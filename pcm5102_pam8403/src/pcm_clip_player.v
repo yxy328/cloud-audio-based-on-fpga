@@ -23,13 +23,18 @@ module pcm_clip_player #(
 );
     localparam integer ADDRESS_BITS = $clog2(MAX_SAMPLES);
     localparam integer BLOCKS = MAX_SAMPLES / 16;
+    localparam integer BLOCK_ADDRESS_BITS = (BLOCKS>1) ? $clog2(BLOCKS) : 1;
     localparam IDLE=0, CHECK_FETCH=1, CHECK_WAIT=2, CHECK_SUM=3,
-        PLAY_FETCH=4, PLAY_WAIT=5, PLAY_LOAD=6, RUN=7;
-    reg [2:0] state;
+        PLAY_FETCH=4, PLAY_WAIT=5, PLAY_LOAD=6, RUN=7, CLEAR_BLOCKS=8;
+    reg [3:0] state;
     reg [7:0] pcm [0:2*MAX_SAMPLES-1];
     reg [7:0] ram_q;
     reg active_bank, staging, block_open;
-    reg [BLOCKS-1:0] block_written;
+    // One synchronous RAM port replaces a 2048-bit vector with dynamic writes.
+    // BEGIN clears one bit per clock and acknowledges only after completion.
+    reg block_written [0:BLOCKS-1];
+    reg block_q;
+    reg [BLOCK_ADDRESS_BITS-1:0] clear_index;
     reg [15:0] staged_count, active_count, expected_sum, checksum;
     reg [15:0] check_index, play_index, next_address;
     reg [25:0] phase;
@@ -46,17 +51,30 @@ module pcm_clip_player #(
         arg1<256 && arg2<4 && data_sequence_ok && (arg2[1]==last_in_block);
     wire [ADDRESS_BITS:0] write_address = {!active_bank,arg0[ADDRESS_BITS-1:0]};
     wire [15:0] sum_next = checksum + {8'd0,ram_q};
+    wire block_data_start = resetn && request && operation==2 && state==IDLE &&
+        staging && edit_allowed && !playing && arg0<staged_count &&
+        arg1<256 && arg2<4 && arg2[0] && arg0[3:0]==0;
+    wire block_data_end = data_write && arg2[1];
+    wire block_write = resetn && (state==CLEAR_BLOCKS || block_data_start || block_data_end);
+    wire [BLOCK_ADDRESS_BITS-1:0] block_write_address =
+        state==CLEAR_BLOCKS ? clear_index : arg0 >> 4;
+    wire [BLOCK_ADDRESS_BITS-1:0] block_read_address = check_index >> 4;
+    wire block_write_value = (state==CLEAR_BLOCKS) ? 1'b0 : block_data_end;
 
     // No RAM reset: synchronous read and one write port infer block RAM.
     always @(posedge clk) begin
         if(data_write) pcm[write_address] <= arg1[7:0];
         ram_q <= pcm[read_address];
     end
+    always @(posedge clk) begin
+        if(block_write) block_written[block_write_address] <= block_write_value;
+        block_q <= block_written[block_read_address];
+    end
 
     always @(posedge clk) begin
         if(!resetn) begin
             state<=IDLE; active_bank<=0; staging<=0; block_open<=0;
-            block_written<=0; staged_count<=0; active_count<=0;
+            clear_index<=0; staged_count<=0; active_count<=0;
             expected_sum<=0; checksum<=0; check_index<=0; play_index<=0;
             next_address<=0; phase<=0; done<=0; error<=0;
             valid<=0; playing<=0; sample<=0;
@@ -65,10 +83,15 @@ module pcm_clip_player #(
             // RAM verification and playback progress independently of rejected
             // UART commands, so a BUSY response cannot stretch an audio frame.
             case(state)
+                CLEAR_BLOCKS: begin
+                    if(clear_index==BLOCKS-1) begin
+                        state<=IDLE; staging<=1; done<=1; error<=0;
+                    end else clear_index<=clear_index+1'b1;
+                end
                 CHECK_FETCH: state<=CHECK_WAIT;
                 CHECK_WAIT: state<=CHECK_SUM;
                 CHECK_SUM: begin
-                    if(!block_written[check_index >> 4]) begin
+                    if(!block_q) begin
                         done<=1; error<=4; state<=IDLE;
                     end else if(check_index==staged_count-1'b1) begin
                         done<=1; state<=IDLE;
@@ -100,15 +123,21 @@ module pcm_clip_player #(
 
             if(request && operation==5) begin
                 state<=IDLE; playing<=0; sample<=0; phase<=0;
+                // An interrupted bitmap clear cannot expose stale valid bits.
+                if(state==CLEAR_BLOCKS) staging<=0;
                 done<=1; error<=0;
             end else if((request && operation==4) ||
                         (!request && valid && (toggle_play || restart))) begin
                 if(!request && toggle_play && playing && !restart) begin
                     state<=IDLE; playing<=0; sample<=0; phase<=0;
-                end else if(!valid) begin done<=request; error<=3; end
+                end else if(!valid) begin
+                    if(request) begin done<=1; error<=3; end
+                end
                 else if(state!=IDLE && state!=RUN && state!=PLAY_FETCH &&
                         state!=PLAY_WAIT && state!=PLAY_LOAD) begin
-                    done<=request; error<=1;
+                    // A physical key during verification/clear must not mask
+                    // that transaction's final completion pulse.
+                    if(request) begin done<=1; error<=1; end
                 end else begin
                     play_index<=0; phase<=0; sample<=0; playing<=1;
                     state<=PLAY_FETCH; done<=request; error<=0;
@@ -120,8 +149,9 @@ module pcm_clip_player #(
                     1: begin
                         if(arg0==0 || arg0>MAX_SAMPLES) error<=2;
                         else begin
-                            staging<=1; block_open<=0; block_written<=0;
+                            staging<=0; block_open<=0; clear_index<=0;
                             staged_count<=arg0; expected_sum<=arg1; error<=0;
+                            state<=CLEAR_BLOCKS; done<=0;
                         end
                     end
                     2: begin
@@ -131,8 +161,6 @@ module pcm_clip_player #(
                         end else begin
                             // A retried first byte invalidates its entire block
                             // until every byte, including the tail, arrives.
-                            if(arg2[0] && arg0[3:0]==0)
-                                block_written[arg0 >> 4]<=0;
                             if(!data_sequence_ok) begin
                                 block_open<=0; error<=3;
                             end else if(arg2[1]!=last_in_block) begin
@@ -140,7 +168,6 @@ module pcm_clip_player #(
                             end else begin
                                 error<=0; next_address<=arg0+1'b1;
                                 block_open<=!arg2[1];
-                                if(arg2[1]) block_written[arg0 >> 4]<=1;
                             end
                         end
                     end

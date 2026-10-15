@@ -109,7 +109,7 @@ module performance_logger #(
             end else if(capturing) begin
                 if(ms_tick) begin
                     ms_div<=0; elapsed_ms<=elapsed_ms+1'b1;
-                    pressure_ms<=(pressure_ms==19) ? 0 : pressure_ms+1'b1;
+                    pressure_ms<=(pressure_ms==5'd19) ? 5'd0 : pressure_ms+5'd1;
                 end else ms_div<=ms_div+1'b1;
                 if(stop) begin
                     capturing<=0; ending<=1; final_pending<=1;
@@ -178,13 +178,13 @@ module performance_logger #(
                 APPEND_FIELDS: begin
                     if(field==0) begin
                         message<={message[463:0],8'd44,hexchar({1'b0,held[39:37]}),hexchar(held[36:33]),
-                            8'd44,8'd48+{7'd0,held[32]},8'd44}; length<=length+6;
+                            8'd44,8'd48+{7'd0,held[32]},8'd44}; length<=length+7'd6;
                         field<=1; number({16'd0,held[31:16]});
                     end else if(field==1) begin
                         append(","); field<=2; number({16'd0,held[15:0]});
                     end else begin
                         message<={message[495:0],8'd13,8'd10};
-                        length<=length+2; align_remaining<=62-length; state<=ALIGN;
+                        length<=length+7'd2; align_remaining<=6'd62-length[5:0]; state<=ALIGN;
                     end
                 end
                 // UART takes thousands of fabric clocks per byte. Align one

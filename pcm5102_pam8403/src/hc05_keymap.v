@@ -56,8 +56,8 @@ module hc05_keymap #(
     wire [5:0] char_offset=parse_length[5:0]-6'd1-position[5:0];
     wire [7:0] ch=line[{char_offset,3'b000} +: 8];
     wire [4:0] hex_value=(ch>="0" && ch<="9") ? {1'b0,ch[3:0]} :
-        (ch>="A" && ch<="F") ? ch-8'd55 :
-        (ch>="a" && ch<="f") ? ch-8'd87 : 5'd16;
+        (ch>="A" && ch<="F") ? ch[4:0]+5'd9 :
+        (ch>="a" && ch<="f") ? ch[4:0]+5'd9 : 5'd16;
     assign downloaded_increment=download_steps[31:0];
     assign log_ready=select_log && tx_ready;
     uart_8n1 #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) u_uart (
