@@ -18,7 +18,8 @@ module performance_logger #(
 );
     localparam integer PTR_W=$clog2(FIFO_DEPTH);
     localparam integer MS_TICKS=(CLK_HZ/1000 < 1) ? 1 : CLK_HZ/1000;
-    localparam IDLE=0, FETCH_WAIT=1, EVENT=2, CONVERT=3, DIGITS=4, SEND=5;
+    localparam IDLE=0, FETCH_WAIT=1, EVENT=2, CONVERT=3, DIGITS=4, SEND=5,
+        APPEND_FIELDS=6, ALIGN=7;
     reg [2:0] state;
     reg capturing, map_pending, ending, final_pending;
     reg [55:0] map_snapshot;
@@ -28,8 +29,10 @@ module performance_logger #(
     reg last_mode;
     reg [15:0] last_gain, last_ratio;
     reg [71:0] fifo [0:FIFO_DEPTH-1];
+    reg [71:0] fifo_q;
     reg [71:0] held;
     reg [71:0] final_event;
+    reg fetch_final;
     reg [PTR_W-1:0] wr_ptr, rd_ptr;
     reg [PTR_W:0] count;
     wire ms_tick=ms_div==MS_TICKS-1;
@@ -38,12 +41,13 @@ module performance_logger #(
     wire accept_start=start && !recording;
     wire capture=accept_start || (capturing && !stop && (keys_changed ||
         (ms_tick && pressure_ms==19 && expression_changed)));
-    wire fetch=state==IDLE && !map_pending && dropped==reported_dropped && count!=0;
+    wire fetch=resetn && state==IDLE && !map_pending && dropped==reported_dropped && count!=0;
     // Avoid implementation-specific RAM read-during-write behavior at full.
-    wire push=capture && count<FIFO_DEPTH;
+    wire push=resetn && capture && count<FIFO_DEPTH;
     wire [31:0] event_time=elapsed_ms+((capturing && ms_tick) ? 32'd1 : 32'd0);
     reg [511:0] message;
     reg [6:0] length, send_index;
+    reg [5:0] align_remaining;
     reg [31:0] binary_value;
     reg [39:0] bcd, adjusted_bcd;
     reg [5:0] convert_count;
@@ -55,6 +59,14 @@ module performance_logger #(
     assign tx_valid=state==SEND;
     assign tx_data=message[511:504];
     assign tx_last=state==SEND && send_index==length-1;
+    // Keep the synchronous RAM output free of reset and final-event bypasses,
+    // so inference can retain a single block-RAM read port.
+    always @(posedge clk) begin
+        if(push)
+            fifo[wr_ptr]<={accept_start ? 32'd0 : event_time,touch_keys,pressure_mode,volume_gain,pitch_ratio};
+        if(fetch)
+            fifo_q<=fifo[rd_ptr];
+    end
     function [7:0] hexchar;
         input [3:0] value;
         begin hexchar=(value<10) ? 8'd48+value : 8'd65+value-10; end
@@ -87,6 +99,7 @@ module performance_logger #(
             ms_div<=0; elapsed_ms<=0; pressure_ms<=0; last_keys<=0; last_mode<=0;
             last_gain<=0; last_ratio<=0; wr_ptr<=0; rd_ptr<=0; count<=0; held<=0; final_event<=0;
             dropped<=0; reported_dropped<=0; message<=0; length<=0; send_index<=0;
+            fetch_final<=0; align_remaining<=0;
             binary_value<=0; bcd<=0; convert_count<=0; digit_index<=0; leading<=1; field<=0;
         end else begin
             if(accept_start) begin
@@ -107,11 +120,10 @@ module performance_logger #(
                 last_keys<=touch_keys; last_mode<=pressure_mode;
                 last_gain<=volume_gain; last_ratio<=pitch_ratio;
                 if(push) begin
-                    fifo[wr_ptr]<={accept_start ? 32'd0 : event_time,touch_keys,pressure_mode,volume_gain,pitch_ratio};
                     wr_ptr<=wr_ptr+1'b1;
                 end else if(dropped!=32'hffffffff) dropped<=dropped+1'b1;
             end
-            if(fetch) begin held<=fifo[rd_ptr]; rd_ptr<=rd_ptr+1'b1; end
+            if(fetch) rd_ptr<=rd_ptr+1'b1;
             case({push,fetch})
                 2'b10: count<=count+1'b1;
                 2'b01: count<=count-1'b1;
@@ -132,16 +144,19 @@ module performance_logger #(
                     end else if(dropped!=reported_dropped) begin
                         message<="ERR,REC_OVERFLOW,"; length<=17; field<=3;
                         reported_dropped<=dropped; number(dropped);
-                    end else if(fetch) state<=FETCH_WAIT;
+                    end else if(fetch) begin fetch_final<=0; state<=FETCH_WAIT; end
                     else if(final_pending) begin
-                        held<=final_event; final_pending<=0; state<=FETCH_WAIT;
+                        fetch_final<=1; final_pending<=0; state<=FETCH_WAIT;
                     end
                     else if(ending && !capturing) begin
                         message<="REC_END,"; length<=8; field<=3;
                         ending<=0; number(dropped);
                     end
                 end
-                FETCH_WAIT: state<=EVENT;
+                FETCH_WAIT: begin
+                    held<=fetch_final ? final_event : fifo_q;
+                    fetch_final<=0; state<=EVENT;
+                end
                 EVENT: begin message<="EVT,"; length<=4; field<=0; number(held[71:40]); end
                 CONVERT: begin
                     bcd<={adjusted_bcd[38:0],binary_value[31]};
@@ -157,10 +172,10 @@ module performance_logger #(
                     else begin
                         // The final digit is appended on this edge; delimiters
                         // are built next cycle to avoid competing assignments.
-                        state<=6;
+                        state<=APPEND_FIELDS;
                     end
                 end
-                6: begin
+                APPEND_FIELDS: begin
                     if(field==0) begin
                         message<={message[463:0],8'd44,hexchar({1'b0,held[39:37]}),hexchar(held[36:33]),
                             8'd44,8'd48+{7'd0,held[32]},8'd44}; length<=length+6;
@@ -168,8 +183,17 @@ module performance_logger #(
                     end else if(field==1) begin
                         append(","); field<=2; number({16'd0,held[15:0]});
                     end else begin
-                        message<={message[495:0],8'd13,8'd10} << ((62-length)*8);
-                        length<=length+2; send_index<=0; state<=SEND;
+                        message<={message[495:0],8'd13,8'd10};
+                        length<=length+2; align_remaining<=62-length; state<=ALIGN;
+                    end
+                end
+                // UART takes thousands of fabric clocks per byte. Align one
+                // byte per clock instead of building a 512-bit barrel shifter.
+                ALIGN: begin
+                    if(align_remaining==0) begin send_index<=0; state<=SEND; end
+                    else begin
+                        message<={message[503:0],8'd0};
+                        align_remaining<=align_remaining-1'b1;
                     end
                 end
                 SEND: if(tx_ready) begin
