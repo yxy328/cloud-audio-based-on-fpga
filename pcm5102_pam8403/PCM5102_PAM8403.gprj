@@ -24,10 +24,19 @@
         <File path="src/uart_8n1.v" type="file.verilog" enable="1"/>
         <File path="src/hc05_keymap.v" type="file.verilog" enable="1"/>
         <File path="src/downloadable_song.v" type="file.verilog" enable="1"/>
+        <File path="src/hub75e_rhythm_display.v" type="file.verilog" enable="1"/>
         <File path="src/performance_logger.v" type="file.verilog" enable="1"/>
-        <File path="src/pcm_clip_player.v" type="file.verilog" enable="1"/>
         <File path="src/midi_note_lut.v" type="file.verilog" enable="1"/>
         <File path="src/top.v" type="file.verilog" enable="1"/>
+        <File path="src/geita.v" type="file.verilog" enable="1"/>
+        <File path="src/gesture_top.v" type="file.verilog" enable="1"/>
+        <File path="src/gesture_audio.v" type="file.verilog" enable="1"/>
+        <File path="src/gesture_nco_sine.v" type="file.verilog" enable="1"/>
+        <File path="src/gesture_piano_voice.v" type="file.verilog" enable="1"/>
+        <File path="src/extra_voices.v" type="file.verilog" enable="1"/>
+        <File path="src/vibrato.v" type="file.verilog" enable="1"/>
+        <File path="src/apds9960_ctrl.v" type="file.verilog" enable="1"/>
+        <File path="src/i2c_master.v" type="file.verilog" enable="1"/>
         <File path="src/PCM5102_PAM8403.cst" type="file.cst" enable="1"/>
         <File path="src/PCM5102_PAM8403.sdc" type="file.sdc" enable="1"/>
     </FileList>

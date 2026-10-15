@@ -5,7 +5,7 @@ module tb_top_fsr_modes;
     reg [7:0] pads=8'h80;
     reg s1=0;
     wire bck,lrck,din;
-    top #(.KEY_CONFIRM_CYCLES(1000),.TOUCH_STARTUP_US(3000),
+    top #(.ENABLE_DEMO_SCORE(1),.KEY_CONFIRM_CYCLES(1000),.TOUCH_STARTUP_US(3000),
         .TOUCH_DEBOUNCE_MS(2),.TOUCH_MODE_DEBOUNCE_MS(2),
         .TOUCH_ADSR_RELEASE_SAMPLES(32),.ADSR_ATTACK_SAMPLES(4),
         .ADSR_DECAY_SAMPLES(4),.ADSR_RELEASE_SAMPLES(32)) dut(

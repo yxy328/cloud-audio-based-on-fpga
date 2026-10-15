@@ -1,0 +1,213 @@
+{
+  "file": "pcm5102_pam8403\\debug\\audio_gao\\captures\\key_low.csv",
+  "known_samples": 16384,
+  "capture_span_ns": 327660,
+  "sample_period_ns": {
+    "20": 16383
+  },
+  "key_counts": {
+    "0": 16384
+  },
+  "din_counts": {
+    "0": 16384
+  },
+  "bck_rising_period_ns": {
+    "320": 1023
+  },
+  "lrck_full_period_ns": {
+    "20480": 30
+  },
+  "lrck_changes_off_bck_fall": 0,
+  "din_changes_off_bck_fall": 0,
+  "format_errors": [],
+  "decoded_words": [
+    {
+      "time_ns": 6160,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 16400,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 26640,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 36880,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 47120,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 57360,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 67600,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 77840,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 88080,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 98320,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 108560,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 118800,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 129040,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 139280,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 149520,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 159760,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 170000,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 180240,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 190480,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 200720,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 210960,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 221200,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 231440,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 241680,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 251920,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 262160,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 272400,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 282640,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 292880,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 303120,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 313360,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    }
+  ],
+  "stereo_pairs": 15,
+  "stereo_mismatches": []
+}

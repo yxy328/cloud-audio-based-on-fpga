@@ -1,0 +1,10 @@
+/tools/sdk/
+/tools/*.zip
+/tools/repository.xml
+/build/
+/app/build/
+/.gradle/
+/local.properties
+/tools/*.keystore
+/tools/gradle-distribution.sha256
+/dist/*.idsig

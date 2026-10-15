@@ -31,4 +31,4 @@ if ($readExit -ne 0 -or !$actualCode.Success -or $readText -match '(?im)\b(error
 if ([Convert]::ToUInt32($actualCode.Groups[1].Value.Substring(2),16) -ne [Convert]::ToUInt32($expectedCode.Groups[1].Value.Substring(2),16)) {
     throw "Device UserCode $($actualCode.Groups[1].Value) differs from bitstream $($expectedCode.Groups[1].Value)"
 }
-Write-Host "SRAM downloaded and UserCode checked: $($actualCode.Groups[1].Value). S1 plays/stops the downloaded PCM, else score, else Twinkle; S2 restarts. See BLUETOOTH_MEDIA.md."
+Write-Host "SRAM downloaded and UserCode checked: $($actualCode.Groups[1].Value). Live synthesis build: touch keys generate notes. S1/S2 control downloaded guide timing only. See BLUETOOTH_MEDIA.md."

@@ -10,23 +10,21 @@ module tb_hc05_download;
     reg [9:0] divider=0;
     always @(posedge clk) divider<=divider+1'b1;
     wire sample_ce=divider==0;
-    wire tx,rec_busy,valid,playing,gate,pcm_valid,pcm_playing;
+    wire tx,rec_busy,valid,playing,gate;
     wire [55:0] map;
     wire [31:0] increment;
     wire [6:0] guide;
-    wire signed [15:0] pcm;
     reg [511:0] lines[0:255],incoming=0;
     integer lengths[0:255];
     integer line_count=0,line_length=0,next_line=0,b,events=0;
     reg [7:0] decoded;
     hc05_keymap #(.CLK_HZ(50000000),.BAUD(500000)) dut(
         .clk(clk),.resetn(resetn),.rx(rx),.tx(tx),.keys_ready(1'b1),
-        .song_busy(playing || pcm_playing),.notes_busy(|keys),.recording(1'b0),.note_map(map),
+        .song_busy(playing),.notes_busy(|keys),.recording(1'b0),.note_map(map),
         .touch_keys(keys),.pressure_mode(mode),.volume_gain(gain),.pitch_ratio(ratio),
-        .sample_ce(sample_ce),.toggle_play(1'b0),.restart(1'b0),.rec_busy(rec_busy),
+        .toggle_play(1'b0),.restart(1'b0),.rec_busy(rec_busy),
         .downloaded_valid(valid),.downloaded_playing(playing),.downloaded_gate(gate),
-        .downloaded_increment(increment),.guide_keys(guide),.pcm_valid(pcm_valid),.pcm_playing(pcm_playing),
-        .pcm_sample(pcm),.builtin_play(),.builtin_stop());
+        .downloaded_increment(increment),.guide_keys(guide),.builtin_play(),.builtin_stop());
     initial forever begin
         @(negedge tx); repeat(BIT_TICKS/2) @(posedge clk);
         for(b=0;b<8;b=b+1) begin repeat(BIT_TICKS) @(posedge clk); decoded[b]=tx; end
@@ -88,24 +86,25 @@ module tb_hc05_download;
         transact("PLAY\n",5,{"ERR,MAP",8'd13,8'd10});
         transact("MAP_RESET\n",10,{"OK,MAP_RESET",8'd13,8'd10});
         transact("SONG_NOTE,0,60,65536\n",21,{"ERR,RANGE",8'd13,8'd10});
-        // PCM: 16 signed 8-bit samples, checksum 8*0 + 8*128 = 1024.
-        transact("PCM_BEGIN,16,1024\n",18,{"OK",8'd13,8'd10});
-        transact("PCM_DATA,0,00000000000000008080808080808080\n",44,{"OK",8'd13,8'd10});
-        transact("PCM_DATA,0,00000000000000008080808080808080\n",44,{"OK",8'd13,8'd10});
-        transact("PCM_END\n",8,{"OK",8'd13,8'd10});
-        if(!pcm_valid) $fatal(1,"PCM not committed");
-        transact("PCM_BEGIN,16,0\n",15,{"OK",8'd13,8'd10});
-        transact("PCM_DATA,0,01010101010101010101010101010101\n",44,{"OK",8'd13,8'd10});
-        transact("PCM_END\n",8,{"ERR,CHECKSUM",8'd13,8'd10});
-        transact("PCM_PLAY\n",9,{"OK",8'd13,8'd10});
-        if(!pcm_playing) $fatal(1,"PCM not playing after interrupted/rejected download");
-        wait(pcm==-32768);
-        wait(!pcm_playing);
-        transact("PCM_PLAY\n",9,{"OK",8'd13,8'd10});
-        transact("PCM_STOP\n",9,{"OK",8'd13,8'd10});
-        if(pcm_playing || pcm!==0) $fatal(1,"PCM_STOP failed");
-        transact("PCM_DATA,0,GG\n",14,{"ERR,CMD",8'd13,8'd10});
-        transact("PCM_DATA,0,0\n",13,{"ERR,CMD",8'd13,8'd10});
+        // Pre-recorded sample download/play commands are deliberately absent.
+        transact("PCM_BEGIN,16,1024\n",18,{"ERR,CMD",8'd13,8'd10});
+        transact("PCM_DATA,0,00000000000000008080808080808080\n",44,{"ERR,CMD",8'd13,8'd10});
+        transact("PCM_END\n",8,{"ERR,CMD",8'd13,8'd10});
+        transact("PCM_PLAY\n",9,{"ERR,CMD",8'd13,8'd10});
+        // Chord mask bit0=C4, bit4=E4, bit7=G4; zero is an explicit rest.
+        transact("SONG_BEGIN,2\n",13,{"OK",8'd13,8'd10});
+        transact("SONG_CHORD,0,145,50\n",20,{"OK",8'd13,8'd10});
+        transact("SONG_CHORD,1,0,50\n",18,{"OK",8'd13,8'd10});
+        transact("SONG_CHORD,1,8192,50\n",21,{"ERR,RANGE",8'd13,8'd10});
+        transact("SONG_END\n",9,{"OK",8'd13,8'd10});
+        transact("PLAY\n",5,{"OK",8'd13,8'd10});
+        if(guide!==7'h15) $fatal(1,"Chord mask not mapped to three simultaneous keys");
+        wait(guide==0);
+        if(!playing) $fatal(1,"Explicit rest did not retain score timing");
+        transact("STOP\n",5,{"OK",8'd13,8'd10});
+        transact("SONG_BEGIN,1\n",13,{"OK",8'd13,8'd10});
+        transact("SONG_CHORD,0,2,50\n",18,{"OK",8'd13,8'd10});
+        transact("SONG_END\n",9,{"ERR,MAP",8'd13,8'd10});
         transact("REC_START\n",10,{"OK",8'd13,8'd10});
         expect_line({"MAP,60,62,64,65,67,69,71",8'd13,8'd10});
         expect_line({"EVT,0,00,0,39321,65535",8'd13,8'd10});
@@ -126,7 +125,7 @@ module tb_hc05_download;
         expect_line({"REC_END,0",8'd13,8'd10});
         wait(!rec_busy);
         transact("MAP_RESET\n",10,{"OK,MAP_RESET",8'd13,8'd10});
-        $display("PASS [HC05 downloads]: UART score atomicity/retry/map validation, PCM hex download/checksum/play/stop, recording framing/map lock/initial/final states");
+        $display("PASS [HC05 downloads]: UART score atomicity/retry/map validation, sample commands rejected, recording framing/map lock/initial/final states");
         $finish;
     end
     initial begin #200000000;$fatal(1,"Download protocol timeout state=%0d next=%0d lines=%0d",dut.state,next_line,line_count);end

@@ -21,7 +21,7 @@ module tb_hc05_keymap;
         .clk(clk),.resetn(resetn),.rx(rx),.tx(tx),.keys_ready(ready),
         .song_busy(song),.notes_busy(notes),.recording(recording),.note_map(map),
         .touch_keys(7'd0),.pressure_mode(1'b0),.volume_gain(16'd39321),.pitch_ratio(16'd65535),
-        .sample_ce(1'b0),.toggle_play(1'b0),.restart(1'b0));
+        .toggle_play(1'b0),.restart(1'b0));
     midi_note_lut lut(.clk(clk),.resetn(resetn),.note_map(map),.phase_increments(base_steps));
     fsr_pitch_scaler scaler(.clk(clk),.resetn(resetn),.sample_ce(1'b1),.pitch_ratio(ratio),
         .note_increments(base_steps),.phase_increments(steps));

@@ -1,0 +1,809 @@
+{
+  "file": "pcm5102_pam8403\\debug\\audio_autoplay\\captures\\autoplay.csv",
+  "known_samples": 65536,
+  "capture_span_ns": 1310700,
+  "sample_period_ns": {
+    "20": 65535
+  },
+  "key_counts": {
+    "0": 65536
+  },
+  "din_counts": {
+    "0": 47904,
+    "1": 17632
+  },
+  "bck_rising_period_ns": {
+    "320": 4095
+  },
+  "lrck_full_period_ns": {
+    "20480": 126
+  },
+  "lrck_changes_off_bck_fall": 0,
+  "din_changes_off_bck_fall": 0,
+  "format_errors": [],
+  "decoded_words": [
+    {
+      "time_ns": 4800,
+      "channel": "L",
+      "key": 0,
+      "pcm": 1375
+    },
+    {
+      "time_ns": 15040,
+      "channel": "R",
+      "key": 0,
+      "pcm": 1375
+    },
+    {
+      "time_ns": 25280,
+      "channel": "L",
+      "key": 0,
+      "pcm": 1259
+    },
+    {
+      "time_ns": 35520,
+      "channel": "R",
+      "key": 0,
+      "pcm": 1259
+    },
+    {
+      "time_ns": 45760,
+      "channel": "L",
+      "key": 0,
+      "pcm": 1179
+    },
+    {
+      "time_ns": 56000,
+      "channel": "R",
+      "key": 0,
+      "pcm": 1179
+    },
+    {
+      "time_ns": 66240,
+      "channel": "L",
+      "key": 0,
+      "pcm": 1095
+    },
+    {
+      "time_ns": 76480,
+      "channel": "R",
+      "key": 0,
+      "pcm": 1095
+    },
+    {
+      "time_ns": 86720,
+      "channel": "L",
+      "key": 0,
+      "pcm": 965
+    },
+    {
+      "time_ns": 96960,
+      "channel": "R",
+      "key": 0,
+      "pcm": 965
+    },
+    {
+      "time_ns": 107200,
+      "channel": "L",
+      "key": 0,
+      "pcm": 875
+    },
+    {
+      "time_ns": 117440,
+      "channel": "R",
+      "key": 0,
+      "pcm": 875
+    },
+    {
+      "time_ns": 127680,
+      "channel": "L",
+      "key": 0,
+      "pcm": 783
+    },
+    {
+      "time_ns": 137920,
+      "channel": "R",
+      "key": 0,
+      "pcm": 783
+    },
+    {
+      "time_ns": 148160,
+      "channel": "L",
+      "key": 0,
+      "pcm": 689
+    },
+    {
+      "time_ns": 158400,
+      "channel": "R",
+      "key": 0,
+      "pcm": 689
+    },
+    {
+      "time_ns": 168640,
+      "channel": "L",
+      "key": 0,
+      "pcm": 546
+    },
+    {
+      "time_ns": 178880,
+      "channel": "R",
+      "key": 0,
+      "pcm": 546
+    },
+    {
+      "time_ns": 189120,
+      "channel": "L",
+      "key": 0,
+      "pcm": 448
+    },
+    {
+      "time_ns": 199360,
+      "channel": "R",
+      "key": 0,
+      "pcm": 448
+    },
+    {
+      "time_ns": 209600,
+      "channel": "L",
+      "key": 0,
+      "pcm": 350
+    },
+    {
+      "time_ns": 219840,
+      "channel": "R",
+      "key": 0,
+      "pcm": 350
+    },
+    {
+      "time_ns": 230080,
+      "channel": "L",
+      "key": 0,
+      "pcm": 200
+    },
+    {
+      "time_ns": 240320,
+      "channel": "R",
+      "key": 0,
+      "pcm": 200
+    },
+    {
+      "time_ns": 250560,
+      "channel": "L",
+      "key": 0,
+      "pcm": 100
+    },
+    {
+      "time_ns": 260800,
+      "channel": "R",
+      "key": 0,
+      "pcm": 100
+    },
+    {
+      "time_ns": 271040,
+      "channel": "L",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 281280,
+      "channel": "R",
+      "key": 0,
+      "pcm": 0
+    },
+    {
+      "time_ns": 291520,
+      "channel": "L",
+      "key": 0,
+      "pcm": -151
+    },
+    {
+      "time_ns": 301760,
+      "channel": "R",
+      "key": 0,
+      "pcm": -151
+    },
+    {
+      "time_ns": 312000,
+      "channel": "L",
+      "key": 0,
+      "pcm": -251
+    },
+    {
+      "time_ns": 322240,
+      "channel": "R",
+      "key": 0,
+      "pcm": -251
+    },
+    {
+      "time_ns": 332480,
+      "channel": "L",
+      "key": 0,
+      "pcm": -351
+    },
+    {
+      "time_ns": 342720,
+      "channel": "R",
+      "key": 0,
+      "pcm": -351
+    },
+    {
+      "time_ns": 352960,
+      "channel": "L",
+      "key": 0,
+      "pcm": -498
+    },
+    {
+      "time_ns": 363200,
+      "channel": "R",
+      "key": 0,
+      "pcm": -498
+    },
+    {
+      "time_ns": 373440,
+      "channel": "L",
+      "key": 0,
+      "pcm": -595
+    },
+    {
+      "time_ns": 383680,
+      "channel": "R",
+      "key": 0,
+      "pcm": -595
+    },
+    {
+      "time_ns": 393920,
+      "channel": "L",
+      "key": 0,
+      "pcm": -690
+    },
+    {
+      "time_ns": 404160,
+      "channel": "R",
+      "key": 0,
+      "pcm": -690
+    },
+    {
+      "time_ns": 414400,
+      "channel": "L",
+      "key": 0,
+      "pcm": -784
+    },
+    {
+      "time_ns": 424640,
+      "channel": "R",
+      "key": 0,
+      "pcm": -784
+    },
+    {
+      "time_ns": 434880,
+      "channel": "L",
+      "key": 0,
+      "pcm": -921
+    },
+    {
+      "time_ns": 445120,
+      "channel": "R",
+      "key": 0,
+      "pcm": -921
+    },
+    {
+      "time_ns": 455360,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1010
+    },
+    {
+      "time_ns": 465600,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1010
+    },
+    {
+      "time_ns": 475840,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1096
+    },
+    {
+      "time_ns": 486080,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1096
+    },
+    {
+      "time_ns": 496320,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1220
+    },
+    {
+      "time_ns": 506560,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1220
+    },
+    {
+      "time_ns": 516800,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1300
+    },
+    {
+      "time_ns": 527040,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1300
+    },
+    {
+      "time_ns": 537280,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1376
+    },
+    {
+      "time_ns": 547520,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1376
+    },
+    {
+      "time_ns": 557760,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1484
+    },
+    {
+      "time_ns": 568000,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1484
+    },
+    {
+      "time_ns": 578240,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1551
+    },
+    {
+      "time_ns": 588480,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1551
+    },
+    {
+      "time_ns": 598720,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1615
+    },
+    {
+      "time_ns": 608960,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1615
+    },
+    {
+      "time_ns": 619200,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1703
+    },
+    {
+      "time_ns": 629440,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1703
+    },
+    {
+      "time_ns": 639680,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1757
+    },
+    {
+      "time_ns": 649920,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1757
+    },
+    {
+      "time_ns": 660160,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1807
+    },
+    {
+      "time_ns": 670400,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1807
+    },
+    {
+      "time_ns": 680640,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1852
+    },
+    {
+      "time_ns": 690880,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1852
+    },
+    {
+      "time_ns": 701120,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1911
+    },
+    {
+      "time_ns": 711360,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1911
+    },
+    {
+      "time_ns": 721600,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1945
+    },
+    {
+      "time_ns": 731840,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1945
+    },
+    {
+      "time_ns": 742080,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1974
+    },
+    {
+      "time_ns": 752320,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1974
+    },
+    {
+      "time_ns": 762560,
+      "channel": "L",
+      "key": 0,
+      "pcm": -2009
+    },
+    {
+      "time_ns": 772800,
+      "channel": "R",
+      "key": 0,
+      "pcm": -2009
+    },
+    {
+      "time_ns": 783040,
+      "channel": "L",
+      "key": 0,
+      "pcm": -2026
+    },
+    {
+      "time_ns": 793280,
+      "channel": "R",
+      "key": 0,
+      "pcm": -2026
+    },
+    {
+      "time_ns": 803520,
+      "channel": "L",
+      "key": 0,
+      "pcm": -2039
+    },
+    {
+      "time_ns": 813760,
+      "channel": "R",
+      "key": 0,
+      "pcm": -2039
+    },
+    {
+      "time_ns": 824000,
+      "channel": "L",
+      "key": 0,
+      "pcm": -2048
+    },
+    {
+      "time_ns": 834240,
+      "channel": "R",
+      "key": 0,
+      "pcm": -2048
+    },
+    {
+      "time_ns": 844480,
+      "channel": "L",
+      "key": 0,
+      "pcm": -2048
+    },
+    {
+      "time_ns": 854720,
+      "channel": "R",
+      "key": 0,
+      "pcm": -2048
+    },
+    {
+      "time_ns": 864960,
+      "channel": "L",
+      "key": 0,
+      "pcm": -2043
+    },
+    {
+      "time_ns": 875200,
+      "channel": "R",
+      "key": 0,
+      "pcm": -2043
+    },
+    {
+      "time_ns": 885440,
+      "channel": "L",
+      "key": 0,
+      "pcm": -2033
+    },
+    {
+      "time_ns": 895680,
+      "channel": "R",
+      "key": 0,
+      "pcm": -2033
+    },
+    {
+      "time_ns": 905920,
+      "channel": "L",
+      "key": 0,
+      "pcm": -2009
+    },
+    {
+      "time_ns": 916160,
+      "channel": "R",
+      "key": 0,
+      "pcm": -2009
+    },
+    {
+      "time_ns": 926400,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1987
+    },
+    {
+      "time_ns": 936640,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1987
+    },
+    {
+      "time_ns": 946880,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1960
+    },
+    {
+      "time_ns": 957120,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1960
+    },
+    {
+      "time_ns": 967360,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1911
+    },
+    {
+      "time_ns": 977600,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1911
+    },
+    {
+      "time_ns": 987840,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1873
+    },
+    {
+      "time_ns": 998080,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1873
+    },
+    {
+      "time_ns": 1008320,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1830
+    },
+    {
+      "time_ns": 1018560,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1830
+    },
+    {
+      "time_ns": 1028800,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1757
+    },
+    {
+      "time_ns": 1039040,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1757
+    },
+    {
+      "time_ns": 1049280,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1703
+    },
+    {
+      "time_ns": 1059520,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1703
+    },
+    {
+      "time_ns": 1069760,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1645
+    },
+    {
+      "time_ns": 1080000,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1645
+    },
+    {
+      "time_ns": 1090240,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1551
+    },
+    {
+      "time_ns": 1100480,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1551
+    },
+    {
+      "time_ns": 1110720,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1484
+    },
+    {
+      "time_ns": 1120960,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1484
+    },
+    {
+      "time_ns": 1131200,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1413
+    },
+    {
+      "time_ns": 1141440,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1413
+    },
+    {
+      "time_ns": 1151680,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1338
+    },
+    {
+      "time_ns": 1161920,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1338
+    },
+    {
+      "time_ns": 1172160,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1220
+    },
+    {
+      "time_ns": 1182400,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1220
+    },
+    {
+      "time_ns": 1192640,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1138
+    },
+    {
+      "time_ns": 1202880,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1138
+    },
+    {
+      "time_ns": 1213120,
+      "channel": "L",
+      "key": 0,
+      "pcm": -1053
+    },
+    {
+      "time_ns": 1223360,
+      "channel": "R",
+      "key": 0,
+      "pcm": -1053
+    },
+    {
+      "time_ns": 1233600,
+      "channel": "L",
+      "key": 0,
+      "pcm": -921
+    },
+    {
+      "time_ns": 1243840,
+      "channel": "R",
+      "key": 0,
+      "pcm": -921
+    },
+    {
+      "time_ns": 1254080,
+      "channel": "L",
+      "key": 0,
+      "pcm": -830
+    },
+    {
+      "time_ns": 1264320,
+      "channel": "R",
+      "key": 0,
+      "pcm": -830
+    },
+    {
+      "time_ns": 1274560,
+      "channel": "L",
+      "key": 0,
+      "pcm": -738
+    },
+    {
+      "time_ns": 1284800,
+      "channel": "R",
+      "key": 0,
+      "pcm": -738
+    },
+    {
+      "time_ns": 1295040,
+      "channel": "L",
+      "key": 0,
+      "pcm": -595
+    }
+  ],
+  "stereo_pairs": 63,
+  "stereo_mismatches": [],
+  "tone_check": {
+    "volume_shift": 4,
+    "phase_increment": 38702432,
+    "nominal_sample_rate_hz": 48828.125,
+    "nominal_tone_hz": 439.99571062158793,
+    "left_sample_count": 64,
+    "pcm_min": -2048,
+    "pcm_max": 1375,
+    "nonzero_left_samples": 63,
+    "initial_phase_intervals_exclusive_end": [
+      [
+        1657499328,
+        1657684192
+      ]
+    ],
+    "model_example_initial_phase": 1657499328,
+    "exact_quantized_sequence_match": true,
+    "note": "Frequency is computed from the validated phase model and nominal 50 MHz, not independently measured by GAO."
+  }
+}

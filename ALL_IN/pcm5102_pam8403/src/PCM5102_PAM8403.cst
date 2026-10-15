@@ -1,0 +1,47 @@
+IO_LOC "clk" E2;
+IO_LOC "key_s1" H11;
+IO_LOC "key_s2" H10;
+IO_LOC "i2s_bck" K2;
+IO_LOC "i2s_lrck" K1;
+IO_LOC "i2s_din" L1;
+IO_PORT "clk" IO_TYPE=LVCMOS33;
+IO_PORT "key_s1" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;
+IO_PORT "key_s2" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;
+IO_PORT "i2s_bck" IO_TYPE=LVCMOS33 DRIVE=8;
+IO_PORT "i2s_lrck" IO_TYPE=LVCMOS33 DRIVE=8;
+IO_PORT "i2s_din" IO_TYPE=LVCMOS33 DRIVE=8;
+
+// Keep the unused serial clock at its HIGH idle level in direct mode.
+IO_LOC "touch_scl" F6;
+IO_PORT "touch_scl" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+
+// TTP229 OUT1..8, 8-key direct mode, active-high, 3.3V.
+// OUT1 moves from K1 (now DAC LRCK) to K4, J3 pin 5.
+// Pull-downs keep disconnected active-high inputs silent.
+IO_LOC "touch_out[0]" K4; // OUT1 -> J3 pin 5.
+IO_LOC "touch_out[1]" L2; // OUT2 -> J3 pin 4.
+IO_LOC "touch_out[2]" J4; // OUT3 -> J3 pin 6.
+IO_LOC "touch_out[3]" G1; // OUT4 -> J3 pin 7.
+IO_LOC "touch_out[4]" G2; // OUT5 -> J3 pin 8.
+IO_LOC "touch_out[5]" L3; // OUT6 -> J3 pin 9.
+IO_LOC "touch_out[6]" L4; // OUT7 -> J3 pin 10.
+IO_LOC "touch_out[7]" J2; // OUT8 -> J3 pin 21.
+IO_PORT "touch_out[0]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+IO_PORT "touch_out[1]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+IO_PORT "touch_out[2]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+IO_PORT "touch_out[3]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+IO_PORT "touch_out[4]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+IO_PORT "touch_out[5]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+IO_PORT "touch_out[6]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+IO_PORT "touch_out[7]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+
+// On-chip ADC bus0 PAD: IOT56[A]=J8/J3 pin 36, IOT56[B]=K8/J3 pin 35.
+// A receives AO after 22k/4.7k attenuation; B connects to GND. ADC limit=1V.
+USE_ADC_SRC bus0 IOT56;
+// APDS-9960 on the J3 2x20 header, separate from TTP229 SCL.
+// SCL -> J3 physical pin 23 / H4 (IOB89B); SDA -> pin 24 / G4 (IOB89A).
+// Both are unused 3.3V GPIOs; PMOD K11/L11 are released.
+IO_LOC "scl" H4;
+IO_LOC "sda" G4;
+IO_PORT "scl" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8 BANK_VCCIO=3.3;
+IO_PORT "sda" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8 BANK_VCCIO=3.3;

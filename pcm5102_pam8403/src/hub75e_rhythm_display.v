@@ -1,0 +1,313 @@
+`timescale 1ns/1ps
+// 64x64, 1/32-scan HUB75E rhythm display. Every register uses clk; hub_CK
+// is an output waveform, never an internal clock. RGB has one full 50MHz
+// cycle of setup before each 25MHz external shift-clock rising edge.
+//
+// A 64x7 bitmap holds note heads rather than a per-note register queue.
+// Notes closer than one screen pixel share a row and OR their key masks.
+// This accepts all 128 score events even at 1ms spacing without consuming
+// 128 copies of a timer/position accumulator or blocking the sequencer.
+module hub75e_rhythm_display #(
+    parameter integer LEAD_MS = 1500
+) (
+    input wire clk,
+    input wire resetn,
+    input wire [6:0] touch_keys,
+    input wire [6:0] guide_keys,
+    input wire playing,
+    input wire ms_tick,
+    input wire note_spawn,
+    input wire [6:0] spawn_keys,
+    input wire [15:0] spawn_delay_ms,
+    output wire note_ready,
+    output reg overflow,
+    output wire hub_R1,
+    output wire hub_G1,
+    output wire hub_B1,
+    output wire hub_R2,
+    output wire hub_G2,
+    output wire hub_B2,
+    output wire hub_A,
+    output wire hub_B,
+    output wire hub_C,
+    output wire hub_D,
+    output wire hub_E,
+    output reg hub_CK,
+    output reg hub_ST,
+    output reg hub_OE
+);
+    localparam integer TOP_Y = 2;
+    localparam integer HIT_Y = 54;
+    localparam integer TRAVEL = HIT_Y-TOP_Y;
+    localparam integer PHASE_BITS = $clog2(LEAD_MS+1);
+    localparam integer DISTANCE_BITS = $clog2((LEAD_MS+1)*(TRAVEL+1));
+    localparam integer REMAINDER_BITS = $clog2(LEAD_MS*8);
+    localparam [DISTANCE_BITS-1:0] DIV32 = LEAD_MS*32;
+    localparam [DISTANCE_BITS-1:0] DIV16 = LEAD_MS*16;
+    localparam [DISTANCE_BITS-1:0] DIV8 = LEAD_MS*8;
+    localparam [REMAINDER_BITS-1:0] DIV4 = LEAD_MS*4;
+    localparam [REMAINDER_BITS-1:0] DIV2 = LEAD_MS*2;
+    localparam [REMAINDER_BITS-1:0] DIV1 = LEAD_MS;
+
+    reg [6:0] note_rows [0:63];
+    reg [PHASE_BITS-1:0] motion_phase;
+    wire scroll = ms_tick && motion_phase+TRAVEL >= LEAD_MS;
+    wire [PHASE_BITS-1:0] next_phase = !ms_tick ? motion_phase :
+        (scroll ? motion_phase+TRAVEL-LEAD_MS : motion_phase+TRAVEL);
+    // Counting future fractional steps places a late event on the correct
+    // row for the current scroll phase. Its head reaches HIT_Y after its
+    // advertised delay, to the screen's approximately 29ms resolution.
+    // The quotient is only 0..52. Pipeline six constant compare/subtract
+    // steps as 3+3 bits rather than placing a divider on a 50MHz path.
+    // Every pipeline stage accepts another note each clock, with no FIFO
+    // limit or backpressure even for a burst of all 128 score events.
+    wire [PHASE_BITS-1:0] bounded_delay = spawn_delay_ms > LEAD_MS ? LEAD_MS : spawn_delay_ms;
+    wire [DISTANCE_BITS-1:0] distance_to_hit = next_phase+bounded_delay*TRAVEL;
+    reg [DISTANCE_BITS-1:0] distance_s0;
+    reg [REMAINDER_BITS-1:0] remainder_s1;
+    reg [2:0] quotient_hi_s1;
+    reg [6:0] insert_y_s2;
+    reg [6:0] keys_s0, keys_s1, keys_s2;
+    reg valid_s0, valid_s1, valid_s2;
+    reg scroll_s1;
+    reg [1:0] scroll_s2;
+    reg [DISTANCE_BITS-1:0] upper_remainder;
+    reg [REMAINDER_BITS-1:0] lower_remainder;
+    reg [2:0] upper_quotient, lower_quotient;
+    // Scrolls AFTER the distance snapshot move the new note down too.
+    // This includes a scroll on the exact bitmap-commit edge.
+    wire [6:0] insert_y = insert_y_s2+scroll_s2+(scroll ? 7'd1 : 7'd0);
+    assign note_ready = resetn && playing;
+
+    always @* begin
+        upper_remainder=distance_s0;
+        upper_quotient=0;
+        if(upper_remainder>=DIV32) begin
+            upper_remainder=upper_remainder-DIV32; upper_quotient[2]=1;
+        end
+        if(upper_remainder>=DIV16) begin
+            upper_remainder=upper_remainder-DIV16; upper_quotient[1]=1;
+        end
+        if(upper_remainder>=DIV8) begin
+            upper_remainder=upper_remainder-DIV8; upper_quotient[0]=1;
+        end
+        lower_remainder=remainder_s1;
+        lower_quotient=0;
+        if(lower_remainder>=DIV4) begin
+            lower_remainder=lower_remainder-DIV4; lower_quotient[2]=1;
+        end
+        if(lower_remainder>=DIV2) begin
+            lower_remainder=lower_remainder-DIV2; lower_quotient[1]=1;
+        end
+        if(lower_remainder>=DIV1)
+            lower_quotient[0]=1;
+    end
+    // Data registers need no reset: valid bits invalidate stopped/restarted
+    // notes and avoid adding the global reset to the arithmetic data path.
+    always @(posedge clk) begin
+        distance_s0<=distance_to_hit;
+        keys_s0<=spawn_keys;
+        remainder_s1<=upper_remainder[REMAINDER_BITS-1:0];
+        quotient_hi_s1<=upper_quotient;
+        keys_s1<=keys_s0;
+        insert_y_s2<=HIT_Y-{quotient_hi_s1,lower_quotient};
+        keys_s2<=keys_s1;
+    end
+
+    integer row;
+    always @(posedge clk) begin
+        if (!resetn || !playing) begin
+            motion_phase <= 0;
+            overflow <= 0;
+            valid_s0 <= 0; valid_s1 <= 0; valid_s2 <= 0;
+            scroll_s1 <= 0; scroll_s2 <= 0;
+            for (row=0; row<64; row=row+1)
+                note_rows[row] <= 0;
+        end else begin
+            valid_s0 <= note_spawn && spawn_keys != 0;
+            valid_s1 <= valid_s0;
+            valid_s2 <= valid_s1;
+            scroll_s1 <= scroll;
+            scroll_s2 <= {1'b0,scroll_s1}+{1'b0,scroll};
+            if (ms_tick)
+                motion_phase <= next_phase;
+            if (note_spawn && spawn_keys != 0 && spawn_delay_ms > LEAD_MS)
+                overflow <= 1; // Unsupported lookahead was clamped, never silent.
+            if (scroll || valid_s2) begin
+                for (row=0; row<64; row=row+1) begin
+                    if (scroll) begin
+                        if (row == 0)
+                            note_rows[row] <= 0;
+                        else
+                            note_rows[row] <= note_rows[row-1];
+                    end
+                    if (valid_s2 && insert_y == row) begin
+                        if (scroll) begin
+                            if (row == 0)
+                                note_rows[row] <= keys_s2;
+                            else
+                                note_rows[row] <= note_rows[row-1] | keys_s2;
+                        end else
+                            note_rows[row] <= note_rows[row] | keys_s2;
+                    end
+                end
+            end
+        end
+    end
+`ifndef SYNTHESIS
+    initial begin
+        if (LEAD_MS < TRAVEL)
+            $fatal(1,"hub75e_rhythm_display LEAD_MS must be at least 52ms");
+    end
+`endif
+
+    localparam [2:0] S_ROW_PREP = 3'd0;
+    localparam [2:0] S_PIXEL_PREP = 3'd1;
+    localparam [2:0] S_SHIFT = 3'd2;
+    localparam [2:0] S_BLANK = 3'd3;
+    localparam [2:0] S_SELECT = 3'd4;
+    localparam [2:0] S_LATCH_HIGH = 3'd5;
+    localparam [2:0] S_LATCH_LOW = 3'd6;
+    reg [2:0] state;
+    reg [4:0] scan_row, display_row, pwm_phase;
+    reg [5:0] column;
+    reg have_latched;
+    reg [6:0] upper_notes, lower_notes;
+    reg [14:0] upper_pixel, lower_pixel;
+    wire [6:0] upper_y = {2'b00,scan_row};
+    wire [6:0] lower_y = {2'b00,scan_row}+7'd32;
+
+    // Capture the row masks once per row scan. Only heads through HIT_Y
+    // are drawn; their three-pixel glyph can extend through HIT_Y+2.
+    function [6:0] row_notes;
+        input [6:0] y;
+        reg [6:0] mask;
+        begin
+            mask = 0;
+            if (y <= HIT_Y)
+                mask = mask | note_rows[y];
+            if (y >= 1 && y-1 <= HIT_Y)
+                mask = mask | note_rows[y-1];
+            if (y >= 2 && y-2 <= HIT_Y)
+                mask = mask | note_rows[y-2];
+            row_notes = mask;
+        end
+    endfunction
+
+    // Same seven-lane layout/colors as rhythm_guide.v. Sharing the bitmap
+    // above avoids duplicating its per-note timers for the two panel halves.
+    function [14:0] pixel_rgb;
+        input [5:0] x;
+        input [6:0] y;
+        input [6:0] notes;
+        reg [4:0] r, g, b;
+        reg [5:0] relative_x;
+        reg [2:0] lane;
+        reg [2:0] lane_x;
+        begin
+            r = 0; g = 0; b = 0;
+            relative_x = x-6'd4;
+            lane = relative_x[5:3];
+            lane_x = relative_x[2:0];
+            if (x >= 4 && x < 60) begin
+                r = 1; g = 1; b = 2;
+                if (lane_x == 0) begin r = 2; g = 3; b = 5; end
+                if (y == HIT_Y || y == HIT_Y+1) begin
+                    r = 8; g = 8; b = 8;
+                    if (playing && guide_keys[lane]) begin r = 31; g = 18; b = 0; end
+                end
+                if (y >= HIT_Y+4 && lane_x >= 2 && lane_x < 7) begin
+                    r = 2; g = 3; b = 5;
+                    if (touch_keys[lane]) begin
+                        r = 0; g = 25; b = 6;
+                        if (playing && guide_keys[lane]) begin r = 31; g = 31; b = 31; end
+                    end
+                end
+                if (playing && notes[lane] && lane_x >= 2 && lane_x < 7) begin
+                    r = 0; g = 24; b = 31;
+                end
+            end
+            pixel_rgb = {r,g,b};
+        end
+    endfunction
+
+    always @(posedge clk) begin
+        if (!resetn) begin
+            state <= S_ROW_PREP;
+            scan_row <= 0;
+            display_row <= 0;
+            pwm_phase <= 0;
+            column <= 0;
+            have_latched <= 0;
+            upper_notes <= 0;
+            lower_notes <= 0;
+            upper_pixel <= 0;
+            lower_pixel <= 0;
+            hub_CK <= 0;
+            hub_ST <= 0;
+            hub_OE <= 1;
+        end else begin
+            case (state)
+                S_ROW_PREP: begin
+                    upper_notes <= row_notes(upper_y);
+                    lower_notes <= row_notes(lower_y);
+                    column <= 0;
+                    hub_CK <= 0;
+                    hub_ST <= 0;
+                    hub_OE <= !have_latched;
+                    state <= S_PIXEL_PREP;
+                end
+                S_PIXEL_PREP: begin
+                    hub_CK <= 0;
+                    upper_pixel <= pixel_rgb(column, upper_y, upper_notes);
+                    lower_pixel <= pixel_rgb(column, lower_y, lower_notes);
+                    state <= S_SHIFT;
+                end
+                S_SHIFT: begin
+                    hub_CK <= 1;
+                    if (column == 63)
+                        state <= S_BLANK;
+                    else begin
+                        column <= column+1'b1;
+                        state <= S_PIXEL_PREP;
+                    end
+                end
+                S_BLANK: begin
+                    hub_CK <= 0;
+                    hub_OE <= 1;
+                    state <= S_SELECT;
+                end
+                S_SELECT: begin
+                    display_row <= scan_row;
+                    state <= S_LATCH_HIGH;
+                end
+                S_LATCH_HIGH: begin
+                    hub_ST <= 1;
+                    have_latched <= 1;
+                    state <= S_LATCH_LOW;
+                end
+                S_LATCH_LOW: begin
+                    hub_ST <= 0;
+                    scan_row <= scan_row+1'b1;
+                    if (scan_row == 31)
+                        pwm_phase <= pwm_phase+1'b1;
+                    state <= S_ROW_PREP;
+                end
+                default: begin
+                    state <= S_ROW_PREP;
+                    hub_CK <= 0;
+                    hub_ST <= 0;
+                    hub_OE <= 1;
+                    have_latched <= 0;
+                end
+            endcase
+        end
+    end
+    assign {hub_E,hub_D,hub_C,hub_B,hub_A} = display_row;
+    assign hub_R1 = upper_pixel[14:10] > pwm_phase;
+    assign hub_G1 = upper_pixel[9:5] > pwm_phase;
+    assign hub_B1 = upper_pixel[4:0] > pwm_phase;
+    assign hub_R2 = lower_pixel[14:10] > pwm_phase;
+    assign hub_G2 = lower_pixel[9:5] > pwm_phase;
+    assign hub_B2 = lower_pixel[4:0] > pwm_phase;
+endmodule

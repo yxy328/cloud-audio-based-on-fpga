@@ -12,7 +12,7 @@ module tb_top_hc05_map;
     integer reply_count=0,expected_count=0,bit_index,first,n;
     real g4,c4,c5,wrong;
     reg [31:0] previous_phase,expected_phase;
-    top #(.HC05_BAUD(500000),.TOUCH_STARTUP_US(3000),.KEY_CONFIRM_CYCLES(1000),
+    top #(.ENABLE_DEMO_SCORE(1),.HC05_BAUD(500000),.TOUCH_STARTUP_US(3000),.KEY_CONFIRM_CYCLES(1000),
         .TOUCH_MODE_DEBOUNCE_MS(2),.ADSR_ATTACK_SAMPLES(4),.ADSR_DECAY_SAMPLES(4),
         .ADSR_RELEASE_SAMPLES(32),.TOUCH_ADSR_RELEASE_SAMPLES(32)) dut(
         .clk(clk),.key_s1(s1),.key_s2(s2),.touch_out(pads),.hc05_rx(rx),.hc05_tx(tx),

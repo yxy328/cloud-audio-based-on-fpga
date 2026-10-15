@@ -1,0 +1,10 @@
+[General]
+ipc_version=4
+file=gowin_dce
+module=Gowin_DCE
+target_device=gw5a25a-002
+type=clock_dce
+version=1.0
+
+[Config]
+Language=0

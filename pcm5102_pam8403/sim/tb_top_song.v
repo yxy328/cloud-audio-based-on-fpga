@@ -6,7 +6,7 @@ module tb_top_song;
     always #10 clk=~clk;
     reg s1=0;
     wire bck,lrck,din;
-    top #(.KEY_CONFIRM_CYCLES(1000), .ADSR_ATTACK_SAMPLES(8),
+    top #(.ENABLE_DEMO_SCORE(1),.KEY_CONFIRM_CYCLES(1000), .ADSR_ATTACK_SAMPLES(8),
         .ADSR_DECAY_SAMPLES(32), .ADSR_RELEASE_SAMPLES(64),
         .SONG_BEAT_SAMPLES(256), .SONG_GAP_SAMPLES(64),
         .SONG_INTRO_SAMPLES(32), .SONG_TAIL_SAMPLES(256)) dut(

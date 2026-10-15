@@ -1,0 +1,38 @@
+param([string]$SdkPath = (Join-Path $PSScriptRoot 'tools\sdk'))
+$ErrorActionPreference = 'Stop'
+Push-Location $PSScriptRoot
+try {
+    $sdkAbsolute = [System.IO.Path]::GetFullPath($SdkPath)
+    $androidJar = Join-Path $sdkAbsolute 'platforms\android-35\android.jar'
+    $buildTools = Get-ChildItem -LiteralPath (Join-Path $sdkAbsolute 'build-tools') -Directory |
+        Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'aapt2.exe') } |
+        Sort-Object Name -Descending | Select-Object -First 1
+    if (!(Test-Path -LiteralPath $androidJar) -or !$buildTools) { throw 'Missing SDK. Run .\prepare-sdk.ps1 first, or specify -SdkPath.' }
+    $jdkBin = Split-Path (Get-Command javac.exe -ErrorAction Stop).Source
+    $java = Join-Path $jdkBin 'java.exe'
+    New-Item -ItemType Directory -Force -Path build\classes,build\dex,dist | Out-Null
+    $sources = @(Get-ChildItem -LiteralPath app\src\main\java -Filter '*.java' -Recurse | ForEach-Object FullName)
+    & (Join-Path $jdkBin 'javac.exe') --release 8 -Xlint:-options -encoding UTF-8 -classpath $androidJar -d build\classes @sources
+    if ($LASTEXITCODE -ne 0) { throw 'javac failed' }
+    $classes = @(Get-ChildItem -LiteralPath build\classes -Filter '*.class' -Recurse | ForEach-Object FullName)
+    & $java -cp (Join-Path $buildTools.FullName 'lib\d8.jar') com.android.tools.r8.D8 --release --min-api 29 --lib $androidJar --output build\dex @classes
+    if ($LASTEXITCODE -ne 0) { throw 'D8 failed' }
+    & (Join-Path $buildTools.FullName 'aapt2.exe') link -I $androidJar --manifest app\src\main\AndroidManifest.xml --min-sdk-version 29 --target-sdk-version 35 -o build\unsigned.apk
+    if ($LASTEXITCODE -ne 0) { throw 'aapt2 link failed' }
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::Open((Join-Path $PSScriptRoot 'build\unsigned.apk'), [System.IO.Compression.ZipArchiveMode]::Update)
+    try { [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,(Join-Path $PSScriptRoot 'build\dex\classes.dex'),'classes.dex') | Out-Null } finally { $zip.Dispose() }
+    & (Join-Path $buildTools.FullName 'zipalign.exe') -f -p 4 build\unsigned.apk build\aligned.apk
+    if ($LASTEXITCODE -ne 0) { throw 'zipalign failed' }
+    if (!(Test-Path -LiteralPath tools\debug.keystore)) {
+        & (Join-Path $jdkBin 'keytool.exe') -genkeypair -keystore tools\debug.keystore -storepass android -keypass android -alias androiddebugkey -dname 'CN=FPGA Score Debug,O=Local,C=CN' -keyalg RSA -keysize 2048 -validity 10000
+        if ($LASTEXITCODE -ne 0) { throw 'Debug signing key generation failed' }
+    }
+    & $java -jar (Join-Path $buildTools.FullName 'lib\apksigner.jar') sign --ks tools\debug.keystore --ks-pass pass:android --key-pass pass:android --out dist\FPGA-Score-debug.apk build\aligned.apk
+    if ($LASTEXITCODE -ne 0) { throw 'APK signing failed' }
+    & $java -jar (Join-Path $buildTools.FullName 'lib\apksigner.jar') verify --verbose dist\FPGA-Score-debug.apk
+    if ($LASTEXITCODE -ne 0) { throw 'APK signature verification failed' }
+    & (Join-Path $buildTools.FullName 'aapt2.exe') dump badging dist\FPGA-Score-debug.apk
+    if ($LASTEXITCODE -ne 0) { throw 'APK manifest verification failed' }
+    Get-FileHash -LiteralPath dist\FPGA-Score-debug.apk -Algorithm SHA256
+} finally { Pop-Location }

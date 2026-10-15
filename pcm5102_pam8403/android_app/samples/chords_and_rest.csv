@@ -1,0 +1,7 @@
+# MIDI pitches, milliseconds. 0 / REST is a silent guidance interval.
+pitches,duration_ms
+60+64+67,500
+REST,250
+62+65+69,500
+0,250
+60+64+67,1000

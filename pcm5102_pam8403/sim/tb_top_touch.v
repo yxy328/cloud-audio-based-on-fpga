@@ -6,7 +6,7 @@ module tb_top_touch;
     reg [7:0] pads=8'hff;
     reg s1=0,s2=0;
     wire bck,lrck,din;
-    top #(
+    top #(.ENABLE_DEMO_SCORE(1),
         .FSR_ENABLE(0),
         .KEY_CONFIRM_CYCLES(1000), .TOUCH_STARTUP_US(3000),
         .TOUCH_DEBOUNCE_MS(2), .TOUCH_MODE_DEBOUNCE_MS(2),

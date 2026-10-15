@@ -34,6 +34,9 @@ auth.json
 # Duplicate generated archives already represented by source projects.
 /pcm5102_pam8403.zip
 /pcm5102_pam8403*.zip
+/ALL_IN.zip
+/ALL_IN/pcm5102_pam8403/tools/local_sim/
+/ALL_IN/pcm5102_pam8403/tmp/
 *.lnk
 /pmod_hub75e/HUB75E.fs.7z
 
