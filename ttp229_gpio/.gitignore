@@ -1,0 +1,4 @@
+/impl/
+/sim/build/
+*.gprj.user
+*.vcd

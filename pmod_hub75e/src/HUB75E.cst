@@ -1,0 +1,77 @@
+//Copyright (C)2014-2023 Gowin Semiconductor Corporation.
+//All rights reserved. 
+//File Title: Physical Constraints file
+//GOWIN Version: V1.9.9 Beta-5
+//Part Number: GW5A-LV25MG121NES
+//Device: GW5A-25
+//Device Version: A
+//Created Time: Wed 10 25 21:38:46 2023
+
+IO_LOC "dbg2" K4;
+IO_PORT "dbg2" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "dbg1" L1;
+IO_PORT "dbg1" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "dbg0" K2;
+IO_PORT "dbg0" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_OE" K5;
+IO_PORT "hub_OE" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_ST" K11;
+IO_PORT "hub_ST" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_CK" L11;
+IO_PORT "hub_CK" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_D" E11;
+IO_PORT "hub_D" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_C" E10;
+IO_PORT "hub_C" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_B" A11;
+IO_PORT "hub_B" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_A" A10;
+IO_PORT "hub_A" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_E" C11;
+IO_PORT "hub_E" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_B2" C10;
+IO_PORT "hub_B2" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_G2" B11;
+IO_PORT "hub_G2" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_R2" B10;
+IO_PORT "hub_R2" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_B1" D10;
+IO_PORT "hub_B1" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_G1" G11;
+IO_PORT "hub_G1" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "hub_R1" G10;
+IO_PORT "hub_R1" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "USER_KEY" H11;
+IO_PORT "USER_KEY" PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+// Dock S2 is active-high. Press toggles 8/16-key software mode.
+IO_LOC "S2" H10;
+IO_PORT "S2" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "CLK_IN" E2;
+IO_PORT "CLK_IN" PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+
+// TTP229-BSF HW-136: TP2 open for 8 keys, shorted for 16 keys.
+// TP3+TP4 shorted for multi-key mode; power-cycle after jumper changes.
+// Active-low SDO. 40Pin header SDRAM A0/A1, verified 3.3V bank.
+IO_LOC "touch_scl" F6;
+IO_PORT "touch_scl" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "touch_sdo" F7;
+IO_PORT "touch_sdo" PULL_MODE=UP BANK_VCCIO=3.3;
+
+// mode_16=0: OUT1..OUT8 direct inputs, same unused J3 pins as ttp229_gpio.
+// No pulls: TTP229 reuses these pins as touch electrodes in 16-key mode.
+IO_LOC "touch_out[0]" K1; // OUT1 -> J3 pin 2.
+IO_PORT "touch_out[0]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[1]" L2; // OUT2 -> J3 pin 4.
+IO_PORT "touch_out[1]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[2]" J4; // OUT3 -> J3 pin 6.
+IO_PORT "touch_out[2]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[3]" G1; // OUT4 -> J3 pin 7.
+IO_PORT "touch_out[3]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[4]" G2; // OUT5 -> J3 pin 8.
+IO_PORT "touch_out[4]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[5]" L3; // OUT6 -> J3 pin 9.
+IO_PORT "touch_out[5]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[6]" L4; // OUT7 -> J3 pin 10.
+IO_PORT "touch_out[6]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[7]" J2; // OUT8 -> J3 pin 21.
+IO_PORT "touch_out[7]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;

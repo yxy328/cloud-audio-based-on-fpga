@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project>
+    <Template>FPGA</Template>
+    <Version>5</Version>
+    <Device name="GW5A-25A" pn="GW5A-LV25MG121NC1/I0">gw5a25a-002</Device>
+    <FileList>
+        <File path="src/clk_div.v" type="file.verilog" enable="1"/>
+        <File path="src/i2s_tx.v" type="file.verilog" enable="1"/>
+        <File path="src/button_filter.v" type="file.verilog" enable="1"/>
+        <File path="src/pitch_control.v" type="file.verilog" enable="1"/>
+        <File path="src/sine_rom.v" type="file.verilog" enable="1"/>
+        <File path="src/dds_voice.v" type="file.verilog" enable="1"/>
+        <File path="src/top.v" type="file.verilog" enable="1"/>
+        <File path="src/DDS_STEP1.cst" type="file.cst" enable="1"/>
+        <File path="src/DDS_STEP1.sdc" type="file.sdc" enable="1"/>
+    </FileList>
+</Project>

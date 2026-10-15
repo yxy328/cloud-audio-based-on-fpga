@@ -1,0 +1,5 @@
+GAO_ID: 1010001010110010
+FS SHA256: 3dc417c02cbd069d85cfcc81b22588fe6f5a26e668ecb071dcb422eb5513c7db
+FS: impl/pnr/ao_0.fs
+GAO: Touch_LIVE.gao
+CheckSum/UserCode: 0x0DAC

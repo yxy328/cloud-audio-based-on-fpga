@@ -1,0 +1,4 @@
+impl/*
+!impl/HC05_UART_ECHO_process_config.json
+sim/build/
+*.gprj.user

@@ -1,0 +1,56 @@
+# Gowin generated outputs; preserve reproducible project process settings.
+**/impl/*
+!**/impl/*_process_config.json
+!**/impl/project_process_config.json
+*.gprj.user
+
+# Simulation and Python caches.
+**/sim/build/
+*.vcd
+*.vvp
+*.out
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Logs and temporary editor files.
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+Thumbs.db
+.DS_Store
+
+# Local credentials (never store API keys in Git).
+.env
+.env.*
+!.env.example
+auth.json
+*.pem
+*.key
+
+# Duplicate generated archives already represented by source projects.
+/pcm5102_pam8403.zip
+/pcm5102_pam8403*.zip
+*.lnk
+/pmod_hub75e/HUB75E.fs.7z
+
+# Keil build outputs and per-user UI settings for the STM32 reference project.
+/1-2-4-按键控制LED程序/*.o
+/1-2-4-按键控制LED程序/*.d
+/1-2-4-按键控制LED程序/*.crf
+/1-2-4-按键控制LED程序/*.lst
+/1-2-4-按键控制LED程序/*.axf
+/1-2-4-按键控制LED程序/*.hex
+/1-2-4-按键控制LED程序/*.map
+/1-2-4-按键控制LED程序/*.lnp
+/1-2-4-按键控制LED程序/*.dep
+/1-2-4-按键控制LED程序/*.plg
+/1-2-4-按键控制LED程序/*.tra
+/1-2-4-按键控制LED程序/*.htm
+/1-2-4-按键控制LED程序/*.uvguix.*
+/1-2-4-按键控制LED程序/*.uvopt
+/1-2-4-按键控制LED程序/*.uvoptx
+/1-2-4-按键控制LED程序/*.saved_uv4

@@ -1,0 +1,7 @@
+impl/*
+!impl/PCM5102_PAM8403_process_config.json
+!impl/project_process_config.json
+sim/build/
+programmer_sram.log
+programmer_verify.log
+*.gprj.user

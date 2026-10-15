@@ -1,0 +1,26 @@
+{
+  "source": "E:\\Users\\Downloads\\所长sama - 结算画面.flac",
+  "source_format": "FLAC",
+  "source_samplerate": 48000,
+  "source_channels": 2,
+  "source_duration_seconds": 101.8114375,
+  "start_seconds": 0.0,
+  "duration_seconds": 4.0,
+  "samples": 32000,
+  "sample_rate": 8000,
+  "encoding": "signed 8-bit mono; wire bytes are two's-complement HEX",
+  "peak_target": 0.6,
+  "source_excerpt_peak": 1.0090565519680985,
+  "checksum_sum16_unsigned_bytes": 29699,
+  "pcm_sha256": "0c77b4bc07231a851bd6f7a596ee7f7c87ca1c7dece7e286d2e29f48d8762d08",
+  "command_lines": 2003,
+  "command_bytes": 97346,
+  "uart_9600_minimum_seconds_without_ack": 101.40208333333334,
+  "files": {
+    "commands": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\audio_clips\\settlement_4s.txt",
+    "pcm": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\audio_clips\\settlement_4s.s8",
+    "readmemh": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\audio_clips\\settlement_4s.hex",
+    "preview": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\audio_clips\\settlement_4s.wav"
+  },
+  "send_policy": "Send one line, wait for OK, then send the next; retry whole PCM_DATA line on timeout."
+}

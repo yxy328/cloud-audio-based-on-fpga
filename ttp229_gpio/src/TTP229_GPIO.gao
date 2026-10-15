@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<GAO_CONFIG>
+    <Version>3.0</Version>
+    <Mode>Standard</Mode>
+    <AoCore index="0" sample_clock="gao_clock" trig_type="0" storage_depth="8192" window_num="1" capture_amount="8192" implementation="0" trigger_pos="6144" module_name="ttp229_gpio_top" force_trigger_by_falling_edge="false" capture_init_data_enabled="false">
+        <SignalList>
+            <Bus capture_enable="true" name="touch_out[7:0]">
+                <Signal>gao_probe[7]</Signal>
+                <Signal>gao_probe[6]</Signal>
+                <Signal>gao_probe[5]</Signal>
+                <Signal>gao_probe[4]</Signal>
+                <Signal>gao_probe[3]</Signal>
+                <Signal>gao_probe[2]</Signal>
+                <Signal>gao_probe[1]</Signal>
+                <Signal>gao_probe[0]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="keys_raw[15:0]">
+                <Signal>gao_probe[23]</Signal>
+                <Signal>gao_probe[22]</Signal>
+                <Signal>gao_probe[21]</Signal>
+                <Signal>gao_probe[20]</Signal>
+                <Signal>gao_probe[19]</Signal>
+                <Signal>gao_probe[18]</Signal>
+                <Signal>gao_probe[17]</Signal>
+                <Signal>gao_probe[16]</Signal>
+                <Signal>gao_probe[15]</Signal>
+                <Signal>gao_probe[14]</Signal>
+                <Signal>gao_probe[13]</Signal>
+                <Signal>gao_probe[12]</Signal>
+                <Signal>gao_probe[11]</Signal>
+                <Signal>gao_probe[10]</Signal>
+                <Signal>gao_probe[9]</Signal>
+                <Signal>gao_probe[8]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="keys_stable[15:0]">
+                <Signal>gao_probe[39]</Signal>
+                <Signal>gao_probe[38]</Signal>
+                <Signal>gao_probe[37]</Signal>
+                <Signal>gao_probe[36]</Signal>
+                <Signal>gao_probe[35]</Signal>
+                <Signal>gao_probe[34]</Signal>
+                <Signal>gao_probe[33]</Signal>
+                <Signal>gao_probe[32]</Signal>
+                <Signal>gao_probe[31]</Signal>
+                <Signal>gao_probe[30]</Signal>
+                <Signal>gao_probe[29]</Signal>
+                <Signal>gao_probe[28]</Signal>
+                <Signal>gao_probe[27]</Signal>
+                <Signal>gao_probe[26]</Signal>
+                <Signal>gao_probe[25]</Signal>
+                <Signal>gao_probe[24]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="power_resetn">
+                <Signal>gao_probe[40]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="ready">
+                <Signal>gao_probe[41]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="heartbeat">
+                <Signal>gao_probe[42]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="key_event">
+                <Signal>gao_probe[43]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="sample_clock_phase">
+                <Signal>gao_probe[44]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="mode_16">
+                <Signal>gao_probe[45]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="S2">
+                <Signal>gao_probe[46]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="touch_scl">
+                <Signal>gao_probe[47]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="touch_sdo">
+                <Signal>gao_probe[48]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="serial_valid">
+                <Signal>gao_probe[49]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="serial_state[2:0]">
+                <Signal>gao_probe[52]</Signal>
+                <Signal>gao_probe[51]</Signal>
+                <Signal>gao_probe[50]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="serial_bit_cnt[3:0]">
+                <Signal>gao_probe[56]</Signal>
+                <Signal>gao_probe[55]</Signal>
+                <Signal>gao_probe[54]</Signal>
+                <Signal>gao_probe[53]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="mode_state[1:0]">
+                <Signal>gao_probe[58]</Signal>
+                <Signal>gao_probe[57]</Signal>
+            </Bus>
+        </SignalList>
+        <Triggers>
+            <Trigger index="0">
+                <SignalList>
+                    <Signal>gao_probe[43]</Signal>
+                </SignalList>
+            </Trigger>
+            <Trigger index="1" />
+            <Trigger index="2" />
+            <Trigger index="3" />
+            <Trigger index="4" />
+            <Trigger index="5" />
+            <Trigger index="6" />
+            <Trigger index="7" />
+            <Trigger index="8" />
+            <Trigger index="9" />
+            <Trigger index="10" />
+            <Trigger index="11" />
+            <Trigger index="12" />
+            <Trigger index="13" />
+            <Trigger index="14" />
+            <Trigger index="15" />
+        </Triggers>
+        <MatchUnits>
+            <MatchUnit index="0" enabled="1" match_type="1" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="R" value1="0" trigger="0" />
+            <MatchUnit index="1" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="2" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="3" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="4" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="5" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="6" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="7" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="8" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="9" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="10" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="11" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="12" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="13" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="14" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="15" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+        </MatchUnits>
+        <Expressions type="Static">
+            <Expression>M0</Expression>
+        </Expressions>
+    </AoCore>
+    <GAO_ID>1010001010111110</GAO_ID>
+</GAO_CONFIG>

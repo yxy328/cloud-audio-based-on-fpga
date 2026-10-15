@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project>
+    <Template>FPGA</Template>
+    <Version>5</Version>
+    <Device name="GW5A-25A" pn="GW5A-LV25MG121NC1/I0">gw5a25a-002</Device>
+    <FileList>
+        <File path="src/ttp229_serial16_top.v" type="file.verilog" enable="1"/>
+        <File path="src/ttp229_serial16.v" type="file.verilog" enable="1"/>
+        <File path="src/ttp229_uart_report.v" type="file.verilog" enable="1"/>
+        <File path="src/TTP229_SERIAL16.cst" type="file.cst" enable="1"/>
+        <File path="src/TTP229_SERIAL16.sdc" type="file.sdc" enable="1"/>
+    </FileList>
+</Project>

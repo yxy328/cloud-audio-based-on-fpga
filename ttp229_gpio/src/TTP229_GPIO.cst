@@ -1,0 +1,32 @@
+// Sipeed Dock 60033 official schematic, v1.1 2025-08-28, page 1.
+// Module OUT1..OUT8 -> eight unused J3 GPIO. All are FPGA INPUTS.
+// These BANK2 3.3V pins are not routed to J4/J5/J6 PMODs and do not
+// overlap the original HUB75E.cst. E2 is the necessary onboard crystal.
+IO_LOC "CLK_IN" E2;
+IO_PORT "CLK_IN" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "S2" H10;
+IO_PORT "S2" IO_TYPE=LVCMOS33 PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+// Serial mode: remove module SCL's old VCC tie before connecting F6.
+IO_LOC "touch_scl" F6;
+IO_PORT "touch_scl" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "touch_sdo" F7;
+IO_PORT "touch_sdo" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF BANK_VCCIO=3.3;
+
+// Direct outputs share the chip touch pads in 16-key mode.
+// Keep FPGA inputs unbiased (NONE) so they do not pull those pads down.
+IO_LOC "touch_out[0]" K1; // Module OUT1 -> J3 physical pin 2, IOR20A.
+IO_PORT "touch_out[0]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[1]" L2; // Module OUT2 -> J3 physical pin 4, IOR18A.
+IO_PORT "touch_out[1]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[2]" J4; // Module OUT3 -> J3 physical pin 6, IOR22A.
+IO_PORT "touch_out[2]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[3]" G1; // Module OUT4 -> J3 physical pin 7, IOR24B.
+IO_PORT "touch_out[3]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[4]" G2; // Module OUT5 -> J3 physical pin 8, IOR24A.
+IO_PORT "touch_out[4]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[5]" L3; // Module OUT6 -> J3 physical pin 9, IOR31B.
+IO_PORT "touch_out[5]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[6]" L4; // Module OUT7 -> J3 physical pin 10, IOR31A.
+IO_PORT "touch_out[6]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_out[7]" J2; // Module OUT8 -> J3 physical pin 21, IOR33B.
+IO_PORT "touch_out[7]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;

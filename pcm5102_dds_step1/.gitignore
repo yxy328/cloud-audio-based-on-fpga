@@ -1,0 +1,7 @@
+sim/build/
+impl/*
+!impl/DDS_STEP1_process_config.json
+!impl/project_process_config.json
+*.gprj.user
+programmer_sram.log
+programmer_verify.log

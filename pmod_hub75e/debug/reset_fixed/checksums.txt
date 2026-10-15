@@ -1,0 +1,6 @@
+FS checksum: 0x2187
+GAOCRC / GAO_ID: 1010001010110110
+FS SHA256: D77F26720D0C438248BA5594AC94DFBA20991E0FE9A9D140331FD3487BD5F7B3
+Programmed: 2026-10-06 20:10:56, Finished, 5.41s
+Actual capture: SCL transitions and touch_valid visible; SDO high, touch_keys=0000. Key 1 not verified.
+Simulation: all seven PASS. Main timing: setup 0, hold 2; not fully signed off.

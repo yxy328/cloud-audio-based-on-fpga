@@ -1,0 +1,9 @@
+// Four ports only; H11 S1 is active-high and needs a pull-down when released.
+IO_LOC "USER_KEY" H11;
+IO_PORT "USER_KEY" PULL_MODE=DOWN DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "CLK_IN" E2;
+IO_PORT "CLK_IN" PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
+IO_LOC "touch_scl" F6;
+IO_PORT "touch_scl" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC "touch_sdo" F7;
+IO_PORT "touch_sdo" PULL_MODE=UP BANK_VCCIO=3.3;

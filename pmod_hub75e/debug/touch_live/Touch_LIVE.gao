@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GAO_CONFIG>
+    <Version>3.0</Version>
+    <Mode>Standard</Mode>
+    <AoCore index="0" sample_clock="CLK_IN" trig_type="0" storage_depth="16384" window_num="1" capture_amount="16384" implementation="0" trigger_pos="128" module_name="TOP_TOUCH_LIVE" force_trigger_by_falling_edge="false" capture_init_data_enabled="false">
+        <SignalList>
+            <Bus capture_enable="true" name="touch_keys[15:0]">
+                <Signal>live_probe[28]</Signal>
+                <Signal>live_probe[27]</Signal>
+                <Signal>live_probe[26]</Signal>
+                <Signal>live_probe[25]</Signal>
+                <Signal>live_probe[24]</Signal>
+                <Signal>live_probe[23]</Signal>
+                <Signal>live_probe[22]</Signal>
+                <Signal>live_probe[21]</Signal>
+                <Signal>live_probe[20]</Signal>
+                <Signal>live_probe[19]</Signal>
+                <Signal>live_probe[18]</Signal>
+                <Signal>live_probe[17]</Signal>
+                <Signal>live_probe[16]</Signal>
+                <Signal>live_probe[15]</Signal>
+                <Signal>live_probe[14]</Signal>
+                <Signal>live_probe[13]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="touch_scl">
+                <Signal>live_probe[12]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="touch_sdo">
+                <Signal>live_probe[11]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="touch_valid">
+                <Signal>live_probe[10]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="USER_KEY">
+                <Signal>live_probe[9]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="power_resetn">
+                <Signal>live_probe[8]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="state_o[2:0]">
+                <Signal>live_probe[7]</Signal>
+                <Signal>live_probe[6]</Signal>
+                <Signal>live_probe[5]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="bit_cnt_o[3:0]">
+                <Signal>live_probe[4]</Signal>
+                <Signal>live_probe[3]</Signal>
+                <Signal>live_probe[2]</Signal>
+                <Signal>live_probe[1]</Signal>
+            </Bus>
+            <Bus capture_enable="true" name="frame_start">
+                <Signal>live_probe[0]</Signal>
+            </Bus>
+        </SignalList>
+        <Triggers>
+            <Trigger index="0">
+                <SignalList>
+                    <Signal>live_probe[0]</Signal>
+                </SignalList>
+            </Trigger>
+            <Trigger index="1" />
+            <Trigger index="2" />
+            <Trigger index="3" />
+            <Trigger index="4" />
+            <Trigger index="5" />
+            <Trigger index="6" />
+            <Trigger index="7" />
+            <Trigger index="8" />
+            <Trigger index="9" />
+            <Trigger index="10" />
+            <Trigger index="11" />
+            <Trigger index="12" />
+            <Trigger index="13" />
+            <Trigger index="14" />
+            <Trigger index="15" />
+        </Triggers>
+        <MatchUnits>
+            <MatchUnit index="0" enabled="1" match_type="1" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="R" value1="0" trigger="0" />
+            <MatchUnit index="1" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="2" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="3" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="4" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="5" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="6" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="7" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="8" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="9" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="10" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="11" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="12" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="13" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="14" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+            <MatchUnit index="15" enabled="0" match_type="0" counter_enable="0" counter_width="2" counter="2" countinuous="0" func="0" value0="" value1="" />
+        </MatchUnits>
+        <Expressions type="Static">
+            <Expression>M0</Expression>
+        </Expressions>
+    </AoCore>
+    <GAO_ID>1010001010110010</GAO_ID>
+</GAO_CONFIG>

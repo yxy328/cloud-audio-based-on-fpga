@@ -1,0 +1,44 @@
+{
+  "recorded_at": "2026-10-06T20:18:31.6380502+08:00",
+  "project": "HUB75E",
+  "main": {
+    "fs": "impl/pnr/ao_0.fs",
+    "gao": "src/HUB75E.gao",
+    "checksum": "0x2187",
+    "gao_crc": "1010001010110110",
+    "sha256": "D77F26720D0C438248BA5594AC94DFBA20991E0FE9A9D140331FD3487BD5F7B3",
+    "programming": "Finished, 20:10:56, 5.41 seconds",
+    "force_capture": "Completed after main restore",
+    "raw_keys": "0000",
+    "stable_keys": "0000",
+    "sdo": "High throughout stored capture",
+    "user_key": 0,
+    "key1_verified": false,
+    "screenshots": [
+      "debug/touch_live/captures/18_main_restored_programmed.png",
+      "debug/touch_live/captures/20_main_final_wave_start.png",
+      "debug/touch_live/captures/21_main_final_wave_end.png"
+    ]
+  },
+  "software": {
+    "user_key_reset": "Active high S1, PULL_MODE=DOWN, uresetn<=~USER_KEY",
+    "gao_clock": "Free-running clkn[3], 3.125 MHz",
+    "scan_clock": "scan_div, 25 MHz, reset phase preserved",
+    "simulations": "All seven PASS",
+    "bsram": "56/56",
+    "setup_violations": 0,
+    "hold_violations": 2,
+    "hold_note": "Divider self-feedback paths; generated clock source modeling under review, not signed off"
+  },
+  "high_comparison": {
+    "fs": "debug/touch_high/impl/pnr/ao_0.fs",
+    "gao": "debug/touch_high/Touch_HIGH.gao",
+    "checksum": "0xE16C",
+    "gao_crc": "1010001010111000",
+    "sha256": "EBFBC559676E69062F4A0DB153B17F9BCB5649368D4562A2CF83EDD5217FE596",
+    "reset_fix_included": true,
+    "programming": "Finished, 20:05:35, 5.4 seconds",
+    "capture": "Not completed, no valid waveform or polarity conclusion",
+    "historical_snapshots": "debug/polarity_compare not modified"
+  }
+}
