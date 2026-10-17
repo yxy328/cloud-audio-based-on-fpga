@@ -5,7 +5,7 @@ module tb_top;
     always #10 clk=~clk;
     reg key_s1=0,key_s2=0;
     wire bck,lrck,din,scl;
-    top #(.ENABLE_DEMO_SCORE(1)) dut(.clk(clk),.key_s1(key_s1),.key_s2(key_s2),.touch_out(8'h00),.hc05_rx(1'b1),.hc05_tx(),.i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din),.touch_scl(scl));
+    top #(.ENABLE_DEMO_SCORE(1)) dut(.clk(clk),.key_s1(key_s1),.key_s2(key_s2),.ir_beam(8'hff),.touch_out(8'h00),.hc05_rx(1'b1),.hc05_tx(),.i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din),.touch_scl(scl));
     // Electrical interface requirement, including reset/startup: never clock
     // or float the unused serial input while reading direct touch outputs.
     always @(negedge clk)

@@ -4,6 +4,7 @@
 // Each sample then uses add/subtract and a remainder accumulator. Segment
 // endpoints are exact even when the starting gain is low or on retrigger.
 module adsr_env #(
+    parameter RUNTIME_ADSR = 0,
     parameter ATTACK_SAMPLES = 98,
     parameter DECAY_SAMPLES = 3906,
     parameter [15:0] SUSTAIN_LEVEL = 16'd39321,
@@ -13,6 +14,7 @@ module adsr_env #(
     input wire resetn,
     input wire sample_ce,
     input wire gate,
+    input wire [63:0] adsr_config,
     output reg [15:0] gain,
     output reg [2:0] state,
     output wire active
@@ -22,25 +24,31 @@ module adsr_env #(
     localparam [31:0] A_TICKS = (ATTACK_SAMPLES < 1) ? 1 : ATTACK_SAMPLES;
     localparam [31:0] D_TICKS = (DECAY_SAMPLES < 1) ? 1 : DECAY_SAMPLES;
     localparam [31:0] R_TICKS = (RELEASE_SAMPLES < 1) ? 1 : RELEASE_SAMPLES;
+    localparam integer T = RUNTIME_ADSR ? 16 : 32;
+    reg [15:0] latched_d,latched_s,latched_r;
+    wire [T-1:0] attack_ticks=RUNTIME_ADSR ? ((adsr_config[63:48]==0) ? 16'd1 : adsr_config[63:48]) : A_TICKS;
+    wire [T-1:0] decay_ticks=RUNTIME_ADSR ? latched_d : D_TICKS;
+    wire [T-1:0] release_ticks=RUNTIME_ADSR ? latched_r : R_TICKS;
+    wire [15:0] sustain=RUNTIME_ADSR ? latched_s : SUSTAIN_LEVEL;
     reg gate_seen;
     reg [15:0] target_gain;
     reg rising;
-    reg [31:0] segment_ticks;
-    reg [31:0] ticks_left;
+    reg [T-1:0] segment_ticks;
+    reg [T-1:0] ticks_left;
     reg [15:0] step_size;
-    reg [31:0] step_remainder;
-    reg [32:0] slope_error;
+    reg [T-1:0] step_remainder;
+    reg [T:0] slope_error;
     reg dividing;
     reg [4:0] divide_left;
     reg [15:0] quotient;
-    reg [32:0] remainder;
+    reg [T:0] remainder;
 
-    wire [32:0] shifted_remainder = {remainder[31:0],quotient[15]};
+    wire [T:0] shifted_remainder = {remainder[T-1:0],quotient[15]};
     wire divide_one = shifted_remainder >= {1'b0,segment_ticks};
-    wire [32:0] next_remainder = divide_one
+    wire [T:0] next_remainder = divide_one
         ? shifted_remainder - {1'b0,segment_ticks} : shifted_remainder;
     wire [15:0] next_quotient = {quotient[14:0],divide_one};
-    wire [32:0] next_error = slope_error + {1'b0,step_remainder};
+    wire [T:0] next_error = slope_error + {1'b0,step_remainder};
     wire extra_step = next_error >= {1'b0,segment_ticks};
     wire [16:0] delta = {1'b0,step_size} + extra_step;
     // Preserve the original low 16 bits without an implicit width truncation.
@@ -55,7 +63,7 @@ module adsr_env #(
         input [2:0] next_state;
         input [15:0] start_gain;
         input [15:0] end_gain;
-        input [31:0] length;
+        input [T-1:0] length;
         begin
             state <= next_state;
             target_gain <= end_gain;
@@ -76,6 +84,7 @@ module adsr_env #(
     always @(posedge clk) begin
         if (!resetn) begin
             gain <= 16'd0;
+            latched_d <= D_TICKS;latched_s <= SUSTAIN_LEVEL;latched_r <= R_TICKS;
             state <= IDLE;
             gate_seen <= 1'b0;
             target_gain <= 16'd0;
@@ -94,21 +103,24 @@ module adsr_env #(
             // Gate events have priority over an in-flight division/ramp.
             // Neither event resets gain: release and retrigger are continuous.
             if (gate && !gate_seen) begin
-                start_segment(ATTACK,gain,16'hffff,A_TICKS);
+                latched_d <= adsr_config[47:32]==0 ? 16'd1 : adsr_config[47:32];
+                latched_s <= adsr_config[31:16];
+                latched_r <= adsr_config[15:0]==0 ? 16'd1 : adsr_config[15:0];
+                start_segment(ATTACK,gain,16'hffff,attack_ticks);
             end else if (!gate && gate_seen) begin
                 if (gain == 16'd0) begin
                     state <= IDLE;
                     dividing <= 1'b0;
                     ticks_left <= 32'd0;
                 end else begin
-                    start_segment(RELEASE,gain,16'd0,R_TICKS);
+                    start_segment(RELEASE,gain,16'd0,release_ticks);
                 end
             end else if (dividing) begin
                 quotient <= next_quotient;
                 remainder <= next_remainder;
                 if (divide_left == 0) begin
                     step_size <= next_quotient;
-                    step_remainder <= next_remainder[31:0];
+                    step_remainder <= next_remainder[T-1:0];
                     dividing <= 1'b0;
                 end else begin
                     divide_left <= divide_left - 1'b1;
@@ -121,7 +133,7 @@ module adsr_env #(
                             ticks_left <= 32'd0;
                             slope_error <= 33'd0;
                             case (state)
-                                ATTACK: start_segment(DECAY,16'hffff,SUSTAIN_LEVEL,D_TICKS);
+                                ATTACK: start_segment(DECAY,16'hffff,sustain,decay_ticks);
                                 DECAY: state <= SUSTAIN;
                                 RELEASE: state <= IDLE;
                                 default: state <= IDLE;
@@ -136,7 +148,7 @@ module adsr_env #(
                                 gain <= next_gain_fall[15:0];
                         end
                     end
-                    SUSTAIN: gain <= SUSTAIN_LEVEL;
+                    SUSTAIN: gain <= sustain;
                     default: gain <= 16'd0;
                 endcase
             end

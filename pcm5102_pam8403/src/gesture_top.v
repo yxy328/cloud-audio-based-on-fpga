@@ -20,7 +20,13 @@ module gesture_top #(
     output wire init_done, gesture_valid, dir_evaluated,
     output wire [2:0] start_dir, end_dir,
     input wire [2:0] control_timbre,
-    input wire control_vibrato, control_bank
+    input wire control_vibrato, control_bank,
+    input wire ir_note_valid, test32,
+    input wire [129:0] adsr_config,
+    input wire [2:0] ir_note_index,
+    output wire [31:0] voice_active,
+    output wire [5:0] voice_count,
+    output wire overrun
 );
     wire i2c_start, i2c_rw, i2c_busy, i2c_done, i2c_nack, i2c_rvalid;
     wire [6:0] i2c_addr;
@@ -48,22 +54,19 @@ module gesture_top #(
         .dbg_proximity(), .dbg_error(), .dbg_nack_count(), .dbg_nack_reg(),
         .dbg_gconf2(), .dbg_gpulse()
     );
-    gesture_audio #(
-        .SHARED_AUDIO_CLOCK(1), .NOTE_FRAMES(AUDIO_NOTE_FRAMES),
+    sensor_poly_audio #(
+        .NOTE_FRAMES(AUDIO_NOTE_FRAMES),
         .PIANO_FRAMES(AUDIO_PIANO_FRAMES), .FLUTE_FRAMES(AUDIO_FLUTE_FRAMES),
         .UKULELE_FRAMES(AUDIO_UKULELE_FRAMES), .DRUM_FRAMES(AUDIO_DRUM_FRAMES),
-        .VOLUME_SHIFT(AUDIO_VOLUME_SHIFT),
-        .KEY_DEBOUNCE_CYCLES(AUDIO_KEY_DEBOUNCE_CYCLES),
-        .LONG_PRESS_CYCLES(AUDIO_LONG_PRESS_CYCLES),
-        .EXTERNAL_CONTROL(EXTERNAL_CONTROL)
+        .VOLUME_SHIFT(AUDIO_VOLUME_SHIFT)
     ) u_audio (
-        .clk(clk), .resetn(resetn), .shared_frame_ce(frame_ce),
+        .clk(clk), .resetn(resetn), .frame_ce(frame_ce),
         .sensor_ready(init_done), .gesture_valid(gesture_valid),
         .dir_evaluated(dir_evaluated), .start_dir(start_dir), .end_dir(end_dir),
-        .key_s1(key_s1), .key_s2(key_s2),
+        .ir_note_valid(ir_note_valid),.ir_note_index(ir_note_index),.test32(test32),
         .control_timbre(control_timbre), .control_vibrato(control_vibrato),
-        .control_bank(control_bank),
-        .note_bank(), .timbre_selected(), .vibrato_enabled(),
-        .i2s_bck(), .i2s_lrck(), .i2s_din(), .audio_sample(audio_sample)
+        .control_bank(control_bank),.adsr_config(adsr_config),
+        .voice_active(voice_active),.voice_count(voice_count),.overrun(overrun),
+        .audio_sample(audio_sample)
     );
 endmodule

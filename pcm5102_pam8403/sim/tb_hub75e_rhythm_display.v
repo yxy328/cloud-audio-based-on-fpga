@@ -12,6 +12,8 @@ module tb_hub75e_rhythm_display;
         .clk(clk),.resetn(resetn),.touch_keys(touch_keys),.guide_keys(guide_keys),
         .playing(playing),.ms_tick(ms_tick),.note_spawn(note_spawn),
         .spawn_keys(spawn_keys),.spawn_delay_ms(spawn_delay_ms),
+        .visual_mode(2'd0),.sample_ce(1'b0),.mixed_sample(16'sd0),
+        .touch0(16'sd0),.touch1(16'sd0),.sensor_sample(16'sd0),.guitar_sample(16'sd0),
         .note_ready(ready),.overflow(overflow),
         .hub_R1(r1),.hub_G1(g1),.hub_B1(b1),.hub_R2(r2),.hub_G2(g2),.hub_B2(b2),
         .hub_A(a),.hub_B(b),.hub_C(c),.hub_D(d),.hub_E(e),

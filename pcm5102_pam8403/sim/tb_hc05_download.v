@@ -10,7 +10,7 @@ module tb_hc05_download;
     reg [9:0] divider=0;
     always @(posedge clk) divider<=divider+1'b1;
     wire sample_ce=divider==0;
-    wire tx,rec_busy,valid,playing,gate;
+    wire tx,rec_busy,valid,playing,gate,audition;
     wire [55:0] map;
     wire [31:0] increment;
     wire [6:0] guide;
@@ -24,6 +24,7 @@ module tb_hc05_download;
         .touch_keys(keys),.pressure_mode(mode),.volume_gain(gain),.pitch_ratio(ratio),
         .toggle_play(1'b0),.restart(1'b0),.rec_busy(rec_busy),
         .downloaded_valid(valid),.downloaded_playing(playing),.downloaded_gate(gate),
+        .downloaded_audition(audition),
         .downloaded_increment(increment),.guide_keys(guide),.builtin_play(),.builtin_stop());
     initial forever begin
         @(negedge tx); repeat(BIT_TICKS/2) @(posedge clk);
@@ -64,6 +65,8 @@ module tb_hc05_download;
     endtask
     initial begin
         repeat(5) @(negedge clk);resetn=1;
+        transact("AUDITION\n",9,{"ERR,STATE",8'd13,8'd10});
+        if(audition) $fatal(1,"No-score audition armed audio");
         transact("SONG_BEGIN,2\n",13,{"OK",8'd13,8'd10});
         transact("SONG_NOTE,1,67,500\n",19,{"OK",8'd13,8'd10});
         transact("SONG_END\n",9,{"ERR,MISSING",8'd13,8'd10});
@@ -79,11 +82,18 @@ module tb_hc05_download;
         repeat(10000) @(negedge clk);
         transact("PLAY\n",5,{"OK",8'd13,8'd10});
         if(!playing || guide!==1 || increment!==23012828) $fatal(1,"Interrupted score replaced old score");
+        if(audition) $fatal(1,"PLAY unexpectedly armed audition");
+        transact("AUDITION\n",9,{"OK",8'd13,8'd10});
+        if(!audition || !playing) $fatal(1,"Valid score audition did not start");
+        transact("PLAY\n",5,{"OK",8'd13,8'd10});
+        if(audition) $fatal(1,"PLAY did not clear audition");
         transact("MAP_RESET\n",10,{"ERR,BUSY",8'd13,8'd10});
         transact("STOP\n",5,{"OK",8'd13,8'd10});
         if(playing || guide!=0) $fatal(1,"STOP failed");
         transact("MAP,1,62\n",9,{"OK,MAP,1,62",8'd13,8'd10});
         transact("PLAY\n",5,{"ERR,MAP",8'd13,8'd10});
+        transact("AUDITION\n",9,{"ERR,MAP",8'd13,8'd10});
+        if(audition) $fatal(1,"Invalid map armed audition");
         transact("MAP_RESET\n",10,{"OK,MAP_RESET",8'd13,8'd10});
         transact("SONG_NOTE,0,60,65536\n",21,{"ERR,RANGE",8'd13,8'd10});
         // Pre-recorded sample download/play commands are deliberately absent.
@@ -108,6 +118,8 @@ module tb_hc05_download;
         transact("REC_START\n",10,{"OK",8'd13,8'd10});
         expect_line({"MAP,60,62,64,65,67,69,71",8'd13,8'd10});
         expect_line({"EVT,0,00,0,39321,65535",8'd13,8'd10});
+        transact("AUDITION\n",9,{"ERR,BUSY",8'd13,8'd10});
+        if(audition || playing) $fatal(1,"Recording allowed audition to start");
         transact("MAP,1,67\n",9,{"ERR,BUSY",8'd13,8'd10});
         @(negedge clk);keys=1;
         wait(line_count>next_line);

@@ -17,7 +17,7 @@ public final class SppLinkTest {
         a.onCommand=c->{a.feed("EVT,120,01,0,39321,65535\r");a.feed("\nERR,REC_OVERFLOW,1\r\nO");a.feed("K\r\n");};
         yes(link.command("STOP","OK").equals("OK"));yes(link.connected());yes(lines.contains("ERR,REC_OVERFLOW,1"));
         // New controls use the same acknowledged transport while recording lines arrive.
-        for(String control:new String[]{"GUITAR","TONE,0","TONE,1","TONE,2","TONE,3","TONE,4","VIBRATO,0","VIBRATO,1","BANK,0","BANK,1"}){
+        for(String control:new String[]{"GUITAR","TONE,0","TONE,1","TONE,2","TONE,3","TONE,4","VIBRATO,0","VIBRATO,1","BANK,0","BANK,1","ADSR,TOUCH,10,80,60,200","ADSR,SENSOR,10,80,60,200","ADSR_RESET,TOUCH","ADSR_RESET,SENSOR","BEND,1,8192","BEND,4,16384","BEND,7,32768","BEND_RESET"}){
             final String expected=control+"\r\n";
             a.onCommand=c->{yes(c.equals(expected));a.feed("EVT,140,03,1,30000,65535\r\nERR,REC_OVERFLOW,2\r\nOK\r\n");};
             yes(link.command(control,"OK").equals("OK"));

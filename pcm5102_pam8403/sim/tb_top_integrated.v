@@ -17,7 +17,7 @@ module tb_top_integrated;
         .ADSR_RELEASE_SAMPLES(32),.TOUCH_ADSR_RELEASE_SAMPLES(32),
         .FSR_SAMPLE_HZ(2000),.FSR_SLEW_STEP(65535),.FSR_PITCH_SLEW_STEP(65535),
         .GUITAR_STRING_LENGTH(8)) dut (
-        .clk(clk),.key_s1(s1),.key_s2(s2),.touch_out(pads),
+        .clk(clk),.key_s1(s1),.key_s2(s2),.ir_beam(8'hff),.touch_out(pads),
         .hc05_rx(rx),.hc05_tx(tx),.i2s_bck(bck),.i2s_lrck(lrck),
         .i2s_din(din),.touch_scl(touch_scl),.scl(sensor_scl),.sda(sensor_sda),
         .hub_R1(r1),.hub_G1(g1),.hub_B1(b1),.hub_R2(r2),.hub_G2(g2),.hub_B2(b2),
@@ -167,16 +167,16 @@ module tb_top_integrated;
             force dut.u_gesture.end_dir=to_dir;
             force dut.u_gesture.gesture_valid=1'b1;
             @(negedge clk); force dut.u_gesture.gesture_valid=1'b0;
-            if(dut.u_gesture.u_audio.note_inc!==expected_increment ||
-               dut.u_gesture.u_audio.note_timbre!==expected_timbre ||
-               dut.u_gesture.u_audio.remaining!==400)
-                $fatal(1,"Gesture lost bank/timbre/duration at top interface");
+            frames(40);
+            if(((dut.u_gesture.u_audio.u_synth.peek_context(0)>>274)&32'hffffffff)!==expected_increment ||
+               ((dut.u_gesture.u_audio.u_synth.peek_context(0)>>271)&7)!==expected_timbre)
+                $fatal(1,"Gesture lost bank/timbre in independent TDM context");
         end
     endtask
     task gesture_silence;
         integer first_sample;
         begin
-            wait(dut.u_gesture.u_audio.remaining==0 && dut.u_gesture.u_audio.gain==0);
+            wait(dut.sensor_voice_count==0);
             frames(12); first_sample=monitor.pcm_count;
             frames(32); check_silence(first_sample);
         end
@@ -289,15 +289,15 @@ module tb_top_integrated;
         transact("TONE,0\n",7,{"OK",8'd13,8'd10});
         transact("VIBRATO,1\n",10,{"OK",8'd13,8'd10});
         gesture(1,2,32'd23012828,0); frames(300);
-        if(dut.u_gesture.u_audio.u_vibrato.depth!==256 ||
-           dut.u_gesture.u_audio.phase_inc===dut.u_gesture.u_audio.note_inc)
+        if(dut.u_gesture.u_audio.u_synth.depth!==256 ||
+           dut.u_gesture.u_audio.u_synth.lfo_scaled===0)
             $fatal(1,"UART vibrato did not change gesture oscillator pitch");
         transact("BANK,1\n",7,{"OK",8'd13,8'd10});
         transact("TONE,3\n",7,{"OK",8'd13,8'd10});
-        if(dut.u_gesture.u_audio.note_inc!==23012828 || dut.u_gesture.u_audio.note_timbre!==0)
+        if(((dut.u_gesture.u_audio.u_synth.peek_context(0)>>274)&32'hffffffff)!==23012828 || ((dut.u_gesture.u_audio.u_synth.peek_context(0)>>271)&7)!==0)
             $fatal(1,"New controls retuned/revoiced a sounding gesture");
         transact("VIBRATO,0\n",10,{"OK",8'd13,8'd10}); frames(260);
-        if(dut.u_gesture.u_audio.u_vibrato.depth!==0) $fatal(1,"UART vibrato failed to ramp off");
+        if(dut.u_gesture.u_audio.u_synth.depth!==0) $fatal(1,"UART vibrato failed to ramp off");
         gesture_silence;
         $display("PASS [integrated gestures]: all four directions, both banks, five audible timbres, latched note/timbre, vibrato on/off and release to external I2S zero");
 
@@ -320,6 +320,6 @@ module tb_top_integrated;
     end
     initial begin
         #400000000;
-        $fatal(1,"Integrated timeout: replies=%0d/%0d touch=%h score=%h gesture=%0d guitar=%0d",reply_count,next_reply,dut.touch_keys,dut.song_guide_keys,dut.u_gesture.u_audio.remaining,dut.guitar_sample);
+        $fatal(1,"Integrated timeout: replies=%0d/%0d touch=%h score=%h gesture=%0d guitar=%0d",reply_count,next_reply,dut.touch_keys,dut.song_guide_keys,dut.sensor_voice_count,dut.guitar_sample);
     end
 endmodule

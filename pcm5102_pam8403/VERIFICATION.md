@@ -1,10 +1,502 @@
 # 本地验证记录
 
+## 2026-10-17：综合位宽与ROM初始化警告清理（当前版本）
+
+修正 `downloadable_song.v`、`tdm_synth.v`、`hub75e_rhythm_display.v`、
+`audio_visualizer.v` 的10处隐式截断，明确中间运算宽度、字段切片与有符号增益相加。
+`midi_note_lut.v` 改用生成期常量初始化ROM，去掉综合器对初始循环变量 `n` 的警告。
+既有的定点缩放、音符映射、流水线周期和端口保持一致。
+
+- Gowin重新综合：`EX3791=0`、`EX3780=0`，没有其他新增综合警告；保留29条 `NL0002`。
+- `NL0002` 原因：默认 `ENABLE_DEMO_SCORE=0` 裁掉演示曲谱音轨及其下载音高表；
+  触摸只接七个音符键，第八声部恒静音。没有添加保留无用逻辑的属性，也没有屏蔽警告。
+- 已通过11项模块RTL：MIDI ROM、下载曲谱、节奏显示、音频可视化、TDM ADSR、TDM队列、
+  传感器事件队列、HC05下载、混音延时XY、参考XY、HUB音频显示。
+  其中包含65536个有符号PCM输入的坐标核对、3002组延时/相位、每路256个MIDI输入、
+  32声部独立包络与正负饱和；满队列处理最大871个主时钟，低于1024时钟帧预算。
+- 完整 `tb_top_audio_visual` 通过：真实50MHz/I2S时序下174.47ms，核对触摸/红外/吉他、
+  波形/FFT、六种XY预设、演奏中UART设置、连续音源相位、曲谱不误重启和八张外部HUB画面。
+  本次合计12项RTL通过。
+- 后续附加的 `tb_top_ir_tdm` 与PNR网表 `tb_top_idle` 手动结束，`tb_top_song` 未执行；
+  不将这些附加仿真记作通过。验证范围见 `sim/build/warning_cleanup_validation_scope.txt`。
+
+### 本次位流与时序
+
+Gowin V1.9.11.03 Education于2026-10-17 13:20:26（上海）完成布局布线及位流/仿真网表生成。
+50MHz约束下Setup/Hold违例均为0，Fmax=51.798MHz，最差Setup Slack=+0.694ns。
+资源：Logic 21872/23040，CLS 11358/11520，Register 10124/23280，BSRAM 56/56，DSP 23/28。
+CPU/SSPI GPIO仍开启、JTAG GPIO仍关闭；本次没有修改CST/SDC。
+
+- 位流：`impl/pnr/PCM5102_PAM8403.fs`，UserCode=`0x00003EC1`。
+- SHA256：`B4669E7ABD643631E52BA76B964A7504EFDDE729AFAEB9778313FB305B742581`。
+- 日志：`sim/build/warning_cleanup_synth.log`、`warning_cleanup_pnr.log`、`warning_cleanup_tests.log`。
+- 修改前五个RTL及旧位流备份：`sim/build/warning_cleanup_baseline/`。
+
+本轮没有完成PNR网表功能仿真，没有下载FPGA或进行实板测量。下节保留上一版功能与验证记录。
+
+## 2026-10-17：可调参考李萨如与实际混音XY（上一版）
+
+补齐规整李萨如参考曲线及频率比/相位控制。原来的混音延时XY保留为AUD，不能用复杂混音点迹代替标准曲线验收。
+参考曲线显示REF，不进入音频输出，不代表现场音源测量；波形、FFT与下方三组幅度条仍观察真实采样。
+
+- S2长按仍轮换曲谱、波形、XY、FFT；XY页短按轮换八字、多瓣、圆、椭圆、直线、实际混音，其他页短按重启曲谱。
+- 新命令`XY,r,p`分别设置来源/频率比和相位：r=0/1/2/3对应AUD/1:1/1:2/2:3，p=0/1/2/3对应0°/45°/90°/135°。
+  命令回复OK，不自动切屏；正在演奏和曲谱播放时也可设置。参数随新捕获段锁存，标签与位图一起发布。
+- 使用8位相干DDS、256相位像素正弦查表。每512点采集包含两个完整基础周期，双轴均14像素幅度，保证1:1、90°在方形LED上呈圆形。
+  新参考逻辑复用原XY缓存，不增加BSRAM/DSP。现有安卓App无专用XY控件，使用S2或蓝牙串口终端，详见[AUDIO_VISUAL.md](AUDIO_VISUAL.md)。
+
+### 最终构建（256相位查表）
+
+| 项目 | 结果 |
+| --- | --- |
+| 工具 / 结束时间 | Gowin V1.9.11.03 Education / 2026-10-17 12:32:25（上海） |
+| 工程 / 顶层 | PCM5102_PAM8403.gprj / top |
+| 位流 | impl/pnr/PCM5102_PAM8403.fs |
+| UserCode | **0x0000158C** |
+| SHA256 | `D5F6EAFB45B0ED69698D9865AC6C139734AAEA43C459A8898BEB2A42F70F6429` |
+| 约束 / Fmax | **50.000 / 52.733 MHz** |
+| Setup / Hold违例 | **0 / 0** |
+| 最差Setup Slack | **+1.037 ns** |
+| Logic / CLS | **21776/23040 / 11307/11520** |
+| Register | **10124/23280，锁存器0** |
+| BSRAM / DSP | **56/56 / 23/28** |
+| I/O | **41；CST/SDC与前版相同** |
+
+资源接近上限；本次通过小型像素查表和共用位图实现参考曲线。首轮64相位版本存在可见点迹间断，
+已提高至256相位并重新构建，首轮产物仅保留在`sim/build/lissajous_candidate1/`，不作为最终交付。
+最终构建日志为`sim/build/lissajous_controls_build2.log`。46个输入及SHA256见`sim/build/lissajous_controls_source_manifest.json`。
+前版0x0000017C源码、工程、文档与位流已备份在`sim/build/pre_lissajous_controls_20261017/`。
+
+### 本轮验证
+
+- `tb_lissajous_reference`：12种频率比/相位组合、3072个点与独立实数正弦比较，最大误差0.494860像素；闭合周期、圆形几何、八字交点、旧点清除、配置/标签整帧发布通过。
+- `tb_hc05_xy`：16种设置、严格语法/范围、非法命令不修改状态、忙碌时设置及PING共存通过。
+- `tb_display_mode_control`：六预设短按轮换、XY页不重启、远程独立参数、长按四屏轮换、复位通过。
+- `tb_lissajous_delay`、`tb_audio_visualizer`、`tb_hub75e_audio_display`、`tb_hc05_bend`、`tb_hc05_adsr`、`tb_hub75e_rhythm_display`、`tb_audio_spectrum`通过。
+- 完整顶层`tb_top_audio_visual`通过：按真实50MHz/I²S时序运行174.47ms，仅UART和长按阈值加速；真实触摸/红外/吉他、六预设物理S2切换、忙碌中UART设置、返回FFT/曲谱、I²S取样与连续音源相位、曲谱不误重启，以及八张完整PWM面板重建均通过。
+- `tools/check_lissajous_panels.py`逐像素核对五种参考画面的外部HUB输出：八字149点、多瓣189点、圆96点、椭圆104点、直线29点，均与独立正弦量化坐标完全一致，无缺点/多点。日志`sim/build/lissajous_controls_geometry.log`。
+
+FFT独立NumPy复核通过：全部128个旋转系数正确，4组输入全部256个复数频点最大分量误差分别为0、4.1111、5.1237、1.0493 LSB。
+日志为`sim/build/lissajous_controls_numpy.log`。最终RTL汇总日志为`sim/build/lissajous_controls_final_tests.log`，以上11项RTL全部通过。
+
+六种XY对比预览为`sim/build/lissajous_presets_preview.png`，由外部HUB引脚重建数据生成，已检查图形和REF/AUD标签；并非实物拍摄。
+产物、测试、文档的SHA256见`sim/build/lissajous_controls_delivery_manifest.json`。
+
+尚未烧录或进行本版实板测量。上板需确认按键操作、REF/AUD标识、图形比例、HUB色序及演奏到声音/屏幕的响应。
+下面保留前版历史记录；当前交付以本节为准。
+
+## 2026-10-17：波形、混音延时XY与实时FFT四画面（历史版本0x0000017C）
+
+S2长按约1秒按“曲谱→波形→延时音频XY（李萨如）→实时FFT频谱→曲谱”循环；
+短按松开仍重启下载曲谱。三个分析画面都保留触摸、红外/手势、吉他三组采样幅度条。
+曲谱在后台继续推进，各音源、I²S和事件日志无需等待显示分析。操作与范围见
+[AUDIO_VISUAL.md](AUDIO_VISUAL.md)。App沿用v1.2，无需新命令或重新安装。
+
+### 最终构建
+
+Gowin V1.9.11.03 Education完成综合、布局布线、时序和位流/仿真网表生成，
+结束于2026-10-17 11:54:51（Asia/Shanghai）；日志`sim/build/xy_fft_build3.log`。
+
+| 项目 | 当前结果 |
+| --- | --- |
+| 位流 | `impl/pnr/PCM5102_PAM8403.fs` |
+| UserCode | **0x0000017C** |
+| SHA256 | `C461EAC66773D6A67CF6B5CA314FD956EE2B2B04AED5112F61ADB0506964BF31` |
+| 约束 / Fmax | **50.000 / 55.172MHz** |
+| Setup / Hold违例 | **0 / 0** |
+| 最差Setup Slack | **+1.875ns** |
+| Logic | **21515/23040** |
+| CLS | **11214/11520** |
+| Register | **10098/23280，锁存器0** |
+| BSRAM | **56/56** |
+| DSP | **23/28** |
+| I/O | **41；CST/SDC与前版SHA256相同** |
+
+首轮32位FFT工作区因器件的SDP32/36转换设置超出1块BSRAM；改为16位分时访问，
+保留原转换设置。第二轮能放入，50MHz仅余0.018ns；最终将幅值求和、压缩柱高、
+频段最大值写入拆成流水级，时序余量改善到1.875ns。中间产物不作为本次交付。
+FFT仅增加一个复用乘法器；当前BSRAM已用满，不能直接继续叠加大型缓存。
+
+### 分析链路与验证范围
+
+- 波形：同一I²S帧锁存采样，64列×8采样的极值窗口，显示约10.486ms。
+- XY：X为当前混音，Y为32个采样前的混音，固定延时655.36µs；64×32位图双缓冲。
+  这是同信号延时XY，不是两个独立声道测相。位图与波形合用一块BSRAM。
+- 频谱：CIC3低通/8倍降采样→Hann窗→256点定点FFT→16频段压缩柱高。
+  分析采样率6103.515625Hz，频点间隔23.8418579Hz，约0～3.05kHz、约23次更新/秒。
+  另一块1024×16 RAM同时保存工作区和旋转系数，实虚部分时访问；分析间隔不阻塞演奏。
+- `fft256_init.hex`保存数学旋转系数和零初始化，不含歌曲或预录音频。
+  FFT每级缩放1/2，幅度近似为`abs(real)+abs(imag)`，显示抑制≤8LSB底噪。
+  CIC高频通带衰减未补偿、柱高未校准为声压级，不能用作精密全频段测量。
+
+| 本轮RTL测试 | 结果与范围 |
+| --- | --- |
+| `tb_audio_spectrum` | 通过：静音、单音、双音、落在抽取镜像频率的高频抑制，导出4×256个复数FFT频点 |
+| `tb_lissajous_delay` | 通过：非周期正负阶跃区分当前X/32采样前Y，轨迹位置、零点和下一帧旧点清除 |
+| `tb_display_mode_control` | 通过：四画面循环、长按只执行一次、长按松开不重启、短按松开重启、复位 |
+| `tb_audio_visualizer` | 通过：波形极值/双缓冲、分组峰值/衰减、XY点位、真实FFT柱高/间隔/底噪对应像素 |
+| `tb_hub75e_audio_display` | 通过：外部HUB引脚的波形/XY像素、FFT首窗前空白、四模式整PWM切换、原133周期行扫描、隐藏曲谱继续下落 |
+| `tb_hub75e_rhythm_display` | 通过：原显示扫描/RGB5 PWM、128事件提交和3002组位置运算回归 |
+| `tb_top_audio_visual` | 通过：真实I²S采样取点与连续相位、触摸/红外/吉他幅度、实际C4的FFT频段、物理S2四模式循环、隐藏曲谱不中断，重建三张完整PWM画面 |
+| `tb_top_voice_bend` | 通过：七键持续发声时分别变调、相位/ADSR保持、平滑回正与独立释音，外部I²S/HUB继续运行 |
+| `tb_top_live` | 通过：默认曲谱静音、拒绝旧PCM命令、四/七键独立DDS/ADSR、独立释音、STOP不截断现场音符与最终归零；3820对立体声采样 |
+
+以上9项RTL测试全部通过。独立NumPy FFT检查`tools/check_audio_spectrum.py`通过：全部128个复数旋转系数正确；
+4种输入的全部256个复数频点，实部/虚部最大误差分别为0、4.1111、5.1237、1.0493 LSB，
+均小于9 LSB门限。日志`sim/build/xy_fft_numpy_final.log`；FFT纯数值测试加速采样使能，
+完整顶层仍按真实50MHz、I²S和HUB扫描运行，仅UART/S2长按测试阈值加速。
+
+数值与独立延迟日志分别为`xy_fft_numeric_final.log`、`xy_fft_delay_final.log`，
+其余最终回归日志为`sim/build/xy_fft_final_tests.log`。
+本轮使用以上针对性测试；后续章节保留之前的完整综合演奏和32复音验收记录。
+
+### 交付追溯与板上验收
+
+45个构建输入（包含FFT初始化数据）的SHA256见`sim/build/xy_fft_source_manifest.json`；
+产物与测试记录见`sim/build/xy_fft_delivery_manifest.json`。
+前版波形位流0x00000B62及源码保留在`sim/build/pre_xy_fft_20261016/`。
+
+三种画面的PPM来自顶层测试对外部HUB数据/时钟/LAT及完整32相位PWM的重建；
+PNG和并排预览由`tools/render_audio_visual_preview.py`生成。
+已目视检查最终波形、复合音XY轨迹、频谱柱及下半屏三组音源幅度条。
+本轮未烧录实板，未测量实体面板、APDS光学识别、HC05无线或DAC模拟输出。
+仍需现场核对S2四画面循环、颜色/行序、纯音XY椭圆、复合音轨迹和谱柱随演奏变化。
+可视化未增加音频处理级，但本轮不能证明实物动作到声音≤5ms。
+数字效果器、完整音频录音回传及逐动态声部独立显示仍未实现。
+
+## 2026-10-16：最终混音波形与三组音源幅度反馈（历史构建）
+
+在App v1.2独立变调版本上，增加64×64面板音频可视化。上半屏显示送往I²S的最终混音波形，
+下半屏分别显示触摸、红外/手势合并组、吉他实际采样幅度。S2长按约1秒切换画面，
+短按松开后重启曲谱。隐藏期间曲谱继续推进，切屏不复位音源或I²S。
+操作、显示刻度与范围见[AUDIO_VISUAL.md](AUDIO_VISUAL.md)。手机APK沿用v1.2，无需更新。
+
+### 构建与资源
+
+Gowin V1.9.11.03 Education完成综合、布局布线、时序分析、位流及仿真网表生成，
+结束时间2026-10-16 17:16:19（Asia/Shanghai），日志`sim/build/audio_visual_build2.log`。
+
+| 项目 | 当前结果 |
+| --- | --- |
+| 位流 | `impl/pnr/PCM5102_PAM8403.fs` |
+| UserCode | **0x00000B62** |
+| 位流SHA256 | `B8BAAE265DCDC3803BCCDC8B6FCB3263D317B88010243A42C3827D4B9F19B2E5` |
+| 约束 / Fmax | **50.000 / 51.786MHz** |
+| Setup / Hold违例 | **0 / 0** |
+| 最差Setup Slack | **+0.690ns** |
+| Logic | **20270/23040** |
+| CLS | **10869/11520** |
+| Register | **9051/23280，锁存器0** |
+| BSRAM | **55/56，仅余1块** |
+| DSP | **22/28** |
+| I/O | **41；CST、SDC与修改前SHA256一致** |
+
+相对独立变调版：Logic增加217、CLS增加79、Register增加90、BSRAM增加1，DSP不变。
+128×10bit波形双缓冲使用一块同步RAM，扫描器提前请求下一列，保留133主时钟/行、
+25MHz移位时钟及RGB5 PWM。模式和前后台缓冲均在完整32行×32相位边界切换。
+音频合成、增益、混音和I²S发送模块源码未改动，显示只是并行读取实际采样。
+
+### 验证证据
+
+| 测试 | 结果与范围 |
+| --- | --- |
+| `tb_display_mode_control` | 通过：短按松开、长按阈值、按住不重复、长按松开不重启、再次切回和复位 |
+| `tb_audio_visualizer` | 通过：64列独立极值窗口、首尾采样、正负满幅与17bit触摸求和、启动遮蔽、前台保持/整帧发布、像素颜色、幅度衰减归零 |
+| `tb_hub75e_audio_display` | 通过：外部HUB引脚的交替波形列与同步RAM预取、三组音量条、原133周期扫描、整PWM帧切屏；隐藏曲谱经过750ms后从正确位置恢复 |
+| `tb_hub75e_rhythm_display` | 通过：原显示扫描/RGB5 PWM、128事件连续提交、滚动/停止流水边界、3002组位置运算及触摸反馈 |
+| `tb_top_audio_visual` | 通过：真实50MHz与I²S、物理S2消抖长短按、实际触摸/红外/吉他幅度；波形取样与I²S帧锁存一致、振荡器相位连续、运行中曲谱两次切屏不重启 |
+| `tb_top_voice_bend` | 通过：七路持续发声时UART逐声部变调、相位/包络、平滑回正、释音，外部I²S/HUB连续 |
+| `tb_top_live` | 通过：原生产默认静音指引、拒绝旧PCM命令、四/七路独立触摸、独立释音、STOP不截断现场音符 |
+| `tb_top_integrated` | 通过：38条UART回复、压力ADC、五音色/四方向/双音组/颤音、吉他及七键+手势+吉他同奏、最终静音；11691对立体声采样、90012次面板行锁存 |
+
+以上8项RTL测试全部通过。前5项日志为`sim/build/audio_visual_final_tests.log`，兼容性回归日志为
+`sim/build/audio_visual_compatibility.log`。完整综合演奏输出`decoded_pcm_top_integrated.csv`与
+修改前基线文件逐字节一致，包含相同时间戳和全部11691个单声道采样，外部I²S左右声道一致。
+这个比较覆盖该固定测试输入序列，不代表实物模拟输出的验收。顶层可视化测试仍使用真实音频帧/面板周期，
+仅UART加速至500k、S2长按阈值缩为64帧；默认约1秒的参数由48828帧×20.48µs确定。
+红外由真实输入高低电平与1ms滤波触发；此用例没有模拟APDS光学识别。
+
+`sim/build/audio_visual_panel.ppm`由顶层仿真的外部HUB引脚累计32个PWM相位重建，
+`audio_visual_panel.png`为其最近邻放大预览，已目视检查波形和三组横条；均不是实物照片。
+
+### 追溯与实物边界
+
+43个构建输入的SHA256见`sim/build/audio_visual_source_manifest.json`，交付产物和测试清单见
+`sim/build/audio_visual_delivery_manifest.json`。修改前源码、约束、位流及完整综合演奏基线
+保留在`sim/build/pre_audio_visual_20261016/`；旧位流UserCode为0x0000F954。
+
+本轮没有烧录开发板或进行实体屏幕、传感器、DAC模拟输出测试。还需板上核对长短按、
+实际颜色/行序、触摸/红外/手势/吉他的声音与画面联动，不能据此宣称整条模拟链路满足5ms。
+当前实现最终混音波形和三组采样幅度，尚无FFT频谱、李萨如、每个动态声部的独立可视化、
+数字效果器或完整音频录音回传。
+
+## 2026-10-16：App v1.2 七触摸声部独立变调（历史构建）
+
+七个手机滑杆分别调整OUT1～OUT7正在发声及以后触发的音高，范围±1200音分，
+支持和弦内只移动某个音，保持DDS相位与ADSR；保留FSR全局比例叠加。
+App按最新位置合并拖动、逐条ACK、公平轮流发送；断线保留草稿，清除待发任务。
+作用范围、命令、约100ms发送节拍和平滑时间见 [逐声部滑音](VOICE_PITCH.md)。
+本节以及下面的ADSR、红外/TDM章节均为历史构建记录，最新产物以上方音频可视化章节为准。
+
+### 最终构建与资源
+
+Gowin V1.9.11.03 Education 完成综合、布局布线、时序分析和位流生成，
+结束时间2026-10-16 15:23:41（Asia/Shanghai）。
+
+| 项目 | 当前结果 |
+| --- | --- |
+| 位流 | `impl/pnr/PCM5102_PAM8403.fs` |
+| UserCode | **0x0000F954** |
+| 位流SHA256 | `38D65661387E8F5008BE7C85B5AE11585CD259AFD2F81E896C16EB35CE0EFDFB` |
+| 约束 / Fmax | **50.000 / 55.482MHz** |
+| Setup / Hold违例 | **0 / 0** |
+| 最差Setup Slack | +1.976ns |
+| Logic | 20053/23040（约87.04%，工具向上取整88%） |
+| CLS | **10790/11520** |
+| Register | 8961/23280；锁存器0 |
+| BSRAM | **54/56，仅余2个** |
+| DSP | **22/28** |
+| I/O | 41，CST与修改前逐字节一致，LED等原接线不变 |
+| App | v1.2 / versionCode3；`android_app/dist/FPGA-Score-debug.apk` |
+| APK SHA256 | `8B3C8207FEC3F5ACAAB9052D84CFDCA06DBD95E1009941AA01819C3A515B9CB8` |
+
+与上版比较：CLS从11513降为10790，DSP从23降为22，BSRAM从38增为54。
+节省逻辑以换用块存储器为代价，不能承诺直接叠加大型效果器。
+
+### 架构与时序修正
+
+- 基础MIDI仍限制60～72，相位步进小于2^26。一个26×16乘法器分时完成
+  全局FSR和各声部Q2.14比例缩放，每帧最多43个时钟，1024时钟帧预算充足。
+- 两个小块RAM保存目标/当前比例，比例每帧最多移动16/16384；
+  半倍频到二倍频最大过渡30.72ms，回正到高八度约20.97ms。
+  不改MAP、门控、包络、相位；回正同样平滑，松键保留该键偏移。
+- 七键MIDI映射改用同步块ROM；触摸正弦查表和增益乘法之间增加每时钟流水寄存器，
+  工具将七路正弦表映射为块ROM。相位在音频帧之间稳定，因此逐音频采样值与原实现一致，
+  不增加音频帧延迟；该模式要求两个采样使能之间至少两个主时钟，生产间隔为1024。
+- ADSR毫秒转换用5次串行乘5计算3125倍，再四舍五入，复用加法器。
+  所有0～1000ms值和原实现一致，只增加控制换算时钟，不占音频帧预算。
+- 第一轮新增功能超出逻辑上限（`voice_bend_build.log`）；第二轮放入但Fmax仅46.366MHz、
+  Setup违例4（`voice_bend_build2.log`），**均不作为当前交付**。
+  第三轮修正上述路径并通过50MHz检查，最终日志 `sim/build/voice_bend_build3.log`。
+
+### 验证证据
+
+本轮11种不同RTL测试通过（部分针对最终时序修正重新执行）：
+
+| 测试 | 结果与证据 |
+| --- | --- |
+| `tb_voice_bend` | 全七键独立目标，半倍/二倍界限，1024个连续有界上升步，FSR叠加、非法值保护、平滑回正、帧间静止 |
+| `tb_hc05_bend` | 位级UART，19条回复；键号/比例界限、缺失/多余字段/负号原子拒绝、发声与曲谱忙时仍可调节、回正、ADSR共存 |
+| `tb_top_voice_bend`（最终源码重跑） | 真实50MHz与I2S、UART加速500k；七个触摸声部同时持续发声，分别指定两键约±100音分，其余五键准确不变；七路相位持续累加，ADSR不变，HUB锁存及I2S正常；回正与释音归零 |
+| `tb_poly_pipeline` | 加流水寄存器后4825帧独立数学正弦/增益/混音检查、12315次未改声部对比，逐采样保持原行为 |
+| `tb_midi_block_rom` | 每个键遍历全部256种MIDI地址，与原组合查表精确一致；非法音高输出0 |
+| `tb_fsr_modes` | 原FSR两模式及全部32768种全局音高比例回归通过 |
+| `tb_runtime_adsr`（修正后重跑） | 0～1000ms全部1001值、保持级、精确A/D/S/R、旧音快照/新音生效、提前释音 |
+| `tb_hc05_adsr`（修正后重跑） | 20条UART回复，四参数换算、非法参数拒绝、两音源独立恢复、忙时运行 |
+| `tb_hc05_keymap` | 原57条改键/查询/忙保护/异常行回复回归 |
+| `tb_hc05_download` | 曲谱原子提交/重试/改键验证，事件日志帧、拒绝PCM命令 |
+| `tb_tdm_adsr` | 32声部运行时包络/事件快照/测试模式，最重一帧871时钟，小于1024 |
+
+日志：`sim/build/voice_bend_final_sim.log`、`voice_bend_regression.log`、
+`voice_bend_compatibility.log`、`voice_bend_timing_regression.log`。
+最终顶层外部I2S采样：`sim/build/decoded_pcm_voice_bend.csv`。
+这里用相位步进精确证明目标音高，7.8ms的短I2S捕获不作为七个可分辨FFT峰的证据。
+原TEST32频谱证据见历史章节，本轮没有重新执行整套模拟/频谱验收。
+
+App纯JVM测试：VoiceBend **7229**、AdsrProfile **5032**、SongCodec **30**、SPP **56**项断言通过，
+覆盖全部2401个音分值、比例误差<0.11音分、离线草稿、拖动合并、轮流发送、
+发送中继续编辑、批量快照隔离、异步日志与命令确认。APK已完成编译、签名和Manifest检查。
+日志 `sim/build/voice_bend_android_tests.log`、`sim/build/voice_bend_apk.log`。
+
+### 来源、限制与现场验收
+
+FPGA当前41个构建输入的SHA256在 `sim/build/voice_bend_source_manifest.json`；
+App的9个构建输入在 `voice_bend_app_source_manifest.json`；交付产物/文档在
+`voice_bend_delivery_manifest.json`。修改前源码、约束、App源码和位流保留在
+`sim/build/pre_voice_bend_20261016/`。
+
+本轮没有烧录开发板，也没有安装到实体手机或模拟器操作UI；未实测HC05无线传输、
+DAC模拟输出、动作到声音延迟。蓝牙发送节拍/串行耗时与平滑时间不满足或证明≤5/10ms门槛，
+该门槛仍须本地动作→FPGA→DAC的完整实物测量。
+
+现场装入配套位流和App后，先全部回正，按住C/E/G，只拖对应E的声部：
+观察/听取只有E移动，其余保持；再回正，叠加FSR全局滑音。
+逐声部接口仅用于七触摸键，红外/手势32动态声部和吉他尚无同类寻址接口。
+事件日志不保存BEND/ADSR等设置，不能完整重放含这些控制的演奏。
+
+## 2026-10-16：手机运行时 ADSR 编辑（历史版本）
+
+已为触摸与红外/手势加入两套独立运行时四参数包络。App 支持四滑块、可拖动曲线、
+应用与恢复原包络；参数在新音符触发时锁存，正在响和已经排队的音符保持原设置。
+用法、指令、保持段/提前释音语义见 [运行时ADSR](ADSR_RUNTIME.md)。原LED、传感器引脚未变。
+下面的红外/TDM融合章节保留为历史记录，其资源和位流不代表当前版本。
+
+### 最终构建
+
+Gowin V1.9.11.03 Education 成功完成综合、布局布线、时序分析和位流生成。
+结束时间：2026-10-16 13:59:25（Asia/Shanghai）。
+
+| 项目 | 当前结果 |
+| --- | --- |
+| 位流 | `impl/pnr/PCM5102_PAM8403.fs` |
+| UserCode | `0x00002C7B` |
+| 位流 SHA256 | `F5E86F8B20FBB08838D2278477CCBDDE618D79AEC5A007317FBC85958738847C` |
+| 约束 / Fmax | **50.000 / 50.718MHz** |
+| Setup / Hold 违例 | **0 / 0** |
+| Logic | 22864/23040（约99.24%，工具取整显示100%） |
+| Register | 9124/23280，无锁存器 |
+| CLS | **11513/11520，仅余7个** |
+| BSRAM | 38/56 |
+| DSP | **23/28**，未因运行时包络增加 |
+| APK SHA256 | `8D24181A30F91199603B4B81E4DA63924DB890DE0A85D89C0A1A0E939E0D6299` |
+
+当前位流与源码以 `sim/build/runtime_adsr_source_manifest.json` 的41个工程、构建脚本、
+启用RTL和约束文件为准，包含共用的TTP229输入源码。修改前产物在
+`sim/build/pre_runtime_adsr_20261016/`。构建日志 `sim/build/runtime_adsr_build.log`。
+App已构建并通过签名检查，文件为 `android_app/dist/FPGA-Score-debug.apk`。
+逻辑和布线余量已经很小，不能据此承诺还可直接叠加其他大型模块。
+
+### 实现与帧预算
+
+触摸包络继续用线性余量累加，时长计数收窄到16位，每个声部在门控上升沿锁存配置。
+红外/手势使用Q24相位、逐段计数与0～256增益，每个声部保存独立配置和ADSR状态；
+排队事件同样保存配置快照。提前结束音符会从当前音量进入完整R段。
+音色自身的主体/亮度衰减保留，因此包络预览不等于混音后实际声压曲线。
+
+32路TDM新增的包络乘法放在查表时原来空闲的流水线时隙中，没有增加FSM状态。
+音源仍共享一颗MULT27X36（两个DSP资源）；每帧现在有约161次乘法发起，
+约786万次/秒。32事件压力测试最重帧仍为 **871/1024个50MHz时钟**。
+蓝牙命令缓存改为同步BRAM，解析延迟远低于串口字节间隔；原协议和原子性测试继续通过。
+
+### 完成的验证
+
+| 测试 | 结果 |
+| --- | --- |
+| tb_runtime_adsr | PASS：全部1001个毫秒取值与S比例、恢复、触摸精确A/D/S/R、新旧音符独立、途中松手释音 |
+| tb_tdm_adsr | PASS：A4/D4/S128/R8、排队快照、定时松音、TEST32独立包络、32个声部各用不同S值、同时释音；最重871时钟 |
+| tb_hc05_adsr | PASS：20条真实UART回复，4字段、上下界/零、格式错误、非法更新不改变状态、忙时配置、分别恢复 |
+| tb_top_runtime_adsr | PASS：24.48383ms，1195立体声帧；UART→触摸/IR包络、旧音S50与新音S25共存、复位恢复、外部I²S最终静音和LED扫描 |
+| tb_adsr_env | PASS：原固定参数包络106459个精确线性采样及全部边界 |
+| tb_hc05_download / tb_hc05_keymap | PASS：原曲谱原子提交、旧PCM命令拒绝、57条协议回复、改键/范围/格式/忙保护 |
+| tb_hc05_control_races | PASS：下载/改键竞争与完成响应归属 |
+| tb_tdm_queue / tb_sensor_poly_audio | PASS：FIFO64、替换/饱和/超时诊断、双输入事件及背压 |
+| tb_top_ir_tdm（当前源码复验） | PASS：101.27518ms、4945个PCM采样；八IR与同拍手势、七键、UART TEST32及32路独立频率，原数字首音延迟1.833911ms未变 |
+| Android AdsrProfile | PASS：5032项参数、预览几何、拖动控制点及边界断言 |
+| Android SongCodec / SppLink | PASS：30 / 48项断言，包含ADSR和恢复指令的ACK传输 |
+
+详细日志分别在 `sim/build/runtime_adsr_units.log`、`runtime_adsr_poly32.log`、
+`runtime_adsr_protocol.log`、`runtime_adsr_initial.log`、`runtime_adsr_top.log`、
+`runtime_adsr_android_tests.log`、`runtime_adsr_apk.log`。
+
+最新TEST32外部I²S解码FFT仍得到32个独立对应主峰，单峰幅值510.013～513.972LSB，
+最大绝对采样16289，无削顶。数据/图见 `sim/build/runtime_adsr_test32_spectrum.json` / `.csv` / `.png`，
+检查日志 `sim/build/runtime_adsr_spectrum.log`。
+
+测试与构建完成不代表板卡模拟链路验收。本次未烧录板卡，未测手机触屏实际手感、
+HC-05实机连接、DAC模拟输出或总演奏延迟；基础≤10ms/拓展≤5ms仍需实测。
+
+---
+
+
+## 2026-10-16：八路红外与 32 复音 TDM
+
+这是当前版本；后面的 2026-10-15 章节是历史记录。
+完整引脚、基础/拓展要求状态、评分口径和现场标准见
+[赛题验收表](PIN_FUNCTION_REQUIREMENTS.md)。原 33 个引脚分配全部保留，
+新增 8 个红外输入，无重复球号，ADC J8/K8 保留。
+
+### 构建产物与资源
+
+Gowin V1.9.11.03 Education `run all` 成功完成综合、布局布线、时序分析和位流生成。
+本次成功构建结束于 2026-10-16 12:12:54（Asia/Shanghai）。
+
+| 项目 | 当前结果 |
+| --- | --- |
+| 位流 | `impl/pnr/PCM5102_PAM8403.fs` |
+| UserCode | `0x0000592C` |
+| 位流 SHA256 | `40B0B67D9231B980108D69EAE6E492DECDE944B6FC370A6D2634FE4F6C07FCE9` |
+| 约束 / Actual Fmax | 50.000 / **53.257MHz** |
+| Setup / Hold 违例端点 | **0 / 0** |
+| Logic | 21960/23040（96%） |
+| Register | 7866/23280（34%），无锁存器 |
+| CLS | 11262/11520（98%） |
+| BSRAM | 25/56（45%） |
+| DSP | **23/28（83%）**，上一版为28/28 |
+| ADC | 1/1 |
+| APK | `android_app/dist/FPGA-Score-debug.apk` |
+| APK SHA256 | `EC807D78F24FCA36BB76247948620B532C1F08A02F8D4EC479C677CAE2D7728A` |
+
+构建日志 `sim/build/ir_tdm_build.log`，PNR 报告 `impl/pnr/PCM5102_PAM8403.rpt.txt`，
+时序报告正文 `impl/pnr/PCM5102_PAM8403_tr_content.html`，
+43个工程/源码/约束文件的校验清单 `sim/build/ir_tdm_source_manifest.json`。
+修改前位流及关键源码备份在 `sim/build/pre_ir_tdm_merge/`。
+本次开发期间曾出现逻辑超限和专用 I²C 管脚冲突，均已修正；只有上述成功构建作为交付。
+
+### DSP 为什么仍然不是整机两个
+
+`u_gesture/u_audio/u_synth` 的 32 个声部共享唯一 `mul_a*mul_b` 运算路径，
+综合层次报表显示一颗 `MULT27X36`，对应两个 DSP 资源。
+这次采用的是红外/手势音源的 TDM 改造；保留的七路触摸 DDS/ADSR 仍为并行架构，
+另有 FSR 映射/缩放、APDS 方向强度计算、命令解析及屏幕位置换算等乘法。
+整机资源由全部模块和综合映射共同决定：不能把音源的理论乘法吞吐预算直接当作整机占用。
+具体层次证据为 `impl/gwsynthesis/PCM5102_PAM8403_syn_rsc.xml`，
+全局原语为 MULTALU27X18×13、MULT27X36×3、MULT12X12×4、MULTADDALU12X12×2，
+最终物理资源按 PNR 报告的23/28计，不把不同粒度原语简单相加。
+CLS 仅剩258个，当前限制仍是逻辑/布线余量，继续加效果器前需要继续优化。
+
+这里实际主时钟是50MHz。当前引擎每声部逐帧发起音高、主体包络、亮度包络、
+总增益四次乘法，另有一次全局LFO乘法：129×48828.125约为630万次/秒。
+乘法发起量占50MHz周期约12.6%，但上下文访存、查表、流水线等待与事件分配也消耗时钟；
+队列测试最重帧871周期，占1024周期预算的85.1%。不能只按乘法次数推断整个引擎只忙5%。
+
+### 验证范围
+
+- 红外：两级同步、双边1ms滤波、初次通光准备、保持遮挡不重发、同时8路和256种输入子集。
+- TDM：FIFO64、每帧最多32次分配、最老声部替换、帧快照、正负饱和、溢出/超时诊断。
+- 生产顶层：真实50MHz/1ms红外滤波、八路IR与同拍手势、触摸并发、UART TEST32、外部I²S解码和屏幕活动。
+- 蓝牙/FSR：命令范围与格式、音符曲谱/静音指引、压力模式；安卓 SongCodec30和SppLink40项断言。
+
+已完成的新回归：
+
+| 测试 | 结果 |
+| --- | --- |
+| tb_ir_strings | PASS：全部256种同时触发子集、滤波/重新准备/复位 |
+| tb_tdm_queue | PASS：64条队列、32声部、饱和和超时诊断，最坏871/1024时钟 |
+| tb_sensor_poly_audio | PASS：APDS未就绪时红外独立发声、同拍事件、音色锁存、背压/缓存满/溢出/复位 |
+| tb_top_ir_tdm | PASS：101.27518ms仿真、4945个PCM采样，八路IR+同拍手势、七键并发、真实UART TEST32与32个独立频率上下文 |
+| tb_hc05_control_races | PASS：下载验证期间锁定映射和完成响应竞争 |
+| tb_hc05_keymap | PASS：57条回复、全部键位/音高、错误格式/范围、忙保护 |
+| tb_fsr_modes | PASS：1024个ADC码、32768种比例×七键、模式/平滑/复位 |
+| tb_top_integrated | PASS：239.43324ms，38条UART回复、11691立体声帧、90012次面板行锁存；五音色/颤音、FSR、七键+手势+吉他并发无削顶、最终静音 |
+| tb_top_live | PASS：78.24125ms，3820立体声帧；四/七键独立DDS/ADSR及释音、STOP保留按住的音符、曲谱指引无自动音频 |
+| tb_top_idle，PNR网表 | PASS：生产参数2.8ms，136立体声帧；新IR输入明确拉高，S1/S2不触发自动音频；无SDF |
+| Android core | PASS：SongCodec30项、SppLink40项；APK构建和签名检查成功 |
+
+`tb_top_ir_tdm` 的数字边沿到首个外部I²S非零采样为 **1,833,911ns**，
+场景为八路红外与同拍手势，未包含接收器本体/光学动作和DAC延迟。
+从其I²S外部引脚解码结果末尾4096个稳定采样做FFT：**32个对应独立主峰**，
+每峰幅值510.013～513.972LSB，混音最大绝对值16289，未削顶。
+标称Fs=48828.125Hz，32路吞吐量1562500振荡器采样/秒。
+PNR静音仿真使用厂商原语模型，模型有RAM位宽告警；外部I²S和静音断言通过。
+早先一轮未显式连接IR的重复网表仿真已停止，不计通过；上表对应修正后完整完成的测试。
+
+图为 [TEST32数字频谱](sim/build/test32_spectrum.png)，
+原始采样 `sim/build/decoded_pcm_top_ir_tdm.csv`，逐频率表和数据为
+`sim/build/test32_spectrum.csv` / `.json`，检查脚本 `tools/check_test32_spectrum.py`。
+这份频谱是数字仿真结果，**不是板卡DAC模拟输出的32谱峰验收证据**。
+
+本次没有烧录板卡、模拟音频采集、
+手机蓝牙实机连接或环境光/手势实测。数字I²S首个非零采样延迟不含传感器和DAC，
+亦不等于可闻响度阈值下的演奏延迟；基础≤10ms和拓展≤5ms均需现场验证。
+
+---
+
+
 最近更新：2026-10-15（Asia/Shanghai）。
 
 ## 2026-10-15 18:18：触摸、压力、手势、吉他、蓝牙与 64×64 屏幕融合
 
-本节为当前融合版本。继续使用本目录 `PCM5102_PAM8403.gprj` 和 `top`，
+本节为2026-10-15历史融合版本。继续使用本目录 `PCM5102_PAM8403.gprj` 和 `top`，
 保留七键独立 DDS/ADSR、FSR 音量/音高、HC-05 改键/曲谱/事件日志、安卓 App 和
 64×64 HUB75E 七轨指引；增加 APDS-9960 四方向手势、五种手势音色、颤音、
 高低两组手势音符及 Karplus–Strong 单弦吉他。独立红外对管按用户要求留待后续。

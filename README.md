@@ -10,19 +10,22 @@
 | `ttp229_gpio/` | TTP229 输入与模式选择工程 |
 | `ttp229_serial16/` | 新增固定 16 键串口最小验证工程，接线见 [说明](ttp229_serial16/README.md) |
 | `hc05_uart_echo/` | HC-05 与安卓手机的独立 UART 回显测试，接线见 [说明](hc05_uart_echo/README.md) |
-| `pcm5102_pam8403/` | 当前音频主工程：七键弹奏、K8 压力模式、HC-05 手机改键、四声部小星星 |
+| `pcm5102_pam8403/` | 当前主工程：七键/压力、八路红外、32复音手势音源、蓝牙App、64×64指引 |
 | `pcm5102_dds_step1/` | 第一步历史验证快照，只有单声部变调；当前四声部开发不使用此工程 |
 | `1-2-4-按键控制LED程序/` | STM32 按键控制 LED 参考工程 |
 
 使用显示与触摸双模式功能，请打开 `pmod_hub75e/HUB75E.gprj`。接线和模式说明见 [MODE_SELECTION.md](MODE_SELECTION.md)，其他工程参见各目录的 README 和 VERIFICATION 文档。
 
+完整引脚、功能、赛题基础/拓展要求状态及现场评分验证见
+[主工程验收表](pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)。
+
 ## 当前音频入口
 
 - Gowin 工程：[pcm5102_pam8403/PCM5102_PAM8403.gprj](pcm5102_pam8403/PCM5102_PAM8403.gprj)。
-- 顶层源码：`pcm5102_pam8403/src/top.v`，七个独立触摸声部、K8 压力模式与四声部《小星星》播放。
+- 顶层源码：`pcm5102_pam8403/src/top.v`，七个独立触摸声部、K8 压力模式、八路红外、32复音TDM、物理弦吉他和64×64曲谱指引。
 - 触摸输入共用 `pmod_hub75e/src/ttp229_gpio_input.v`；主工程文件列表和仿真工具直接引用同一份代码。
-- 下载位流：`pcm5102_pam8403/impl/pnr/PCM5102_PAM8403.fs`；当前 HC-05 改键版结果见音频工程 `VERIFICATION.md`。
-- 操作和接线：[当前音频说明](pcm5102_pam8403/README.md)：K1～K7 默认弹奏 C4～B4，K8 切换压力模式，S1 播放／停止，S2 重播。OUT1 接 K4/J3 第 5 脚。
+- 下载位流：`pcm5102_pam8403/impl/pnr/PCM5102_PAM8403.fs`；当前红外/TDM融合版结果见音频工程 `VERIFICATION.md`。
+- 操作和接线：[当前音频说明](pcm5102_pam8403/README.md)：K1～K7 默认弹奏 C4～B4，K8 切换压力模式，S1 开始/停止曲谱指引；S2短按在XY页选参考曲线/混音，在其他页重启曲谱，长按约1秒轮换[曲谱、波形、李萨如和实时FFT频谱](pcm5102_pam8403/AUDIO_VISUAL.md)。默认不自动播放曲谱声音，OUT1 接 K4/J3 第 5 脚。
 - 手机改键：[HC-05 命令、接线与新增文件清单](pcm5102_pam8403/HC05_KEYMAP.md)。下载同一音频工程，发送 `MAP,1,67` 并追加换行即可将第 1 键设为 G4。
 - 直连模式 SCL 不能悬空；用户已实测 SCL 接 GND 后消除误响，保持此接法时不连接 F6，SDO 不接。
 - `0x00002064` 的固定和弦操作保留为 [第三步历史说明](pcm5102_pam8403/STEP3.md)。

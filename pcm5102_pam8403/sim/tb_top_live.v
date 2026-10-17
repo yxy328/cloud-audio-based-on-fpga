@@ -16,7 +16,7 @@ module tb_top_live;
         .TOUCH_STARTUP_US(100),.TOUCH_DEBOUNCE_MS(1),.TOUCH_MODE_DEBOUNCE_MS(1),
         .ADSR_ATTACK_SAMPLES(4),.ADSR_DECAY_SAMPLES(4),
         .ADSR_RELEASE_SAMPLES(32),.TOUCH_ADSR_RELEASE_SAMPLES(32)) dut(
-        .clk(clk),.key_s1(s1),.key_s2(s2),.touch_out(pads),
+        .clk(clk),.key_s1(s1),.key_s2(s2),.ir_beam(8'hff),.touch_out(pads),
         .hc05_rx(rx),.hc05_tx(tx),.i2s_bck(bck),.i2s_lrck(lrck),
         .i2s_din(din),.touch_scl(scl),
         .hub_R1(r1),.hub_G1(g1),.hub_B1(b1),.hub_R2(r2),.hub_G2(g2),.hub_B2(b2),

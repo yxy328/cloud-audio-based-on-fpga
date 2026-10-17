@@ -13,7 +13,7 @@ module tb_top_touch;
         .TOUCH_ADSR_RELEASE_SAMPLES(32), .ADSR_ATTACK_SAMPLES(4),
         .ADSR_DECAY_SAMPLES(4), .ADSR_RELEASE_SAMPLES(32)
     ) dut (
-        .clk(clk), .key_s1(s1), .key_s2(s2), .touch_out(pads), 
+        .clk(clk), .key_s1(s1), .key_s2(s2), .ir_beam(8'hff),.touch_out(pads), 
         .hc05_rx(1'b1),.hc05_tx(),.i2s_bck(bck), .i2s_lrck(lrck), .i2s_din(din)
     );
     i2s_pcm_monitor #(.PCM_MIN(-24576), .PCM_MAX(24564)) monitor (

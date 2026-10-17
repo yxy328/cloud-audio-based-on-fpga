@@ -5,7 +5,7 @@ module tb_top_idle;
     always #10 clk=~clk;
     reg s1=0,s2=0;
     wire bck,lrck,din,scl;
-    top dut(.clk(clk),.key_s1(s1),.key_s2(s2),.touch_out(8'd0),
+    top dut(.clk(clk),.key_s1(s1),.key_s2(s2),.touch_out(8'd0),.ir_beam(8'hff),
         .hc05_rx(1'b1),.hc05_tx(),.i2s_bck(bck),.i2s_lrck(lrck),
         .i2s_din(din),.touch_scl(scl));
     i2s_pcm_monitor monitor(.bck(bck),.lrck(lrck),.din(din));

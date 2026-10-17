@@ -52,6 +52,25 @@ IO_PORT "scl" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8 BANK_VCCIO=3.3;
 IO_PORT "sda" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8 BANK_VCCIO=3.3;
 
 // Existing 64x64 HUB75E panel connector; no overlap with I2S or touch pads.
+// IR break beams: receiver light=0, blocked=1; 3.3V digital outputs only.
+// All eight signals use spare J3 pins; HUB75E wiring stays unchanged.
+IO_LOC "ir_beam[0]" L7; // J3 pin 30, C4.
+IO_LOC "ir_beam[1]" K7; // J3 pin 28, D4.
+IO_LOC "ir_beam[2]" A1; // J3 pin 17, E4.
+IO_LOC "ir_beam[3]" D1; // J3 pin 19, F4.
+IO_LOC "ir_beam[4]" E3; // J3 pin 20, G4.
+IO_LOC "ir_beam[5]" J1; // J3 pin 22, A4.
+IO_LOC "ir_beam[6]" H2; // J3 pin 25, B4.
+IO_LOC "ir_beam[7]" H1; // J3 pin 26, C5.
+IO_PORT "ir_beam[0]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF;
+IO_PORT "ir_beam[1]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF;
+IO_PORT "ir_beam[2]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF;
+IO_PORT "ir_beam[3]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF;
+IO_PORT "ir_beam[4]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF;
+IO_PORT "ir_beam[5]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF;
+IO_PORT "ir_beam[6]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF;
+IO_PORT "ir_beam[7]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF;
+
 IO_LOC "hub_R1" G10;
 IO_LOC "hub_G1" G11;
 IO_LOC "hub_B1" D10;

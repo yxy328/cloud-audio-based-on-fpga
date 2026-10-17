@@ -3,7 +3,7 @@
 module tb_fsr_pipeline;
     reg clk=0;always #10 clk=~clk;
     wire bck,lrck,din;
-    top dut(.clk(clk),.key_s1(1'b0),.key_s2(1'b0),.touch_out(8'h00),
+    top dut(.clk(clk),.key_s1(1'b0),.key_s2(1'b0),.ir_beam(8'hff),.touch_out(8'h00),
         .hc05_rx(1'b1),.hc05_tx(),.i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din),.touch_scl());
     i2s_pcm_monitor monitor(.bck(bck),.lrck(lrck),.din(din));
     integer previous_gain=65535,delta,k;

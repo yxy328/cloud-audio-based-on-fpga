@@ -15,7 +15,7 @@ module tb_top_hc05_map;
     top #(.ENABLE_DEMO_SCORE(1),.HC05_BAUD(500000),.TOUCH_STARTUP_US(3000),.KEY_CONFIRM_CYCLES(1000),
         .TOUCH_MODE_DEBOUNCE_MS(2),.ADSR_ATTACK_SAMPLES(4),.ADSR_DECAY_SAMPLES(4),
         .ADSR_RELEASE_SAMPLES(32),.TOUCH_ADSR_RELEASE_SAMPLES(32)) dut(
-        .clk(clk),.key_s1(s1),.key_s2(s2),.touch_out(pads),.hc05_rx(rx),.hc05_tx(tx),
+        .clk(clk),.key_s1(s1),.key_s2(s2),.ir_beam(8'hff),.touch_out(pads),.hc05_rx(rx),.hc05_tx(tx),
         .i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din),.touch_scl());
     i2s_pcm_monitor monitor(.bck(bck),.lrck(lrck),.din(din));
     // UART and pressure changes must never reset or skip the DDS accumulator.

@@ -8,7 +8,8 @@
 // This accepts all 128 score events even at 1ms spacing without consuming
 // 128 copies of a timer/position accumulator or blocking the sequencer.
 module hub75e_rhythm_display #(
-    parameter integer LEAD_MS = 1500
+    parameter integer LEAD_MS = 1500,
+    parameter integer ENABLE_AUDIO_VISUAL = 0
 ) (
     input wire clk,
     input wire resetn,
@@ -19,6 +20,10 @@ module hub75e_rhythm_display #(
     input wire note_spawn,
     input wire [6:0] spawn_keys,
     input wire [15:0] spawn_delay_ms,
+    input wire [1:0] visual_mode,
+    input wire [1:0] reference_ratio,reference_phase,
+    input wire sample_ce,
+    input wire signed [15:0] mixed_sample, touch0, touch1, sensor_sample, guitar_sample,
     output wire note_ready,
     output reg overflow,
     output wire hub_R1,
@@ -51,9 +56,11 @@ module hub75e_rhythm_display #(
 
     reg [6:0] note_rows [0:63];
     reg [PHASE_BITS-1:0] motion_phase;
-    wire scroll = ms_tick && motion_phase+TRAVEL >= LEAD_MS;
+    wire [31:0] advanced_phase = motion_phase+TRAVEL;
+    wire [31:0] wrapped_phase = advanced_phase-LEAD_MS;
+    wire scroll = ms_tick && advanced_phase >= LEAD_MS;
     wire [PHASE_BITS-1:0] next_phase = !ms_tick ? motion_phase :
-        (scroll ? motion_phase+TRAVEL-LEAD_MS : motion_phase+TRAVEL);
+        (scroll ? wrapped_phase[PHASE_BITS-1:0] : advanced_phase[PHASE_BITS-1:0]);
     // Counting future fractional steps places a late event on the correct
     // row for the current scroll phase. Its head reaches HIT_Y after its
     // advertised delay, to the screen's approximately 29ms resolution.
@@ -61,8 +68,10 @@ module hub75e_rhythm_display #(
     // steps as 3+3 bits rather than placing a divider on a 50MHz path.
     // Every pipeline stage accepts another note each clock, with no FIFO
     // limit or backpressure even for a burst of all 128 score events.
-    wire [PHASE_BITS-1:0] bounded_delay = spawn_delay_ms > LEAD_MS ? LEAD_MS : spawn_delay_ms;
-    wire [DISTANCE_BITS-1:0] distance_to_hit = next_phase+bounded_delay*TRAVEL;
+    wire [31:0] bounded_delay_full = spawn_delay_ms > LEAD_MS ? LEAD_MS : {16'd0,spawn_delay_ms};
+    wire [PHASE_BITS-1:0] bounded_delay = bounded_delay_full[PHASE_BITS-1:0];
+    wire [31:0] distance_full = next_phase+bounded_delay*TRAVEL;
+    wire [DISTANCE_BITS-1:0] distance_to_hit = distance_full[DISTANCE_BITS-1:0];
     reg [DISTANCE_BITS-1:0] distance_s0;
     reg [REMAINDER_BITS-1:0] remainder_s1;
     reg [2:0] quotient_hi_s1;
@@ -110,7 +119,7 @@ module hub75e_rhythm_display #(
         remainder_s1<=upper_remainder[REMAINDER_BITS-1:0];
         quotient_hi_s1<=upper_quotient;
         keys_s1<=keys_s0;
-        insert_y_s2<=HIT_Y-{quotient_hi_s1,lower_quotient};
+        insert_y_s2<=HIT_Y[6:0]-{1'b0,quotient_hi_s1,lower_quotient};
         keys_s2<=keys_s1;
     end
 
@@ -176,6 +185,30 @@ module hub75e_rhythm_display #(
     reg [14:0] upper_pixel, lower_pixel;
     wire [6:0] upper_y = {2'b00,scan_row};
     wire [6:0] lower_y = {2'b00,scan_row}+7'd32;
+    wire display_boundary = state == S_LATCH_LOW && scan_row == 31 && pwm_phase == 31;
+    reg [1:0] visual_active;
+    wire [14:0] visual_upper, visual_lower;
+    // RAM address prefetch: row prep requests x=0, each shift requests x+1.
+    // Its result is available for the following S_PIXEL_PREP clock edge.
+    wire [5:0] visual_read_x = state == S_ROW_PREP ? 6'd0 :
+        (state == S_SHIFT ? column+6'd1 : column);
+    generate if (ENABLE_AUDIO_VISUAL) begin: audio_visual
+        audio_visualizer u_visualizer (
+            .clk(clk),.resetn(resetn),.sample_ce(sample_ce),.display_boundary(display_boundary),
+            .service_ce(state==S_BLANK),.visual_mode(visual_active),
+            .reference_ratio(reference_ratio),.reference_phase(reference_phase),
+            .mixed_sample(mixed_sample),.touch0(touch0),.touch1(touch1),
+            .sensor_sample(sensor_sample),.guitar_sample(guitar_sample),
+            .pixel_x(visual_read_x),.pixel_row(scan_row),.upper_rgb(visual_upper),.lower_rgb(visual_lower)
+        );
+    end else begin: guide_only
+        assign visual_upper = 0;
+        assign visual_lower = 0;
+    end endgenerate
+    always @(posedge clk) begin
+        if (!resetn) visual_active <= 0;
+        else if (display_boundary) visual_active <= ENABLE_AUDIO_VISUAL ? visual_mode : 2'd0;
+    end
 
     // Capture the row masks once per row scan. Only heads through HIT_Y
     // are drawn; their three-pixel glyph can extend through HIT_Y+2.
@@ -259,8 +292,8 @@ module hub75e_rhythm_display #(
                 end
                 S_PIXEL_PREP: begin
                     hub_CK <= 0;
-                    upper_pixel <= pixel_rgb(column, upper_y, upper_notes);
-                    lower_pixel <= pixel_rgb(column, lower_y, lower_notes);
+                    upper_pixel <= visual_active ? visual_upper : pixel_rgb(column, upper_y, upper_notes);
+                    lower_pixel <= visual_active ? visual_lower : pixel_rgb(column, lower_y, lower_notes);
                     state <= S_SHIFT;
                 end
                 S_SHIFT: begin

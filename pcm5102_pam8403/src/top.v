@@ -1,7 +1,8 @@
 `timescale 1ns/1ps
 // Seven note keys + pressure + score/panel + APDS gestures + remote guitar.
 // Each note key has its own DDS/ADSR; FSR402 controls volume OR pitch.
-// S1 plays/stops and S2 restarts the song, independently of pressure.
+// S1 plays/stops; short S2 restarts outside XY / selects XY preset inside;
+// long S2 switches panel mode. XY reference settings are display-only.
 // E2=50MHz, H11=S1, H10=S2; K2/K1/L1=PCM5102 BCK/LRCK/DIN.
 module top #(
     // Live touch, gesture and remote pluck events generate audio in FPGA.
@@ -34,12 +35,16 @@ module top #(
     parameter [15:0] FSR_PITCH_SLEW_STEP = 16'd64,
     parameter integer HC05_BAUD = 9600,
     parameter integer GUIDE_LEAD_MS = 1500,
-    parameter GUITAR_STRING_LENGTH = 110
+    parameter GUITAR_STRING_LENGTH = 110,
+    parameter IR_FILTER_CYCLES = 50000,
+    parameter SENSOR_VOLUME_SHIFT = VOLUME_SHIFT+2,
+    parameter integer DISPLAY_HOLD_FRAMES = 48828
 ) (
     input wire clk,
     input wire key_s1,
     input wire key_s2,
     input wire [7:0] touch_out,
+    input wire [7:0] ir_beam,
     input wire hc05_rx,
     output wire hc05_tx,
     output wire i2s_bck,
@@ -65,6 +70,13 @@ module top #(
 
     wire s1_pressed;
     wire s2_pressed;
+    wire s2_level, s2_restart;
+    wire [1:0] visual_mode;
+    wire xy_write;
+    wire [1:0] xy_ratio,xy_phase,reference_ratio,reference_phase;
+    // Keep the historical audition-mode press timing; production short S2
+    // waits for release so a long display-switch hold never restarts a score.
+    wire s2_action = ENABLE_DEMO_SCORE ? s2_pressed : s2_restart;
     wire [3:0] voice_gates;
     wire [127:0] phase_increments;
     wire frame_ce;
@@ -82,7 +94,10 @@ module top #(
     assign touch_keys = {mode_keys[7],note_keys[6:0]};
     assign touch_keys_raw = {mode_keys_raw[7],note_keys_raw[6:0]};
     assign touch_ready = note_ready && mode_ready;
-    wire [7:0] touch_note_gates = {1'b0,touch_keys[6:0]};
+    // Downloaded notes drive the same independent DDS/ADSR lanes as the pads
+    // only after an explicit AUDITION. No audio samples are stored in a score.
+    wire [6:0] audition_keys;
+    wire [7:0] touch_note_gates = {1'b0,(touch_keys[6:0] | audition_keys)};
     wire fsr_pitch_mode;
     wire [15:0] fsr_target_pitch_ratio, fsr_pitch_ratio;
     wire [255:0] touch_phase_increments;
@@ -101,6 +116,7 @@ module top #(
     wire [55:0] touch_note_map;
     wire [223:0] touch_base_increments;
     wire builtin_playing, downloaded_valid, downloaded_playing, downloaded_gate;
+    wire downloaded_audition;
     wire [3:0] builtin_gates;
     wire [127:0] builtin_increments;
     wire [31:0] downloaded_increment;
@@ -111,6 +127,16 @@ module top #(
     wire recording_busy, builtin_play, builtin_stop;
     wire guitar_pluck, gesture_vibrato, gesture_bank;
     wire [2:0] gesture_timbre;
+    wire [63:0] touch_adsr;
+    wire [129:0] sensor_adsr;
+    wire bend_write,bend_reset;
+    wire [2:0] bend_index;
+    wire [15:0] bend_ratio;
+    wire ir_note_valid, sensor_test32, sensor_overrun;
+    wire [2:0] ir_note_index;
+    wire [7:0] ir_blocked, ir_armed;
+    wire [31:0] sensor_voice_active;
+    wire [5:0] sensor_voice_count;
     wire signed [15:0] guitar_sample, guitar_scaled_sample, gesture_sample;
     wire signed [15:0] extra_sample;
     wire gesture_ready, gesture_valid, dir_evaluated;
@@ -118,33 +144,46 @@ module top #(
     assign song_playing=builtin_playing || downloaded_playing;
     assign voice_gates=ENABLE_DEMO_SCORE ? (downloaded_valid ? {3'd0,downloaded_gate} : builtin_gates) : 4'd0;
     assign phase_increments=downloaded_valid ? {96'd0,downloaded_increment} : builtin_increments;
+    assign audition_keys=(downloaded_audition && downloaded_gate) ? song_guide_keys : 7'd0;
     // Include synchronized raw pads, debounced gates, and release tails.
-    hc05_keymap #(.BAUD(HC05_BAUD),.ENABLE_DEMO_SCORE(ENABLE_DEMO_SCORE),
+    hc05_keymap #(.DEFAULT_A(ADSR_ATTACK_SAMPLES),.DEFAULT_D(ADSR_DECAY_SAMPLES),
+        .DEFAULT_S(ADSR_SUSTAIN_LEVEL),.DEFAULT_R(TOUCH_ADSR_RELEASE_SAMPLES),.BAUD(HC05_BAUD),.ENABLE_DEMO_SCORE(ENABLE_DEMO_SCORE),
         .ENABLE_LOOKAHEAD(!ENABLE_DEMO_SCORE),.LOOKAHEAD_MS(GUIDE_LEAD_MS)) u_keymap (
         .clk(clk),.resetn(resetn),.rx(hc05_rx),.tx(hc05_tx),
         .keys_ready(touch_ready),
-        .song_busy(song_playing || (|song_active) || s1_pressed || s2_pressed),
+        .song_busy(song_playing || (|song_active) || s1_pressed || s2_action),
         .notes_busy((|touch_keys_raw[6:0]) || (|touch_keys[6:0]) || (|touch_active[6:0])),
         .recording(1'b0),.note_map(touch_note_map),
         .touch_keys(touch_keys[6:0]),.pressure_mode(fsr_pitch_mode),
         .volume_gain(fsr_gain),.pitch_ratio(fsr_pitch_ratio),
-        .toggle_play(s1_pressed),.restart(s2_pressed),.rec_busy(recording_busy),
+        .toggle_play(s1_pressed),.restart(s2_action),.rec_busy(recording_busy),
         .downloaded_valid(downloaded_valid),.downloaded_playing(downloaded_playing),
+        .downloaded_audition(downloaded_audition),
         .downloaded_gate(downloaded_gate),.downloaded_increment(downloaded_increment),
         .guide_keys(song_guide_keys),.guide_ms_tick(guide_ms_tick),.guide_reset(guide_reset),
         .note_spawn(guide_note_spawn),.spawn_keys(guide_spawn_keys),
         .spawn_delay_ms(guide_spawn_delay),.note_ready(guide_note_ready),
         .builtin_play(builtin_play),.builtin_stop(builtin_stop),
         .guitar_pluck(guitar_pluck),.gesture_timbre(gesture_timbre),
-        .gesture_vibrato(gesture_vibrato),.gesture_bank(gesture_bank)
+        .gesture_vibrato(gesture_vibrato),.gesture_bank(gesture_bank),
+        .sensor_test32(sensor_test32),.touch_adsr(touch_adsr),.sensor_adsr(sensor_adsr),
+        .bend_write(bend_write),.bend_reset(bend_reset),.bend_index(bend_index),.bend_ratio(bend_ratio),
+        .xy_write(xy_write),.xy_ratio(xy_ratio),.xy_phase(xy_phase)
     );
     // Sensor, score/panel and all voices share one 50MHz clock and frame CE.
     // S1/S2 retain their score controls; Bluetooth controls the new voices.
-    gesture_top #(.AUDIO_VOLUME_SHIFT(VOLUME_SHIFT),.EXTERNAL_CONTROL(1)) u_gesture (
+    ir_strings #(.FILTER_CYCLES(IR_FILTER_CYCLES)) u_ir (
+        .clk(clk),.rst_n(resetn),.beam_in(ir_beam),
+        .blocked(ir_blocked),.armed(ir_armed),
+        .note_valid(ir_note_valid),.note_index(ir_note_index)
+    );
+    gesture_top #(.AUDIO_VOLUME_SHIFT(SENSOR_VOLUME_SHIFT),.EXTERNAL_CONTROL(1)) u_gesture (
         .clk(clk),.resetn(resetn),.frame_ce(frame_ce),
         .key_s1(1'b0),.key_s2(1'b0),.scl(scl),.sda(sda),
         .control_timbre(gesture_timbre),.control_vibrato(gesture_vibrato),
         .control_bank(gesture_bank),.audio_sample(gesture_sample),
+        .ir_note_valid(ir_note_valid),.ir_note_index(ir_note_index),.test32(sensor_test32),.adsr_config(sensor_adsr),
+        .voice_active(sensor_voice_active),.voice_count(sensor_voice_count),.overrun(sensor_overrun),
         .init_done(gesture_ready),.gesture_valid(gesture_valid),
         .dir_evaluated(dir_evaluated),.start_dir(start_dir),.end_dir(end_dir)
     );
@@ -160,18 +199,22 @@ module top #(
     );
     // Score timing and panel scan use clock enables on the same 50MHz clock.
     // Dropping playing on guide_reset clears pending pixels without resetting scan.
-    hub75e_rhythm_display #(.LEAD_MS(GUIDE_LEAD_MS)) u_guide_display (
+    hub75e_rhythm_display #(.LEAD_MS(GUIDE_LEAD_MS),.ENABLE_AUDIO_VISUAL(1)) u_guide_display (
         .clk(clk),.resetn(resetn),.touch_keys(touch_keys[6:0]),
         .guide_keys(song_guide_keys),.playing(downloaded_playing && !guide_reset),
         .ms_tick(guide_ms_tick),.note_spawn(guide_note_spawn),
         .spawn_keys(guide_spawn_keys),.spawn_delay_ms(guide_spawn_delay),
+        .visual_mode(visual_mode),.reference_ratio(reference_ratio),.reference_phase(reference_phase),
+        .sample_ce(frame_ce),.mixed_sample(audio_sample),
+        .touch0(touch_mix0),.touch1(touch_mix1),
+        .sensor_sample(gesture_sample),.guitar_sample(guitar_scaled_sample),
         .note_ready(guide_note_ready),.overflow(),
         .hub_R1(hub_R1),.hub_G1(hub_G1),.hub_B1(hub_B1),
         .hub_R2(hub_R2),.hub_G2(hub_G2),.hub_B2(hub_B2),
         .hub_A(hub_A),.hub_B(hub_B),.hub_C(hub_C),.hub_D(hub_D),.hub_E(hub_E),
         .hub_CK(hub_CK),.hub_ST(hub_ST),.hub_OE(hub_OE)
     );
-    midi_note_lut u_note_lut (
+    midi_note_lut #(.BLOCK_ROM(1)) u_note_lut (
         .clk(clk),.resetn(resetn),.note_map(touch_note_map),
         .phase_increments(touch_base_increments)
     );
@@ -233,7 +276,13 @@ module top #(
     );
     button_filter #(.CONFIRM_CYCLES(KEY_CONFIRM_CYCLES)) u_s2 (
         .clk(clk), .resetn(resetn), .button(key_s2),
-        .level(), .pressed(s2_pressed)
+        .level(s2_level), .pressed(s2_pressed)
+    );
+    display_mode_control #(.HOLD_FRAMES(DISPLAY_HOLD_FRAMES)) u_display_mode (
+        .clk(clk),.resetn(resetn),.frame_ce(frame_ce),.button_level(s2_level),
+        .restart(s2_restart),.visual_mode(visual_mode),
+        .xy_write(xy_write),.xy_ratio(xy_ratio),.xy_phase(xy_phase),
+        .reference_ratio(reference_ratio),.reference_phase(reference_phase)
     );
     twinkle_sequencer #(
         .BEAT_SAMPLES(SONG_BEAT_SAMPLES), .GAP_SAMPLES(SONG_GAP_SAMPLES),
@@ -241,7 +290,7 @@ module top #(
     ) u_control (
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce),
         .toggle_play(ENABLE_DEMO_SCORE && ((s1_pressed && !downloaded_valid) || (builtin_stop && builtin_playing))),
-        .restart(ENABLE_DEMO_SCORE && ((s2_pressed && !downloaded_valid) || builtin_play)),
+        .restart(ENABLE_DEMO_SCORE && ((s2_action && !downloaded_valid) || builtin_play)),
         .playing(builtin_playing), .note_index(), .gates(builtin_gates), .phase_increments(builtin_increments)
     );
     clk_div u_clk_div (
@@ -257,20 +306,23 @@ module top #(
         .RELEASE_SAMPLES(ADSR_RELEASE_SAMPLES)
     ) u_synth (
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce),
-        .gates(voice_gates), .phase_increments(phase_increments), .sample(song_sample),
+        .gates(voice_gates),.adsr_config(64'd0), .phase_increments(phase_increments), .sample(song_sample),
         .voice_samples(), .envelope_gains(), .envelope_states(), .active(song_active), .clipped()
     );
     // OUT1..7 default to C4 D4 E4 F4 G4 A4 B4; HC-05 can remap them.
     // Fs=48828.125Hz. Pressure pitch changes preserve each DDS phase.
-    fsr_pitch_scaler u_fsr_pitch_scaler (
+    fsr_pitch_scaler #(.PER_VOICE_BEND(1)) u_fsr_pitch_scaler (
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce), .pitch_ratio(fsr_pitch_ratio),
         .note_increments(touch_base_increments),
+        .bend_write(bend_write),.bend_reset(bend_reset),.bend_index(bend_index),.bend_ratio(bend_ratio),
         .phase_increments(touch_phase_increments)
     );
     genvar touch_group;
     generate
         for (touch_group=0; touch_group<2; touch_group=touch_group+1) begin: touch_voices
             poly_synth #(
+                .PIPELINE_OSCILLATOR(1),
+                .RUNTIME_ADSR(1),
                 .VOLUME_SHIFT(VOLUME_SHIFT),
                 .ATTACK_SAMPLES(ADSR_ATTACK_SAMPLES),
                 .DECAY_SAMPLES(ADSR_DECAY_SAMPLES),
@@ -278,7 +330,7 @@ module top #(
                 .RELEASE_SAMPLES(TOUCH_ADSR_RELEASE_SAMPLES)
             ) u_synth (
                 .clk(clk), .resetn(resetn), .sample_ce(frame_ce),
-                .gates(touch_note_gates[touch_group*4 +: 4]),
+                .gates(touch_note_gates[touch_group*4 +: 4]),.adsr_config(touch_adsr),
                 .phase_increments(touch_phase_increments[touch_group*128 +: 128]),
                 .sample(touch_samples[touch_group*16 +: 16]),
                 .voice_samples(), .envelope_gains(), .envelope_states(),

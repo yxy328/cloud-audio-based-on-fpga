@@ -3,6 +3,8 @@
 // All voices advance on the same sample_ce. Only one mixed PCM stream leaves.
 module poly_synth #(
     parameter VOLUME_SHIFT = 4,
+    parameter RUNTIME_ADSR = 0,
+    parameter PIPELINE_OSCILLATOR = 0,
     parameter MIX_SHIFT = 0,
     parameter ATTACK_SAMPLES = 98,
     parameter DECAY_SAMPLES = 3906,
@@ -12,6 +14,7 @@ module poly_synth #(
     input wire clk,
     input wire resetn,
     input wire sample_ce,
+    input wire [63:0] adsr_config,
     input wire [3:0] gates,
     input wire [127:0] phase_increments,
     output wire signed [15:0] sample,
@@ -25,12 +28,13 @@ module poly_synth #(
     generate
         for (voice_index=0; voice_index<4; voice_index=voice_index+1) begin: voices
             synth_voice #(
+                .RUNTIME_ADSR(RUNTIME_ADSR),.PIPELINE_OSCILLATOR(PIPELINE_OSCILLATOR),
                 .VOLUME_SHIFT(VOLUME_SHIFT), .ATTACK_SAMPLES(ATTACK_SAMPLES),
                 .DECAY_SAMPLES(DECAY_SAMPLES), .SUSTAIN_LEVEL(SUSTAIN_LEVEL),
                 .RELEASE_SAMPLES(RELEASE_SAMPLES)
             ) u_voice (
                 .clk(clk), .resetn(resetn), .sample_ce(sample_ce),
-                .gate(gates[voice_index]),
+                .gate(gates[voice_index]),.adsr_config(adsr_config),
                 .phase_inc(phase_increments[voice_index*32 +: 32]),
                 .sample(voice_samples[voice_index*16 +: 16]),
                 .envelope_gain(envelope_gains[voice_index*16 +: 16]),

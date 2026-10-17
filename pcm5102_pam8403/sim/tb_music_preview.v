@@ -11,7 +11,7 @@ module tb_music_preview;
     end
     wire sample_ce=count==19;
     // Unclocked parameter reference, not an audio source.
-    top config_defaults(.clk(1'b0),.key_s1(1'b0),.key_s2(1'b0),.touch_out(8'h00),
+    top config_defaults(.clk(1'b0),.key_s1(1'b0),.key_s2(1'b0),.ir_beam(8'hff),.touch_out(8'h00),
                         
                         .hc05_rx(1'b1),.hc05_tx(),.i2s_bck(),.i2s_lrck(),.i2s_din());
     wire [3:0] gates, active;

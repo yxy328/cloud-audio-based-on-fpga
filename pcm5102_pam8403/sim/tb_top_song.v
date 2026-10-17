@@ -10,7 +10,7 @@ module tb_top_song;
         .ADSR_DECAY_SAMPLES(32), .ADSR_RELEASE_SAMPLES(64),
         .SONG_BEAT_SAMPLES(256), .SONG_GAP_SAMPLES(64),
         .SONG_INTRO_SAMPLES(32), .SONG_TAIL_SAMPLES(256)) dut(
-        .clk(clk),.key_s1(s1),.key_s2(1'b0),.touch_out(8'h00),.hc05_rx(1'b1),.hc05_tx(),.i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din));
+        .clk(clk),.key_s1(s1),.key_s2(1'b0),.ir_beam(8'hff),.touch_out(8'h00),.hc05_rx(1'b1),.hc05_tx(),.i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din));
     i2s_pcm_monitor monitor(.bck(bck),.lrck(lrck),.din(din));
     integer events=0,k,nonzero=0;
     reg lead_previous=0;

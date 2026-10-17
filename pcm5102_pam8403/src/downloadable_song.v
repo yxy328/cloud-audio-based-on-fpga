@@ -56,6 +56,7 @@ module downloadable_song #(
     wire [31:0] next_elapsed_ms=elapsed_ms+1'b1;
     wire [31:0] event_elapsed_ms=ms_tick ? next_elapsed_ms : elapsed_ms;
     wire [31:0] future_due_ms=future_start_ms+PRE_ROLL_MS;
+    wire [31:0] future_delay_ms=future_due_ms-event_elapsed_ms;
     integer k;
 
     function [6:0] keys_for_mask;
@@ -90,8 +91,8 @@ module downloadable_song #(
     // The free-running millisecond pulse is also used by the renderer. Playback
     // starts on its edge, so every duration and the pre-roll use the same clock.
     assign ms_tick=resetn && ms_count==MS_TICKS-1;
-    // Legacy monophonic audition retains a 1ms release for repeated pitches.
-    // The production top does not use this gate to trigger downloaded audio.
+    // A 1ms note-off before each boundary rearticulates repeated pitches.
+    // AUDITION in the top applies this gate to all mapped chord voices.
     assign gate=playing && state==RUN && current_mask!=0 &&
         (cur_end_ms-elapsed_ms>1 || cur_word[15:0]==1);
 
@@ -209,7 +210,7 @@ module downloadable_song #(
                             note_spawn<=1;
                             spawn_keys<=keys_for_mask(future_word[28:16],checked_map);
                             if(future_due_ms>event_elapsed_ms)
-                                spawn_delay_ms<=future_due_ms-event_elapsed_ms;
+                                spawn_delay_ms<=future_delay_ms[15:0];
                             else spawn_delay_ms<=0;
                         end
                         future_have<=0;

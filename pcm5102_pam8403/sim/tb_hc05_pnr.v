@@ -10,7 +10,7 @@ module tb_hc05_pnr;
     reg [7:0] decoded;
     integer count=0,b,parsed=0,previous_length=0;
     localparam [63:0] LETTERS="PINGMAP?";
-    top dut(.clk(clk),.key_s1(1'b0),.key_s2(1'b0),.touch_out(8'd0),
+    top dut(.clk(clk),.key_s1(1'b0),.key_s2(1'b0),.ir_beam(8'hff),.touch_out(8'd0),
         .hc05_rx(rx),.hc05_tx(tx),.i2s_bck(),.i2s_lrck(),.i2s_din(),.touch_scl());
     always @(negedge clk) begin
         if(dut.resetn && dut.\u_keymap/line_error !==0)

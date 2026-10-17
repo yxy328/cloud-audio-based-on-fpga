@@ -12,6 +12,7 @@
         <File path="src/twinkle_sequencer.v" type="file.verilog" enable="1"/>
         <File path="src/dds_voice.v" type="file.verilog" enable="1"/>
         <File path="src/sine_rom.v" type="file.verilog" enable="1"/>
+        <File path="src/adsr_config.v" type="file.verilog" enable="1"/>
         <File path="src/adsr_env.v" type="file.verilog" enable="1"/>
         <File path="src/envelope_gain.v" type="file.verilog" enable="1"/>
         <File path="src/synth_voice.v" type="file.verilog" enable="1"/>
@@ -25,11 +26,19 @@
         <File path="src/hc05_keymap.v" type="file.verilog" enable="1"/>
         <File path="src/downloadable_song.v" type="file.verilog" enable="1"/>
         <File path="src/hub75e_rhythm_display.v" type="file.verilog" enable="1"/>
+        <File path="src/audio_visualizer.v" type="file.verilog" enable="1"/>
+        <File path="src/lissajous_reference.v" type="file.verilog" enable="1"/>
+        <File path="src/audio_spectrum.v" type="file.verilog" enable="1"/>
+        <File path="src/display_mode_control.v" type="file.verilog" enable="1"/>
         <File path="src/performance_logger.v" type="file.verilog" enable="1"/>
         <File path="src/midi_note_lut.v" type="file.verilog" enable="1"/>
         <File path="src/top.v" type="file.verilog" enable="1"/>
         <File path="src/geita.v" type="file.verilog" enable="1"/>
         <File path="src/gesture_top.v" type="file.verilog" enable="1"/>
+        <File path="src/ir_strings.v" type="file.verilog" enable="1"/>
+        <File path="src/sensor_poly_audio.v" type="file.verilog" enable="1"/>
+        <File path="src/tdm_synth.v" type="file.verilog" enable="1"/>
+        <File path="src/sine_lookup.v" type="file.verilog" enable="1"/>
         <File path="src/gesture_audio.v" type="file.verilog" enable="1"/>
         <File path="src/gesture_nco_sine.v" type="file.verilog" enable="1"/>
         <File path="src/gesture_piano_voice.v" type="file.verilog" enable="1"/>

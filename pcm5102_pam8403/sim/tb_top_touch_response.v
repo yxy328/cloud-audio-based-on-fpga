@@ -6,7 +6,7 @@ module tb_top_touch_response;
     reg [7:0] pads=0;
     wire bck,lrck,din;
     top #(.TOUCH_STARTUP_US(3000)) dut (
-        .clk(clk), .key_s1(1'b0), .key_s2(1'b0), .touch_out(pads),
+        .clk(clk), .key_s1(1'b0), .key_s2(1'b0), .ir_beam(8'hff),.touch_out(pads),
         .hc05_rx(1'b1),.hc05_tx(),.i2s_bck(bck), .i2s_lrck(lrck), .i2s_din(din), .touch_scl()
     );
     i2s_pcm_monitor #(.PCM_MIN(-24576),.PCM_MAX(24564)) monitor (
