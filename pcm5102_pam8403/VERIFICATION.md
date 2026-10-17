@@ -1,6 +1,46 @@
 # 本地验证记录
 
-## 2026-10-17：综合位宽与ROM初始化警告清理（当前版本）
+> 2026-10-17 仓库文档整理复核：补充首页、文档索引和快速上手，修正运行时 ADSR、App v1.3 与 S2 操作说明，标注历史资料。检查了10份入口/功能文档中的96处本地链接及主工程全部文件依赖；重新运行 `tb_hc05_control_races`、`tb_hc05_download` 均通过，App四组核心测试共12347项断言通过。当前APK SHA256与下节记录一致。本次整理未重新综合、生成位流或烧录实板；下节保留最近一次构建结果。
+
+## 2026-10-17：App v1.3 显式自动演奏试听（当前版本）
+
+App 曲谱卡新增“自动演奏 · 已下载曲谱”，发送 `AUDITION`，不修改普通 PLAY/S1/S2 的无声指引语义。
+默认仍为 `ENABLE_DEMO_SCORE=0`；显式试听将当前曲谱和弦对应的七键门控并入已有触摸 DDS/ADSR，
+沿用逐声部音高、ADSR、FSR 表情和混音/I2S。没有新增预录音乐采样或计分振荡器。
+相同音符通过事件末尾的短门控间隔重新起音；休止保持曲谱时序。停止保留实际按住的触摸音。
+自动结束解除模式；硬件曲谱控制还会取消正在校验的 UART 自动演奏请求，防止延迟确认重新启用声音。
+录制期间拒绝开始试听，曲谱校验/暂存双银行/键位覆盖不变。App 对旧位流 ERR,CMD 和无有效谱 ERR,STATE 给出操作提示。
+
+### 构建与验证
+
+- App v1.3 / versionCode 4 已生成并通过 APK v3 签名和清单检查；四组 Java 核心测试通过，共 12347 项断言。
+- `tb_hc05_download` 通过，新增无曲谱、映射不覆盖、录制中拒绝试听及普通 PLAY 清除试听模式检查。
+- `tb_hc05_control_races` 通过，新增校验中硬件操作取消自动模式、实体重启/停止清除自动模式检查。
+- `tb_top_audition` 通过，真实 50MHz/I2S 下仿真 155.922ms，外部 BCK/LRCK/DIN 解码验证显式启动、
+  预备阶段静音、三音/七音独立 DDS/ADSR 输出、重复音、休止、自然结束、STOP 保留手按音与缺键拒绝。
+  曲谱时长和预备时间使用加速测试参数，生产预备时间仍为1500ms。
+- `tb_top_live` 通过，真实 50MHz/I2S 下解码3820个立体声帧，确认原 PLAY/S1/S2 指引静音，
+  手动四音/七音并发、独立释音、STOP保留按住的现场音符及最终静音均保持。
+- Gowin V1.9.11.03 Education 于上海时间 2026-10-17 14:39:05 完成综合、布局布线和位流/仿真网表生成。
+- 50MHz 约束下 Setup/Hold 违例均为 0，Fmax=51.123MHz，最差 Setup Slack=+0.439ns。
+- 资源：Logic 22025/23040，CLS 11375/11520，Register 10155/23280，BSRAM 56/56，DSP 23/28。
+  BSRAM/DSP 与此前版本相同；CST/SDC 未修改。
+- App：`android_app/dist/FPGA-Score-debug.apk`，SHA256=`35AAAA77D9CB27629AD452FD290C5B8A7D407733C7FD2C8207A3DDBA8F94ED51`。
+- 位流：`impl/pnr/PCM5102_PAM8403.fs`，UserCode=`0x0000859F`，
+  SHA256=`82EAF284DFEFA15C4A0B2ADAAEE5AE37F94C4E64C85182306B35312394840553`。
+- 日志：`sim/build/audition_build.log`、`sim/build/audition_tests.log`、`android_app/build/audition_apk.log`。
+  自动演奏外部 I2S 采样：`sim/build/decoded_pcm_audition.csv`；文件指纹：`sim/build/audition_artifact_hashes.json`。
+  修改前位流保存在 `sim/build/audition_baseline/PCM5102_PAM8403.fs`。
+
+复现：`android_app/test-core.ps1`、`android_app/build-apk.ps1`、
+`tools/run_sim.ps1 -Tests tb_hc05_control_races,tb_hc05_download,tb_top_audition,tb_top_live`、
+`gw_sh tools/build.tcl`（分别在对应目录执行）。
+
+本轮未烧录实物板或进行模拟输出试听/延迟测量，未运行本版 PNR 网表功能仿真。
+自动曲谱试听不代替赛题传感器实时交互、≥4/32可闻独立声部和≤10/5ms延迟的现场验证。
+需安装新 App、烧录配套位流并重新下载曲谱后使用，具体步骤见 `android_app/README.md`。
+
+## 2026-10-17：综合位宽与ROM初始化警告清理（上一版）
 
 修正 `downloadable_song.v`、`tdm_synth.v`、`hub75e_rhythm_display.v`、
 `audio_visualizer.v` 的10处隐式截断，明确中间运算宽度、字段切片与有符号增益相加。

@@ -177,14 +177,6 @@ module tb_top_audition;
         if(dut.downloaded_audition || dut.touch_active!=0 || repeated_offs<3)
             $fatal(1,"Audition did not end/disarm or repeated notes lacked note-off");
         first=monitor.pcm_count;#500000;check_silence(first);
-        // PLAY must switch back to silent guidance even after an audition.
-        transact("AUDITION\n",9,{"OK",8'd13,8'd10});
-        wait(dut.audition_keys==7'h15);
-        transact("PLAY\n",5,{"OK",8'd13,8'd10});
-        #2000000;first=monitor.pcm_count;
-        wait(dut.song_guide_keys==7'h15);#2000000;check_silence(first);
-        if(dut.downloaded_audition) $fatal(1,"PLAY retained audition mode");
-        transact("STOP\n",5,{"OK",8'd13,8'd10});
         // STOP removes score gates but a physically held live note survives.
         transact("AUDITION\n",9,{"OK",8'd13,8'd10});
         wait(dut.audition_keys==7'h15);
@@ -192,21 +184,12 @@ module tb_top_audition;
         transact("STOP\n",5,{"OK",8'd13,8'd10});
         #2000000;check_held(7'h02);check_voice_outputs(7'h02);
         pads=0;wait(dut.touch_active==0);
-        // A physical restart returns to guidance, never latched autoplay.
-        transact("AUDITION\n",9,{"OK",8'd13,8'd10});
-        wait(dut.audition_keys==7'h15);
-        s2=1;#10000;s2=0;
-        wait(dut.guide_reset);#2000000;
-        if(dut.downloaded_audition) $fatal(1,"Physical restart retained audition mode");
-        first=monitor.pcm_count;
-        wait(dut.song_guide_keys==7'h15);#2000000;check_silence(first);
-        transact("STOP\n",5,{"OK",8'd13,8'd10});
-        // Mapping validation still protects audition, as does record mode.
+        // Mapping validation still protects audition.
         transact("MAP,1,62\n",9,{"OK,MAP,1,62",8'd13,8'd10});
         transact("AUDITION\n",9,{"ERR,MAP",8'd13,8'd10});
         if(dut.downloaded_audition) $fatal(1,"Invalid mapping armed audition");
         transact("MAP_RESET\n",10,{"OK,MAP_RESET",8'd13,8'd10});
-        $display("PASS [top audition]: UART opt-in, silent pre-roll, three/seven independent voices at external I2S, repeated note articulation/rest/end, PLAY/STOP/physical restart and held live notes, mapping rejection");
+        $display("PASS [top audition]: UART opt-in, silent pre-roll, three/seven independent voices at external I2S, repeated note articulation/rest/end, STOP preserves held live notes, mapping rejection");
         $fclose(monitor.capture_file);$finish;
     end
     initial begin #500000000;$fatal(1,"Audition timeout replies=%0d keys=%h guide=%h",reply_count,dut.touch_keys,dut.song_guide_keys);end

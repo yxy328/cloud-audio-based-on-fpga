@@ -7,8 +7,8 @@ module tb_hc05_control_races;
     localparam [55:0] DEFAULT_MAP={8'd71,8'd69,8'd67,8'd65,8'd64,8'd62,8'd60};
     reg clk=0;
     always #10 clk=~clk;
-    reg resetn=0, rx=1, toggle_play=0;
-    wire tx, valid, playing;
+    reg resetn=0, rx=1, toggle_play=0, restart=0;
+    wire tx, valid, playing, audition;
     wire [55:0] note_map;
     hc05_keymap #(
         .CLK_HZ(1000000),.BAUD(50000),.ENABLE_LOOKAHEAD(1)
@@ -17,8 +17,9 @@ module tb_hc05_control_races;
         .song_busy(playing || toggle_play),.notes_busy(1'b0),.recording(1'b0),
         .note_map(note_map),.touch_keys(7'd0),.pressure_mode(1'b0),
         .volume_gain(16'd39321),.pitch_ratio(16'd65535),
-        .toggle_play(toggle_play),.restart(1'b0),.rec_busy(),
+        .toggle_play(toggle_play),.restart(restart),.rec_busy(),
         .downloaded_valid(valid),.downloaded_playing(playing),.downloaded_gate(),
+        .downloaded_audition(audition),
         .downloaded_increment(),.guide_keys(),.guide_ms_tick(),.guide_reset(),
         .note_spawn(),.spawn_keys(),.spawn_delay_ms(),.note_ready(1'b1),
         .builtin_play(),.builtin_stop()
@@ -123,6 +124,30 @@ module tb_hc05_control_races;
         if(!playing) $fatal(1,"hardware playback validation did not complete");
         transact("STOP\n",5,{"OK",8'd13,8'd10});
         transact("MAP,1,60\n",9,{"OK,MAP,1,60",8'd13,8'd10});
+
+        // A physical action during UART validation cancels its pending
+        // audition arm, even if the score validation completes later.
+        fork
+            begin send("AUDITION\n",9); end
+            begin
+                wait(dut.song_request && dut.song_operation==4);
+                @(negedge clk);toggle_play=1;
+                @(negedge clk);toggle_play=0;
+            end
+        join
+        expect_reply({"OK",8'd13,8'd10});
+        if(audition) $fatal(1,"Late UART completion rearmed cancelled audition");
+        transact("AUDITION\n",9,{"OK",8'd13,8'd10});
+        if(!audition) $fatal(1,"Explicit audition did not arm");
+        @(negedge clk);restart=1;
+        @(negedge clk);restart=0;
+        repeat(500) @(negedge clk);
+        if(audition) $fatal(1,"Physical restart retained audition");
+        transact("AUDITION\n",9,{"OK",8'd13,8'd10});
+        @(negedge clk);toggle_play=1;
+        @(negedge clk);toggle_play=0;
+        repeat(5) @(negedge clk);
+        if(audition || playing) $fatal(1,"Physical stop retained audition/playback");
 
         // Real UART submits an invalid BEGIN. Inject a successful OLD
         // completion while song_request is high (the acceptance edge).

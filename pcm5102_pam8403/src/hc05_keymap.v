@@ -173,7 +173,7 @@ module hc05_keymap #(
             xy_write<=0;
             // Audition is opt-in for one UART start only. Physical controls
             // always return to silent guidance; ending a score disarms it.
-            if(!downloaded_playing || toggle_play || restart) downloaded_audition<=0;
+            if(!downloaded_playing) downloaded_audition<=0;
             if(select_log && log_valid && tx_ready) log_owned<=!log_last;
             if(rx_fault) begin
                 line_error<=UART_ERROR;
@@ -338,6 +338,11 @@ module hc05_keymap #(
                     end
                     default: state<=COLLECT;
                 endcase
+            end
+            // A physical action also cancels a UART start still validating.
+            // Give it priority over the command decoder on the same cycle.
+            if(toggle_play || restart) begin
+                downloaded_audition<=0; audition_pending<=0;
             end
         end
     end

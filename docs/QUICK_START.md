@@ -1,0 +1,61 @@
+# 快速上手
+
+[首页](../README.md) · [文档索引](README.md)
+
+## 1. 获取完整仓库
+
+```powershell
+git clone https://gitee.com/yxy0818/cloud-audio-based-on-fpga.git
+cd cloud-audio-based-on-fpga
+```
+
+主工程为 `pcm5102_pam8403/PCM5102_PAM8403.gprj`，顶层 `top`，器件 `GW5A-LV25MG121NC1/I0`。保留同级 `pmod_hub75e/`，工程直接引用其中的触摸输入模块。
+
+## 2. 准备工具和接线
+
+- FPGA：已有构建记录使用 Gowin V1.9.11.03 Education，需安装 IDE、Programmer 和开发板下载驱动。
+- RTL 仿真：Icarus Verilog；脚本默认路径为 `C:/iverilog/bin`，可用 `-IverilogDir` 覆盖。
+- 手机：Android 10+，安装 [当前 APK](../pcm5102_pam8403/android_app/dist/FPGA-Score-debug.apk)，使用 HC-05 经典蓝牙 SPP。
+- 修改 App 时再配置 JDK 和 Android SDK，步骤见 [App 文档](../pcm5102_pam8403/android_app/README.md)。现成 APK 可直接安装。
+
+接线先查 [完整引脚表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)。TTP229 使用8键直连模式，SCL 按当前接法接 GND、F6 不接；上电前600ms不触摸。FSR 模块 AO 经22kΩ/4.7kΩ分压后接ADC，ADC输入范围为0～1V。详细电气说明见 [主工程说明](../pcm5102_pam8403/README.md) 与 [FSR文档](../pcm5102_pam8403/FSR402.md)。
+
+## 3. 仿真与构建
+
+在仓库根目录运行指定模块测试：
+
+```powershell
+& ./pcm5102_pam8403/tools/run_sim.ps1 -Tests tb_hc05_control_races,tb_hc05_download
+```
+
+完整 RTL 回归省略 `-Tests`。仅检查自动试听时可指定 `-Tests tb_top_audition`；这些顶层音频仿真耗时较长。软件核心测试入口为 `./pcm5102_pam8403/android_app/test-core.ps1`。
+
+用 Gowin IDE 打开主工程并执行完整综合、布局布线与位流生成，或使用命令行（将下面路径替换为本机安装路径）：
+
+```powershell
+$gowinShell = 'C:/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe'
+& $gowinShell ./pcm5102_pam8403/tools/build.tcl
+```
+
+生成位流：`pcm5102_pam8403/impl/pnr/PCM5102_PAM8403.fs`。该文件不在源码仓库中。检查构建日志和时序报告，最近已记录构建见 [VERIFICATION.md](../pcm5102_pam8403/VERIFICATION.md)；重新构建后的指纹可能不同。
+
+## 4. 下载开发板
+
+在 Programmer 中选择主工程新生成的 `.fs`，执行 **SRAM Program**。也可运行脚本，按本机路径和已连接的线缆位置修改参数：
+
+```powershell
+& ./pcm5102_pam8403/tools/program_sram.ps1 -ProgrammerDir 'C:/Gowin/Gowin_V1.9.11.03_Education_x64/Programmer/bin' -CableLocation 385
+```
+
+`385` 是现有开发机记录的线缆位置，其他电脑需按 Programmer 检测结果调整。脚本下载后读取 UserCode 并与位流头比较。SRAM 配置断电丢失；重新编译不会自动更新板上程序。
+
+## 5. 首次演奏和曲谱试听
+
+1. 先用 K1～K7 触摸演奏，默认 C4～B4；K8 切换压力音量/音高模式。
+2. 手机系统配对 HC-05，再在 App 中连接已配对设备。Android 12+ 需允许“附近的设备”。
+3. 载入示例或导入 CSV/MIDI，点击“校验键位并下载”，等待显示已提交。
+4. 自己演奏使用 `PLAY` 或板上 S1：预备1.5秒后显示无声曲谱指引，按键实时发声。
+5. 自动试听使用 App v1.3“自动演奏 · 已下载曲谱”：`AUDITION` 复用触摸 DDS/ADSR 合成声音，曲谱结束自动停止；`STOP` 提前停止，保留实际按住的音符。
+6. S2长按约1秒依次切换曲谱、波形、XY、FFT；XY页短按选图，其他页短按重启曲谱。
+
+曲谱和运行时配置掉电丢失；只在手机载入文件不会替换板上曲谱，必须完成下载。`ERR,CMD` 可能表示位流不支持新命令，`ERR,STATE` 表示没有有效曲谱，`ERR,MAP` 表示七键映射未覆盖曲谱音高。完整流程见 [App 说明](../pcm5102_pam8403/android_app/README.md)。

@@ -1,5 +1,7 @@
 # 《小星星》已同步到原工程
 
+> 历史演示记录：以下 S1/S2 自动播放和位流编号属于早期版本。当前 `PLAY`/S1 是无声指引，App v1.3 使用 `AUDITION` 显式试听已下载曲谱，见 [当前 App 说明](android_app/README.md) 与 [验证记录](VERIFICATION.md)。本文 `sim/build/` 产物需在本地生成。
+
 当前 `PCM5102_PAM8403.gprj` 的生产文件列表包含 `src/twinkle_sequencer.v`，
 `src/top.v` 实际连接这个曲谱控制器和现有四声部 DDS/ADSR/混音/I2S。
 板端和电脑试听共用同一个曲谱控制器；本次不再用仿真平台独立维护旋律表。
