@@ -38,11 +38,8 @@ module tb_top_audio_visual;
             if(expected_sample>7680) expected_y=1;
             else if(expected_sample < -7680) expected_y=31;
             else expected_y=16-($signed(expected_sample) >>> 9);
-            expected_phase=dut.touch_voices[0].u_synth.voices[0].u_voice.u_dds.phase+dut.touch_phase_increments[31:0];
             #1;
             if(dut.u_i2s_tx.frame_sample!==expected_sample) $fatal(1,"Visualization changed I2S frame sample");
-            if(dut.touch_voices[0].u_synth.voices[0].u_voice.u_dds.phase!==expected_phase)
-                $fatal(1,"Display switch disturbed live oscillator");
             if(!dut.u_guide_display.audio_visual.u_visualizer.capture_ready &&
                dut.u_guide_display.audio_visual.u_visualizer.sample_phase==1) begin
                 if(dut.u_guide_display.audio_visual.u_visualizer.minimum_y!==expected_y[4:0])
@@ -51,6 +48,10 @@ module tb_top_audio_visual;
             end
             phase_checks=phase_checks+1;
         end
+    end
+    always @(posedge clk)if(dut.resetn && dut.u_touch_synth.state==7 && dut.u_touch_synth.index==0)begin
+        expected_phase=dut.u_touch_synth.phase+dut.u_touch_synth.frame_steps[31:0];#1;
+        if(dut.u_touch_synth.phase!==expected_phase)$fatal(1,"Display switch disturbed TDM phase");
     end
     task frames;
         input integer count; integer target;
@@ -198,7 +199,35 @@ module tb_top_audio_visual;
             $fatal(1,"Short S2 release lost the score restart");
         if(dut.visual_mode || dut.sensor_overrun || monitor.pcm_count<1000 || latches<1000 || phase_checks<1000)
             $fatal(1,"Integrated audio/display coverage or timing failed");
+        // Real UART settings, ADC conversion, pads and break beams must also
+        // reach the idle dashboard through top, without an OLED dependency.
+        command("STOP\n",5);
+        command("HOLD,1\n",7);
+        command("EFFECT,2,5\n",11);
+        command("VOLUME,8\n",9);
+        command("ANALOG,1\n",9);
+        command("PRESSURE,1\n",11);
+        command("TONE,7\n",7);
+        dut.u_fsr_adc.adc_inst.sim_value={3'd0,10'h2a5,1'b0};beams=8'h81;
+        frames(150);
+        wait(dut.u_guide_display.display_boundary);@(posedge clk);#2;
+        if(!dut.u_guide_display.status_active ||
+           dut.u_guide_display.status_panel.u_status.mode_q ||
+           !dut.u_guide_display.status_panel.u_status.hold_q ||
+           !dut.u_guide_display.status_panel.u_status.pressure_q ||
+           dut.u_guide_display.status_panel.u_status.timbre_q!=7 ||
+           dut.u_guide_display.status_panel.u_status.analog_q!=1 ||
+           dut.u_guide_display.status_panel.u_status.effect_q!=2 ||
+           dut.u_guide_display.status_panel.u_status.wet_q!=5 ||
+           dut.u_guide_display.status_panel.u_status.volume_q!=8 ||
+           dut.u_guide_display.status_panel.u_status.adc_q!=10'h2a5 ||
+           dut.u_guide_display.status_panel.u_status.physical_q!=1 ||
+           dut.u_guide_display.status_panel.u_status.gates_q!=1 ||
+           dut.u_guide_display.status_panel.u_status.ir_q!=8'h81)
+            $fatal(1,"Top dashboard wiring/snapshot failed");
+        save_preview("sim/build/status_live_panel.ppm");
         $display("PASS top audio visual: exact I2S tap/continuous phase, live touch/IR/guitar, C4 FFT, S2 modes and six XY presets, UART XY while playing, score uninterrupted, external I2S/HUB and eight panel captures");
+        $display("PASS top dashboard: UART volume/effect/hold/timbre/pressure/analog, real ADC conversion, physical touch/IR, automatic idle status and external RGB5 frame");
         $finish;
     end
     initial begin #250000000; $fatal(1,"Top audio visual timeout"); end

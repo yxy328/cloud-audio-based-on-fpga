@@ -1,5 +1,7 @@
 > 2026-10-16：App v1.2支持七个触摸声部独立实时变调：`BEND,键号1～7,比例8192～32768` / `BEND_RESET`，成功回复`OK`。可按住和弦调单音，不改MAP、相位或ADSR；用法及蓝牙延迟边界见[逐声部滑音](VOICE_PITCH.md)。
 
+> 2026-10-18 / App v1.4：新增 8/16 键串行切换、完整 16 键演奏、滑杆与标定、音效/延音及八种红外/手势音色。新增接线和兼容范围以 [迁移说明](REFERENCE_MIGRATION.md) 为准；下文七键部分仍适用于前七键及原 8 键模式。
+
 > 2026-10-16：新增 `ADSR,TOUCH,A,D,S,R`、`ADSR,SENSOR,A,D,S,R`，A/D/R范围0～1000ms，S为0～100%；
 > `ADSR_RESET,TOUCH` / `ADSR_RESET,SENSOR` 恢复原始包络。成功OK，新音符生效，旧音锁存设置。
 > 详细语义见 [运行时ADSR](ADSR_RUNTIME.md)。

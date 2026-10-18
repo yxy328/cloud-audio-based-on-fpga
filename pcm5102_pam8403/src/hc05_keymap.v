@@ -37,7 +37,16 @@ module hc05_keymap #(
     output reg [2:0] bend_index,
     output reg [15:0] bend_ratio,
     output reg xy_write,
-    output reg [1:0] xy_ratio,xy_phase
+    output reg [1:0] xy_ratio,xy_phase,
+    output reg touch_mode16,touch_hold,panic,serial_active_high,
+    output reg [1:0] effect_mode,
+    output reg [3:0] effect_wet,
+    output reg [4:0] master_volume,
+    output reg [2:0] analog_mode,
+    output reg pressure_write,pressure_value,
+    output reg [9:0] analog_min,analog_max,
+    input wire [9:0] adc_sample,
+    input wire adc_timeout
 );
     localparam [55:0] DEFAULT_MAP={8'd71,8'd69,8'd67,8'd65,8'd64,8'd62,8'd60};
     localparam COLLECT=0, EXECUTE=1, RESPOND=2, DECIMAL=3, SONG_WAIT=4, DECIMAL_READ=5, ADSR_WAIT=6;
@@ -73,6 +82,7 @@ module hc05_keymap #(
     reg [7:0] ch;
     reg adsr_parse,adsr_target,adsr_request,adsr_restore;
     reg bend_parse;
+    reg [3:0] control_parse;
     reg [15:0] adsr_a,adsr_d,adsr_s,adsr_r;
     wire adsr_done;
     integer prefix_byte;
@@ -113,6 +123,10 @@ module hc05_keymap #(
         .touch_keys(touch_keys),.pressure_mode(pressure_mode),.volume_gain(volume_gain),.pitch_ratio(pitch_ratio),
         .recording(rec_busy),.tx_data(log_data),.tx_valid(log_valid),.tx_last(log_last),.tx_ready(log_ready),.dropped()
     );
+    function [7:0] hex_char;
+        input [3:0] n;
+        begin hex_char=n<10 ? "0"+n : "A"+n-10;end
+    endfunction
     function [7:0] tens;
         input [7:0] note;
         begin tens=(note<70) ? "6" : "7"; end
@@ -159,6 +173,8 @@ module hc05_keymap #(
             builtin_play<=0; builtin_stop<=0;
             guitar_pluck<=0; gesture_timbre<=0; gesture_vibrato<=0; gesture_bank<=0;
             sensor_test32<=0;
+            touch_mode16<=0;serial_active_high<=0;touch_hold<=0;panic<=0;effect_mode<=0;effect_wet<=4;
+            master_volume<=16;analog_mode<=0;analog_min<=0;analog_max<=1023;pressure_write<=0;pressure_value<=0;control_parse<=0;
             xy_write<=0;xy_ratio<=2;xy_phase<=0;
             bend_parse<=0;bend_write<=0;bend_reset<=0;bend_index<=0;bend_ratio<=16384;
             adsr_parse<=0;adsr_target<=0;adsr_request<=0;adsr_restore<=0;
@@ -167,7 +183,7 @@ module hc05_keymap #(
             have_digit<=0; parse_length<=0; position<=0;
         end else begin
             song_request<=0; rec_start<=0; rec_stop<=0; builtin_play<=0; builtin_stop<=0;
-            guitar_pluck<=0;
+            guitar_pluck<=0;panic<=0;pressure_write<=0;
             sensor_test32<=0;adsr_request<=0;
             bend_write<=0;bend_reset<=0;
             xy_write<=0;
@@ -202,11 +218,45 @@ module hc05_keymap #(
                         end
                     end
                     EXECUTE: begin
-                        line_length<=0; line_error<=NO_ERROR;adsr_parse<=0;adsr_restore<=0;bend_parse<=0;
+                        line_length<=0; line_error<=NO_ERROR;adsr_parse<=0;adsr_restore<=0;bend_parse<=0;control_parse<=0;
                         if(line_error==UART_ERROR) respond({"ERR,UART",8'd13,8'd10},10);
                         else if(line_error==LENGTH_ERROR) respond({"ERR,LENGTH",8'd13,8'd10},12);
                         else if(line_error==CHAR_ERROR) respond({"ERR,CMD",8'd13,8'd10},9);
                         else if(line_length==4 && line[31:0]=="PING") respond({"PONG",8'd13,8'd10},6);
+                        else if(line_length==5 && line[39:0]=="CTRL?") begin
+                            respond({"CTRL,",8'd48+{7'd0,touch_mode16},",",8'd48+{6'd0,effect_mode},",",
+                                8'd48+{4'd0,effect_wet},",",8'd48+{7'd0,touch_hold},",",
+                                8'd48+{5'd0,analog_mode},",",(master_volume>=10 ? 8'd49 : 8'd48),
+                                8'd48+(master_volume>=10 ? master_volume-8'd10 : {3'd0,master_volume}),",",
+                                8'd48+{7'd0,pressure_mode},8'd13,8'd10},21);
+                        end else if(line_length==7 && line[55:0]=="SERIAL?") begin
+                            respond({"SERIAL,",8'd48+{7'd0,serial_active_high},8'd13,8'd10},10);
+                        end else if(line_length>7 && prefix[95:40]=="SERIAL,") begin
+                            control_parse<=8;parse_numbers(7,1);
+                        end else if(line_length==4 && line[31:0]=="CAL?") begin
+                            respond({"CAL,",hex_char({2'd0,analog_min[9:8]}),hex_char(analog_min[7:4]),hex_char(analog_min[3:0]),",",
+                                hex_char({2'd0,analog_max[9:8]}),hex_char(analog_max[7:4]),hex_char(analog_max[3:0]),8'd13,8'd10},13);
+                        end else if(line_length>4 && prefix[95:64]=="CAL,") begin
+                            control_parse<=7;parse_numbers(4,2);
+                        end else if(line_length==4 && line[31:0]=="ADC?") begin
+                            respond({"ADC,",hex_char({2'd0,adc_sample[9:8]}),hex_char(adc_sample[7:4]),
+                                hex_char(adc_sample[3:0]),",",8'd48+{7'd0,adc_timeout},8'd13,8'd10},11);
+                        end else if(line_length==5 && line[39:0]=="PANIC") begin
+                            panic<=1;touch_hold<=0;downloaded_audition<=0;audition_pending<=0;
+                            builtin_stop<=1;song_request<=1;song_operation<=5;state<=SONG_WAIT;
+                        end else if(line_length>6 && prefix[95:48]=="TOUCH,") begin
+                            control_parse<=1;parse_numbers(6,1);
+                        end else if(line_length>7 && prefix[95:40]=="EFFECT,") begin
+                            control_parse<=2;parse_numbers(7,2);
+                        end else if(line_length>5 && prefix[95:56]=="HOLD,") begin
+                            control_parse<=3;parse_numbers(5,1);
+                        end else if(line_length>7 && prefix[95:40]=="VOLUME,") begin
+                            control_parse<=4;parse_numbers(7,1);
+                        end else if(line_length>7 && prefix[95:40]=="ANALOG,") begin
+                            control_parse<=5;parse_numbers(7,1);
+                        end else if(line_length>9 && prefix[95:24]=="PRESSURE,") begin
+                            control_parse<=6;parse_numbers(9,1);
+                        end
                         else if(line_length==6 && prefix[95:72]=="XY," && line[15:8]==",") begin
                             if(line[23:16]>="0" && line[23:16]<="3" && line[7:0]>="0" && line[7:0]<="3") begin
                                 xy_ratio<=line[17:16];xy_phase<=line[1:0];xy_write<=1;result(0);
@@ -230,7 +280,7 @@ module hc05_keymap #(
                             guitar_pluck<=1; result(0);
                         end else if(line_length==6 && line[47:8]=="TONE,") begin
                             if(line[7:0]<"0" || line[7:0]>"9") result(7);
-                            else if(line[7:0]>"4") result(2);
+                            else if(line[7:0]>"7") result(2);
                             else begin gesture_timbre<=line[2:0]; result(0); end
                         end else if(line_length==9 && line[71:8]=="VIBRATO,") begin
                             if(line[7:0]<"0" || line[7:0]>"9") result(7);
@@ -289,7 +339,7 @@ module hc05_keymap #(
                             builtin_stop<=1; song_request<=1; song_operation<=5;
                             state<=SONG_WAIT;
                         end else if(line_length==9 && line[71:0]=="REC_START") begin
-                            if(!keys_ready || rec_busy || recording) result(1);
+                            if(!keys_ready || rec_busy || recording || touch_mode16 || touch_hold || analog_mode!=0) result(1);
                             else begin rec_start<=1; result(0); end
                         end else if(line_length==8 && line[63:0]=="REC_STOP") begin rec_stop<=1; result(0); end
                         else result(7);
@@ -299,7 +349,32 @@ module hc05_keymap #(
                     DECIMAL: begin
                         if(position==parse_length) begin
                             if(!have_digit || field_count==0 || field_index!=field_count-1) result(7);
-                            else if(bend_parse) begin
+                            else if(control_parse!=0) begin
+                                case(control_parse)
+                                    1:if(accumulator!=8 && accumulator!=16)result(2);
+                                      else if(!edit_allowed || touch_hold)result(1);
+                                      else begin touch_mode16<=accumulator==16;result(0);end
+                                    2:if(value0>2 || accumulator>8)result(2);
+                                      else begin effect_mode<=value0[1:0];effect_wet<=accumulator[3:0];result(0);end
+                                    3:if(accumulator>1)result(2);
+                                      else if(rec_busy || recording)result(1);
+                                      else begin touch_hold<=accumulator[0];result(0);end
+                                    4:if(accumulator>16)result(2);
+                                      else begin master_volume<=accumulator[4:0];result(0);end
+                                    5:if(accumulator>4)result(2);
+                                      else if(rec_busy || recording)result(1);
+                                      else begin analog_mode<=accumulator[2:0];result(0);end
+                                    6:if(accumulator>1)result(2);
+                                      else begin pressure_write<=1;pressure_value<=accumulator[0];result(0);end
+                                    7:if(value0>1023 || accumulator>1023 || accumulator<=value0 || accumulator-value0<32)result(2);
+                                      else if(rec_busy || recording)result(1);
+                                      else begin analog_min<=value0[9:0];analog_max<=accumulator[9:0];result(0);end
+                                    8:if(accumulator>1)result(2);
+                                      else if(!edit_allowed || touch_hold)result(1);
+                                      else begin serial_active_high<=accumulator[0];result(0);end
+                                    default:result(7);
+                                endcase
+                            end else if(bend_parse) begin
                                 if(value0<1 || value0>7 || accumulator<8192 || accumulator>32768) result(2);
                                 else begin
                                     bend_index<=value0[2:0]-1'b1;bend_ratio<=accumulator;bend_write<=1;result(0);

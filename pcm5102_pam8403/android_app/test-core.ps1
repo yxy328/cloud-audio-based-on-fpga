@@ -6,6 +6,10 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Core test compilation failed' }
     & javac --release 8 -Xlint:-options -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\VoiceBend.java core_test\VoiceBendTest.java
     if ($LASTEXITCODE -ne 0) { throw 'Voice bend test compilation failed' }
+    & javac --release 8 -Xlint:-options -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\DeviceControls.java core_test\DeviceControlsTest.java
+    if ($LASTEXITCODE -ne 0) { throw 'Device controls compilation failed' }
+    & java -cp build\core cn.fpga.score.DeviceControlsTest
+    if ($LASTEXITCODE -ne 0) { throw 'Device controls tests failed' }
     & java -cp build\core cn.fpga.score.VoiceBendTest
     if ($LASTEXITCODE -ne 0) { throw 'Voice bend tests failed' }
     & java -cp build\core cn.fpga.score.AdsrProfileTest

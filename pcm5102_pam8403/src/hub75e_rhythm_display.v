@@ -9,11 +9,24 @@
 // 128 copies of a timer/position accumulator or blocking the sequencer.
 module hub75e_rhythm_display #(
     parameter integer LEAD_MS = 1500,
-    parameter integer ENABLE_AUDIO_VISUAL = 0
+    parameter integer ENABLE_AUDIO_VISUAL = 0,
+    parameter integer ENABLE_STATUS = 0
 ) (
     input wire clk,
     input wire resetn,
     input wire [6:0] touch_keys,
+    input wire touch_mode16,
+    input wire [15:0] all_touch_keys,
+    input wire [15:0] physical_keys,
+    input wire [7:0] ir_keys,
+    input wire touch_hold,pressure_pitch,recording,keys_ready,
+    input wire [2:0] timbre,analog_mode,
+    input wire [1:0] effect_mode,
+    input wire [3:0] effect_wet,
+    input wire [4:0] volume,
+    input wire [12:0] master_gain,
+    input wire [9:0] adc_sample,analog_position,
+    input wire analog_valid,
     input wire [6:0] guide_keys,
     input wire playing,
     input wire ms_tick,
@@ -123,6 +136,10 @@ module hub75e_rhythm_display #(
         keys_s2<=keys_s1;
     end
 
+    reg was_playing;
+    always @(posedge clk)begin
+        if(!resetn)was_playing<=0;else was_playing<=playing;
+    end
     integer row;
     always @(posedge clk) begin
         if (!resetn || !playing) begin
@@ -130,8 +147,9 @@ module hub75e_rhythm_display #(
             overflow <= 0;
             valid_s0 <= 0; valid_s1 <= 0; valid_s2 <= 0;
             scroll_s1 <= 0; scroll_s2 <= 0;
-            for (row=0; row<64; row=row+1)
-                note_rows[row] <= 0;
+            // Nothing writes rows while stopped; clear once on stop/reset.
+            if(!resetn || was_playing)
+                for (row=0; row<64; row=row+1)note_rows[row] <= 0;
         end else begin
             valid_s0 <= note_spawn && spawn_keys != 0;
             valid_s1 <= valid_s0;
@@ -188,6 +206,8 @@ module hub75e_rhythm_display #(
     wire display_boundary = state == S_LATCH_LOW && scan_row == 31 && pwm_phase == 31;
     reg [1:0] visual_active;
     wire [14:0] visual_upper, visual_lower;
+    reg status_active;
+    wire [14:0] status_upper,status_lower;
     // RAM address prefetch: row prep requests x=0, each shift requests x+1.
     // Its result is available for the following S_PIXEL_PREP clock edge.
     wire [5:0] visual_read_x = state == S_ROW_PREP ? 6'd0 :
@@ -205,9 +225,25 @@ module hub75e_rhythm_display #(
         assign visual_upper = 0;
         assign visual_lower = 0;
     end endgenerate
+    generate if(ENABLE_STATUS)begin: status_panel
+        hub75e_status u_status(
+            .clk(clk),.resetn(resetn),.display_boundary(display_boundary),
+            .pixel_x(visual_read_x),.pixel_row(scan_row),
+            .mode16(touch_mode16),.hold_notes(touch_hold),.pressure_pitch(pressure_pitch),
+            .recording(recording),.keys_ready(keys_ready),.physical_keys(physical_keys),
+            .note_gates(all_touch_keys),.ir_keys(ir_keys),.timbre(timbre),.analog_mode(analog_mode),
+            .effect_mode(effect_mode),.effect_wet(effect_wet),.volume(volume),.master_gain(master_gain),
+            .adc_sample(adc_sample),.analog_position(analog_position),.analog_valid(analog_valid),
+            .upper_rgb(status_upper),.lower_rgb(status_lower));
+    end else begin: no_status
+        assign status_upper=0;assign status_lower=0;
+    end endgenerate
     always @(posedge clk) begin
-        if (!resetn) visual_active <= 0;
-        else if (display_boundary) visual_active <= ENABLE_AUDIO_VISUAL ? visual_mode : 2'd0;
+        if (!resetn)begin visual_active <= 0;status_active<=ENABLE_STATUS;end
+        else if (display_boundary)begin
+            visual_active <= ENABLE_AUDIO_VISUAL ? visual_mode : 2'd0;
+            status_active<=ENABLE_STATUS && !playing;
+        end
     end
 
     // Capture the row masks once per row scan. Only heads through HIT_Y
@@ -260,6 +296,15 @@ module hub75e_rhythm_display #(
                     r = 0; g = 24; b = 31;
                 end
             end
+            // Sixteen 3-pixel indicators along the bottom of the guide page.
+            // Keeps the existing seven score lanes and all graph pages intact.
+            if(touch_mode16===1'b1 && y>=60)begin
+                r=0;g=0;b=0;
+                if(x[1:0]!=0)begin
+                    r=2;g=3;b=5;
+                    if(all_touch_keys[x[5:2]])begin r=0;g=25;b=12;end
+                end
+            end
             pixel_rgb = {r,g,b};
         end
     endfunction
@@ -292,8 +337,8 @@ module hub75e_rhythm_display #(
                 end
                 S_PIXEL_PREP: begin
                     hub_CK <= 0;
-                    upper_pixel <= visual_active ? visual_upper : pixel_rgb(column, upper_y, upper_notes);
-                    lower_pixel <= visual_active ? visual_lower : pixel_rgb(column, lower_y, lower_notes);
+                    upper_pixel <= visual_active ? visual_upper : status_active ? status_upper : pixel_rgb(column, upper_y, upper_notes);
+                    lower_pixel <= visual_active ? visual_lower : status_active ? status_lower : pixel_rgb(column, lower_y, lower_notes);
                     state <= S_SHIFT;
                 end
                 S_SHIFT: begin

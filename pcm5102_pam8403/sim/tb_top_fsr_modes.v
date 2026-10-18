@@ -18,15 +18,15 @@ module tb_top_fsr_modes;
     reg [31:0] old_phase,expected_phase;
     // DDS phase must advance by the selected step, never reset on a mode change.
     always @(posedge clk) begin
-        if(dut.resetn && dut.frame_ce) begin
-            old_phase=dut.touch_voices[0].u_synth.voices[0].u_voice.u_dds.phase;
-            expected_phase=old_phase+dut.touch_phase_increments[31:0]; #1;
-            if(dut.touch_voices[0].u_synth.voices[0].u_voice.u_dds.phase!==expected_phase)
+        if(dut.resetn && dut.u_touch_synth.state==7 && dut.u_touch_synth.index==0) begin
+            old_phase=dut.u_touch_synth.phase;
+            expected_phase=old_phase+dut.u_touch_synth.frame_steps[31:0]; #1;
+            if(dut.u_touch_synth.phase!==expected_phase)
                 $fatal(1,"Mode/pressure change interrupted DDS phase continuity");
         end
     end
     always @(negedge clk) begin
-        if(dut.resetn && (dut.u_output_mix.clipped || dut.pressure_enabled.u_touch_mix.clipped))
+        if(dut.resetn && (dut.u_output_mix.clipped || dut.u_touch_synth.clipped))
             $fatal(1,"Default 11-voice expression mix clipped");
         if(dut.touch_note_gates[7]!==0) $fatal(1,"Control key 8 started a note");
     end
@@ -114,7 +114,7 @@ module tb_top_fsr_modes;
         pads=8'h7f;wait(dut.touch_keys==8'h7f);set_pressure(0);
         s1=1;#100000;s1=0;#45000000;
         if(!dut.u_control.playing || dut.voice_gates!==4'hf ||
-           dut.touch_voices[0].u_synth.active!==4'hf || dut.touch_voices[1].u_synth.active!==4'h7)
+           dut.touch_active[3:0]!==4'hf || dut.touch_active[7:4]!==4'h7)
             $fatal(1,"Seven notes plus four song voices failed");
         press_mode(1);set_pressure(1023);
         if(dut.phase_increments[31:0]!==46025656 || dut.u_control.note_index!==0)

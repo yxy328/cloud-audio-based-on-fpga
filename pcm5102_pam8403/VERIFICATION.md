@@ -1,8 +1,70 @@
 # 本地验证记录
 
+> 2026-10-18 仓库整理复核：统一App v1.4、8/16键接线、八音色、ADSR作用范围及快速上手，新增版本记录和首页状态页预览。检查22份文档中的169个链接（其中2个为明确保留的本地生成产物链接），主工程50项文件依赖均已纳入仓库。重跑App五组核心测试共16990项断言通过；`tb_hc05_extensions`、`tb_analog_expression`、`tb_touch_tdm_synth`、`tb_audio_effects`、`tb_audio_master_volume`通过。模拟输入测试在受限环境编译器异常退出，宿主环境复跑通过。核对APK与本地位流SHA256均与下表一致；本次整理没有重新综合或烧录实板。
+
+## 2026-10-18：App v1.4，8/16 键和参考工程迁移（当前版本）
+
+功能、串口协议、接线和限制见 [参考工程迁移说明](REFERENCE_MIGRATION.md)。
+新增 App 8/16 键选择、串行极性读回、完整 16 键和弦、回声/合唱、延音/PANIC、总音量、
+滑杆四种用途及端点标定；红外/手势音色增至八种。上电仍为原 8 键接口。
+无需 OLED，64×64 HUB75E 空闲显示控制参数、16 键/红外状态、音量和 ADC 行程，播放时自动显示原曲谱；波形、XY、FFT 页保留。
+
+触摸合成改为 16 个独立相位/ADSR 上下文共享运算，每声部保存包络快照；
+前七键 MAP、独立滑音和曲谱保持兼容，K8～K16 固定 C5～D6。
+TTP229 采用参考工程的双窗口投票与两帧确认，并适配高/低有效串行。
+16 键时必须拆掉 OUT1～OUT8 直连，只接 SCL/SDO，避免 FPGA 原有下拉加载触摸电极。
+滑杆复用原 ADC，替换 FSR；没有新增第二路同时采集。曲谱/日志的兼容范围见迁移说明。
+
+### 构建
+
+- Gowin V1.9.11.03 Education，GW5A-LV25MG121NC1/I0，顶层 `top`；上海时间 **2026-10-18 16:27:14** 完成最终综合、布局布线、位流及仿真网表生成。
+- 50MHz：Setup/Hold 违例均 **0**，Fmax **50.072MHz**，最差 Setup Slack **+0.029ns**；时序余量较小，修改 RTL 后需重新布局布线确认。
+- 资源：Logic **22131/23040**，Register **9544/23280**，CLS **11343/11520**，BSRAM **52/56**，DSP **20.5/28**，ADC **1/1**。
+  相比此前 7 键版本的 56 块 BSRAM、23 DSP，保留了新增功能所需空间；逻辑和 CLS 仍接近容量，不承诺还能直接叠加大型外设。
+- App **v1.4 / versionCode 5** 已完成 Java/D8/APK 构建、对齐、APK v3 签名和 Manifest 检查；复用原调试签名，可覆盖安装。
+- JVM 核心测试 **16990 项断言**：DeviceControls 4605、VoiceBend 7229、AdsrProfile 5032、SongCodec 30、SppLink 94。
+
+### 数字验证
+
+本轮针对性 RTL 仿真已通过 **35 / 35** 组；没有声称运行所有历史测试。
+
+- `tb_top_touch16`：真实 UART、TTP229 SCL/SDO 和外部 I2S 解码；全部 16 键音高存在，两种串行极性、GPIO 隔离、忙状态拒绝、锁存/PANIC、K16、压力用途及返回 GPIO 均通过。
+  4096 点 Hann 投影复查得到前七键幅度约 1217～1316、后九键约 614～624 PCM 单位，16 个目标音高均存在。
+- `tb_touch_tdm_synth`：16 键同时起音/衰减不超音频帧期限；高九键频谱、各自包络/释音、已按音参数快照、新音参数更新、变调相位连续。
+- `tb_hc05_extensions`：40 条真实位级 UART 事务，控制/ADC/标定/极性查询，参数边界、非法格式、录制/演奏忙状态和拒绝时不提交。
+- `tb_analog_expression`：全部湿度代码、校准两端/中点、音量上限、音高、完整颤音周期、ADC 超时/过期回退。
+- `tb_sensor_eight_timbres`：8 种不同且非零的 PCM 波形、事件分配、期限和最终释音；参考抗干扰用例通过真实 1+7、16 键和弦、短干扰修正、长干扰拒绝及恢复。
+- 音效独立环形缓冲参考模型检查 59005 样本；总音量的精确静音/原增益、符号、平滑及反向变化通过。
+- 原七键独立滑音、运行时 ADSR、现场静音/多音演奏、按键响应和显示回归通过；16 份顶层测试平台全部编译通过。
+  七键 OUT→首个 I2S PCM 最慢 **1.823ms**，OUT→包含释音尾音的静音最慢 **12.033ms**；不含触摸芯片电容扫描、DAC 和功放。
+- `tb_top_audition` 与 `tb_top_integrated` 已通过：显式试听、七键和弦/连续音/休止、STOP 保留手按音，UART/曲谱/HUB 扫描，FSR 两用途、四方向/双银行手势、吉他及最终静音。
+- `tb_hub75e_status`：从外部 HUB75E RGB/CK/LAT 引脚重建全部 32 个 PWM 平面；精确检查 8/16 键、锁存、红外、字体、半音量/满行程、ADC 红色故障提示、整帧更新和状态/曲谱自动切换；扫描仍为每行 133 个时钟。
+- 为解决新增显示后的布线拥挤，XY 的 32 样本历史改为同步 BSRAM；ADC、TTP229、曲谱和日志的计数器按参数范围定宽。`tb_lissajous_delay`、`tb_audio_visualizer`、`tb_fsr_adc_capture`、`tb_gowin_fsr_adc`、`tb_downloadable_song`、`tb_performance_logger` 和三组 TTP229 抗干扰用例重新通过。
+- `tb_top_audio_visual` 已通过：真实 I2S 采样和 DDS 相位不受切页影响，触摸/红外/吉他进入波形与 FFT，S2 四页和六种 XY 预设、UART XY、曲谱并行正常；真实 UART 的音量/音效/延音/音色/压力/模拟用途、ADC 转换及实体键/红外进入总览快照，并重建外部 RGB5 画面。最终 RTL 的 `tb_top_touch16` 和生产参数 `tb_top_idle` 再次通过。
+
+### 产物
+
+| 产物 | 标识 / SHA256 |
+| --- | --- |
+| `android_app/dist/FPGA-Score-debug.apk` | v1.4 / Code5；`659A2DF5E1B58686C8BA1F662C39D4B33EB837CCBF9B61C3DEFEF4F147DDE7F7` |
+| `impl/pnr/PCM5102_PAM8403.fs` | UserCode **0x00002850**；`E48577E990BF0A4233401078A91555CE0F22EBF44A824BE0986BF400F4B16FCF` |
+
+源文件与产物指纹保存在 `sim/build/migration_artifact_hashes.json`。
+主要日志：`impl/build_migration_led_fit.log`、`sim/build/migration_final_touch.log`、
+`sim/build/tb_hc05_extensions.log`、`sim/build/tb_analog_expression.log`、`sim/build/migration_units.log`、
+`sim/build/migration_regressions.log`、`sim/build/migration_led_tests.log`、`sim/build/migration_fit_tests.log`、
+`sim/build/migration_led_top.log`、`sim/build/migration_led_touch16.log`、`android_app/build/migration_apk_led.log`。
+16 键采样与频谱结果：`sim/build/decoded_pcm_touch16.csv`、`sim/build/touch16_spectrum.json`。
+状态页预览：`assets/status16.png`、`assets/status8.png`，由真实 HUB75E 输出引脚的数字仿真重建。
+
+本轮**未烧录实板、未实测触摸焊盘/误触、未试听模拟输出或测整机延时，未在真实安卓手机/模拟器操作 UI**。
+上述属于数字仿真、编译与静态时序证据；硬件改接后仍需按迁移说明现场验收。
+
+复现：`android_app/test-core.ps1`、`android_app/build-apk.ps1`、`tools/run_sim.ps1 -Tests <上述测试名>`、Gowin `gw_sh tools/build.tcl`。
+
 > 2026-10-17 仓库文档整理复核：补充首页、文档索引和快速上手，修正运行时 ADSR、App v1.3 与 S2 操作说明，标注历史资料。检查了10份入口/功能文档中的96处本地链接及主工程全部文件依赖；重新运行 `tb_hc05_control_races`、`tb_hc05_download` 均通过，App四组核心测试共12347项断言通过。当前APK SHA256与下节记录一致。本次整理未重新综合、生成位流或烧录实板；下节保留最近一次构建结果。
 
-## 2026-10-17：App v1.3 显式自动演奏试听（当前版本）
+## 2026-10-17：App v1.3 显式自动演奏试听（历史版本）
 
 App 曲谱卡新增“自动演奏 · 已下载曲谱”，发送 `AUDITION`，不修改普通 PLAY/S1/S2 的无声指引语义。
 默认仍为 `ENABLE_DEMO_SCORE=0`；显式试听将当前曲谱和弦对应的七键门控并入已有触摸 DDS/ADSR，

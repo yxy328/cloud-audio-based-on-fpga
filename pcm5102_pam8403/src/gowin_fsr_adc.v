@@ -69,10 +69,15 @@ module fsr_adc_capture #(
     output reg timeout
 );
     localparam PERIOD_CYCLES = CLK_FREQ/SAMPLE_HZ;
+    localparam PERIOD_BITS=PERIOD_CYCLES<2 ? 1 : $clog2(PERIOD_CYCLES);
+    localparam REQUEST_BITS=REQUEST_CYCLES<1 ? 1 : $clog2(REQUEST_CYCLES+1);
+    localparam TIMEOUT_BITS=TIMEOUT_CYCLES<2 ? 1 : $clog2(TIMEOUT_CYCLES);
     localparam IDLE=2'd0, WAIT_LOW=2'd1, WAIT_HIGH=2'd2;
     reg [1:0] state;
     reg ready_meta, ready_sync;
-    reg [31:0] period_count, request_left, elapsed;
+    reg [PERIOD_BITS-1:0] period_count;
+    reg [REQUEST_BITS-1:0] request_left;
+    reg [TIMEOUT_BITS-1:0] elapsed;
     assign busy = state != IDLE;
     // ADCVALUE/2048 is voltage in volts. Convert 0..1V to 0..1023.
     // Saturating this digital conversion does not protect the analog pin.

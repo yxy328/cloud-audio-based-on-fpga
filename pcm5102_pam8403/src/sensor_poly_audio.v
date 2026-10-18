@@ -38,6 +38,7 @@ module sensor_poly_audio #(
         case (control_timbre)
             1:event_frames=PIANO_FRAMES; 2:event_frames=FLUTE_FRAMES;
             3:event_frames=UKULELE_FRAMES; 4:event_frames=DRUM_FRAMES;
+            5:event_frames=PIANO_FRAMES;6:event_frames=UKULELE_FRAMES;7:event_frames=FLUTE_FRAMES;
             default:event_frames=NOTE_FRAMES;
         endcase
     end
@@ -71,7 +72,7 @@ module sensor_poly_audio #(
         end
     end
     wire [181:0] next_event=events[rd];
-    tdm_synth #(.VOICES(32),.RUNTIME_ADSR(1),.VOLUME_SHIFT(VOLUME_SHIFT)) u_synth (
+    tdm_synth #(.VOICES(32),.EXTENDED_TIMBRES(1),.RUNTIME_ADSR(1),.VOLUME_SHIFT(VOLUME_SHIFT)) u_synth (
         .clk(clk),.resetn(resetn),.sample_ce(frame_ce),
         .event_valid(pop),.event_inc(next_event[31:0]),
         .event_adsr(next_event[181:52]),.event_timbre(next_event[34:32]),.event_frames(next_event[51:35]),

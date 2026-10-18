@@ -41,7 +41,9 @@ module downloadable_song #(
     reg [127:0] written;
     reg [7:0] staged_count, active_count, index;
     reg [55:0] checked_map;
-    reg [31:0] ms_count, elapsed_ms;
+    localparam MS_BITS=MS_TICKS<2 ? 1 : $clog2(MS_TICKS);
+    reg [MS_BITS-1:0] ms_count;
+    reg [31:0] elapsed_ms;
 
     reg [28:0] cur_word, next_word, future_word;
     reg cur_have, next_have, future_have, current_finished, future_finished;

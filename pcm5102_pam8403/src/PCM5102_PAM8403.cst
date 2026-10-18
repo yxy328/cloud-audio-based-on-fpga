@@ -21,9 +21,13 @@ IO_PORT "hc05_tx" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
 IO_LOC "touch_scl" F6;
 IO_PORT "touch_scl" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
 
+IO_LOC "touch_sdo" F7;
+IO_PORT "touch_sdo" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF BANK_VCCIO=3.3;
+
 // TTP229 OUT1..8, 8-key direct mode, active-high, 3.3V.
 // OUT1 moves from K1 (now DAC LRCK) to K4, J3 pin 5.
-// Pull-downs keep disconnected active-high inputs silent.
+// Pull-downs keep unused GPIO inputs silent after rewiring to serial.
+// In 16-key mode DISCONNECT OUT1..OUT8: they become touch electrodes.
 IO_LOC "touch_out[0]" K4; // OUT1 -> J3 pin 5.
 IO_LOC "touch_out[1]" L2; // OUT2 -> J3 pin 4.
 IO_LOC "touch_out[2]" J4; // OUT3 -> J3 pin 6.

@@ -16,3 +16,5 @@ set_false_path -from [get_ports {ir_beam[*]}] -to [get_pins {u_ir/beam_meta*/D}]
 # ready goes low then high. ADC/fabric clock paths remain normally constrained.
 # BCK/LRCK/DIN are registered outputs, not clocks for internal logic.
 # This master-clock constraint does not model cable / DAC output timing.
+
+set_false_path -from [get_ports {touch_sdo}] -to [get_pins {u_touch_serial/sdo_meta*/D}]

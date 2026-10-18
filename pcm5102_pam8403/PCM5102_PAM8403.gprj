@@ -26,6 +26,7 @@
         <File path="src/hc05_keymap.v" type="file.verilog" enable="1"/>
         <File path="src/downloadable_song.v" type="file.verilog" enable="1"/>
         <File path="src/hub75e_rhythm_display.v" type="file.verilog" enable="1"/>
+        <File path="src/hub75e_status.v" type="file.verilog" enable="1"/>
         <File path="src/audio_visualizer.v" type="file.verilog" enable="1"/>
         <File path="src/lissajous_reference.v" type="file.verilog" enable="1"/>
         <File path="src/audio_spectrum.v" type="file.verilog" enable="1"/>
@@ -48,5 +49,11 @@
         <File path="src/i2c_master.v" type="file.verilog" enable="1"/>
         <File path="src/PCM5102_PAM8403.cst" type="file.cst" enable="1"/>
         <File path="src/PCM5102_PAM8403.sdc" type="file.sdc" enable="1"/>
+        <File path="src/ttp229_keys.v" type="file.verilog" enable="1"/>
+        <File path="src/touch_tdm_synth.v" type="file.verilog" enable="1"/>
+        <File path="src/analog_expression.v" type="file.verilog" enable="1"/>
+        <File path="src/audio_effects.v" type="file.verilog" enable="1"/>
+        <File path="src/audio_master_volume.v" type="file.verilog" enable="1"/>
+        <File path="src/touch_sine_rom.v" type="file.verilog" enable="1"/>
     </FileList>
 </Project>

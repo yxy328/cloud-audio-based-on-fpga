@@ -19,10 +19,10 @@ module tb_top_hc05_map;
         .i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din),.touch_scl());
     i2s_pcm_monitor monitor(.bck(bck),.lrck(lrck),.din(din));
     // UART and pressure changes must never reset or skip the DDS accumulator.
-    always @(posedge clk) if(dut.resetn && dut.frame_ce) begin
-        previous_phase=dut.touch_voices[0].u_synth.voices[0].u_voice.u_dds.phase;
-        expected_phase=previous_phase+dut.touch_phase_increments[31:0];#1;
-        if(dut.touch_voices[0].u_synth.voices[0].u_voice.u_dds.phase!==expected_phase)
+    always @(posedge clk) if(dut.resetn && dut.u_touch_synth.state==7 && dut.u_touch_synth.index==0) begin
+        previous_phase=dut.u_touch_synth.phase;
+        expected_phase=previous_phase+dut.u_touch_synth.frame_steps[31:0];#1;
+        if(dut.u_touch_synth.phase!==expected_phase)
             $fatal(1,"UART mapping disturbed DDS phase continuity");
     end
     initial forever begin

@@ -11,7 +11,8 @@
 | [快速上手](QUICK_START.md) | 克隆、工具准备、仿真、构建、SRAM 下载和首次演奏 |
 | [主工程说明](../pcm5102_pam8403/README.md) | 整体架构、触摸操作、音频接口和默认参数 |
 | [引脚与功能验收表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md) | 完整接线、功能实现状态、赛题口径和现场验收步骤 |
-| [安卓曲谱助手](../pcm5102_pam8403/android_app/README.md) | App v1.3 安装、蓝牙连接、CSV/MIDI 导入和自动试听 |
+| [8/16 键与参考功能迁移](../pcm5102_pam8403/REFERENCE_MIGRATION.md) | 模式、串行极性、16 键和弦、音效、延音、滑杆标定、64×64 状态页图例 |
+| [安卓曲谱助手](../pcm5102_pam8403/android_app/README.md) | App v1.4 安装、蓝牙连接、CSV/MIDI 导入和自动试听 |
 | [蓝牙曲谱与事件日志](../pcm5102_pam8403/BLUETOOTH_MEDIA.md) | 曲谱协议、PLAY/AUDITION/STOP、日志与错误码 |
 | [HC-05 与键位映射](../pcm5102_pam8403/HC05_KEYMAP.md) | UART 接线、通信参数和改键 |
 | [压力输入](../pcm5102_pam8403/FSR402.md) | FSR402、ADC 分压、力度和音高模式 |
@@ -21,6 +22,7 @@
 | [音频可视化](../pcm5102_pam8403/AUDIO_VISUAL.md) | 波形、参考/混音 XY、FFT、S2 切页与 XY 命令 |
 | [验证记录](../pcm5102_pam8403/VERIFICATION.md) | 按时间倒序记录构建、指纹、仿真结果和未完成的实板验证 |
 | [仓库维护](REPOSITORY.md) | Git 更新、目录约定、文档维护和上传范围 |
+| [版本记录](CHANGELOG.md) | App/FPGA 配套版本、升级要点与兼容范围 |
 
 完整接线以验收表及 `src/PCM5102_PAM8403.cst` 为依据。最新位流和 App 配套信息查验证记录顶部；历史段落中的编号不代表当前版本。
 

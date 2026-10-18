@@ -17,8 +17,8 @@ module tb_top_touch_response;
     time press_at, gate_at, audio_at, release_at, idle_at, quiet_at;
     time press_at_mode;
     time max_press=0, max_release=0;
-    wire voices_idle = dut.touch_voices[0].u_synth.active==0 &&
-                       dut.touch_voices[1].u_synth.active==0;
+    wire voices_idle = dut.touch_active[3:0]==0 &&
+                       dut.touch_active[7:4]==0;
     task silence;
         input integer start_sample;
         integer n;
@@ -109,11 +109,11 @@ module tb_top_touch_response;
         wait(dut.touch_keys[6:0]==7'h7f); #3000000;
         @(negedge clk); pads[0]=0;
         wait(dut.touch_keys[6:0]==7'h7e); #2000000;
-        if(!dut.touch_voices[0].u_synth.active[0]) $fatal(1,"Release cut off abruptly");
+        if(!dut.touch_active[0]) $fatal(1,"Release cut off abruptly");
         @(negedge clk); pads[0]=1;
-        wait(dut.touch_keys[6:0]==7'h7f); #100;
-        if(dut.touch_voices[0].u_synth.voices[0].u_voice.envelope_state!=1 ||
-           dut.touch_voices[0].u_synth.active!=4'hf || dut.touch_voices[1].u_synth.active!=4'h7)
+        wait(dut.touch_keys[6:0]==7'h7f); #21000;
+        if(dut.u_touch_synth.states[2:0]!=1 ||
+           dut.touch_active[3:0]!=4'hf || dut.touch_active[7:4]!=4'h7)
             $fatal(1,"Fast retrigger interrupted another held note");
         #3000000;
         @(negedge clk); pads[6:0]=0;

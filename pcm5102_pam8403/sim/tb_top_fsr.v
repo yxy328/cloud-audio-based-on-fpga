@@ -41,7 +41,7 @@ module tb_top_fsr;
         end
     endtask
     always @(negedge clk) begin
-        if(dut.resetn && (dut.u_output_mix.clipped || dut.pressure_enabled.u_touch_mix.clipped))
+        if(dut.resetn && (dut.u_output_mix.clipped || dut.u_touch_synth.clipped))
             $fatal(1,"Default pressure mix clipped");
     end
     initial begin

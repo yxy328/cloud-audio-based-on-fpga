@@ -50,15 +50,13 @@ module tb_top_integrated;
            dut.downloaded_playing && dut.song_guide_keys==0) cyan_rows=cyan_rows+1;
         cyan_in_row=0;
     end
-    wire [127:0] gains={dut.touch_voices[1].u_synth.envelope_gains,
-                       dut.touch_voices[0].u_synth.envelope_gains};
-    wire [23:0] states={dut.touch_voices[1].u_synth.envelope_states,
-                       dut.touch_voices[0].u_synth.envelope_states};
+    wire [127:0] gains=dut.u_touch_synth.gains[127:0];
+    wire [23:0] states=dut.u_touch_synth.states[23:0];
     always @(negedge clk) if(dut.resetn) begin
         if(touch_scl!==1) $fatal(1,"Direct-mode TTP229 SCL not HIGH");
         if(dut.voice_gates!==0 || dut.song_active!==0)
             $fatal(1,"Guide enabled autonomous score audio");
-        if(dut.u_output_mix.clipped || dut.pressure_enabled.u_touch_mix.clipped ||
+        if(dut.u_output_mix.clipped || dut.u_touch_synth.clipped ||
            dut.u_extra_mix.clipped) $fatal(1,"Integrated voices clipped");
         if(dut.touch_note_gates[7]!==0) $fatal(1,"Mode key became an audio key");
     end
@@ -231,7 +229,7 @@ module tb_top_integrated;
         transact("VIBRATO,1\n",10,{"OK",8'd13,8'd10});
         if(dut.gesture_timbre!==4 || !dut.gesture_bank || !dut.gesture_vibrato)
             $fatal(1,"UART sensor controls failed while seven keys were held");
-        transact("TONE,5\n",7,{"ERR,RANGE",8'd13,8'd10});
+        transact("TONE,8\n",7,{"ERR,RANGE",8'd13,8'd10});
         transact("TONE,9\n",7,{"ERR,RANGE",8'd13,8'd10});
         transact("BANK,2\n",7,{"ERR,RANGE",8'd13,8'd10});
         transact("VIBRATO,2\n",10,{"ERR,RANGE",8'd13,8'd10});

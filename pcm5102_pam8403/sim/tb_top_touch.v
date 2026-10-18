@@ -77,11 +77,11 @@ module tb_top_touch;
             if($time-press_time>2300000) $fatal(1,"Touch confirmation-to-PCM budget failed");
             #1000000;
             if(k<4) begin
-                if(dut.touch_voices[0].u_synth.active!==(4'b0001<<k) ||
-                   dut.touch_voices[1].u_synth.active!==0) $fatal(1,"Wrong independent low touch voice");
+                if(dut.touch_active[3:0]!==(4'b0001<<k) ||
+                   dut.touch_active[7:4]!==0) $fatal(1,"Wrong independent low touch voice");
             end else begin
-                if(dut.touch_voices[1].u_synth.active!==(4'b0001<<(k-4)) ||
-                   dut.touch_voices[0].u_synth.active!==0) $fatal(1,"Wrong independent high touch voice");
+                if(dut.touch_active[7:4]!==(4'b0001<<(k-4)) ||
+                   dut.touch_active[3:0]!==0) $fatal(1,"Wrong independent high touch voice");
             end
             // Each production note increment agrees with equal temperament.
             if($abs(dut.touch_base_increments[k*32 +: 32]-hz[k]*4294967296.0/48828.125)>0.51)

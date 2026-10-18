@@ -28,7 +28,7 @@ public final class SppLink implements Closeable {
     private void read(BluetoothSocket s){
         try{InputStream input=s.getInputStream();ByteArrayOutputStream b=new ByteArrayOutputStream();int ch;
             while((ch=input.read())!=-1){if(socket!=s)return;if(ch=='\n'){String line=new String(b.toByteArray(),StandardCharsets.US_ASCII).trim();b.reset();if(line.isEmpty())continue;
-                    listener.line(line);if(waiting&&!line.startsWith("ERR,REC_OVERFLOW,")&&(line.equals("OK")||line.startsWith("OK,")||line.startsWith("ERR,")||line.startsWith("MAP,")||line.equals("PONG")))responses.offer(line);
+                    listener.line(line);if(waiting&&!line.startsWith("ERR,REC_OVERFLOW,")&&(line.equals("OK")||line.startsWith("OK,")||line.startsWith("ERR,")||line.startsWith("MAP,")||line.startsWith("CTRL,")||line.startsWith("ADC,")||line.startsWith("CAL,")||line.startsWith("SERIAL,")||line.equals("PONG")))responses.offer(line);
                 }else if(ch!='\r'){if(b.size()>=1024)throw new IOException("接收行过长，连接已关闭");b.write(ch);}}
             throw new IOException("设备已断开");
         }catch(IOException e){if(socket==s){socket=null;responses.offer("!DISCONNECTED");listener.disconnected(e.getMessage());}try{s.close();}catch(IOException ignored){}}
@@ -43,7 +43,7 @@ public final class SppLink implements Closeable {
                 String response=responses.poll(remaining,TimeUnit.NANOSECONDS);if(response==null)continue;
                 if(response.equals("!DISCONNECTED"))throw new IOException("蓝牙已断开；重新连接后可从头重试下载");
                 if(response.startsWith("ERR,"))throw new IOException("设备返回 "+response);
-                if(expected.equals("MAP")&&response.startsWith("MAP,"))return response;
+                if((expected.equals("MAP")||expected.equals("CTRL")||expected.equals("ADC")||expected.equals("CAL")||expected.equals("SERIAL"))&&response.startsWith(expected+","))return response;
                 if(expected.equals("OK")&&(response.equals("OK")||response.startsWith("OK,")))return response;
                 if(expected.equals("PONG")&&response.equals("PONG"))return response;
             }

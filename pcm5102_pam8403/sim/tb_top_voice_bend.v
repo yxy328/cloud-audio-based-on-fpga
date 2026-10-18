@@ -63,10 +63,10 @@ module tb_top_voice_bend;
     genvar v;
     generate for(v=0;v<7;v=v+1)begin: phase_check
         reg [31:0] expected;
-        always @(posedge clk)if(dut.resetn && dut.frame_ce)begin
-            expected=dut.touch_voices[v/4].u_synth.voices[v%4].u_voice.u_dds.phase+dut.touch_phase_increments[v*32 +:32];
+        always @(posedge clk)if(dut.resetn && dut.u_touch_synth.state==7 && dut.u_touch_synth.index==v)begin
+            expected=dut.u_touch_synth.phase+dut.u_touch_synth.frame_steps[v*32 +:32];
             #1;
-            if(dut.touch_voices[v/4].u_synth.voices[v%4].u_voice.u_dds.phase!==expected)$fatal(1,"Live bend reset DDS phase %0d",v);
+            if(dut.u_touch_synth.phase!==expected)$fatal(1,"Live bend reset DDS phase %0d",v);
         end
     end endgenerate
     reg [223:0] base;
@@ -76,8 +76,8 @@ module tb_top_voice_bend;
         wait(dut.resetn);frames(10);
         pads=127;wait(dut.touch_keys[6:0]==127);frames(12);
         base=dut.touch_base_increments;
-        envelope0=dut.touch_voices[0].u_synth.envelope_gains;
-        envelope1=dut.touch_voices[1].u_synth.envelope_gains;
+        envelope0=dut.u_touch_synth.gains[63:0];
+        envelope1=dut.u_touch_synth.gains[127:64];
         command("BEND,2,17358\n",13);frames(70);
         for(k=0;k<7;k=k+1)begin
             expected_product=base[k*32+:32]*((k==1)?16'd17358:16'd16384);
@@ -88,7 +88,7 @@ module tb_top_voice_bend;
             expected_product=base[k*32+:32]*((k==1)?16'd17358:((k==3)?16'd15464:16'd16384));
             if(dut.touch_phase_increments[k*32+:32]!==expected_product[45:14])$fatal(1,"Top second bend wrong key %0d",k);
         end
-        if(dut.touch_voices[0].u_synth.envelope_gains!==envelope0 || dut.touch_voices[1].u_synth.envelope_gains!==envelope1)$fatal(1,"Bend altered held ADSR");
+        if(dut.u_touch_synth.gains[63:0]!==envelope0 || dut.u_touch_synth.gains[127:64]!==envelope1)$fatal(1,"Bend altered held ADSR");
         if(monitor.pcm_count<100 || !latches)$fatal(1,"External I2S/LED stopped");
         nonzero=0;for(k=0;k<monitor.pcm_count;k=k+1)if(monitor.pcm[k])nonzero=nonzero+1;
         if(nonzero<100)$fatal(1,"Live chords not audible on I2S");

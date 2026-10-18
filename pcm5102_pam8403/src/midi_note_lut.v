@@ -29,7 +29,24 @@ module midi_note_lut #(parameter integer BLOCK_ROM=0) (
         end
     endfunction
     genvar voice, note_index;
-    generate if(BLOCK_ROM) begin: rom_bank
+    generate if(BLOCK_ROM==2) begin: shared_rom
+        (* syn_romstyle="block_rom" *) reg [25:0] table_rom[0:255];
+        reg [2:0] index=0,held_index=0;
+        reg [25:0] q;
+        reg valid=0;
+        for(note_index=0;note_index<256;note_index=note_index+1)begin: init_note
+            localparam [31:0] STEP=midi_step(note_index[7:0]);
+            initial table_rom[note_index]=STEP[25:0];
+        end
+        always @(posedge clk) begin
+            q<=table_rom[note_map[index*8 +:8]];held_index<=index;
+            if(!resetn) begin index<=0;valid<=0;phase_increments<=0;end
+            else begin
+                valid<=1;index<=(index==6) ? 3'd0 : index+1'b1;
+                if(valid)phase_increments[held_index*32 +:32]<={6'd0,q};
+            end
+        end
+    end else if(BLOCK_ROM) begin: rom_bank
         for(voice=0;voice<7;voice=voice+1)begin: entry
             (* syn_romstyle="block_rom" *) reg [25:0] table_rom[0:255];
             reg [25:0] q;

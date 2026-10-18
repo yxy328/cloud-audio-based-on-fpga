@@ -48,10 +48,15 @@ module audio_visualizer (
     end
     wire [4:0] next_minimum = sample_y < minimum_y ? sample_y : minimum_y;
     wire [4:0] next_maximum = sample_y > maximum_y ? sample_y : maximum_y;
-    reg [4:0] history[0:31];
+    // The pointer is stable for 1024 clocks between samples. A synchronous
+    // read therefore supplies the same delayed point at sample_ce, while
+    // moving the 32-entry history and its large mux into one block RAM.
+    (* syn_ramstyle="block_ram" *) reg [4:0] history[0:31];
+    reg [4:0] history_q;
     reg [4:0] history_pointer;
     reg [5:0] history_count;
-    wire [4:0] xy_y=capture_ratio==0 ? history[history_pointer] : reference_y;
+    wire [4:0] xy_y=capture_ratio==0 ? history_q : reference_y;
+    always @(posedge clk)history_q<=history[history_pointer];
     always @(posedge clk) begin
         if(!resetn) begin history_pointer<=0;history_count<=0;end
         else if(sample_ce) begin

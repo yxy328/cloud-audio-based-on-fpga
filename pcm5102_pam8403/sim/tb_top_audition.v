@@ -41,12 +41,9 @@ module tb_top_audition;
     // one-bit I2S delay, padding, pin update edge, and output headroom.
     i2s_pcm_monitor #(.PCM_MIN(-24576),.PCM_MAX(24576)) monitor(
         .bck(bck),.lrck(lrck),.din(din));
-    wire [127:0] gains={dut.touch_voices[1].u_synth.envelope_gains,
-                       dut.touch_voices[0].u_synth.envelope_gains};
-    wire [23:0] states={dut.touch_voices[1].u_synth.envelope_states,
-                       dut.touch_voices[0].u_synth.envelope_states};
-    wire [127:0] voices={dut.touch_voices[1].u_synth.voice_samples,
-                        dut.touch_voices[0].u_synth.voice_samples};
+    wire [127:0] gains=dut.u_touch_synth.gains[127:0];
+    wire [23:0] states=dut.u_touch_synth.states[23:0];
+    wire [127:0] voices=dut.u_touch_synth.voice_samples[127:0];
     reg [511:0] replies[0:63],incoming=0;
     reg [7:0] decoded;
     integer reply_count=0,next_reply=0,rx_bit,first,k;

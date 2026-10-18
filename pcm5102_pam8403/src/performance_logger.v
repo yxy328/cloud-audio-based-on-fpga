@@ -23,7 +23,9 @@ module performance_logger #(
     reg [2:0] state;
     reg capturing, map_pending, ending, final_pending;
     reg [55:0] map_snapshot;
-    reg [31:0] ms_div, elapsed_ms, reported_dropped;
+    localparam MS_BITS=MS_TICKS<2 ? 1 : $clog2(MS_TICKS);
+    reg [MS_BITS-1:0] ms_div;
+    reg [31:0] elapsed_ms, reported_dropped;
     reg [4:0] pressure_ms;
     reg [6:0] last_keys;
     reg last_mode;

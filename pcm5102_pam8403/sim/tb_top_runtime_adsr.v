@@ -64,11 +64,11 @@ module tb_top_runtime_adsr;
         wait(dut.resetn);frames(10);
         command("ADSR,TOUCH,1,1,50,1\n",20);
         pads=1;wait(dut.touch_keys[0]);frames(120);
-        if(dut.touch_voices[0].u_synth.envelope_gains[15:0]!=32767) $fatal(1,"Touch UART envelope did not reach 50 percent");
+        if(dut.u_touch_synth.gains[15:0]!=32767) $fatal(1,"Touch UART envelope did not reach 50 percent");
         command("ADSR,TOUCH,0,0,25,1\n",20);
-        if(dut.touch_voices[0].u_synth.envelope_gains[15:0]!=32767) $fatal(1,"Held touch changed profile");
+        if(dut.u_touch_synth.gains[15:0]!=32767) $fatal(1,"Held touch changed profile");
         pads=3;wait(dut.touch_keys[1]);frames(8);
-        if(dut.touch_voices[0].u_synth.envelope_gains[15:0]!=32767 || dut.touch_voices[0].u_synth.envelope_gains[31:16]!=16383)
+        if(dut.u_touch_synth.gains[15:0]!=32767 || dut.u_touch_synth.gains[31:16]!=16383)
             $fatal(1,"Two independently snapshotted touch envelopes");
         pads=0;wait(dut.touch_keys==0);frames(80);if(monitor.last_pcm) $fatal(1,"Touch R did not become silent");
         command("ADSR,SENSOR,1,1,50,1\n",21);

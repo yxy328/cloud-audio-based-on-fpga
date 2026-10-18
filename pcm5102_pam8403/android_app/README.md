@@ -1,6 +1,12 @@
 # 安卓 HC-05 曲谱助手
 
-[仓库首页](../../README.md) · [文档索引](../../docs/README.md) · [下载当前 APK（v1.3）](dist/FPGA-Score-debug.apk)
+[仓库首页](../../README.md) · [文档索引](../../docs/README.md) · [下载当前 APK（v1.4）](dist/FPGA-Score-debug.apk)
+
+**当前版本 v1.4 / versionCode 5。** 首页新增“键盘模式与演奏控制”：8/16 键切换、串行极性、压力用途、延音、原声/回声/合唱、湿度、总音量、滑杆用途与端点标定，以及设备状态/ADC 读取。红外/手势音色增至八种。安装包需要配套新版 FPGA 位流，完整步骤、接线和限制见 [迁移说明](../REFERENCE_MIGRATION.md)；验证与当前 SHA256 见 [验证记录](../VERIFICATION.md)。
+
+无需 OLED，64×64 LED 在空闲时显示键态、音量、滑杆/ADC、延音、音色、音效和红外状态，曲谱播放时自动显示下落指引；长按 S2 切换波形/XY/频谱。屏幕图例见迁移说明。
+
+16 键全部可同时演奏；前七键映射和独立滑音仍保留，K8～K16 为固定 C5～D6。曲谱下载/自动试听和屏幕指引仍是七键格式；16 键、锁存、滑杆模式暂不支持演奏事件日志。滑杆替换原 ADC 上的 FSR，并非并行采两路。以下 v1.3 及更早章节保留为原功能说明。
 
 原生 Java App，连接现有 **HC-05 经典蓝牙 SPP**。下载的是音符、和弦、休止与时长，不包含 PCM、MP3 或 FLAC。`PLAY` 开始 HUB75E 曲目指引；FPGA 实时合成触摸、APDS-9960 手势和单弦吉他声音。App 另提供手势音源设置和单次拨弦控制。
 
@@ -98,7 +104,7 @@ App 一次只保留一条待确认命令。4 秒未收到预期响应、设备�
 
 “手势音源与单弦吉他”区域分别选择并应用音色、颤音与音符组；每次应用使用同一条串口命令队列，并等待 `OK` 后才提示成功。下载或其他命令执行期间，这些按钮与现有操作一起禁用。列表显示待发送值，没有设备状态查询；连接后需要点击应用，不能把列表初始值当作板上当前状态。
 
-- `TONE,0..4`：依次为正弦、钢琴、长笛、尤克里里、鼓。
+- `TONE,0..7`：依次为正弦、钢琴、长笛、尤克里里、鼓、电钢琴、钟声、弦乐。
 - `VIBRATO,0/1`：关闭或开启颤音。
 - `BANK,0/1`：低音组 C4～F4，或高音组 G4～C5。
 - `GUITAR`：点击一次触发一次固定单弦吉他拨弦，不需要 APDS-9960 就绪，不选择和弦或吉他弦。
@@ -115,7 +121,7 @@ App 一次只保留一条待确认命令。4 秒未收到预期响应、设备�
 
 ## 构建与验证
 
-当前安装包为 **v1.3 / versionCode 4**，SHA256 为 `35AAAA77D9CB27629AD452FD290C5B8A7D407733C7FD2C8207A3DDBA8F94ED51`。新增自动演奏按钮和配套位流的验证结果见 [最新验证记录](../VERIFICATION.md)。本节后半的 v1.2/v1.1/v1.0 信息保留为历史记录。
+历史 v1.3 安装包为 **v1.3 / versionCode 4**，SHA256 为 `35AAAA77D9CB27629AD452FD290C5B8A7D407733C7FD2C8207A3DDBA8F94ED51`。新增自动演奏按钮和配套位流的验证结果见 [最新验证记录](../VERIFICATION.md)。本节后半的 v1.2/v1.1/v1.0 信息保留为历史记录。
 
 工程没有第三方运行依赖。可以在 Android Studio 中打开本目录，使用其 SDK/JDK 构建；Gradle 插件使用 AGP 8.7.3（JDK 17、Gradle 8.9）。本目录另提供不依赖 Gradle 的 Windows 构建脚本，使用官方 Android SDK API35 / build-tools35 及 PATH 上的 JDK 17+（已在本机 JDK25 实际构建）。脚本只写本目录的 `tools/`、`build/` 与 `dist/`，不修改全局环境。
 
@@ -137,6 +143,6 @@ v1.1 已重新通过上述 70 项核心断言、APK 编译、签名、对齐和 
 
 本机受限沙盒内原生 `aapt2` 写文件仍失败；在允许原生文件写入的宿主环境中，`build-apk.ps1` 完整构建成功，SDK 工具与配置未修改。历史 v1.1 APK SHA256：`499D547116E33EAAB26420566FF6E988F6F44D8099472D87EEE017E3650054AA`。原 v1.0 安装包保留为 `dist/FPGA-Score-debug-v1.0.apk`。
 
-建议板上验收：小星星下载到 100% → PLAY → 断开蓝牙观察指引继续 → 下载到一半断开验证旧谱仍可用 → 和弦/休止谱面 → 自定义键位缺音报错 → 录制按下、长按、松开、多键并导出 → 五种手势音色、颤音与两组音符逐项应用 → 不连接手势模块时单次吉他拨弦 → 确认 S1/S2 仍控制曲谱。录制期间操作手势设置或吉他，确认串口确认与 `EVT`、`REC_END` 均正常接收，并核对日志只包含触摸/压力事件。
+建议板上验收：小星星下载到 100% → PLAY → 断开蓝牙观察指引继续 → 下载到一半断开验证旧谱仍可用 → 和弦/休止谱面 → 自定义键位缺音报错 → 录制按下、长按、松开、多键并导出 → 八种红外/手势音色、颤音与两组音符逐项应用 → 不连接手势模块时单次吉他拨弦 → 确认 S1/S2 仍控制曲谱。录制期间操作手势设置或吉他，确认串口确认与 `EVT`、`REC_END` 均正常接收，并核对日志只包含触摸/压力事件。
 
 官方接口依据：[Bluetooth 权限](https://developer.android.com/develop/connectivity/bluetooth/bt-permissions)、[查找已配对设备](https://developer.android.com/develop/connectivity/bluetooth/find-bluetooth-devices)、[RFCOMM 连接](https://developer.android.com/develop/connectivity/bluetooth/connect-bluetooth-devices)、[系统文件选择器](https://developer.android.com/training/data-storage/shared/documents-files)。

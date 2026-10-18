@@ -29,7 +29,11 @@ public final class MainActivity extends Activity {
     private TextView status,scoreInfo,mapInfo,logs;
     private ProgressBar progress;
     private Spinner devices,gestureTone,gestureVibrato,gestureBank;
-    private EditText mappingInput;
+    private EditText mappingInput,calibrationInput;
+    private TextView controlsInfo,volumeLabel,wetLabel,adcInfo;
+    private Spinner touchMode,serialPolarity,effectChoice,holdChoice,analogChoice,pressureChoice;
+    private SeekBar volumeBar,wetBar;
+    private DeviceControls confirmedControls;
     private Spinner adsrTarget;
     private final SeekBar[] adsrBars=new SeekBar[4];
     private final TextView[] adsrLabels=new TextView[4];
@@ -54,7 +58,7 @@ public final class MainActivity extends Activity {
     private boolean recordingCompleted;
     private static final int PICK_SCORE=10,EXPORT_LOG=11,PERMISSION=12;
     @Override public void onCreate(Bundle state){super.onCreate(state);
-        link=new SppLink(new SppLink.Listener(){public void line(String line){main.post(()->receive(line));}public void disconnected(String reason){main.post(()->{forgetBendConnection();mapping=null;recordingInterrupted();mapInfo.setText("键位未知，请重新连接");setStatus("蓝牙断开："+reason);});}});
+        link=new SppLink(new SppLink.Listener(){public void line(String line){main.post(()->receive(line));}public void disconnected(String reason){main.post(()->{forgetBendConnection();mapping=null;recordingInterrupted();forgetControls();mapInfo.setText("键位未知，请重新连接");setStatus("蓝牙断开："+reason);});}});
         BluetoothManager manager=(BluetoothManager)getSystemService(BLUETOOTH_SERVICE);adapter=manager==null?null:manager.getAdapter();
         buildUi();showSong();setStatus("先在系统蓝牙设置配对 HC-05，再刷新设备");
         if(hasBluetoothPermission())refreshDevices();
@@ -107,6 +111,7 @@ public final class MainActivity extends Activity {
         LinearLayout box=card(content,"01","蓝牙连接","先在系统蓝牙设置中配对 HC-05，再选择设备。");devices=new Spinner(this);devices.setContentDescription("已配对蓝牙设备");addSpinner(box,devices);
         LinearLayout connectionRow=row(box);button(connectionRow,"刷新设备",()->ensurePermission(this::refreshDevices),true);button(connectionRow,"连接设备",()->ensurePermission(this::connectSelected),true,1);
         button(box,"断开 / 取消下载",this::disconnect,false,2);
+        buildControls(content);
         box=card(content,"02","曲谱与播放","导入并下载曲谱后，可选择自动演奏或跟随屏幕指引练习。");
         button(box,"载入小星星示例",()->{song=SongCodec.twinkle();showSong();},true);
         button(box,"导入 CSV / MIDI 文件",this::pickScore,true);
@@ -116,7 +121,7 @@ public final class MainActivity extends Activity {
         button(box,"校验键位并下载 / 重新下载",this::download,true,1);
         text(box,"逐条确认后发送下一条。超时或取消后请重连并从头下载；提交成功前保留板上旧谱。",12,MUTED);
         button(box,"自动演奏 · 已下载曲谱",this::audition,true,1);
-        text(box,"下载提交成功后点自动演奏，开发板喇叭会从头播放，无需按触摸键；预备 1.5 秒后发声，结束自动停止。使用当前触摸音色、ADSR 和音高/压力设置，需配套新版 FPGA 位流。",12,MUTED);
+        text(box,"下载提交成功后点自动演奏，开发板喇叭会从头播放，无需按触摸键；预备 1.5 秒后发声，结束自动停止。使用当前触摸 ADSR 和音高/压力设置，需配套新版 FPGA 位流。",12,MUTED);
         LinearLayout playRow=row(box);button(playRow,"PLAY · 开始指引",()->sendSimple("PLAY","已开始无声指引，预备 1.5 秒后进入首条音符，请按触摸键演奏"),true,1);button(playRow,"STOP · 停止",()->sendSimple("STOP","指引 / 自动演奏已停止，按住的触摸键仍可发声"),true);
         box=card(content,"03","七键音高","按第 1～7 键填写 MIDI 音高，范围 60～72。");
         mapInfo=text(box,"尚未读取键位",14,MUTED);
@@ -125,7 +130,7 @@ public final class MainActivity extends Activity {
         button(box,"应用七键映射",this::applyMapping,true,1);
         button(box,"恢复默认映射",()->{if(recording||recordDraining){alert("先停止并等待日志结束，再修改键位");return;}task(()->{link.command("MAP_RESET","OK");readMapping();},"默认映射已恢复");},true);
         box=card(content,"04","红外 / 手势音源与吉他","红外与手势共享 32 复音音源，音色和颤音同时生效；音符组仅作用于手势。");
-        gestureTone=choices(box,"红外 / 手势音色",new String[]{"正弦","钢琴","长笛","尤克里里","鼓"});
+        gestureTone=choices(box,"红外 / 手势音色",new String[]{"正弦","钢琴","长笛","尤克里里","鼓","电钢琴","钟声","弦乐"});
         button(box,"应用音源音色",()->{int value=gestureTone.getSelectedItemPosition();sendSimple("TONE,"+value,"红外 / 手势音色已确认："+gestureTone.getSelectedItem());},true);
         gestureVibrato=choices(box,"红外 / 手势颤音",new String[]{"关闭","开启"});
         button(box,"应用音源颤音",()->{int value=gestureVibrato.getSelectedItemPosition();sendSimple("VIBRATO,"+value,"红外 / 手势颤音已确认："+gestureVibrato.getSelectedItem());},true);
@@ -197,7 +202,7 @@ public final class MainActivity extends Activity {
     }
     private void buildAdsrControls(LinearLayout content){
         LinearLayout box=card(content,"05","ADSR 包络编辑","滑块或拖动曲线控制点编辑；曲线表示待发送参数，点击应用后新发音生效。");
-        adsrTarget=choices(box,"作用音源",new String[]{"触摸七键","红外 / 手势 32 复音"});
+        adsrTarget=choices(box,"作用音源",new String[]{"触摸键盘（8 / 16 键）","红外 / 手势 32 复音"});
         adsrCurve=new AdsrEnvelopeView(this);box.addView(adsrCurve,new LinearLayout.LayoutParams(-1,dp(210)));
         final String[] labels={"A 起音","D 衰减","S 保持音量","R 释音"};
         for(int i=0;i<4;i++){
@@ -239,13 +244,71 @@ public final class MainActivity extends Activity {
             else for(int i=0;i<paired.size();i++)if(safeName(paired.get(i)).toUpperCase(Locale.ROOT).contains("HC")){devices.setSelection(i);break;}
         }catch(SecurityException e){alert("请允许附近设备权限后刷新");}}
     private String safeName(BluetoothDevice d){String n=d.getName();return n==null?"未命名设备":n;}
-    private void connectSelected(){if(recording||recordDraining){alert("请先停止录制并等待 REC_END，再重新连接；也可点断开以中断此次录制。");return;}int selected=devices.getSelectedItemPosition();if(selected<0||selected>=paired.size()){alert("请先刷新并选择已配对 HC-05");return;}BluetoothDevice d=paired.get(selected);forgetBendConnection();mapping=null;mapInfo.setText("连接中，尚未读取键位");task(()->{link.connect(d);link.command("PING","PONG");readMapping();},"HC-05 已连接，可下载曲谱");}
+    private void connectSelected(){if(recording||recordDraining){alert("请先停止录制并等待 REC_END，再重新连接；也可点断开以中断此次录制。");return;}int selected=devices.getSelectedItemPosition();if(selected<0||selected>=paired.size()){alert("请先刷新并选择已配对 HC-05");return;}BluetoothDevice d=paired.get(selected);forgetBendConnection();forgetControls();mapping=null;mapInfo.setText("连接中，尚未读取键位");task(()->{link.connect(d);link.command("PING","PONG");readMapping();readControls();},"HC-05 已连接，已读取键位与演奏模式");}
     private void setStatus(String s){status.setText(s);}
     private void setBusy(boolean value){busy=value;for(Button b:lockedButtons)b.setEnabled(!value);getWindow().setFlags(value?WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON:0,WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);}
     private interface Work {void run()throws Exception;}
-    private void task(Work work,String done){if(busy)return;setBusy(true);cancelled=false;setStatus("处理中…");worker.execute(()->{try{work.run();main.post(()->{setBusy(false);if(!cancelled)setStatus(done);});}catch(Exception e){main.post(()->{setBusy(false);if(!cancelled){if(!link.connected()){mapping=null;recordingInterrupted();mapInfo.setText("连接已关闭，请重新连接后重试");}setStatus("未完成："+e.getMessage());alert(e.getMessage());}});}});}
+    private void task(Work work,String done){if(busy)return;setBusy(true);cancelled=false;setStatus("处理中…");worker.execute(()->{try{work.run();main.post(()->{setBusy(false);if(!cancelled)setStatus(done);});}catch(Exception e){main.post(()->{setBusy(false);if(!cancelled){if(!link.connected()){mapping=null;forgetControls();recordingInterrupted();mapInfo.setText("连接已关闭，请重新连接后重试");}setStatus("未完成："+e.getMessage());alert(e.getMessage());}});}});}
     private void recordingInterrupted(){if(recording||recordDraining){recordingOverflow=true;recordingCompleted=false;}recording=false;recordDraining=false;}
-    private void disconnect(){forgetBendConnection();cancelled=true;link.close();mapping=null;recordingInterrupted();mapInfo.setText("尚未连接");setStatus("已断开。下载未提交时旧谱保留；重新连接后可重新下载。");}
+    private void disconnect(){forgetBendConnection();forgetControls();cancelled=true;link.close();mapping=null;recordingInterrupted();mapInfo.setText("尚未连接");setStatus("已断开。下载未提交时旧谱保留；重新连接后可重新下载。");}
+    private void buildControls(LinearLayout content){
+        LinearLayout box=card(content,"K","键盘模式与演奏控制","切换前松开全部键，停止曲谱并关闭延音。选择只修改草稿，点击应用后才发送。");
+        controlsInfo=text(box,"尚未读取设备状态",14,ACCENT);
+        text(box,"64×64 LED：空闲显示键态、延音、音色、音量、滑杆/ADC、音效和红外状态；播放曲谱时显示下落指引。长按板上 S2 可切换波形、XY、频谱。",12,MUTED);
+        touchMode=choices(box,"TTP229 接口",new String[]{"8 键直连：K1～K7 演奏，K8 切压力","16 键串行：K1～K16 全部演奏 / 和弦"});
+        button(box,"应用 8 / 16 键模式",()->{
+            if(recording||recordDraining){alert("请先结束事件录制");return;}
+            applyControl(DeviceControls.touchCommand(touchMode.getSelectedItemPosition()),"模式已确认。切换到串行模式后等待约 0.6 秒校准，再松开并重按触摸键。");
+        },true,1);
+        text(box,"16 键：C4 D4 E4 F4 G4 A4 B4 C5 / D5 E5 F5 G5 A5 B5 C6 D6。前七键仍可自定义。16 键须拆掉 OUT1～OUT8 直连线，只接 SCL/SDO，并配置模块的 16 键及多键焊盘；App 不会改变芯片焊盘。",12,MUTED);
+        serialPolarity=choices(box,"16 键串行极性（匹配模块 TP1 / SAHL）",new String[]{"低有效：参考工程 TP1 开路","高有效：TP1 已装跳帽"});
+        button(box,"应用串行极性",()->{if(recording||recordDraining){alert("请先结束事件录制");return;}applyControl("SERIAL,"+serialPolarity.getSelectedItemPosition(),"串行极性已确认；进入串行时重新等待校准");},true);
+        pressureChoice=choices(box,"FSR 压力用途（16 键时由手机切换）",new String[]{"控制触摸音量","控制触摸音高"});
+        button(box,"应用压力用途",()->applyControl("PRESSURE,"+pressureChoice.getSelectedItemPosition(),"压力用途已确认"),true);
+        holdChoice=choices(box,"延音锁存",new String[]{"关闭：松键进入释音","开启：松键后继续保持，关闭时释放"});
+        button(box,"应用延音锁存",()->{
+            if(recording||recordDraining){alert("请先结束事件录制");return;}
+            applyControl("HOLD,"+holdChoice.getSelectedItemPosition(),"延音锁存已确认");
+        },true);
+        effectChoice=choices(box,"全局音效",new String[]{"原声","反馈回声 · 约 84 ms","合唱 · 缓慢变延迟"});
+        wetLabel=text(box,"音效湿度 · 4 / 8",13,INK);wetBar=new SeekBar(this);wetBar.setMax(8);wetBar.setProgress(4);box.addView(wetBar);
+        wetBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int n,boolean user){wetLabel.setText("音效湿度 · "+n+" / 8");}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});
+        button(box,"应用音效与湿度",()->applyControl("EFFECT,"+effectChoice.getSelectedItemPosition()+","+wetBar.getProgress(),"音效与湿度已确认"),true);
+        volumeLabel=text(box,"总音量 · 16 / 16",13,INK);volumeBar=new SeekBar(this);volumeBar.setMax(16);volumeBar.setProgress(16);box.addView(volumeBar);
+        volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int n,boolean user){volumeLabel.setText("总音量 · "+n+" / 16");}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});
+        button(box,"应用总音量",()->applyControl("VOLUME,"+volumeBar.getProgress(),"总音量已确认；0 为静音"),true);
+        analogChoice=choices(box,"模拟输入用途",new String[]{"0 · 原 FSR 压力（保持原标定）","1 · 滑动变阻器：总音量","2 · 滑动变阻器：触摸音高 0.5～1 倍","3 · 滑动变阻器：触摸颤音深度","4 · 滑动变阻器：音效湿度"});
+        button(box,"应用模拟输入用途",()->{
+            if(recording||recordDraining){alert("请先结束事件录制");return;}
+            applyControl("ANALOG,"+analogChoice.getSelectedItemPosition(),"模拟输入用途已确认");
+        },true);
+        text(box,"滑动变阻器复用原 ADC 模拟输入，替换 FSR，不是同时采两路。滑杆音量受手机总音量上限约束；ADC 必须经过分压保持在 0～1V。湿度控制需先开启回声或合唱。",12,MUTED);
+        text(box,"滑杆端点标定：先读 ADC，把最小 / 最大端点的十进制值填入（0～1023，跨度至少 32）。",12,MUTED);
+        calibrationInput=new EditText(this);calibrationInput.setSingleLine(true);calibrationInput.setText("0,1023");calibrationInput.setTextColor(INK);calibrationInput.setTextSize(15);calibrationInput.setHint("最小值,最大值，例如 0,590");calibrationInput.setContentDescription("滑杆 ADC 最小值和最大值，十进制逗号分隔");box.addView(calibrationInput);
+        button(box,"应用滑杆端点标定",()->{
+            if(recording||recordDraining){alert("请先结束事件录制");return;}
+            String[] parts=calibrationInput.getText().toString().trim().split(",",-1);int lo,hi;
+            try{if(parts.length!=2)throw new NumberFormatException();lo=Integer.parseInt(parts[0].trim());hi=Integer.parseInt(parts[1].trim());if(lo<0||lo>1023||hi<0||hi>1023||hi-lo<32)throw new NumberFormatException();}
+            catch(NumberFormatException e){alert("输入两个十进制 ADC 端点，0～1023 且最大值至少比最小值大 32");return;}
+            applyControl("CAL,"+lo+","+hi,"滑杆标定已确认；不修改原 FSR 标定");
+        },true);
+        adcInfo=text(box,"ADC 尚未读取",13,MUTED);
+        button(box,"读取实际模式 / ADC",()->task(()->{readControls();String raw=link.command("ADC?","ADC");String[] fields=raw.split(",",-1);if(fields.length!=3||!fields[1].matches("[0-3][0-9A-F]{2}")||!fields[2].matches("[01]"))throw new IOException("ADC 回报无效");int code=Integer.parseInt(fields[1],16);main.post(()->adcInfo.setText("ADC："+code+" / 1023（0x"+fields[1]+"） · "+(fields[2].equals("0")?"正常":"超时")));},"设备状态与 ADC 已读取"),true);
+        button(box,"PANIC · 释放全部声音与延音",()->applyControl("PANIC","声音已释放，曲谱停止，延音关闭；按住的键需松开重按"),true,2);
+        text(box,"曲谱下载、屏幕七列指引与逐声部滑音仍针对前七键；K8～K16 使用上述固定高音。事件日志仅支持原 8 键 / FSR 模式。",12,MUTED);
+    }
+    private void applyControl(String command,String done){task(()->{link.command(command,"OK");readControls();},done);}
+    private void readControls()throws Exception{
+        DeviceControls state=DeviceControls.parse(link.command("CTRL?","CTRL"));
+        String serial=link.command("SERIAL?","SERIAL");if(!serial.equals("SERIAL,0")&&!serial.equals("SERIAL,1"))throw new IOException("串行极性回报无效");
+        String[] cal=link.command("CAL?","CAL").split(",",-1);
+        if(cal.length!=3||!cal[1].matches("[0-3][0-9A-F]{2}")||!cal[2].matches("[0-3][0-9A-F]{2}"))throw new IOException("滑杆标定回报无效");
+        int lo=Integer.parseInt(cal[1],16),hi=Integer.parseInt(cal[2],16);if(hi-lo<32)throw new IOException("滑杆标定范围无效");
+        main.post(()->{confirmedControls=state;controlsInfo.setText("设备已确认：\n"+state.summary());touchMode.setSelection(state.mode16);serialPolarity.setSelection(serial.equals("SERIAL,1")?1:0);
+            effectChoice.setSelection(state.effect);wetBar.setProgress(state.wet);holdChoice.setSelection(state.hold);
+            analogChoice.setSelection(state.analog);volumeBar.setProgress(state.volume);pressureChoice.setSelection(state.pressure);calibrationInput.setText(lo+","+hi);});
+    }
+    private void forgetControls(){confirmedControls=null;if(controlsInfo!=null)controlsInfo.setText("模式未知，请连接并读取设备状态");if(adcInfo!=null)adcInfo.setText("ADC 尚未读取");}
     private void showSong(){scoreInfo.setText(song.name+"\n"+song.events.size()+" 条 · "+String.format(Locale.ROOT,"%.2f",song.durationMs()/1000.0)+" 秒\n需要音高："+SongCodec.notes(song.requiredMask()));progress.setProgress(0);}
     private void preview(){StringBuilder s=new StringBuilder();long at=0;for(int i=0;i<song.events.size();i++){SongCodec.Event e=song.events.get(i);s.append(i).append("  ").append(at).append("ms  ").append(SongCodec.notes(e.mask)).append("  ").append(e.durationMs).append("ms\n");at+=e.durationMs;}new AlertDialog.Builder(this).setTitle(song.name).setMessage(s.toString()).setPositiveButton("关闭",null).show();}
     private void pickScore(){Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.addCategory(Intent.CATEGORY_OPENABLE);i.setType("*/*");startActivityForResult(i,PICK_SCORE);}
@@ -264,7 +327,7 @@ public final class MainActivity extends Activity {
     }
     private void applyMapping(){if(recording||recordDraining){alert("录制期间键位锁定，请先停止并等待 REC_END");return;}String[] p=mappingInput.getText().toString().trim().split(",",-1);if(p.length!=7){alert("请输入 7 个 MIDI 音高，用英文逗号分隔");return;}int[] m=new int[7];try{for(int i=0;i<7;i++){m[i]=Integer.parseInt(p[i].trim());if(m[i]<60||m[i]>72)throw new NumberFormatException();}}catch(NumberFormatException e){alert("七个音高均须为 60..72");return;}
         task(()->{for(int i=0;i<7;i++)link.command("MAP,"+(i+1)+","+m[i],"OK");readMapping();},"键位已应用。若曲谱需要其他音高，下载前会提示。");}
-    private void startRecording(){if(recording||recordDraining){alert("正在录制或等待日志排空");return;}recordingText.setLength(0);recordingOverflow=false;recordingCompleted=false;
+    private void startRecording(){if(confirmedControls==null||confirmedControls.mode16!=0||confirmedControls.hold!=0||confirmedControls.analog!=0){alert("事件日志支持 8 键、关闭延音锁存、FSR 模式；请先设置并读取设备状态。16 键仍可正常演奏。");return;}if(recording||recordDraining){alert("正在录制或等待日志排空");return;}recordingText.setLength(0);recordingOverflow=false;recordingCompleted=false;
         // Mark before the command: the FPGA may send MAP/EVT immediately after OK.
         recording=true;task(()->{try{link.command("REC_START","OK");}catch(Exception e){recording=false;recordingOverflow=true;throw e;}},"正在记录演奏事件；保持 App 前台");}
     private void stopRecording(){if(!recording){alert("当前没有正在进行的事件录制");return;}recordDraining=true;task(()->link.command("REC_STOP","OK"),"停止命令已确认；接收窗口 REC_END 为日志结束标记");}
