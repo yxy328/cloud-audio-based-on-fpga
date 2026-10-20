@@ -8,6 +8,11 @@ module top #(
     // Live touch, gesture and remote pluck events generate audio in FPGA.
     // Optional score audition is an explicitly separate demonstration mode.
     parameter ENABLE_DEMO_SCORE = 0,
+    parameter ENABLE_EVENT_TAKE = 0,
+    parameter ENABLE_FLASH_AUDIO = 0,
+    // Phone communication uses HC-05. The separate 2Mbps USB PCM uplink
+    // is opt-in and consumes no FIFO/UART logic in the default build.
+    parameter ENABLE_USB_AUDIO_RECORD = 0,
     parameter VOLUME_SHIFT = 4,
     parameter KEY_CONFIRM_CYCLES = 50_000,
     parameter TOUCH_STARTUP_US = 600000,
@@ -51,6 +56,8 @@ module top #(
     input wire [7:0] ir_beam,
     input wire hc05_rx,
     output wire hc05_tx,
+    input wire audio_rec_cts_n,
+    output wire audio_rec_tx,
     output wire i2s_bck,
     output wire i2s_lrck,
     output wire i2s_din,
@@ -59,10 +66,29 @@ module top #(
     output wire hub_R1, hub_G1, hub_B1,
     output wire hub_R2, hub_G2, hub_B2,
     output wire hub_A, hub_B, hub_C, hub_D, hub_E,
-    output wire hub_CK, hub_ST, hub_OE
+    output wire hub_CK, hub_ST, hub_OE,
+    output wire flash_cs_n,flash_sck,flash_mosi,flash_wp_n,flash_hold_n,
+    input wire flash_miso
 );
     reg [5:0] power_count = 6'd0;
     wire resetn = &power_count;
+    wire [527:0] perf_live_state,perf_state;
+    wire [15:0] perf_live_pulses,perf_pulses;
+    wire perf_recording,perf_playing,perf_replay,perf_kill,perf_available,perf_saved,perf_full;
+    wire [3:0] perf_error;
+    wire [1:0] perf_confirm;
+    wire [23:0] perf_elapsed,perf_duration;
+    wire [10:0] perf_count;
+    wire [2:0] perf_command;
+    wire nv_busy,nv_boot_done,nv_valid,nv_done,nv_ok,nv_save,nv_delete,nv_we,nv_full;
+    wire [3:0] nv_error;
+    wire [10:0] nv_count;
+    wire [23:0] nv_duration;
+    wire [9:0] nv_address;
+    wire [47:0] nv_data,nv_q;
+    wire [7:0] perf_flags={perf_confirm,nv_busy,perf_full,perf_saved,perf_available,perf_playing,perf_recording};
+    assign flash_wp_n=1'b1;
+    assign flash_hold_n=1'b1;
     always @(posedge clk) begin
         if (!resetn)
             power_count <= power_count + 6'd1;
@@ -72,6 +98,9 @@ module top #(
     wire s2_pressed;
     wire s2_level, s2_restart;
     wire [1:0] visual_mode;
+    wire visual_write;
+    wire [1:0] remote_visual_mode;
+    wire [111:0] visual_snapshot;
     wire xy_write;
     wire [1:0] xy_ratio,xy_phase,reference_ratio,reference_phase;
     // Keep the historical audition-mode press timing; production short S2
@@ -123,16 +152,18 @@ module top #(
     // Downloaded notes drive the same independent DDS/ADSR lanes as the pads
     // only after an explicit AUDITION. No audio samples are stored in a score.
     wire [6:0] audition_keys;
-    wire [15:0] physical_notes=touch_ready ? (touch_mode16 ? touch_keys : {9'd0,touch_keys[6:0]}) : 16'd0;
+    wire [15:0] physical_notes=touch_ready ? ((touch_mode16 ? touch_keys : {9'd0,touch_keys[6:0]}) &
+        (ENABLE_EVENT_TAKE ? 16'h0fff : 16'hffff)) : 16'd0;
     reg [15:0] held_notes,blocked_notes;
     reg previous_touch_mode;
-    wire [15:0] touch_note_gates=(physical_notes & ~blocked_notes) |
+    wire [15:0] live_note_gates=(physical_notes & ~blocked_notes) |
         (touch_hold ? held_notes : 16'd0) | {9'd0,audition_keys};
+    wire [15:0] touch_note_gates=perf_playing ? perf_state[512 +: 16] : live_note_gates;
     always @(posedge clk)begin
         if(!resetn)begin held_notes<=0;blocked_notes<=0;previous_touch_mode<=0;end
         else begin
             previous_touch_mode<=touch_mode16;
-            if(panic || previous_touch_mode!=touch_mode16)begin held_notes<=0;blocked_notes<=physical_notes;end
+            if(panic || (perf_kill && !perf_recording) || previous_touch_mode!=touch_mode16)begin held_notes<=0;blocked_notes<=physical_notes;end
             else if(frame_ce)begin
                 blocked_notes<=blocked_notes & physical_notes;
                 held_notes<=touch_hold ? held_notes | (physical_notes & ~blocked_notes) : 16'd0;
@@ -174,6 +205,15 @@ module top #(
     wire [6:0] guide_spawn_keys;
     wire [15:0] guide_spawn_delay;
     wire recording_busy, builtin_play, builtin_stop;
+    wire audio_rec_prepare,audio_rec_start,audio_rec_stop,audio_rec_abort,audio_rec_send,audio_rec_ack;
+    wire audio_rec_busy,audio_rec_ready,audio_rec_overflow,audio_rec_valid;
+    wire [3:0] audio_rec_status,audio_rec_error;
+    wire [20:0] audio_rec_stored_samples;
+    wire [15:0] audio_rec_generation;
+    wire [15:0] audio_rec_session;
+    wire [15:0] audio_rec_ack_sequence;
+    wire [7:0] audio_stream_data;
+    wire audio_stream_valid,audio_stream_last,audio_stream_ready,audio_stream_busy;
     wire guitar_pluck, gesture_vibrato, gesture_bank;
     wire [2:0] gesture_timbre;
     wire [63:0] touch_adsr;
@@ -197,12 +237,14 @@ module top #(
     // Include synchronized raw pads, debounced gates, and release tails.
     hc05_keymap #(.DEFAULT_A(ADSR_ATTACK_SAMPLES),.DEFAULT_D(ADSR_DECAY_SAMPLES),
         .DEFAULT_S(ADSR_SUSTAIN_LEVEL),.DEFAULT_R(TOUCH_ADSR_RELEASE_SAMPLES),.BAUD(HC05_BAUD),.ENABLE_DEMO_SCORE(ENABLE_DEMO_SCORE),
-        .ENABLE_LOOKAHEAD(!ENABLE_DEMO_SCORE),.LOOKAHEAD_MS(GUIDE_LEAD_MS)) u_keymap (
+        .ENABLE_LOOKAHEAD(!ENABLE_DEMO_SCORE),.LOOKAHEAD_MS(GUIDE_LEAD_MS),
+        .ENABLE_DOWNLOADED_INCREMENT(ENABLE_DEMO_SCORE),.ENABLE_EVENT_TAKE(ENABLE_EVENT_TAKE),
+        .ENABLE_FLASH_AUDIO(ENABLE_FLASH_AUDIO)) u_keymap (
         .clk(clk),.resetn(resetn),.rx(hc05_rx),.tx(hc05_tx),
         .keys_ready(touch_ready),
         .song_busy(song_playing || (|song_active) || s1_pressed || s2_action),
         .notes_busy((|(touch_mode16 ? touch_keys_raw : {9'd0,touch_keys_raw[6:0]})) || (|physical_notes) || (|touch_active[6:0]) || (|extended_active)),
-        .recording(1'b0),.note_map(touch_note_map),
+        .recording(perf_playing),.note_map(touch_note_map),
         .touch_keys(touch_keys[6:0]),.pressure_mode(fsr_pitch_mode),
         .volume_gain(fsr_gain),.pitch_ratio(fsr_pitch_ratio),
         .toggle_play(s1_pressed),.restart(s2_action),.rec_busy(recording_busy),
@@ -218,10 +260,22 @@ module top #(
         .sensor_test32(sensor_test32),.touch_adsr(touch_adsr),.sensor_adsr(sensor_adsr),
         .bend_write(bend_write),.bend_reset(bend_reset),.bend_index(bend_index),.bend_ratio(bend_ratio),
         .xy_write(xy_write),.xy_ratio(xy_ratio),.xy_phase(xy_phase),
+        .visual_write(visual_write),.remote_mode(remote_visual_mode),
+        .visual_requested(visual_mode),.reference_ratio(reference_ratio),.reference_phase(reference_phase),
+        .visual_snapshot(visual_snapshot),
         .touch_mode16(touch_mode16),.touch_hold(touch_hold),.panic(panic),.serial_active_high(serial_active_high),
         .effect_mode(effect_mode),.effect_wet(effect_wet),.master_volume(master_volume),
         .analog_mode(analog_mode),.pressure_write(pressure_write),.pressure_value(pressure_value),
-        .analog_min(analog_min),.analog_max(analog_max),.adc_sample(fsr_adc_sample),.adc_timeout(fsr_adc_timeout)
+        .analog_min(analog_min),.analog_max(analog_max),.adc_sample(fsr_adc_sample),.adc_timeout(fsr_adc_timeout),
+        .audio_rec_busy(audio_rec_busy),.audio_rec_ready(audio_rec_ready),.audio_rec_overflow(audio_rec_overflow),.audio_rec_valid(audio_rec_valid),
+        .audio_rec_status(audio_rec_status),.audio_rec_error(audio_rec_error),
+        .audio_rec_stored_samples(audio_rec_stored_samples),.audio_rec_generation(audio_rec_generation),
+        .audio_stream_data(audio_stream_data),.audio_stream_valid(audio_stream_valid),.audio_stream_last(audio_stream_last),
+        .audio_stream_busy(audio_stream_busy),.audio_stream_ready(audio_stream_ready),
+        .audio_rec_prepare(audio_rec_prepare),.audio_rec_start(audio_rec_start),.audio_rec_stop(audio_rec_stop),.audio_rec_abort(audio_rec_abort),
+        .audio_rec_send(audio_rec_send),.audio_rec_ack(audio_rec_ack),.audio_rec_ack_sequence(audio_rec_ack_sequence),
+        .audio_rec_session(audio_rec_session),.take_command(perf_command),.take_flags(perf_flags),
+        .take_error(perf_error),.take_elapsed(perf_elapsed),.take_duration(perf_duration),.take_count(perf_count)
     );
     // Sensor, score/panel and all voices share one 50MHz clock and frame CE.
     // S1/S2 retain their score controls; Bluetooth controls the new voices.
@@ -230,40 +284,70 @@ module top #(
         .blocked(ir_blocked),.armed(ir_armed),
         .note_valid(ir_note_valid),.note_index(ir_note_index)
     );
-    gesture_top #(.AUDIO_VOLUME_SHIFT(SENSOR_VOLUME_SHIFT),.EXTERNAL_CONTROL(1)) u_gesture (
-        .clk(clk),.resetn(resetn && !panic),.frame_ce(frame_ce),
+    reg [15:0] replay_pending;
+    always @(posedge clk)begin
+        if(!resetn || perf_kill)replay_pending<=0;
+        else replay_pending<=(replay_pending & (replay_pending-16'd1)) | perf_pulses;
+    end
+    wire replay_ir_valid=|replay_pending[7:0];
+    wire [2:0] replay_ir_index=replay_pending[0] ? 0 : replay_pending[1] ? 1 :
+        replay_pending[2] ? 2 : replay_pending[3] ? 3 : replay_pending[4] ? 4 :
+        replay_pending[5] ? 5 : replay_pending[6] ? 6 : 7;
+    wire replay_gesture_valid=!(|replay_pending[7:0]) && (|replay_pending[11:8]);
+    wire [2:0] replay_start=replay_pending[8] ? 1 : replay_pending[9] ? 3 : replay_pending[10] ? 2 : 4;
+    wire [2:0] replay_end=replay_pending[8] ? 2 : replay_pending[9] ? 4 : replay_pending[10] ? 1 : 3;
+    wire [3:0] live_gesture=(gesture_ready && gesture_valid && dir_evaluated) ?
+        ({start_dir,end_dir}=={3'd1,3'd2} ? 4'b0001 :
+         {start_dir,end_dir}=={3'd3,3'd4} ? 4'b0010 :
+         {start_dir,end_dir}=={3'd2,3'd1} ? 4'b0100 :
+         {start_dir,end_dir}=={3'd4,3'd3} ? 4'b1000 : 4'd0) : 4'd0;
+    assign perf_live_pulses={panic,1'b0,sensor_test32,guitar_pluck,live_gesture,
+        ir_note_valid ? (8'b1<<ir_note_index) : 8'd0};
+    assign perf_live_state={live_note_gates,{11'd0,gesture_bank,gesture_vibrato,gesture_timbre},
+        {10'd0,effect_mode,effective_wet},{3'd0,master_target},effective_pitch_ratio,fsr_gain,
+        {14'd0,sensor_adsr},touch_adsr,touch_phase_increments[223:0]};
+    gesture_top #(.AUDIO_VOLUME_SHIFT(SENSOR_VOLUME_SHIFT),.EXTERNAL_CONTROL(1),.ENABLE_REPLAY(ENABLE_EVENT_TAKE)) u_gesture (
+        .clk(clk),.resetn(resetn && !(panic && !ENABLE_EVENT_TAKE)),.frame_ce(frame_ce),
         .key_s1(1'b0),.key_s2(1'b0),.scl(scl),.sda(sda),
-        .control_timbre(gesture_timbre),.control_vibrato(gesture_vibrato),
-        .control_bank(gesture_bank),.audio_sample(gesture_sample),
-        .ir_note_valid(ir_note_valid),.ir_note_index(ir_note_index),.test32(sensor_test32),.adsr_config(sensor_adsr),
+        .control_timbre(perf_replay ? perf_state[496 +: 3] : gesture_timbre),
+        .control_vibrato(perf_replay ? perf_state[499] : gesture_vibrato),
+        .control_bank(perf_replay ? perf_state[500] : gesture_bank),.audio_sample(gesture_sample),
+        .ir_note_valid(perf_playing ? replay_ir_valid : ir_note_valid),
+        .ir_note_index(perf_playing ? replay_ir_index : ir_note_index),
+        .test32(perf_playing ? (replay_pending[13] && !(|replay_pending[12:0])) : sensor_test32),
+        .adsr_config(perf_replay ? perf_state[288 +: 130] : sensor_adsr),
+        .replay_mode(perf_playing),.replay_gesture_valid(replay_gesture_valid),.audio_clear(perf_kill || panic),
+        .replay_start(replay_start),.replay_end(replay_end),
         .voice_active(sensor_voice_active),.voice_count(sensor_voice_count),.overrun(sensor_overrun),
         .init_done(gesture_ready),.gesture_valid(gesture_valid),
         .dir_evaluated(dir_evaluated),.start_dir(start_dir),.end_dir(end_dir)
     );
     geita #(.STRING_LENGTH(GUITAR_STRING_LENGTH),.EXTERNAL_TRIGGER(1)) u_string (
-        .clk(clk),.resetn(resetn && !panic),.sample_ce(frame_ce),.key_s1(1'b0),
-        .pluck(guitar_pluck),.sample(guitar_sample)
+        .clk(clk),.resetn(resetn && !panic && !perf_kill),.sample_ce(frame_ce),.key_s1(1'b0),
+        .pluck(perf_playing ? (replay_pending[12] && !(|replay_pending[11:0])) : guitar_pluck),.sample(guitar_sample)
     );
     assign guitar_scaled_sample = guitar_sample >>> VOLUME_SHIFT;
     audio_mixer u_extra_mix (
-        .clk(clk),.resetn(resetn),.sample_ce(frame_ce),
+        .clk(clk),.resetn(resetn && !perf_kill),.sample_ce(frame_ce),
         .sample0(gesture_sample),.sample1(guitar_scaled_sample),
         .sample2(16'sd0),.sample3(16'sd0),.sample_out(extra_sample),.clipped()
     );
     // Score timing and panel scan use clock enables on the same 50MHz clock.
     // Dropping playing on guide_reset clears pending pixels without resetting scan.
-    hub75e_rhythm_display #(.LEAD_MS(GUIDE_LEAD_MS),.ENABLE_AUDIO_VISUAL(1),.ENABLE_STATUS(1)) u_guide_display (
+    hub75e_rhythm_display #(.LEAD_MS(GUIDE_LEAD_MS),.ENABLE_AUDIO_VISUAL(1),.ENABLE_STATUS(1),.ENABLE_TAKE_STATUS(ENABLE_EVENT_TAKE)) u_guide_display (
         .clk(clk),.resetn(resetn),.touch_keys(touch_keys[6:0]),
         .touch_mode16(touch_mode16),.all_touch_keys(touch_note_gates),
         .physical_keys(touch_keys),.ir_keys(ir_blocked),.touch_hold(touch_hold),
-        .pressure_pitch(fsr_pitch_mode),.recording(recording_busy),.keys_ready(touch_ready),
+        .pressure_pitch(fsr_pitch_mode),.recording(recording_busy || perf_recording),.keys_ready(touch_ready),
         .timbre(gesture_timbre),.analog_mode(analog_mode),.effect_mode(effect_mode),
         .effect_wet(effective_wet),.volume(master_volume),.master_gain(master_target),
         .adc_sample(fsr_adc_sample),.analog_position(analog_position),.analog_valid(analog_available),
+        .take_flags(perf_flags),.take_error(perf_error),.take_elapsed(perf_elapsed),.take_count(perf_count),
         .guide_keys(song_guide_keys),.playing(downloaded_playing && !guide_reset),
         .ms_tick(guide_ms_tick),.note_spawn(guide_note_spawn),
         .spawn_keys(guide_spawn_keys),.spawn_delay_ms(guide_spawn_delay),
         .visual_mode(visual_mode),.reference_ratio(reference_ratio),.reference_phase(reference_phase),
+        .visual_snapshot(visual_snapshot),
         .sample_ce(frame_ce),.mixed_sample(audio_sample),
         .touch0(touch_mix0),.touch1(touch_mix1),
         .sensor_sample(gesture_sample),.guitar_sample(guitar_scaled_sample),
@@ -341,22 +425,22 @@ module top #(
     display_mode_control #(.HOLD_FRAMES(DISPLAY_HOLD_FRAMES)) u_display_mode (
         .clk(clk),.resetn(resetn),.frame_ce(frame_ce),.button_level(s2_level),
         .restart(s2_restart),.visual_mode(visual_mode),
+        .visual_write(visual_write),.remote_mode(remote_visual_mode),
         .xy_write(xy_write),.xy_ratio(xy_ratio),.xy_phase(xy_phase),
         .reference_ratio(reference_ratio),.reference_phase(reference_phase)
     );
+    // Elaborate the optional demo chain only when enabled. Production
+    // AUDITION still drives the live touch synthesizer through audition_keys.
+    generate
+    if(ENABLE_DEMO_SCORE) begin: demo_score
     twinkle_sequencer #(
         .BEAT_SAMPLES(SONG_BEAT_SAMPLES), .GAP_SAMPLES(SONG_GAP_SAMPLES),
         .INTRO_SAMPLES(SONG_INTRO_SAMPLES), .TAIL_SAMPLES(SONG_TAIL_SAMPLES)
     ) u_control (
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce),
-        .toggle_play(ENABLE_DEMO_SCORE && ((s1_pressed && !downloaded_valid) || (builtin_stop && builtin_playing))),
-        .restart(ENABLE_DEMO_SCORE && ((s2_action && !downloaded_valid) || builtin_play)),
+        .toggle_play((s1_pressed && !downloaded_valid) || (builtin_stop && builtin_playing)),
+        .restart((s2_action && !downloaded_valid) || builtin_play),
         .playing(builtin_playing), .note_index(), .gates(builtin_gates), .phase_increments(builtin_increments)
-    );
-    clk_div u_clk_div (
-        .clk(clk), .resetn(resetn), .bck(i2s_bck), .lrck(i2s_lrck),
-        .bck_rise_ce(bck_rise_ce), .bck_fall_ce(bck_fall_ce),
-        .frame_ce(frame_ce), .bit_index(bit_index)
     );
     poly_synth #(
         .VOLUME_SHIFT(VOLUME_SHIFT),
@@ -369,6 +453,19 @@ module top #(
         .gates(voice_gates),.adsr_config(64'd0), .phase_increments(phase_increments), .sample(song_sample),
         .voice_samples(), .envelope_gains(), .envelope_states(), .active(song_active), .clipped()
     );
+    end else begin: live_score
+        assign builtin_playing=1'b0;
+        assign builtin_gates=4'd0;
+        assign builtin_increments=128'd0;
+        assign song_sample=16'sd0;
+        assign song_active=4'd0;
+    end
+    endgenerate
+    clk_div u_clk_div (
+        .clk(clk), .resetn(resetn), .bck(i2s_bck), .lrck(i2s_lrck),
+        .bck_rise_ce(bck_rise_ce), .bck_fall_ce(bck_fall_ce),
+        .frame_ce(frame_ce), .bit_index(bit_index)
+    );
     // OUT1..7 default to C4 D4 E4 F4 G4 A4 B4; HC-05 can remap them.
     // Fs=48828.125Hz. Pressure pitch changes preserve each DDS phase.
     fsr_pitch_scaler #(.PER_VOICE_BEND(1)) u_fsr_pitch_scaler (
@@ -378,15 +475,16 @@ module top #(
         .phase_increments(touch_phase_increments)
     );
     touch_tdm_synth #(.VOLUME_SHIFT(VOLUME_SHIFT)) u_touch_synth (
-        .clk(clk),.resetn(resetn && !panic),.sample_ce(frame_ce),
-        .gates(touch_note_gates),.low_steps(touch_phase_increments[223:0]),
-        .adsr_config(touch_adsr),.pitch_ratio(effective_pitch_ratio),
-        .sample(touch_sample),.active(touch_active),.overrun());
+        .clk(clk),.resetn(resetn && !panic && !perf_kill),.sample_ce(frame_ce),
+        .gates(touch_note_gates),.low_steps(perf_replay ? perf_state[223:0] : touch_phase_increments[223:0]),
+        .adsr_config(perf_replay ? perf_state[224 +: 64] : touch_adsr),
+        .pitch_ratio(perf_replay ? perf_state[448 +: 16] : effective_pitch_ratio),
+        .sample(touch_sample),.active(touch_active),.clipped(),.overrun());
     generate
         if (FSR_ENABLE) begin: pressure_enabled
             envelope_gain #(.VOLUME_SHIFT(0)) u_expression (
                 .clk(clk), .resetn(resetn), .sample_ce(frame_ce),
-                .sample_in(touch_sample), .gain(fsr_gain), .sample_out(touch_mix0)
+                .sample_in(touch_sample), .gain(perf_replay ? perf_state[432 +: 16] : fsr_gain), .sample_out(touch_mix0)
             );
             assign touch_mix1 = 16'sd0;
         end else begin: pressure_bypass
@@ -398,7 +496,7 @@ module top #(
     // Default gain leaves room for seven keys, gestures and a guitar string.
     // Saturation still protects configurations with a higher compile-time gain.
     audio_mixer u_output_mix (
-        .clk(clk), .resetn(resetn), .sample_ce(frame_ce),
+        .clk(clk), .resetn(resetn && !perf_kill), .sample_ce(frame_ce),
         .sample0(song_sample), .sample1(touch_mix0),
         .sample2(touch_mix1), .sample3(extra_sample),
         .sample_out(dry_audio_sample), .clipped()
@@ -412,14 +510,74 @@ module top #(
     // Dry bypass retains the original frame timing. Wet modes add the
     // reference effect pipeline, and the panel observes the final PCM.
     audio_effects #(.ADDRESS_BITS(12)) u_effects (
-        .clk(clk),.resetn(resetn && !panic),.sample_valid(frame_ce),.dry(dry_audio_sample),
-        .mode(effect_mode),.wet(effective_wet),.sample(effect_sample),.valid(effect_valid));
+        .clk(clk),.resetn(resetn && !panic && !perf_kill),.sample_valid(frame_ce),.dry(dry_audio_sample),
+        .mode(perf_replay ? perf_state[484 +: 2] : effect_mode),
+        .wet(perf_replay ? perf_state[480 +: 4] : effective_wet),.sample(effect_sample),.valid(effect_valid));
     audio_master_volume u_master_volume (
-        .clk(clk),.resetn(resetn),.frame_ce(frame_ce),
-        .sample_in(effect_mode==0 ? dry_audio_sample : effect_sample),
-        .target_gain(master_target),.sample_out(audio_sample),.applied_gain());
+        .clk(clk),.resetn(resetn && !perf_kill),.frame_ce(frame_ce),
+        .sample_in((perf_replay ? perf_state[484 +: 2] : effect_mode)==0 ? dry_audio_sample : effect_sample),
+        .target_gain(perf_replay ? perf_state[464 +: 13] : master_target),.sample_out(audio_sample),.applied_gain());
     i2s_tx u_i2s_tx (
         .clk(clk), .resetn(resetn), .bck_fall_ce(bck_fall_ce),
         .bit_index(bit_index), .sample(audio_sample), .din(i2s_din)
     );
+    generate if(ENABLE_FLASH_AUDIO && !ENABLE_EVENT_TAKE)begin: flash_pcm
+    wire [3:0] flash_audio_status,flash_audio_error;
+    wire flash_audio_prepared,flash_audio_capturing;
+    wire [20:0] flash_audio_samples,flash_audio_stored_samples;
+    wire [15:0] flash_audio_generation;
+    audio_take_store u_audio_take(
+        .clk(clk),.resetn(resetn),.sample_ce(frame_ce),.sample(audio_sample),
+        .prepare(audio_rec_prepare),.start(audio_rec_start),.stop(audio_rec_stop),.abort(audio_rec_abort),.send(audio_rec_send),
+        .session(audio_rec_session),.ack_valid(audio_rec_ack),.ack_sequence(audio_rec_ack_sequence),
+        .stream_data(audio_stream_data),.stream_valid(audio_stream_valid),.stream_last(audio_stream_last),.stream_ready(audio_stream_ready),
+        .status(flash_audio_status),.error(flash_audio_error),.valid(audio_rec_valid),.prepared(flash_audio_prepared),
+        .capturing(flash_audio_capturing),.overflow(audio_rec_overflow),.sample_count(flash_audio_samples),
+        .stored_samples(flash_audio_stored_samples),.stored_generation(flash_audio_generation),.busy(audio_rec_busy),
+        .cs_n(flash_cs_n),.sck(flash_sck),.mosi(flash_mosi),.miso(flash_miso));
+    assign audio_rec_ready=flash_audio_prepared;
+    assign audio_rec_status=flash_audio_status;assign audio_rec_error=flash_audio_error;
+    assign audio_rec_stored_samples=flash_audio_stored_samples;assign audio_rec_generation=flash_audio_generation;
+    assign audio_stream_busy=flash_audio_status==8;
+    assign audio_rec_tx=1'b1;
+    end else if(ENABLE_USB_AUDIO_RECORD && !ENABLE_EVENT_TAKE)begin: legacy_pcm
+    audio_record_stream u_audio_record (
+        .clk(clk),.resetn(resetn),.sample_ce(frame_ce),.sample(audio_sample),
+        .start(audio_rec_start),.stop(audio_rec_stop),.abort(audio_rec_abort),.session(audio_rec_session),
+        .cts_n(audio_rec_cts_n),.tx(audio_rec_tx),.busy(audio_rec_busy),.ready(audio_rec_ready),
+        .capturing(),.overflow(audio_rec_overflow));
+        assign audio_rec_valid=1'b0;assign audio_stream_data=0;assign audio_stream_valid=0;assign audio_stream_last=0;assign audio_stream_busy=0;
+        assign audio_rec_status=0;assign audio_rec_error=0;assign audio_rec_stored_samples=0;assign audio_rec_generation=0;
+    end else begin: event_take_audio
+        assign audio_rec_tx=1'b1;assign audio_rec_busy=1'b0;
+        assign audio_rec_ready=1'b0;assign audio_rec_overflow=1'b0;assign audio_rec_valid=1'b0;
+        assign audio_stream_data=0;assign audio_stream_valid=0;assign audio_stream_last=0;assign audio_stream_busy=0;
+        assign audio_rec_status=0;assign audio_rec_error=0;assign audio_rec_stored_samples=0;assign audio_rec_generation=0;
+    end endgenerate
+    generate if(ENABLE_EVENT_TAKE)begin: take_enabled
+        wire [2:0] local_command;
+        take_key_control u_keys(.clk(clk),.resetn(resetn),.ready(touch_ready),.mode16(touch_mode16),
+            .keys(touch_keys[15:12]),.confirm(perf_confirm),.command(local_command));
+        performance_take u_take(
+            .clk(clk),.resetn(resetn),.frame_ce(frame_ce),.command(panic ? 3'd2 : local_command!=0 ? local_command : perf_command),
+            .live_state(perf_live_state),.live_pulses(perf_live_pulses),
+            .play_state(perf_state),.play_valid(perf_replay),.play_pulses(perf_pulses),.recording(perf_recording),.playing(perf_playing),
+            .kill(perf_kill),.available(perf_available),.saved(perf_saved),.full(perf_full),.error(perf_error),
+            .confirm(perf_confirm),.elapsed_ms(perf_elapsed),.duration_ms(perf_duration),.count(perf_count),
+            .nv_busy(nv_busy),.nv_boot_done(nv_boot_done),.nv_valid(nv_valid),.nv_done(nv_done),.nv_ok(nv_ok),
+            .nv_error(nv_error),.nv_count(nv_count),.nv_duration(nv_duration),.nv_full(nv_full),.nv_save(nv_save),.nv_delete(nv_delete),
+            .nv_we(nv_we),.nv_address(nv_address),.nv_data(nv_data),.nv_q(nv_q));
+        take_nor_store u_store(
+            .clk(clk),.resetn(resetn),.save(nv_save),.delete_take(nv_delete),.count(perf_count),.duration(perf_duration),.take_full(perf_full),
+            .busy(nv_busy),.boot_done(nv_boot_done),.valid(nv_valid),.done(nv_done),.ok(nv_ok),.error(nv_error),
+            .loaded_count(nv_count),.loaded_duration(nv_duration),.loaded_full(nv_full),.ram_we(nv_we),.ram_address(nv_address),
+            .ram_data(nv_data),.ram_q(nv_q),.cs_n(flash_cs_n),.sck(flash_sck),.mosi(flash_mosi),.miso(flash_miso));
+    end else begin: no_take
+        assign perf_state=0;assign perf_pulses=0;assign perf_recording=0;assign perf_playing=0;assign perf_kill=0;
+        assign perf_available=0;assign perf_replay=0;assign perf_saved=0;assign perf_full=0;assign perf_error=0;assign perf_confirm=0;
+        assign perf_elapsed=0;assign perf_duration=0;assign perf_count=0;assign nv_busy=0;
+        if(!ENABLE_FLASH_AUDIO)begin: no_audio_flash
+            assign flash_cs_n=1;assign flash_sck=0;assign flash_mosi=0;
+        end
+    end endgenerate
 endmodule

@@ -10,7 +10,6 @@ import android.graphics.Color;
 import android.graphics.ColorSpace;
 import android.graphics.ImageDecoder;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -37,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /** Owns photo decoding and appearance settings independently of Bluetooth work. */
 final class AppearanceController {
     private static final int PICK_BACKGROUND = 40;
-    private static final int DEFAULT_OVERLAY = 18;
+    private static final int DEFAULT_OVERLAY = 12;
     private static final int MAX_EDGE = 2048;
     private static final double MAX_PIXELS = 4000000.0;
     // Old and recreated Activities can briefly have live image workers together.
@@ -46,6 +45,9 @@ final class AppearanceController {
     private final Activity activity;
     private final ImageView photo;
     private final View scrim;
+    private final View topBar;
+    private final View bottomBar;
+    private final View stage;
     private final SharedPreferences preferences;
     private final AtomicFile storedPhoto;
     private final ExecutorService images = Executors.newSingleThreadExecutor();
@@ -58,13 +60,17 @@ final class AppearanceController {
     private TextView photoState;
     private Button chooseButton;
 
-    AppearanceController(Activity activity, FrameLayout root) {
+    AppearanceController(Activity activity, FrameLayout root, View topBar, View bottomBar) {
         this.activity = activity;
+        this.topBar = topBar;
+        this.bottomBar = bottomBar;
         preferences = activity.getSharedPreferences("appearance", Activity.MODE_PRIVATE);
         storedPhoto = new AtomicFile(new File(activity.getFilesDir(), "background-photo.png"));
         overlay = Math.max(0, Math.min(80, preferences.getInt("overlay_percent", DEFAULT_OVERLAY)));
-        root.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[]{Color.rgb(229, 242, 255), Color.rgb(241, 235, 255), Color.rgb(225, 244, 246)}));
+        // 默认背景是打包的原创「舞台夜色」素材；素材缺失时 StageBackdropView 自行绘制。
+        stage = new StageBackdropView(activity);
+        ((StageBackdropView) stage).setArt(ArtAssets.load(activity, "backdrop"));
+        root.addView(stage, fullScreen());
         photo = new ImageView(activity);
         photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
         photo.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -87,32 +93,33 @@ final class AppearanceController {
         LinearLayout box = new LinearLayout(activity);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(24), dp(4), dp(24), dp(10));
-        TextView intro = label("把喜欢的照片设为背景，打造自己的演奏空间。", 14,
-                Color.rgb(85, 98, 120));
+        TextView intro = label("默认是「孤独摇滚 · 霓虹舞台」主题。把喜欢的照片设为背景，打造自己的演奏空间。", 14,
+                Theme.MUTED);
         box.addView(intro);
-        photoState = label(customPhoto ? "当前：自定义照片" : "当前：默认渐变背景", 13,
-                Color.rgb(76, 89, 176));
+        photoState = label(customPhoto ? "当前：自定义照片" : "当前：霓虹舞台背景", 13,
+                Theme.PINK_INK);
         box.addView(photoState);
         chooseButton = new Button(activity);
         chooseButton.setText("选择背景照片");
         chooseButton.setAllCaps(false);
+        chooseButton.setLetterSpacing(0.02f);
         chooseButton.setTextColor(Color.WHITE);
-        chooseButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(82, 100, 206)));
+        chooseButton.setBackground(Theme.gradient(Theme.BUTTON, Theme.R_BUTTON));
         chooseButton.setMinHeight(dp(52));
         box.addView(chooseButton, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         chooseButton.setOnClickListener(v -> pickPhoto());
-        TextView heading = label("背景遮罩", 15, Color.rgb(35, 49, 76));
+        TextView heading = label("背景遮罩", 15, Theme.INK);
         heading.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         heading.setPadding(0, dp(18), 0, dp(4));
         box.addView(heading);
-        TextView value = label(overlayText(), 13, Color.rgb(85, 98, 120));
+        TextView value = label(overlayText(), 13, Theme.MUTED);
         box.addView(value);
         SeekBar shade = new SeekBar(activity);
         shade.setMax(80);
         shade.setProgress(overlay);
         shade.setContentDescription("背景深色遮罩百分比，0 到 80");
-        shade.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(82, 100, 206)));
-        shade.setThumbTintList(android.content.res.ColorStateList.valueOf(Color.rgb(82, 100, 206)));
+        shade.setProgressTintList(android.content.res.ColorStateList.valueOf(Theme.PINK));
+        shade.setThumbTintList(android.content.res.ColorStateList.valueOf(Theme.PINK));
         box.addView(shade, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)));
         shade.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
@@ -125,7 +132,7 @@ final class AppearanceController {
             @Override public void onStopTrackingTouch(SeekBar bar) { }
         });
         TextView hint = label("向右调暗背景。照片居中铺满，超出屏幕的边缘会裁切。\n照片会保存到 App 内，重启后自动恢复。", 12,
-                Color.rgb(108, 119, 138));
+                Theme.MUTED);
         box.addView(hint);
         ScrollView scroll = new ScrollView(activity);
         scroll.addView(box);
@@ -174,7 +181,7 @@ final class AppearanceController {
                 main.post(() -> {
                     if (!current(version)) { ready.recycle(); return; }
                     photo.setImageBitmap(ready);
-                    customPhoto = true;
+                    setPhotoActive(true);
                     setLoading(false);
                     message("背景已更新，并保存到本机。");
                 });
@@ -204,16 +211,16 @@ final class AppearanceController {
                 main.post(() -> {
                     if (!current(version)) { ready.recycle(); return; }
                     photo.setImageBitmap(ready);
-                    customPhoto = true;
+                    setPhotoActive(true);
                     setLoading(false);
                 });
             } catch (IOException | RuntimeException error) {
                 if (bitmap != null) bitmap.recycle();
                 if (storedPhoto.getBaseFile().exists())
-                    reportFailure(version, "保存的背景暂时无法读取，已显示默认渐变。可重新选择照片。");
+                    reportFailure(version, "保存的背景暂时无法读取，已显示霓虹舞台背景。可重新选择照片。");
             } catch (OutOfMemoryError error) {
                 if (bitmap != null) bitmap.recycle();
-                reportFailure(version, "背景照片暂时无法加载，已显示默认渐变。");
+                reportFailure(version, "背景照片暂时无法加载，已显示霓虹舞台背景。");
             }
         });
     }
@@ -257,18 +264,38 @@ final class AppearanceController {
     private void resetPhoto() {
         final int version = nextRevision();
         photo.setImageDrawable(null);
-        customPhoto = false;
+        setPhotoActive(false);
         overlay = DEFAULT_OVERLAY;
         preferences.edit().putInt("overlay_percent", overlay).putBoolean("photo_enabled", false).apply();
         updateScrim();
         setLoading(false);
         // All disk work is serialized, so an older import cannot overwrite a reset.
         submit(() -> { synchronized (FILE_LOCK) { if (current(version)) storedPhoto.delete(); } });
-        message("已恢复默认渐变背景。");
+        message("已恢复霓虹舞台背景。");
     }
 
     private void updateScrim() {
-        scrim.setBackgroundColor(Color.argb(Math.round(overlay * 255f / 100f), 7, 17, 37));
+        scrim.setBackgroundColor(Color.argb(Math.round(overlay * 255f / 100f),
+                Color.red(Theme.SCRIM), Color.green(Theme.SCRIM), Color.blue(Theme.SCRIM)));
+        syncBarTint();
+    }
+
+    /** 系统栏占位色跟随「是否有自定义照片」，避免状态栏和内容之间出现一道色差。 */
+    private void syncBarTint() {
+        int color = customPhoto ? scrimTint(0.55f) : Theme.BAR;
+        if (topBar != null) topBar.setBackgroundColor(color);
+        if (bottomBar != null) bottomBar.setBackgroundColor(color);
+    }
+
+    private int scrimTint(float factor) {
+        return Color.argb(Math.round(overlay * 255f / 100f * factor),
+                Color.red(Theme.SCRIM), Color.green(Theme.SCRIM), Color.blue(Theme.SCRIM));
+    }
+
+    private void setPhotoActive(boolean active) {
+        customPhoto = active;
+        stage.setVisibility(active ? View.INVISIBLE : View.VISIBLE);
+        syncBarTint();
     }
 
     private void setLoading(boolean loading) {
@@ -277,7 +304,7 @@ final class AppearanceController {
             chooseButton.setText(loading ? "正在准备照片…" : "选择背景照片");
         }
         if (photoState != null) photoState.setText(loading ? "正在处理图片，完成后自动保存" :
-                customPhoto ? "当前：自定义照片" : "当前：默认渐变背景");
+                customPhoto ? "当前：自定义照片" : "当前：霓虹舞台背景");
     }
 
     private String overlayText() { return "深色遮罩 " + overlay + "% · 拖动可实时预览"; }

@@ -17,6 +17,13 @@ IO_LOC "hc05_tx" F1; // J3 pin 15 -> HC-05 RXD.
 IO_PORT "hc05_rx" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF BANK_VCCIO=3.3;
 IO_PORT "hc05_tx" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
 
+// Separate 2Mbps record-only UART, verified on official Dock schematic page 1.
+// J3 pin 27 -> USB UART RXD; USB UART RTS_N -> J3 pin 29. Common GND.
+IO_LOC "audio_rec_tx" J7;
+IO_LOC "audio_rec_cts_n" L8;
+IO_PORT "audio_rec_tx" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_PORT "audio_rec_cts_n" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF BANK_VCCIO=3.3;
+
 // Keep the unused serial clock at its HIGH idle level in direct mode.
 IO_LOC "touch_scl" F6;
 IO_PORT "touch_scl" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
@@ -103,3 +110,18 @@ IO_PORT "hub_E" IO_TYPE=LVCMOS33 DRIVE=8;
 IO_PORT "hub_CK" IO_TYPE=LVCMOS33 DRIVE=8;
 IO_PORT "hub_ST" IO_TYPE=LVCMOS33 DRIVE=8;
 IO_PORT "hub_OE" IO_TYPE=LVCMOS33 DRIVE=8;
+
+// Explicit idle locations for the optional event-store ports. Legacy top
+// defaults keep CS#/WP#/HOLD# high and SCK low; it never writes this bus.
+IO_LOC "flash_cs_n" E6;
+IO_LOC "flash_sck" E7;
+IO_LOC "flash_mosi" D6;
+IO_LOC "flash_miso" E5;
+IO_LOC "flash_wp_n" D5;
+IO_LOC "flash_hold_n" E4;
+IO_PORT "flash_cs_n" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=4;
+IO_PORT "flash_sck" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=4;
+IO_PORT "flash_mosi" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=4;
+IO_PORT "flash_miso" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=OFF;
+IO_PORT "flash_wp_n" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=4;
+IO_PORT "flash_hold_n" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=4;

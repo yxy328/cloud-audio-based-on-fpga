@@ -12,7 +12,8 @@
 | [主工程说明](../pcm5102_pam8403/README.md) | 整体架构、触摸操作、音频接口和默认参数 |
 | [引脚与功能验收表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md) | 完整接线、功能实现状态、赛题口径和现场验收步骤 |
 | [8/16 键与参考功能迁移](../pcm5102_pam8403/REFERENCE_MIGRATION.md) | 模式、串行极性、16 键和弦、音效、延音、滑杆标定、64×64 状态页图例 |
-| [安卓曲谱助手](../pcm5102_pam8403/android_app/README.md) | App v1.4 安装、蓝牙连接、CSV/MIDI 导入和自动试听 |
+| [安卓曲谱助手](../pcm5102_pam8403/android_app/README.md) | App v1.11仅HC-05通信，曲库、演奏参数和LED控制 |
+| [备用高速音频录制](../pcm5102_pam8403/AUDIO_RECORDING.md) | 当前停用；保留2Mbps USB/RTS与FAR1协议，不改走现有9600bps |
 | [蓝牙曲谱与事件日志](../pcm5102_pam8403/BLUETOOTH_MEDIA.md) | 曲谱协议、PLAY/AUDITION/STOP、日志与错误码 |
 | [HC-05 与键位映射](../pcm5102_pam8403/HC05_KEYMAP.md) | UART 接线、通信参数和改键 |
 | [压力输入](../pcm5102_pam8403/FSR402.md) | FSR402、ADC 分压、力度和音高模式 |
@@ -20,7 +21,12 @@
 | [七声部独立滑音](../pcm5102_pam8403/VOICE_PITCH.md) | 每键音分调节与 FSR 叠加 |
 | [七轨曲谱指引](../pcm5102_pam8403/RHYTHM_GUIDE.md) | 下落音符、和弦、休止及显示范围 |
 | [音频可视化](../pcm5102_pam8403/AUDIO_VISUAL.md) | 波形、参考/混音 XY、FFT、S2 切页与 XY 命令 |
+| [LED 视觉与 App 联动](../pcm5102_pam8403/LED_VISUAL_APP_PLAN.md) | 功能总表、现有联动、手机 LED 控件建议、带宽与资源边界 |
+| [手机 LED 轨迹控制](../pcm5102_pam8403/android_app/LED_CONTROL.md) | App v1.9 安装、六个 XY 预设、频率比/相位与设备确认 |
+| [手机切页与实时预览](../pcm5102_pam8403/LED_REMOTE.md) | App v1.10 与配套位流、四页切换、实际状态、频谱与幅度回传 |
 | [验证记录](../pcm5102_pam8403/VERIFICATION.md) | 按时间倒序记录构建、指纹、仿真结果和未完成的实板验证 |
+| [FPGA 资源优化](../pcm5102_pam8403/RESOURCE_OPTIMIZATION.md) | 日志缓存定宽、曲谱行选择共享、同条件快照对比与独立位流 |
+| [HC-05 资源优化](../pcm5102_pam8403/HC05_RESOURCE_OPTIMIZATION.md) | 默认裁掉 USB 硬件、共享 53 命令译码、曲谱计时缩位、最新位流与 19 组 RTL 验证 |
 | [仓库维护](REPOSITORY.md) | Git 更新、目录约定、文档维护和上传范围 |
 | [版本记录](CHANGELOG.md) | App/FPGA 配套版本、升级要点与兼容范围 |
 

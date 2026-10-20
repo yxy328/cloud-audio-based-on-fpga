@@ -74,7 +74,7 @@ module tb_top_touch_response;
         if(dut.TOUCH_DEBOUNCE_MS!=2 || dut.TOUCH_MODE_DEBOUNCE_MS!=20 ||
            dut.ADSR_ATTACK_SAMPLES!=98 || dut.ADSR_DECAY_SAMPLES!=3906 ||
            dut.ADSR_SUSTAIN_LEVEL!=39321 || dut.TOUCH_ADSR_RELEASE_SAMPLES!=488 ||
-           dut.u_synth.RELEASE_SAMPLES!=4883)
+           dut.ADSR_RELEASE_SAMPLES!=4883)
             $fatal(1,"Test must use production confirmation and ADSR defaults");
         #6000000;
         if(!dut.touch_ready || dut.touch_keys!=0) $fatal(1,"Production readers not ready/idle");

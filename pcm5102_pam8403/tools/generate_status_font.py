@@ -28,9 +28,11 @@ PATTERNS = {
     '!': ('010', '010', '010', '000', '010'),
     ' ': ('000',) * 5,
     'I': ('111', '010', '010', '010', '111'),
+    'S': ('111', '100', '111', '001', '111'),
+    '.': ('000', '000', '000', '000', '010'),
 }
-GLYPHS = [str(n) for n in range(17)] + list('ABCDEFKHTRVPW! I')
-assert len(GLYPHS) == 33
+GLYPHS = [str(n) for n in range(17)] + list('ABCDEFKHTRVPW! IS.')
+assert len(GLYPHS) == 35
 
 
 def main():

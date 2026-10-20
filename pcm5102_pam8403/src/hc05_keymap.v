@@ -7,7 +7,12 @@ module hc05_keymap #(
     parameter [15:0] DEFAULT_A=98,DEFAULT_D=3906,DEFAULT_S=39321,DEFAULT_R=488,
     parameter integer ENABLE_DEMO_SCORE=0,
     parameter integer ENABLE_LOOKAHEAD=0,
-    parameter integer LOOKAHEAD_MS=1500
+    parameter integer LOOKAHEAD_MS=1500,
+    // Legacy demo audio consumes this DDS output. Live AUDITION uses the
+    // existing touch voices via guide_keys and needs no extra lookup.
+    parameter integer ENABLE_DOWNLOADED_INCREMENT=1,
+    parameter integer ENABLE_EVENT_TAKE=0,
+    parameter integer ENABLE_FLASH_AUDIO=0
 ) (
     input wire clk, resetn, rx,
     output wire tx,
@@ -38,6 +43,10 @@ module hc05_keymap #(
     output reg [15:0] bend_ratio,
     output reg xy_write,
     output reg [1:0] xy_ratio,xy_phase,
+    output reg visual_write,
+    output reg [1:0] remote_mode,
+    input wire [1:0] visual_requested,reference_ratio,reference_phase,
+    input wire [111:0] visual_snapshot,
     output reg touch_mode16,touch_hold,panic,serial_active_high,
     output reg [1:0] effect_mode,
     output reg [3:0] effect_wet,
@@ -46,24 +55,103 @@ module hc05_keymap #(
     output reg pressure_write,pressure_value,
     output reg [9:0] analog_min,analog_max,
     input wire [9:0] adc_sample,
-    input wire adc_timeout
+    input wire adc_timeout,
+    input wire audio_rec_busy,audio_rec_ready,audio_rec_overflow,
+    input wire audio_rec_valid,
+    input wire [3:0] audio_rec_status,audio_rec_error,
+    input wire [20:0] audio_rec_stored_samples,
+    input wire [15:0] audio_rec_generation,
+    input wire [7:0] audio_stream_data,
+    input wire audio_stream_valid,audio_stream_last,audio_stream_busy,
+    output wire audio_stream_ready,
+    output reg audio_rec_prepare,audio_rec_start,audio_rec_stop,audio_rec_abort,audio_rec_send,audio_rec_ack,
+    output reg [15:0] audio_rec_ack_sequence,
+    output reg [15:0] audio_rec_session,
+    output reg [2:0] take_command,
+    input wire [7:0] take_flags,
+    input wire [3:0] take_error,
+    input wire [23:0] take_elapsed,take_duration,
+    input wire [10:0] take_count
 );
     localparam [55:0] DEFAULT_MAP={8'd71,8'd69,8'd67,8'd65,8'd64,8'd62,8'd60};
-    localparam COLLECT=0, EXECUTE=1, RESPOND=2, DECIMAL=3, SONG_WAIT=4, DECIMAL_READ=5, ADSR_WAIT=6;
+    localparam COLLECT=0, EXECUTE=1, RESPOND=2, DECIMAL=3, SONG_WAIT=4, DECIMAL_READ=5, ADSR_WAIT=6, DECODE_START=7, DECODE_WAIT=8;
+    // BEGIN GENERATED HC05 COMMAND IDS
+    localparam [5:0] CMD_UNKNOWN=0;
+    localparam [5:0] CMD_PING=6'd1;
+    localparam [5:0] CMD_CTRL_QUERY=6'd2;
+    localparam [5:0] CMD_SERIAL_QUERY=6'd3;
+    localparam [5:0] CMD_SERIAL_SET=6'd4;
+    localparam [5:0] CMD_CAL_QUERY=6'd5;
+    localparam [5:0] CMD_CAL_SET=6'd6;
+    localparam [5:0] CMD_ADC_QUERY=6'd7;
+    localparam [5:0] CMD_PANIC=6'd8;
+    localparam [5:0] CMD_TOUCH_SET=6'd9;
+    localparam [5:0] CMD_EFFECT_SET=6'd10;
+    localparam [5:0] CMD_HOLD_SET=6'd11;
+    localparam [5:0] CMD_VOLUME_SET=6'd12;
+    localparam [5:0] CMD_ANALOG_SET=6'd13;
+    localparam [5:0] CMD_PRESSURE_SET=6'd14;
+    localparam [5:0] CMD_TAKE_QUERY=6'd15;
+    localparam [5:0] CMD_TAKE_REC=6'd16;
+    localparam [5:0] CMD_TAKE_DEL=6'd17;
+    localparam [5:0] CMD_TAKE_YES=6'd18;
+    localparam [5:0] CMD_TAKE_STOP=6'd19;
+    localparam [5:0] CMD_TAKE_PLAY=6'd20;
+    localparam [5:0] CMD_TAKE_SAVE=6'd21;
+    localparam [5:0] CMD_TAKE_NO=6'd22;
+    localparam [5:0] CMD_AREC_START=6'd23;
+    localparam [5:0] CMD_AREC_STOP=6'd24;
+    localparam [5:0] CMD_AREC_ABORT=6'd25;
+    localparam [5:0] CMD_AREC_QUERY=6'd26;
+    localparam [5:0] CMD_VIS_SET=6'd27;
+    localparam [5:0] CMD_VIS_QUERY=6'd28;
+    localparam [5:0] CMD_VIZ_QUERY=6'd29;
+    localparam [5:0] CMD_XY_SET=6'd30;
+    localparam [5:0] CMD_BEND_SET=6'd31;
+    localparam [5:0] CMD_BEND_RESET=6'd32;
+    localparam [5:0] CMD_ADSR_TOUCH=6'd33;
+    localparam [5:0] CMD_ADSR_SENSOR=6'd34;
+    localparam [5:0] CMD_ADSR_RESET_TOUCH=6'd35;
+    localparam [5:0] CMD_ADSR_RESET_SENSOR=6'd36;
+    localparam [5:0] CMD_TEST32=6'd37;
+    localparam [5:0] CMD_GUITAR=6'd38;
+    localparam [5:0] CMD_TONE_SET=6'd39;
+    localparam [5:0] CMD_VIBRATO_SET=6'd40;
+    localparam [5:0] CMD_BANK_SET=6'd41;
+    localparam [5:0] CMD_MAP_QUERY=6'd42;
+    localparam [5:0] CMD_MAP_RESET=6'd43;
+    localparam [5:0] CMD_MAP_SET=6'd44;
+    localparam [5:0] CMD_SONG_BEGIN=6'd45;
+    localparam [5:0] CMD_SONG_NOTE=6'd46;
+    localparam [5:0] CMD_SONG_CHORD=6'd47;
+    localparam [5:0] CMD_SONG_END=6'd48;
+    localparam [5:0] CMD_PLAY=6'd49;
+    localparam [5:0] CMD_AUDITION=6'd50;
+    localparam [5:0] CMD_STOP=6'd51;
+    localparam [5:0] CMD_REC_START=6'd52;
+    localparam [5:0] CMD_REC_STOP=6'd53;
+    localparam [5:0] CMD_AREC_PREP=6'd54;
+    localparam [5:0] CMD_AREC_SEND=6'd55;
+    localparam [5:0] CMD_AREC_ACK=6'd56;
+    // END GENERATED HC05 COMMAND IDS
     localparam NO_ERROR=0, LENGTH_ERROR=1, CHAR_ERROR=2, UART_ERROR=3;
     reg [3:0] state;
     reg [1:0] line_error;
-    reg [95:0] line;
-    reg [95:0] prefix; // First eleven bytes, shared fixed-position command decoder.
+    reg [31:0] line; // Only the last four argument bytes need parallel access.
     reg [6:0] line_length, parse_length, position;
     reg [255:0] reply;
+    reg visual_reply,take_reply;
     reg [5:0] reply_remaining;
     wire [7:0] received;
+    wire [7:0] reply_byte;
     wire received_valid, rx_fault, tx_ready;
     reg log_owned;
     wire [7:0] log_data;
     wire log_valid, log_last, log_ready;
-    wire select_log=log_owned || (state!=RESPOND && log_valid);
+    reg stream_owned;
+    wire select_stream=ENABLE_FLASH_AUDIO && (stream_owned || (state!=RESPOND && audio_stream_valid));
+    wire block_log=ENABLE_FLASH_AUDIO && audio_stream_busy;
+    wire select_log=!select_stream && !block_log && (log_owned || (state!=RESPOND && log_valid));
     wire [7:0] requested_note=(line[15:8]-8'd48)*8'd10+(line[7:0]-8'd48);
     wire download_busy;
     wire edit_allowed=keys_ready && !song_busy && !download_busy && !notes_busy && !recording && !rec_busy;
@@ -74,7 +162,6 @@ module hc05_keymap #(
     wire song_done;
     wire [2:0] song_error;
     wire [7:0] download_note;
-    wire [223:0] download_steps;
     reg [2:0] field_index, field_count;
     reg [15:0] accumulator, value0, value1, value2;
     reg have_digit;
@@ -85,9 +172,16 @@ module hc05_keymap #(
     reg [3:0] control_parse;
     reg [15:0] adsr_a,adsr_d,adsr_s,adsr_r;
     wire adsr_done;
-    integer prefix_byte;
+    wire [5:0] decoded_command,decode_position;
+    wire decode_done;
+    wire decoding=state==DECODE_START || state==DECODE_WAIT;
+    hc05_command_decode u_command_decode(
+        .clk(clk),.resetn(resetn && !rx_fault),
+        .start(state==DECODE_START && line_error==NO_ERROR && !rx_fault),
+        .line_length(line_length),.character(ch),.position(decode_position),
+        .done(decode_done),.command(decoded_command));
     always @(posedge clk) begin
-        ch<=command_bytes[position[5:0]];
+        ch<=command_bytes[decoding ? decode_position : position[5:0]];
         if(resetn && state==COLLECT && received_valid && line_error==NO_ERROR &&
            line_length<64 && received>=32 && received<=126)
             command_bytes[line_length[5:0]]<=received;
@@ -96,13 +190,13 @@ module hc05_keymap #(
         .clk(clk),.resetn(resetn),.request(adsr_request),.restore(adsr_restore),.profile(adsr_target),
         .attack_ms(adsr_a),.decay_ms(adsr_d),.sustain_percent(adsr_s),.release_ms(adsr_r),
         .done(adsr_done),.touch_config(touch_adsr),.sensor_config(sensor_adsr));
-    assign downloaded_increment=download_steps[31:0];
     assign log_ready=select_log && tx_ready;
+    assign audio_stream_ready=select_stream && tx_ready;
     uart_8n1 #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) u_uart (
         .clk(clk),.resetn(resetn),.rx(rx),.tx(tx),
         .rx_data(received),.rx_valid(received_valid),.rx_ready(state==COLLECT),
-        .rx_fault(rx_fault),.tx_data(select_log ? log_data : reply[255:248]),
-        .tx_valid(select_log ? log_valid : state==RESPOND),.tx_ready(tx_ready)
+        .rx_fault(rx_fault),.tx_data(select_stream ? audio_stream_data : select_log ? log_data : reply_byte),
+        .tx_valid(select_stream ? audio_stream_valid : select_log ? log_valid : state==RESPOND),.tx_ready(tx_ready)
     );
     downloadable_song #(.CLK_HZ(CLK_HZ),.ENABLE_LOOKAHEAD(ENABLE_LOOKAHEAD),
         .LOOKAHEAD_MS(LOOKAHEAD_MS)) u_download (
@@ -115,18 +209,44 @@ module hc05_keymap #(
         .spawn_keys(spawn_keys),.spawn_delay_ms(spawn_delay_ms),.note_ready(note_ready),
         .current_mask(),.busy(download_busy)
     );
-    midi_note_lut u_download_lut (
-        .clk(clk),.resetn(resetn),.note_map({7{download_note}}),.phase_increments(download_steps)
-    );
+    generate
+        if(ENABLE_DOWNLOADED_INCREMENT) begin: download_pitch_enabled
+            wire [223:0] download_steps;
+            midi_note_lut u_download_lut (
+                .clk(clk),.resetn(resetn),.note_map({7{download_note}}),.phase_increments(download_steps)
+            );
+            assign downloaded_increment=download_steps[31:0];
+        end else begin: download_pitch_disabled
+            assign downloaded_increment=32'd0;
+        end
+    endgenerate
+    generate if(!ENABLE_EVENT_TAKE && !ENABLE_FLASH_AUDIO)begin: legacy_log
     performance_logger #(.CLK_HZ(CLK_HZ)) u_logger (
         .clk(clk),.resetn(resetn),.start(rec_start),.stop(rec_stop),.note_map(note_map),
         .touch_keys(touch_keys),.pressure_mode(pressure_mode),.volume_gain(volume_gain),.pitch_ratio(pitch_ratio),
         .recording(rec_busy),.tx_data(log_data),.tx_valid(log_valid),.tx_last(log_last),.tx_ready(log_ready),.dropped()
     );
+    end else begin: event_log_disabled
+        assign rec_busy=1'b0;assign log_data=0;assign log_valid=0;assign log_last=0;
+    end endgenerate
     function [7:0] hex_char;
         input [3:0] n;
         begin hex_char=n<10 ? "0"+n : "A"+n-10;end
     endfunction
+    // Serialize one nibble at a time through a single hex encoder. Reusing
+    // reply storage avoids 28 parallel encoders on this nearly full device.
+    wire take_digit=reply_remaining==24 || reply_remaining==23 || reply_remaining==21 ||
+        (reply_remaining<=19 && reply_remaining>=14) ||
+        (reply_remaining<=12 && reply_remaining>=10) ||
+        (reply_remaining<=8 && reply_remaining>=3);
+    wire [7:0] encoded_hex=hex_char(reply[255:252]);
+    assign reply_byte = take_reply ?
+        (reply_remaining==29 ? "T" : reply_remaining==28 ? "A" :
+         reply_remaining==27 ? "K" : reply_remaining==26 ? "E" :
+         take_digit ? encoded_hex : reply_remaining==2 ? 8'd13 : reply_remaining==1 ? 8'd10 : ",") :
+        !visual_reply ? reply[255:248] :
+        reply_remaining==32 ? "V" : reply_remaining==31 ? "," :
+        reply_remaining==2 ? 8'd13 : reply_remaining==1 ? 8'd10 : encoded_hex;
     function [7:0] tens;
         input [7:0] note;
         begin tens=(note<70) ? "6" : "7"; end
@@ -138,12 +258,13 @@ module hc05_keymap #(
     task respond;
         input [255:0] message;
         input [5:0] length;
-        begin reply<=message << ((32-length)*8); reply_remaining<=length; state<=RESPOND; end
+        begin reply<=message << ((32-length)*8); reply_remaining<=length; visual_reply<=0;take_reply<=0;state<=RESPOND; end
     endtask
     task result;
         input [2:0] error_code;
         begin
-            case(error_code)
+            if(ENABLE_FLASH_AUDIO && audio_stream_busy)state<=COLLECT;
+            else case(error_code)
                 0: respond({"OK",8'd13,8'd10},4);
                 1: respond({"ERR,BUSY",8'd13,8'd10},10);
                 2: respond({"ERR,RANGE",8'd13,8'd10},11);
@@ -166,16 +287,19 @@ module hc05_keymap #(
     always @(posedge clk) begin
         if(!resetn) begin
             note_map<=DEFAULT_MAP; state<=COLLECT; line_error<=NO_ERROR;
-            line<=0; prefix<=0; line_length<=0; reply<=0; reply_remaining<=0; log_owned<=0;
+            line<=0; line_length<=0; reply<=0; reply_remaining<=0; visual_reply<=0;take_reply<=0;log_owned<=0;
             song_request<=0; rec_start<=0; rec_stop<=0;
             downloaded_audition<=0; audition_pending<=0;
             song_operation<=0; song_arg0<=0; song_arg1<=0; song_arg2<=0;
             builtin_play<=0; builtin_stop<=0;
             guitar_pluck<=0; gesture_timbre<=0; gesture_vibrato<=0; gesture_bank<=0;
             sensor_test32<=0;
-            touch_mode16<=0;serial_active_high<=0;touch_hold<=0;panic<=0;effect_mode<=0;effect_wet<=4;
+            audio_rec_prepare<=0;audio_rec_start<=0;audio_rec_stop<=0;audio_rec_abort<=0;audio_rec_send<=0;audio_rec_ack<=0;
+            audio_rec_ack_sequence<=0;audio_rec_session<=0;take_command<=0;stream_owned<=0;
+            touch_mode16<=ENABLE_EVENT_TAKE!=0;serial_active_high<=0;touch_hold<=0;panic<=0;effect_mode<=0;effect_wet<=4;
             master_volume<=16;analog_mode<=0;analog_min<=0;analog_max<=1023;pressure_write<=0;pressure_value<=0;control_parse<=0;
             xy_write<=0;xy_ratio<=2;xy_phase<=0;
+            visual_write<=0;remote_mode<=0;
             bend_parse<=0;bend_write<=0;bend_reset<=0;bend_index<=0;bend_ratio<=16384;
             adsr_parse<=0;adsr_target<=0;adsr_request<=0;adsr_restore<=0;
             adsr_a<=0;adsr_d<=0;adsr_s<=0;adsr_r<=0;value2<=0;
@@ -187,111 +311,176 @@ module hc05_keymap #(
             sensor_test32<=0;adsr_request<=0;
             bend_write<=0;bend_reset<=0;
             xy_write<=0;
+            visual_write<=0;
+            audio_rec_prepare<=0;audio_rec_start<=0;audio_rec_stop<=0;audio_rec_abort<=0;audio_rec_send<=0;audio_rec_ack<=0;
+            take_command<=0;
             // Audition is opt-in for one UART start only. Physical controls
             // always return to silent guidance; ending a score disarms it.
             if(!downloaded_playing) downloaded_audition<=0;
             if(select_log && log_valid && tx_ready) log_owned<=!log_last;
+            if(select_stream && audio_stream_valid && tx_ready)stream_owned<=!audio_stream_last;
             if(rx_fault) begin
                 line_error<=UART_ERROR;
-                if(state==COLLECT || state==EXECUTE) begin line<=0; line_length<=0; state<=COLLECT; end
+                if(state==COLLECT || state==EXECUTE || decoding) begin line<=0; line_length<=0; state<=COLLECT; end
             end
             if(state==RESPOND) begin
-                if(!select_log && tx_ready) begin
-                    reply<={reply[247:0],8'd0}; reply_remaining<=reply_remaining-1'b1;
+                if(!select_log && !select_stream && tx_ready) begin
+                    if(!visual_reply && !take_reply)reply<={reply[247:0],8'd0};
+                    else if((take_reply && take_digit) || (visual_reply && reply_remaining<=30 && reply_remaining>=3))reply<={reply[251:0],4'd0};
+                    reply_remaining<=reply_remaining-1'b1;
                     if(reply_remaining==1) state<=COLLECT;
                 end
-            end else if(!rx_fault || (state!=COLLECT && state!=EXECUTE)) begin
+            end else if(!rx_fault || (state!=COLLECT && state!=EXECUTE && !decoding)) begin
                 case(state)
                     COLLECT: if(received_valid) begin
                         if(received==13 || received==10) begin
-                            if(line_length!=0 || line_error!=NO_ERROR) state<=EXECUTE;
+                            if(line_length!=0 || line_error!=NO_ERROR) state<=DECODE_START;
                         end else if(line_error==NO_ERROR) begin
                             if(line_length==64) line_error<=LENGTH_ERROR;
                             else if(received<32 || received>126) line_error<=CHAR_ERROR;
                             else begin
-                                if(line_length==0) prefix<={received,88'd0};
-                                else for(prefix_byte=1;prefix_byte<12;prefix_byte=prefix_byte+1)
-                                    if(line_length==prefix_byte) prefix[95-prefix_byte*8 -: 8]<=received;
-                                line<=line_length==0 ? {88'd0,received} : {line[87:0],received};
+                                line<=line_length==0 ? {24'd0,received} : {line[23:0],received};
                                 line_length<=line_length+1'b1;
                             end
                         end
                     end
+                    DECODE_START:state<=line_error==NO_ERROR ? DECODE_WAIT : EXECUTE;
+                    DECODE_WAIT:if(decode_done)state<=EXECUTE;
                     EXECUTE: begin
                         line_length<=0; line_error<=NO_ERROR;adsr_parse<=0;adsr_restore<=0;bend_parse<=0;control_parse<=0;
-                        if(line_error==UART_ERROR) respond({"ERR,UART",8'd13,8'd10},10);
+                        // Download owns the binary link; do not inject text on noise or unrelated commands.
+                        if(ENABLE_FLASH_AUDIO && audio_stream_busy && (line_error!=NO_ERROR ||
+                            (decoded_command!=CMD_AREC_ACK && decoded_command!=CMD_AREC_ABORT)))state<=COLLECT;
+                        else if(line_error==UART_ERROR) respond({"ERR,UART",8'd13,8'd10},10);
                         else if(line_error==LENGTH_ERROR) respond({"ERR,LENGTH",8'd13,8'd10},12);
                         else if(line_error==CHAR_ERROR) respond({"ERR,CMD",8'd13,8'd10},9);
-                        else if(line_length==4 && line[31:0]=="PING") respond({"PONG",8'd13,8'd10},6);
-                        else if(line_length==5 && line[39:0]=="CTRL?") begin
+                        else if(decoded_command==CMD_PING) respond({"PONG",8'd13,8'd10},6);
+                        else if(decoded_command==CMD_CTRL_QUERY) begin
                             respond({"CTRL,",8'd48+{7'd0,touch_mode16},",",8'd48+{6'd0,effect_mode},",",
                                 8'd48+{4'd0,effect_wet},",",8'd48+{7'd0,touch_hold},",",
                                 8'd48+{5'd0,analog_mode},",",(master_volume>=10 ? 8'd49 : 8'd48),
                                 8'd48+(master_volume>=10 ? master_volume-8'd10 : {3'd0,master_volume}),",",
                                 8'd48+{7'd0,pressure_mode},8'd13,8'd10},21);
-                        end else if(line_length==7 && line[55:0]=="SERIAL?") begin
+                        end else if(decoded_command==CMD_SERIAL_QUERY) begin
                             respond({"SERIAL,",8'd48+{7'd0,serial_active_high},8'd13,8'd10},10);
-                        end else if(line_length>7 && prefix[95:40]=="SERIAL,") begin
+                        end else if(decoded_command==CMD_SERIAL_SET) begin
                             control_parse<=8;parse_numbers(7,1);
-                        end else if(line_length==4 && line[31:0]=="CAL?") begin
+                        end else if(decoded_command==CMD_CAL_QUERY) begin
                             respond({"CAL,",hex_char({2'd0,analog_min[9:8]}),hex_char(analog_min[7:4]),hex_char(analog_min[3:0]),",",
                                 hex_char({2'd0,analog_max[9:8]}),hex_char(analog_max[7:4]),hex_char(analog_max[3:0]),8'd13,8'd10},13);
-                        end else if(line_length>4 && prefix[95:64]=="CAL,") begin
+                        end else if(decoded_command==CMD_CAL_SET) begin
                             control_parse<=7;parse_numbers(4,2);
-                        end else if(line_length==4 && line[31:0]=="ADC?") begin
+                        end else if(decoded_command==CMD_ADC_QUERY) begin
                             respond({"ADC,",hex_char({2'd0,adc_sample[9:8]}),hex_char(adc_sample[7:4]),
                                 hex_char(adc_sample[3:0]),",",8'd48+{7'd0,adc_timeout},8'd13,8'd10},11);
-                        end else if(line_length==5 && line[39:0]=="PANIC") begin
+                        end else if(decoded_command==CMD_PANIC) begin
                             panic<=1;touch_hold<=0;downloaded_audition<=0;audition_pending<=0;
                             builtin_stop<=1;song_request<=1;song_operation<=5;state<=SONG_WAIT;
-                        end else if(line_length>6 && prefix[95:48]=="TOUCH,") begin
+                        end else if(decoded_command==CMD_TOUCH_SET) begin
                             control_parse<=1;parse_numbers(6,1);
-                        end else if(line_length>7 && prefix[95:40]=="EFFECT,") begin
+                        end else if(decoded_command==CMD_EFFECT_SET) begin
                             control_parse<=2;parse_numbers(7,2);
-                        end else if(line_length>5 && prefix[95:56]=="HOLD,") begin
+                        end else if(decoded_command==CMD_HOLD_SET) begin
                             control_parse<=3;parse_numbers(5,1);
-                        end else if(line_length>7 && prefix[95:40]=="VOLUME,") begin
+                        end else if(decoded_command==CMD_VOLUME_SET) begin
                             control_parse<=4;parse_numbers(7,1);
-                        end else if(line_length>7 && prefix[95:40]=="ANALOG,") begin
+                        end else if(decoded_command==CMD_ANALOG_SET) begin
                             control_parse<=5;parse_numbers(7,1);
-                        end else if(line_length>9 && prefix[95:24]=="PRESSURE,") begin
+                        end else if(decoded_command==CMD_PRESSURE_SET) begin
                             control_parse<=6;parse_numbers(9,1);
                         end
-                        else if(line_length==6 && prefix[95:72]=="XY," && line[15:8]==",") begin
+                        else if(decoded_command==CMD_TAKE_QUERY && ENABLE_EVENT_TAKE)begin
+                            reply<={take_flags,take_error,take_elapsed,1'b0,take_count,take_duration,184'd0};
+                            reply_remaining<=29;visual_reply<=0;take_reply<=1;state<=RESPOND;
+                        end else if(ENABLE_EVENT_TAKE &&
+                            ((line_length==8 && (decoded_command==CMD_TAKE_REC || decoded_command==CMD_TAKE_DEL || decoded_command==CMD_TAKE_YES)) ||
+                             (line_length==9 && (decoded_command==CMD_TAKE_STOP || decoded_command==CMD_TAKE_PLAY || decoded_command==CMD_TAKE_SAVE)) ||
+                             (decoded_command==CMD_TAKE_NO)))begin
+                            if(decoded_command==CMD_TAKE_STOP)begin take_command<=2;result(0);end
+                            else if(take_flags[5] || take_flags[1:0]!=0)result(1);
+                            else begin
+                                if(decoded_command==CMD_TAKE_REC)take_command<=1;
+                                else if(line_length==9)take_command<=decoded_command==CMD_TAKE_SAVE ? 3'd7 : 3'd3;
+                                else if(decoded_command==CMD_TAKE_DEL)take_command<=4;
+                                else if(line_length==8)take_command<=5;
+                                else take_command<=6;
+                                result(0);
+                            end
+                        end
+                        else if(decoded_command==CMD_AREC_START)begin
+                            control_parse<=9;parse_numbers(11,1);
+                        end else if(decoded_command==CMD_AREC_STOP)begin
+                            audio_rec_stop<=1;result(0);
+                        end else if(decoded_command==CMD_AREC_ABORT)begin
+                            audio_rec_abort<=1;if(ENABLE_FLASH_AUDIO && audio_stream_busy)state<=COLLECT;else result(0);
+                        end else if(decoded_command==CMD_AREC_QUERY)begin
+                            if(ENABLE_FLASH_AUDIO)respond({"AREC,",8'd48+{7'd0,audio_rec_busy},",",8'd48+{7'd0,audio_rec_ready},",",
+                                8'd48+{7'd0,audio_rec_overflow},",",8'd48+{7'd0,audio_rec_valid},",",
+                                hex_char(audio_rec_status),",",hex_char(audio_rec_error),",",
+                                hex_char(audio_rec_generation[15:12]),hex_char(audio_rec_generation[11:8]),
+                                hex_char(audio_rec_generation[7:4]),hex_char(audio_rec_generation[3:0]),",",
+                                hex_char({3'd0,audio_rec_stored_samples[20]}),hex_char(audio_rec_stored_samples[19:16]),
+                                hex_char(audio_rec_stored_samples[15:12]),hex_char(audio_rec_stored_samples[11:8]),
+                                hex_char(audio_rec_stored_samples[7:4]),hex_char(audio_rec_stored_samples[3:0]),8'd13,8'd10},30);
+                            else respond({"AREC,",8'd48+{7'd0,audio_rec_busy},",",8'd48+{7'd0,audio_rec_ready},",",
+                                8'd48+{7'd0,audio_rec_overflow},8'd13,8'd10},12);
+                        end
+                        else if(decoded_command==CMD_AREC_PREP)begin
+                            if(!ENABLE_FLASH_AUDIO || audio_rec_busy)result(ENABLE_FLASH_AUDIO ? 1 : 3);
+                            else begin audio_rec_prepare<=1;result(0);end
+                        end else if(decoded_command==CMD_AREC_SEND)begin
+                            control_parse<=10;parse_numbers(10,1);
+                        end else if(decoded_command==CMD_AREC_ACK)begin
+                            control_parse<=11;parse_numbers(9,1);
+                        end
+                        else if(decoded_command==CMD_VIS_SET) begin
+                            if(line[7:0]>="0" && line[7:0]<="3") begin
+                                remote_mode<=line[1:0];visual_write<=1;result(0);
+                            end else result(2);
+                        end else if(decoded_command==CMD_VIS_QUERY) begin
+                            respond({"VIS,",8'd48+{6'd0,visual_requested},",",
+                                8'd48+{6'd0,visual_snapshot[103:102]},",",
+                                8'd48+{6'd0,reference_ratio},",",8'd48+{6'd0,reference_phase},",",
+                                8'd48+{6'd0,visual_snapshot[101:100]},",",8'd48+{6'd0,visual_snapshot[99:98]},",",
+                                hex_char(visual_snapshot[107:104]),8'd13,8'd10},19);
+                        end else if(decoded_command==CMD_VIZ_QUERY) begin
+                            // Exactly 32 UART bytes, captured atomically into the existing reply register.
+                            reply<={visual_snapshot,144'd0};reply_remaining<=32;visual_reply<=1;take_reply<=0;state<=RESPOND;
+                        end
+                        else if(decoded_command==CMD_XY_SET && line[15:8]==",") begin
                             if(line[23:16]>="0" && line[23:16]<="3" && line[7:0]>="0" && line[7:0]<="3") begin
                                 xy_ratio<=line[17:16];xy_phase<=line[1:0];xy_write<=1;result(0);
                             end else result(2);
                         end
-                        else if(line_length>5 && prefix[95:56]=="BEND,") begin
+                        else if(decoded_command==CMD_BEND_SET) begin
                             bend_parse<=1;parse_numbers(5,2);
-                        end else if(line_length==10 && line[79:0]=="BEND_RESET") begin
+                        end else if(decoded_command==CMD_BEND_RESET) begin
                             bend_reset<=1;result(0);
                         end
-                        else if(line_length>11 && prefix[95:8]=="ADSR,TOUCH,") begin
+                        else if(decoded_command==CMD_ADSR_TOUCH) begin
                             adsr_parse<=1;adsr_target<=0;parse_numbers(11,4);
-                        end else if(line_length>12 && prefix=="ADSR,SENSOR,") begin
+                        end else if(decoded_command==CMD_ADSR_SENSOR) begin
                             adsr_parse<=1;adsr_target<=1;parse_numbers(12,4);
-                        end else if(prefix[95:8]=="ADSR_RESET," &&
-                            ((line_length==16 && line[39:0]=="TOUCH") || (line_length==17 && line[47:0]=="SENSOR"))) begin
+                        end else if((decoded_command==CMD_ADSR_RESET_TOUCH || decoded_command==CMD_ADSR_RESET_SENSOR)) begin
                             adsr_target<=line_length==17;adsr_request<=1;adsr_restore<=1;state<=ADSR_WAIT;
-                        end else if(line_length==6 && line[47:0]=="TEST32") begin
+                        end else if(decoded_command==CMD_TEST32) begin
                             sensor_test32<=1; gesture_vibrato<=0; result(0);
-                        end else if(line_length==6 && line[47:0]=="GUITAR") begin
+                        end else if(decoded_command==CMD_GUITAR) begin
                             guitar_pluck<=1; result(0);
-                        end else if(line_length==6 && line[47:8]=="TONE,") begin
+                        end else if(decoded_command==CMD_TONE_SET) begin
                             if(line[7:0]<"0" || line[7:0]>"9") result(7);
                             else if(line[7:0]>"7") result(2);
                             else begin gesture_timbre<=line[2:0]; result(0); end
-                        end else if(line_length==9 && line[71:8]=="VIBRATO,") begin
+                        end else if(decoded_command==CMD_VIBRATO_SET) begin
                             if(line[7:0]<"0" || line[7:0]>"9") result(7);
                             else if(line[7:0]>"1") result(2);
                             else begin gesture_vibrato<=line[0]; result(0); end
-                        end else if(line_length==6 && line[47:8]=="BANK,") begin
+                        end else if(decoded_command==CMD_BANK_SET) begin
                             if(line[7:0]<"0" || line[7:0]>"9") result(7);
                             else if(line[7:0]>"1") result(2);
                             else begin gesture_bank<=line[0]; result(0); end
                         end
-                        else if(line_length==4 && line[31:0]=="MAP?") begin
+                        else if(decoded_command==CMD_MAP_QUERY) begin
                             respond({"MAP,",tens(note_map[7:0]),ones(note_map[7:0]),",",
                                 tens(note_map[15:8]),ones(note_map[15:8]),",",
                                 tens(note_map[23:16]),ones(note_map[23:16]),",",
@@ -299,10 +488,10 @@ module hc05_keymap #(
                                 tens(note_map[39:32]),ones(note_map[39:32]),",",
                                 tens(note_map[47:40]),ones(note_map[47:40]),",",
                                 tens(note_map[55:48]),ones(note_map[55:48]),8'd13,8'd10},26);
-                        end else if(line_length==9 && line[71:0]=="MAP_RESET") begin
+                        end else if(decoded_command==CMD_MAP_RESET) begin
                             if(!edit_allowed) result(1);
                             else begin note_map<=DEFAULT_MAP; respond({"OK,MAP_RESET",8'd13,8'd10},14); end
-                        end else if(line_length==8 && line[63:32]=="MAP," && line[23:16]==",") begin
+                        end else if(decoded_command==CMD_MAP_SET && line[23:16]==",") begin
                             if(line[31:24]<"1" || line[31:24]>"7") respond({"ERR,KEY",8'd13,8'd10},9);
                             else if(line[15:8]<"0" || line[15:8]>"9" || line[7:0]<"0" || line[7:0]>"9") result(7);
                             else if(requested_note<60 || requested_note>72) respond({"ERR,NOTE",8'd13,8'd10},10);
@@ -311,15 +500,15 @@ module hc05_keymap #(
                                 note_map[(line[31:24]-8'd49)*8 +: 8]<=requested_note;
                                 respond({"OK,MAP,",line[31:24],",",line[15:0],8'd13,8'd10},13);
                             end
-                        end else if(line_length>11 && prefix[95:8]=="SONG_BEGIN,") begin
+                        end else if(decoded_command==CMD_SONG_BEGIN) begin
                             song_operation<=1; parse_numbers(11,1);
-                        end else if(line_length>10 && prefix[95:16]=="SONG_NOTE,") begin
+                        end else if(decoded_command==CMD_SONG_NOTE) begin
                             song_operation<=2; parse_numbers(10,3);
-                        end else if(line_length>11 && prefix[95:8]=="SONG_CHORD,") begin
+                        end else if(decoded_command==CMD_SONG_CHORD) begin
                             song_operation<=6; parse_numbers(11,3);
-                        end else if(line_length==8 && line[63:0]=="SONG_END") begin
+                        end else if(decoded_command==CMD_SONG_END) begin
                             song_request<=1; song_operation<=3; state<=SONG_WAIT;
-                        end else if(line_length==4 && line[31:0]=="PLAY") begin
+                        end else if(decoded_command==CMD_PLAY) begin
                             if(!keys_ready) result(1);
                             else begin
                                  downloaded_audition<=0; audition_pending<=0;
@@ -327,21 +516,22 @@ module hc05_keymap #(
                                 else if(ENABLE_DEMO_SCORE) begin builtin_play<=1; result(0); end
                                 else result(3);
                             end
-                         end else if(line_length==8 && line[63:0]=="AUDITION") begin
+                         end else if(decoded_command==CMD_AUDITION) begin
                              if(!keys_ready || rec_busy || recording) result(1);
                              else if(!downloaded_valid) result(3);
                              else begin
                                  downloaded_audition<=0; audition_pending<=1;
                                  song_request<=1; song_operation<=4; state<=SONG_WAIT;
                              end
-                         end else if(line_length==4 && line[31:0]=="STOP") begin
+                         end else if(decoded_command==CMD_STOP) begin
                              downloaded_audition<=0; audition_pending<=0;
                             builtin_stop<=1; song_request<=1; song_operation<=5;
                             state<=SONG_WAIT;
-                        end else if(line_length==9 && line[71:0]=="REC_START") begin
-                            if(!keys_ready || rec_busy || recording || touch_mode16 || touch_hold || analog_mode!=0) result(1);
+                        end else if(decoded_command==CMD_REC_START) begin
+                            if(ENABLE_EVENT_TAKE || ENABLE_FLASH_AUDIO)result(3);
+                            else if(!keys_ready || rec_busy || recording || touch_mode16 || touch_hold || analog_mode!=0) result(1);
                             else begin rec_start<=1; result(0); end
-                        end else if(line_length==8 && line[63:0]=="REC_STOP") begin rec_stop<=1; result(0); end
+                        end else if(decoded_command==CMD_REC_STOP) begin rec_stop<=1; result(0); end
                         else result(7);
                     end
                     DECIMAL_READ:state<=DECIMAL;
@@ -372,6 +562,13 @@ module hc05_keymap #(
                                     8:if(accumulator>1)result(2);
                                       else if(!edit_allowed || touch_hold)result(1);
                                       else begin serial_active_high<=accumulator[0];result(0);end
+                                    9:if(audio_rec_busy)result(1);
+                                      else if(!audio_rec_ready)result(3);
+                                      else begin audio_rec_session<=accumulator;audio_rec_start<=1;result(0);end
+                                    10:if(!ENABLE_FLASH_AUDIO || audio_rec_busy)result(ENABLE_FLASH_AUDIO ? 1 : 3);
+                                      else if(!audio_rec_valid)result(4);
+                                      else begin audio_rec_session<=accumulator;audio_rec_send<=1;result(0);end
+                                    11:begin audio_rec_ack_sequence<=accumulator;audio_rec_ack<=1;state<=COLLECT;end
                                     default:result(7);
                                 endcase
                             end else if(bend_parse) begin

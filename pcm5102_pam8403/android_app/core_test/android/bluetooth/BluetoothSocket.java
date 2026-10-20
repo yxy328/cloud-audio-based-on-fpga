@@ -12,6 +12,7 @@ public final class BluetoothSocket implements Closeable {
     public void connect()throws IOException{connected=true;}
     public boolean isConnected(){return connected;}
     public void feed(String line){for(byte b:line.getBytes(StandardCharsets.US_ASCII))input.offer(b&255);}
+    public void feed(byte[] bytes){for(byte b:bytes)input.offer(b&255);}
     public void eof(){input.offer(-1);}
     public InputStream getInputStream(){return new InputStream(){public int read()throws IOException{try{return input.take();}catch(InterruptedException e){throw new IOException(e);}}};}
     public OutputStream getOutputStream(){return new ByteArrayOutputStream(){@Override public void flush()throws IOException{String line=new String(toByteArray(),StandardCharsets.US_ASCII);reset();if(onCommand!=null)onCommand.accept(line);}};}

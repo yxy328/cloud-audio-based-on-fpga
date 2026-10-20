@@ -26,6 +26,9 @@ module audio_effects #(
     reg signed [15:0] held_dry,tap;
     reg tap_valid;
     reg signed [20:0] wet_product;
+    // Q4 wet gain: [20:4] is the signed shifted result; extend to the
+    // 18-bit accumulator before adding dry PCM and saturating.
+    wire signed [17:0] wet_sample=$signed(wet_product[20:4]);
     reg signed [17:0] mix,feedback;
     function [15:0] saturate(input signed [17:0] x);
         begin
@@ -59,7 +62,7 @@ module audio_effects #(
                     state<=3;
                 end
                 3:begin
-                    mix<=$signed(held_dry)+(wet_product>>>4);
+                    mix<=$signed(held_dry)+wet_sample;
                     memory[pointer]<=(held_mode==1) ? saturate(feedback) : held_dry;
                     pointer<=pointer+1'b1;
                     if(filled<LENGTH) filled<=filled+1'b1;

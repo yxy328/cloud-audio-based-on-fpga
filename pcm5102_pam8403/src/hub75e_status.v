@@ -2,7 +2,7 @@
 // Eight rows of 8x8 tiles for the existing 64x64 panel. All settings are
 // snapshotted at a full PWM boundary. A single dual-port block font ROM
 // serves both panel halves; no OLED, second clock, or framebuffer is used.
-module hub75e_status(
+module hub75e_status #(parameter ENABLE_TAKE_STATUS=0)(
     input wire clk,resetn,display_boundary,
     input wire [5:0] pixel_x,
     input wire [4:0] pixel_row,
@@ -16,6 +16,10 @@ module hub75e_status(
     input wire [12:0] master_gain,
     input wire [9:0] adc_sample,analog_position,
     input wire analog_valid,
+    input wire [7:0] take_flags,
+    input wire [3:0] take_error,
+    input wire [23:0] take_elapsed,
+    input wire [10:0] take_count,
     output wire [14:0] upper_rgb,lower_rgb
 );
     localparam [5:0] A=17,B=18,C=19,D=20,E=21,F=22,
@@ -31,6 +35,33 @@ module hub75e_status(
     reg [4:0] volume_q;
     reg [9:0] adc_q;
     reg [5:0] volume_fill,analog_fill;
+    reg [7:0] take_q;
+    reg [3:0] take_error_q;
+    reg [10:0] take_count_q;
+    reg [23:0] time_binary;
+    reg [31:0] time_bcd,time_digits,adjusted_bcd,time_display;
+    reg [4:0] time_left;
+    integer digit;
+    always @*begin
+        adjusted_bcd=time_bcd;
+        for(digit=0;digit<8;digit=digit+1)
+            if(time_bcd[digit*4 +: 4]>=5)adjusted_bcd[digit*4 +: 4]=time_bcd[digit*4 +: 4]+4'd3;
+    end
+    always @(posedge clk)begin
+        if(!resetn)begin
+            take_q<=0;take_error_q<=0;take_count_q<=0;time_binary<=0;time_bcd<=0;
+            time_digits<=0;time_display<=0;time_left<=0;
+        end else if(ENABLE_TAKE_STATUS)begin
+            if(display_boundary)begin
+                take_q<=take_flags;take_error_q<=take_error;take_count_q<=take_count;
+                time_binary<=take_elapsed;time_bcd<=0;time_left<=24;time_display<=time_digits;
+            end else if(time_left!=0)begin
+                time_bcd<={adjusted_bcd[30:0],time_binary[23]};time_binary<={time_binary[22:0],1'b0};
+                time_left<=time_left-1'b1;
+                if(time_left==1)time_digits<={adjusted_bcd[30:0],time_binary[23]};
+            end
+        end
+    end
     wire [8:0] gain_times3={2'd0,master_gain[12:6]}+{1'd0,master_gain[12:6],1'b0};
     wire [7:0] position_times3={2'd0,analog_position[9:4]}+{1'd0,analog_position[9:4],1'b0};
     always @(posedge clk) begin
@@ -49,7 +80,7 @@ module hub75e_status(
     end
     function [5:0] hex_glyph;
         input [3:0] value;
-        begin hex_glyph=value<10 ? {2'd0,value} : A+value-10; end
+        begin hex_glyph=value<4'd10 ? {2'd0,value} : A+{2'd0,value}-6'd10; end
     endfunction
     // {glyph, foreground palette, background palette}; tile rows are:
     // K/H/T/R, volume, K1..8, K9..16, ADC, pressure+slider, effect, IR1..8.
@@ -60,7 +91,33 @@ module hub75e_status(
         reg [5:0] bar_x;
         begin
             glyph=BLANK;fg=CYAN;bg=BLACK;key_index=0;bar_x=x-6'd16;
-            case(y[5:3])
+            if(ENABLE_TAKE_STATUS && (take_q!=0 || take_error_q!=0) &&
+                (y[5:3]==0 || y[5:3]==1 || y[5:3]>=6))begin
+                case(y[5:3])
+                    0:case(x[5:3])
+                        0:glyph=R;1:begin glyph={5'd0,take_q[0]};fg=take_q[0] ? RED : GRAY_DIM;end
+                        2:glyph=P;3:begin glyph={5'd0,take_q[1]};fg=take_q[1] ? GREEN : GRAY_DIM;end
+                        4:glyph=B;5:glyph={5'd0,take_q[5]};6:glyph=A;7:glyph={5'd0,take_q[2]};
+                    endcase
+                    1:case(x[5:3])
+                        0:glyph=T;
+                        1:glyph={2'd0,time_display[31:28]};2:glyph={2'd0,time_display[27:24]};
+                        3:glyph={2'd0,time_display[23:20]};4:glyph={2'd0,time_display[19:16]};
+                        5:glyph={2'd0,time_display[15:12]};6:glyph=34;7:glyph={2'd0,time_display[11:8]};
+                    endcase
+                    6:case(x[5:3])
+                        0:glyph=33;1:begin glyph={5'd0,take_q[3]};fg=take_q[3] ? GREEN : RED;end
+                        2:glyph=F;3:begin glyph={5'd0,take_q[4]};fg=take_q[4] ? AMBER : GRAY_DIM;end
+                        4:glyph=E;5:begin glyph=hex_glyph(take_error_q);fg=take_error_q!=0 ? RED : GREEN;end
+                        6:glyph=C;7:begin glyph={4'd0,take_q[7:6]};fg=take_q[7:6]!=0 ? AMBER : GRAY_DIM;end
+                    endcase
+                    7:case(x[5:3])
+                        0:glyph=E;1:glyph=hex_glyph({1'b0,take_count_q[10:8]});
+                        2:glyph=hex_glyph(take_count_q[7:4]);3:glyph=hex_glyph(take_count_q[3:0]);
+                        4:glyph=C;5:glyph=4;6:glyph=0;7:glyph=0;
+                    endcase
+                endcase
+            end else case(y[5:3])
                 0:case(x[5:3])
                     0:begin glyph=K;fg=ready_q ? CYAN : RED;end
                     1:glyph=mode_q ? 16 : 8;
@@ -182,8 +239,8 @@ module hub75e_status(
         font[240]=8'h00; font[241]=8'h10; font[242]=8'h10; font[243]=8'h10; font[244]=8'h00; font[245]=8'h10; font[246]=8'h00; font[247]=8'h00; // 30: !
         font[248]=8'h00; font[249]=8'h00; font[250]=8'h00; font[251]=8'h00; font[252]=8'h00; font[253]=8'h00; font[254]=8'h00; font[255]=8'h00; // 31:  
         font[256]=8'h00; font[257]=8'h38; font[258]=8'h10; font[259]=8'h10; font[260]=8'h10; font[261]=8'h38; font[262]=8'h00; font[263]=8'h00; // 32: I
-        font[264]=8'h00; font[265]=8'h00; font[266]=8'h00; font[267]=8'h00; font[268]=8'h00; font[269]=8'h00; font[270]=8'h00; font[271]=8'h00; // 33:  
-        font[272]=8'h00; font[273]=8'h00; font[274]=8'h00; font[275]=8'h00; font[276]=8'h00; font[277]=8'h00; font[278]=8'h00; font[279]=8'h00; // 34:  
+        font[264]=8'h00; font[265]=8'h38; font[266]=8'h20; font[267]=8'h38; font[268]=8'h08; font[269]=8'h38; font[270]=8'h00; font[271]=8'h00; // 33: S
+        font[272]=8'h00; font[273]=8'h00; font[274]=8'h00; font[275]=8'h00; font[276]=8'h00; font[277]=8'h10; font[278]=8'h00; font[279]=8'h00; // 34: .
         font[280]=8'h00; font[281]=8'h00; font[282]=8'h00; font[283]=8'h00; font[284]=8'h00; font[285]=8'h00; font[286]=8'h00; font[287]=8'h00; // 35:  
         font[288]=8'h00; font[289]=8'h00; font[290]=8'h00; font[291]=8'h00; font[292]=8'h00; font[293]=8'h00; font[294]=8'h00; font[295]=8'h00; // 36:  
         font[296]=8'h00; font[297]=8'h00; font[298]=8'h00; font[299]=8'h00; font[300]=8'h00; font[301]=8'h00; font[302]=8'h00; font[303]=8'h00; // 37:  

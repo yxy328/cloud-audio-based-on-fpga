@@ -83,6 +83,39 @@ module tb_top_audio_visual;
             join
         end
     endtask
+    task query_visual;
+        integer n,b,c,preview_file;reg [7:0] data;reg [3:0] nibble;
+        reg [111:0] decoded,golden;
+        begin
+            decoded=0;preview_file=$fopen("sim/build/led_top_preview.txt","wb");
+            fork
+                begin
+                    for(c=0;c<32;c=c+1)begin
+                        @(negedge tx);repeat(50)@(posedge clk);
+                        for(b=0;b<8;b=b+1)begin repeat(100)@(posedge clk);data[b]=tx;end
+                        repeat(100)@(posedge clk);
+                        if(tx!==1)$fatal(1,"Visual query UART stop");
+                        $fwrite(preview_file,"%c",data);
+                        if(c==0 && data!="V" || c==1 && data!="," || c==30 && data!=13 || c==31 && data!=10)$fatal(1,"Visual framing");
+                        if(c>=2 && c<30)begin
+                            if(data>="0" && data<="9")nibble=data-"0";
+                            else if(data>="A" && data<="F")nibble=data-"A"+10;
+                            else $fatal(1,"Visual hex digit");
+                            decoded={decoded[107:0],nibble};
+                        end
+                    end
+                end
+                begin send_byte("V");send_byte("I");send_byte("Z");send_byte("?");send_byte(10);end
+                begin
+                    wait(dut.u_keymap.state==1 && dut.u_keymap.line[31:0]=="VIZ?");
+                    @(posedge clk);golden=dut.visual_snapshot;
+                end
+            join
+            $fclose(preview_file);
+            if(decoded!==golden)$fatal(1,"Top preview tore or differed from displayed snapshot");
+            if(decoded[103:102]!=3 || !decoded[104] || decoded[24:20]==0)$fatal(1,"Top live C4 preview absent");
+        end
+    endtask
     integer before_resets,before_restarts;
     // Reconstruct a complete RGB5 frame using external HUB data/clock/LAT,
     // including every PWM phase, for a reviewable simulated panel preview.
@@ -187,6 +220,12 @@ module tb_top_audio_visual;
         if(dut.u_guide_display.audio_visual.u_visualizer.shown_spectrum[4*5+:5]==0)
             $fatal(1,"Live C4 did not reach its FFT frequency band");
         save_preview("sim/build/xy_spectrum_panel.ppm");
+        query_visual;
+        command("VIS,1\n",6);wait(dut.u_guide_display.visual_active==1);
+        command("VIS,2\n",6);wait(dut.u_guide_display.visual_active==2);
+        command("VIS,0\n",6);wait(dut.u_guide_display.visual_active==0);
+        if(dut.u_guide_display.status_active)$fatal(1,"Remote auto page hid playing guide");
+        command("VIS,3\n",6);wait(dut.u_guide_display.visual_active==3);
         s2=1;frames(80);s2=0;frames(4);
         wait(dut.u_guide_display.visual_active==0);
         if(restarts!=before_restarts || resets!=before_resets)
@@ -228,6 +267,7 @@ module tb_top_audio_visual;
         save_preview("sim/build/status_live_panel.ppm");
         $display("PASS top audio visual: exact I2S tap/continuous phase, live touch/IR/guitar, C4 FFT, S2 modes and six XY presets, UART XY while playing, score uninterrupted, external I2S/HUB and eight panel captures");
         $display("PASS top dashboard: UART volume/effect/hold/timbre/pressure/analog, real ADC conversion, physical touch/IR, automatic idle status and external RGB5 frame");
+        $display("PASS top remote visual: four UART pages, whole-frame activation, atomic 32-byte live C4 preview, uninterrupted score/I2S/phase");
         $finish;
     end
     initial begin #250000000; $fatal(1,"Top audio visual timeout"); end

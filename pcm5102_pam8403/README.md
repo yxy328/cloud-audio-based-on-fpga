@@ -2,7 +2,11 @@
 
 [仓库首页](../README.md) · [文档索引](../docs/README.md) · [快速上手](../docs/QUICK_START.md) · [完整接线与验收](PIN_FUNCTION_REQUIREMENTS.md)
 
-当前配套 App 为 **v1.4**。新增 **8/16 键切换、两种串行极性、16 键和弦、回声/合唱、延音锁存、总音量、滑动变阻器及标定、八种红外/手势音色**。**无需 OLED**：64×64 LED 空闲显示键态/音量/ADC/音效等总览，播放时显示下落曲谱。操作、屏幕图例、改接线与兼容范围见 [参考工程迁移说明](REFERENCE_MIGRATION.md)，最新位流及验证见 [验证记录](VERIFICATION.md)。默认仍为原 8 键模式；原曲谱下载、指引、自动试听和七键滑音保留。
+最新 [HC-05 资源优化](HC05_RESOURCE_OPTIMIZATION.md)：默认综合移除备用 USB 录音电路，现有 53 个命令共享译码，曲谱计时缩位；同条件综合 Logic 减少 7.91%，独立位流 `PCM5102_HC05_ONLY.fs` 完成 50MHz 布局布线，尚未烧录。
+
+新增 [App v1.10 手机 LED 联动与配套主工程位流](LED_REMOTE.md)：四页直接切换、请求/实际显示状态和频谱/幅度预览。需要同时更新 APK 与位流；手机和面板实物联调待验。
+
+当前采用[App v1.11 / Code12](android_app/dist/FPGA-Score-hc05-only.apk)，**手机与FPGA仅通过HC-05通信**。USB高速数字录音[保留备用，暂不启用](AUDIO_RECORDING.md)，无需新增USB模块、RTS或OTG，也不把完整PCM改走现有9600bps链路。曲库、LED联动、演奏控制及8/16键等功能保留；板上事件录制回放的开发状态单列于[说明](RECORD_PLAYBACK.md)。当前位流与验证见[验证记录](VERIFICATION.md)。
 
 支持[最终混音波形、参考李萨如、混音延时XY、实时FFT频谱与三组音源幅度条](AUDIO_VISUAL.md)。S2长按约1秒按“总览/曲谱→波形→XY→频谱”循环；XY页短按轮换八字、多瓣、圆、椭圆、直线、实际混音，其他页短按重启曲谱。`XY,r,p`可通过蓝牙独立设置频率比和相位；REF与AUD标签区分数学参考与真实混音。上电显示总览，曲谱播放时自动显示七轨指引。构建与实测范围见[验证记录](VERIFICATION.md)。
 
@@ -27,6 +31,7 @@ FSR402 / 滑杆 → 分压 → GW5A 片内 ADC → 表情/全局音量/音高/�
 HC-05 → 键位配置 / 音符曲谱暂存 / 演奏事件日志
 红外8路 + APDS-9960 → 32复音TDM / 八音色 / 颤音 ───────────────→ 实时混音
 HC-05 GUITAR → Karplus–Strong 单弦拨弦 ───────────→ 实时混音
+备用、当前停用：最终实时采样副本 → FIFO/CRC/2Mbps UART → USB/OTG → 手机WAV
 ```
 
 16 键各占独立声部，可同时发声；正弦 ROM 只存一个周期的数学波形，不存歌曲录音。
@@ -71,6 +76,8 @@ MP3/FLAC 不能直接得到准确谱面；需要人工制谱或离线转谱后�
 | `touch_sdo` | F7 / J3第38脚 | 16键串行数据输入；8键模式可不接 |
 | `hc05_rx` | F2 / J3 第16脚 | HC-05 TXD |
 | `hc05_tx` | F1 / J3 第15脚 | HC-05 RXD |
+| `audio_rec_tx` | J7 / J3 第27脚 | 高速USB串口模块RXD，2Mbps音频上行 |
+| `audio_rec_cts_n` | L8 / J3 第29脚 | 高速模块RTS低有效输出，默认上拉禁止发送 |
 | `scl` | H4 / J3 第23脚 | APDS-9960 SCL，开漏、上拉到 3.3V |
 | `sda` | G4 / J3 第24脚 | APDS-9960 SDA，开漏、上拉到 3.3V |
 | GND | 底板 GND | FPGA、DAC、功放、触摸、蓝牙共地 |

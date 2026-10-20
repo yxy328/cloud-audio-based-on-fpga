@@ -11,7 +11,8 @@ module gesture_top #(
     parameter AUDIO_VOLUME_SHIFT = 4,
     parameter [19:0] AUDIO_KEY_DEBOUNCE_CYCLES = 20'd1000000,
     parameter [25:0] AUDIO_LONG_PRESS_CYCLES = 26'd40000000,
-    parameter EXTERNAL_CONTROL = 0
+    parameter EXTERNAL_CONTROL = 0,
+    parameter ENABLE_REPLAY = 0
 ) (
     input wire clk, resetn, frame_ce,
     input wire key_s1, key_s2,
@@ -26,11 +27,14 @@ module gesture_top #(
     input wire [2:0] ir_note_index,
     output wire [31:0] voice_active,
     output wire [5:0] voice_count,
-    output wire overrun
+    output wire overrun,
+    input wire replay_mode,replay_gesture_valid,audio_clear,
+    input wire [2:0] replay_start,replay_end
 );
     wire i2c_start, i2c_rw, i2c_busy, i2c_done, i2c_nack, i2c_rvalid;
     wire [6:0] i2c_addr;
     wire [7:0] i2c_reg, i2c_wdata, i2c_rdlen, i2c_rdata;
+    wire use_replay=ENABLE_REPLAY && replay_mode;
 
     // Only the sensor owns this bus in the requested sensor/audio variant.
     i2c_master #(.CLK_FREQ(50_000_000), .I2C_FREQ(100_000)) u_i2c (
@@ -60,9 +64,10 @@ module gesture_top #(
         .UKULELE_FRAMES(AUDIO_UKULELE_FRAMES), .DRUM_FRAMES(AUDIO_DRUM_FRAMES),
         .VOLUME_SHIFT(AUDIO_VOLUME_SHIFT)
     ) u_audio (
-        .clk(clk), .resetn(resetn), .frame_ce(frame_ce),
-        .sensor_ready(init_done), .gesture_valid(gesture_valid),
-        .dir_evaluated(dir_evaluated), .start_dir(start_dir), .end_dir(end_dir),
+        .clk(clk), .resetn(resetn && !(ENABLE_REPLAY && audio_clear)), .frame_ce(frame_ce),
+        .sensor_ready(use_replay ? 1'b1 : init_done), .gesture_valid(use_replay ? replay_gesture_valid : gesture_valid),
+        .dir_evaluated(use_replay ? replay_gesture_valid : dir_evaluated),
+        .start_dir(use_replay ? replay_start : start_dir), .end_dir(use_replay ? replay_end : end_dir),
         .ir_note_valid(ir_note_valid),.ir_note_index(ir_note_index),.test32(test32),
         .control_timbre(control_timbre), .control_vibrato(control_vibrato),
         .control_bank(control_bank),.adsr_config(adsr_config),

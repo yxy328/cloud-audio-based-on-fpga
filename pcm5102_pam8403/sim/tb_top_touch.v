@@ -107,7 +107,7 @@ module tb_top_touch;
         end
         pads=8'h7f;wait(dut.touch_keys==8'h7f);#1000000;
         s1=1;#100000;s1=0;#45000000;
-        if(!dut.u_control.playing || dut.voice_gates!=4'hf || dut.touch_keys!=8'h7f)
+        if(!dut.demo_score.u_control.playing || dut.voice_gates!=4'hf || dut.touch_keys!=8'h7f)
             $fatal(1,"Song and all seven touch voices failed to coexist");
         peak=0;
         for(i=monitor.pcm_count-1000;i<monitor.pcm_count;i=i+1) begin
@@ -115,7 +115,7 @@ module tb_top_touch;
         end
         if(peak<5000) $fatal(1,"Combined song/touch output missing");
         s1=1;#100000;s1=0;#2000000;
-        if(dut.u_control.playing || dut.touch_keys!=8'h7f || monitor.last_pcm==0)
+        if(dut.demo_score.u_control.playing || dut.touch_keys!=8'h7f || monitor.last_pcm==0)
             $fatal(1,"Stopping song stopped live touch notes");
         pads=0;wait(dut.touch_keys==0);#2000000;
         first=monitor.pcm_count;#1000000;silence(first);

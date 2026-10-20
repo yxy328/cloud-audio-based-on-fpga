@@ -108,7 +108,43 @@ module tb_performance_logger;
         expect_line(65,{"EVT,0,3F,0,0,65535",8'd13,8'd10});
         expect_line(66,{"EVT,0,7F,0,0,65535",8'd13,8'd10});
         expect_line(67,{"REC_END,7",8'd13,8'd10});
-        $display("PASS tb_performance_logger: MAP, press/hold/release/chords, pressure, FIFO64, overflow, STOP");
+        // Exercise the exact 33-byte bound without waiting 49 days of clocks.
+        // Deposit only the elapsed counter; capture/format/handshake stay real.
+        line_count=0; touch_keys=0; pressure_mode=0; volume_gain=0; pitch_ratio=0; tx_ready=0;
+        begin_recording;
+        repeat(3) @(negedge clk);
+        dut.elapsed_ms=32'hffffffff; dut.ms_div=0;
+        touch_keys=7'h7f; pressure_mode=1; volume_gain=65535; pitch_ratio=65535;
+        @(negedge clk); stop=1;
+        @(negedge clk); stop=0;
+        // Also stall a complete maximum-length line before permitting drain.
+        tx_ready=1;
+        wait(line_count==2); @(negedge clk); tx_ready=0;
+        repeat(100) @(negedge clk);
+        tx_ready=1;
+        deadline=0;
+        while(recording && deadline<100000) begin @(negedge clk); deadline=deadline+1; end
+        if(recording || line_count!=5) $fatal(1,"maximum EVT drain failed");
+        expect_line(1,{"EVT,0,00,0,0,0",8'd13,8'd10});
+        expect_line(2,{"EVT,4294967295,7F,1,65535,65535",8'd13,8'd10});
+        expect_line(3,{"EVT,4294967295,7F,1,65535,65535",8'd13,8'd10});
+        expect_line(4,{"REC_END,0",8'd13,8'd10});
+
+        // Largest overflow/end lines and saturation of the drop counter.
+        line_count=0; touch_keys=0; tx_ready=0;
+        begin_recording;
+        for(i=0;i<70;i=i+1) begin @(negedge clk); touch_keys=i+1; end
+        @(negedge clk); dut.dropped=32'hfffffffe; touch_keys=71;
+        @(negedge clk); touch_keys=72;
+        @(negedge clk);
+        if(dropped!==32'hffffffff) $fatal(1,"drop counter did not saturate");
+        stop=1; @(negedge clk); stop=0; tx_ready=1;
+        deadline=0;
+        while(recording && deadline<100000) begin @(negedge clk); deadline=deadline+1; end
+        if(recording || line_count!=68) $fatal(1,"maximum overflow drain failed");
+        expect_line(1,{"ERR,REC_OVERFLOW,4294967295",8'd13,8'd10});
+        expect_line(67,{"REC_END,4294967295",8'd13,8'd10});
+        $display("PASS tb_performance_logger: MAP, events, FIFO64, overflow, STOP, 33-byte EVT, uint32 limits, stalls");
         $finish;
     end
 endmodule

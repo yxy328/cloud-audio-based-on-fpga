@@ -25,6 +25,27 @@ module tb_hub75e_rhythm_display;
     integer pwm_rows=0;
     integer committed_spawns=0;
     reg count_pwm=0;
+    integer checked_rows=0;
+    reg [6:0] expected_upper,expected_lower;
+    // Independent specification: choose up to three neighboring heads,
+    // clipping heads after row 54, then OR their seven key lanes.
+    function [6:0] expected_notes;
+        input integer y;
+        integer dy;
+        begin
+            expected_notes=0;
+            for(dy=0;dy<3;dy=dy+1)
+                if(y>=dy && y-dy<=54) expected_notes=expected_notes | dut.note_rows[y-dy];
+        end
+    endfunction
+    always @(posedge clk) if(resetn && dut.state==0)begin
+        expected_upper=expected_notes(dut.scan_row);
+        expected_lower=expected_notes(32+dut.scan_row);
+        #1;
+        if(dut.upper_notes!==expected_upper || dut.lower_notes!==expected_lower)
+            $fatal(1,"three-row glyph selection mismatch");
+        checked_rows=checked_rows+1;
+    end
     reg [5:0] pixels[0:63];
     time last_rgb_change=0, last_ck_change=0, last_st_change=0;
     time blank_started=0;
@@ -233,7 +254,13 @@ module tb_hub75e_rhythm_display;
         if(ready || overflow) $fatal(1,"stop handshake/reset mismatch");
         inspect_pixel(6,60,3'b111);
         if(latches < 1024) $fatal(1,"insufficient scan coverage");
-        $display("PASS hub75e_rhythm_display: external scan/RGB5 PWM, 1500ms descent, 128 commits at one/clock, every pipeline scroll/STOP boundary, 3002 delay/phase arithmetic cases, touch");
+        // Scan every row/PWM plane with different combinations of lanes,
+        // including nonzero clipped heads at rows 55..63.
+        @(negedge clk); playing=1;
+        for(k=0;k<64;k=k+1) dut.note_rows[k]=(k*37+11)&127;
+        repeat(133*32*32) @(negedge clk);
+        if(checked_rows<1024) $fatal(1,"insufficient glyph selection coverage");
+        $display("PASS hub75e_rhythm_display: external RGB5/133-clock scan, descent/bursts/scroll/STOP, 3002 arithmetic cases, %0d reference row pairs",checked_rows);
         $finish;
     end
     initial begin #30000000; $fatal(1,"HUB rhythm display timeout"); end

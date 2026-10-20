@@ -1,8 +1,20 @@
 # 安卓 HC-05 曲谱助手
 
-[仓库首页](../../README.md) · [文档索引](../../docs/README.md) · [下载当前 APK（v1.4）](dist/FPGA-Score-debug.apk)
+**v1.12-route2 / Code13实验版：** 配套独立音频工程可经现有9600bps HC-05回传原PCM并保存/播放WAV，详见[路线2操作及限制](../HC05_AUDIO_ROUTE2.md)。APK输出为`dist/FPGA-HC05-Audio-Route2.apk`，30秒录音需约54分钟以上；实际手机蓝牙/播放待验收。下文v1.11默认工程及USB备用说明保留历史用途。
 
-**当前版本 v1.4 / versionCode 5。** 首页新增“键盘模式与演奏控制”：8/16 键切换、串行极性、压力用途、延音、原声/回声/合唱、湿度、总音量、滑杆用途与端点标定，以及设备状态/ADC 读取。红外/手势音色增至八种。安装包需要配套新版 FPGA 位流，完整步骤、接线和限制见 [迁移说明](../REFERENCE_MIGRATION.md)；验证与当前 SHA256 见 [验证记录](../VERIFICATION.md)。
+**当前通信选择：仅HC-05。** [App v1.11 / Code12](dist/FPGA-Score-hc05-only.apk)保留当前曲库、LED联动和演奏控制，关闭启动时的USB初始化，不显示USB录音入口。无需USB串口模块、RTS或OTG；完整PCM/WAV高速回传代码[保留备用](../AUDIO_RECORDING.md)，不改走现有9600bps通道。板上事件录制回放仍须配套专用固件，开发进度见[说明](../RECORD_PLAYBACK.md)。构建与测试见[验证记录](../VERIFICATION.md)。
+
+[**新增 v1.10 手机切页与实时预览**](dist/FPGA-Score-led-remote.apk)：四页切换、请求/实际状态读回、FPGA 频谱及三组幅度预览。需要配套新版 FPGA 位流，安装、协议和验证范围见 [手机 LED 联动说明](../LED_REMOTE.md)。
+
+[**新增 v1.9 LED 轨迹控制安装包**](dist/FPGA-Score-led.apk)：六个李萨如/实际混音预设、频率比与相位选择、设备确认提示。先用板上 S2 进入 XY 页；参数命令沿用已有固件，无需为此重新烧录。操作与验证范围见 [LED 控制说明](LED_CONTROL.md)。
+
+[**新增 v1.8 分级曲库安装包**](dist/FPGA-Score-library.apk)：青铜、白银、黄金各三首，包含白银《伦敦桥要塌了》，可离线选曲并匹配七键后直接下载。保留文件夹 CSV/MIDI 导入，另可将内置曲目保存为 CSV。操作、改编说明和验证范围见[分级曲库说明](SONG_LIBRARY.md)。原 v1.6 安装包及下文历史说明保留。
+
+[仓库首页](../../README.md) · [文档索引](../../docs/README.md) · [历史 v1.6 APK](dist/FPGA-Score-debug.apk)
+
+**以下保留 v1.6 / versionCode 7 安装包的说明。** 保留现有主题与演奏控制，新增“08 完整演奏音频录制”：HC-05负责启停，独立USB串口以2Mbps回传最终实时混音，校验后保存/导出WAV。需新增3.3V、2Mbps、自动RTS/CTS模块及手机OTG，见[录音接线与步骤](../AUDIO_RECORDING.md)。代码、RTL/Java测试和布局布线通过，手机USB硬件联调尚待验收。
+
+“键盘模式与演奏控制”提供8/16键切换、串行极性、压力用途、延音、原声/回声/合唱、湿度、总音量、滑杆用途与端点标定，以及设备状态/ADC读取；红外/手势有八种音色。安装包需要配套新版FPGA位流，见[迁移说明](../REFERENCE_MIGRATION.md)与[验证记录](../VERIFICATION.md)。
 
 无需 OLED，64×64 LED 在空闲时显示键态、音量、滑杆/ADC、延音、音色、音效和红外状态，曲谱播放时自动显示下落指引；长按 S2 切换波形/XY/频谱。屏幕图例见迁移说明。
 
@@ -123,7 +135,7 @@ App 一次只保留一条待确认命令。4 秒未收到预期响应、设备�
 
 历史 v1.3 安装包为 **v1.3 / versionCode 4**，SHA256 为 `35AAAA77D9CB27629AD452FD290C5B8A7D407733C7FD2C8207A3DDBA8F94ED51`。新增自动演奏按钮和配套位流的验证结果见 [最新验证记录](../VERIFICATION.md)。本节后半的 v1.2/v1.1/v1.0 信息保留为历史记录。
 
-工程没有第三方运行依赖。可以在 Android Studio 中打开本目录，使用其 SDK/JDK 构建；Gradle 插件使用 AGP 8.7.3（JDK 17、Gradle 8.9）。本目录另提供不依赖 Gradle 的 Windows 构建脚本，使用官方 Android SDK API35 / build-tools35 及 PATH 上的 JDK 17+（已在本机 JDK25 实际构建）。脚本只写本目录的 `tools/`、`build/` 与 `dist/`，不修改全局环境。
+v1.6将MIT许可的usb-serial-for-android v3.10.0驱动源码随工程编译，来源、固定版本指纹和适配说明见[第三方依赖](third_party/README.md)；不需要额外下载驱动AAR或AndroidX。可以在Android Studio中打开本目录，使用其SDK/JDK构建；Gradle插件使用AGP 8.7.3（JDK17、Gradle8.9）。本目录另提供不依赖Gradle的Windows构建脚本，使用官方Android SDK API35 / build-tools35及PATH上的JDK17+（已在本机JDK25实际构建）。脚本只写本目录的`tools/`、`build/`与`dist/`，不修改全局环境。
 
 ```powershell
 .\prepare-sdk.ps1

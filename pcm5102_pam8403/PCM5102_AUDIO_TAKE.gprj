@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project><Template>FPGA</Template><Version>5</Version>
+<Device name="GW5A-25A" pn="GW5A-LV25MG121NC1/I0">gw5a25a-002</Device>
+<FileList>
+<File path="src/clk_div.v" type="file.verilog" enable="1"/><File path="src/i2s_tx.v" type="file.verilog" enable="1"/>
+<File path="src/button_filter.v" type="file.verilog" enable="1"/><File path="../pmod_hub75e/src/ttp229_gpio_input.v" type="file.verilog" enable="1"/>
+<File path="src/twinkle_sequencer.v" type="file.verilog" enable="1"/><File path="src/dds_voice.v" type="file.verilog" enable="1"/>
+<File path="src/sine_rom.v" type="file.verilog" enable="1"/><File path="src/adsr_config.v" type="file.verilog" enable="1"/>
+<File path="src/adsr_env.v" type="file.verilog" enable="1"/><File path="src/envelope_gain.v" type="file.verilog" enable="1"/>
+<File path="src/synth_voice.v" type="file.verilog" enable="1"/><File path="src/audio_mixer.v" type="file.verilog" enable="1"/>
+<File path="src/poly_synth.v" type="file.verilog" enable="1"/><File path="src/gowin_fsr_adc.v" type="file.verilog" enable="1"/>
+<File path="src/fsr_dynamics.v" type="file.verilog" enable="1"/><File path="src/fsr_mode_select.v" type="file.verilog" enable="1"/>
+<File path="src/fsr_pitch_scaler.v" type="file.verilog" enable="1"/><File path="src/uart_8n1.v" type="file.verilog" enable="1"/>
+<File path="src/hc05_command_decode.v" type="file.verilog" enable="1"/><File path="src/hc05_keymap.v" type="file.verilog" enable="1"/>
+<File path="src/downloadable_song.v" type="file.verilog" enable="1"/><File path="src/hub75e_rhythm_display.v" type="file.verilog" enable="1"/>
+<File path="src/hub75e_status.v" type="file.verilog" enable="1"/><File path="src/audio_visualizer.v" type="file.verilog" enable="1"/>
+<File path="src/lissajous_reference.v" type="file.verilog" enable="1"/><File path="src/audio_spectrum.v" type="file.verilog" enable="1"/>
+<File path="src/display_mode_control.v" type="file.verilog" enable="1"/><File path="src/performance_logger.v" type="file.verilog" enable="1"/>
+<File path="src/midi_note_lut.v" type="file.verilog" enable="1"/><File path="src/top.v" type="file.verilog" enable="1"/>
+<File path="src/geita.v" type="file.verilog" enable="1"/><File path="src/gesture_top.v" type="file.verilog" enable="1"/>
+<File path="src/ir_strings.v" type="file.verilog" enable="1"/><File path="src/sensor_poly_audio.v" type="file.verilog" enable="1"/>
+<File path="src/tdm_synth.v" type="file.verilog" enable="1"/><File path="src/sine_lookup.v" type="file.verilog" enable="1"/>
+<File path="src/gesture_audio.v" type="file.verilog" enable="1"/><File path="src/gesture_nco_sine.v" type="file.verilog" enable="1"/>
+<File path="src/gesture_piano_voice.v" type="file.verilog" enable="1"/><File path="src/extra_voices.v" type="file.verilog" enable="1"/>
+<File path="src/vibrato.v" type="file.verilog" enable="1"/><File path="src/apds9960_ctrl.v" type="file.verilog" enable="1"/>
+<File path="src/i2c_master.v" type="file.verilog" enable="1"/><File path="src/ttp229_keys.v" type="file.verilog" enable="1"/>
+<File path="src/touch_tdm_synth.v" type="file.verilog" enable="1"/><File path="src/analog_expression.v" type="file.verilog" enable="1"/>
+<File path="src/audio_effects.v" type="file.verilog" enable="1"/><File path="src/audio_master_volume.v" type="file.verilog" enable="1"/>
+<File path="src/touch_sine_rom.v" type="file.verilog" enable="1"/><File path="src/take_spi_transaction.v" type="file.verilog" enable="1"/>
+<File path="src/audio_nor_operation.v" type="file.verilog" enable="1"/><File path="src/audio_take_store.v" type="file.verilog" enable="1"/>
+<File path="src/top_audio_take.v" type="file.verilog" enable="1"/>
+<File path="src/PCM5102_EVENT_TAKE.cst" type="file.cst" enable="1"/><File path="src/PCM5102_AUDIO_TAKE.sdc" type="file.sdc" enable="1"/>
+</FileList></Project>

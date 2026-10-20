@@ -10,7 +10,8 @@
 module hub75e_rhythm_display #(
     parameter integer LEAD_MS = 1500,
     parameter integer ENABLE_AUDIO_VISUAL = 0,
-    parameter integer ENABLE_STATUS = 0
+    parameter integer ENABLE_STATUS = 0,
+    parameter integer ENABLE_TAKE_STATUS = 0
 ) (
     input wire clk,
     input wire resetn,
@@ -27,6 +28,10 @@ module hub75e_rhythm_display #(
     input wire [12:0] master_gain,
     input wire [9:0] adc_sample,analog_position,
     input wire analog_valid,
+    input wire [7:0] take_flags,
+    input wire [3:0] take_error,
+    input wire [23:0] take_elapsed,
+    input wire [10:0] take_count,
     input wire [6:0] guide_keys,
     input wire playing,
     input wire ms_tick,
@@ -38,6 +43,7 @@ module hub75e_rhythm_display #(
     input wire sample_ce,
     input wire signed [15:0] mixed_sample, touch0, touch1, sensor_sample, guitar_sample,
     output wire note_ready,
+    output wire [111:0] visual_snapshot,
     output reg overflow,
     output wire hub_R1,
     output wire hub_G1,
@@ -206,7 +212,12 @@ module hub75e_rhythm_display #(
     wire display_boundary = state == S_LATCH_LOW && scan_row == 31 && pwm_phase == 31;
     reg [1:0] visual_active;
     wire [14:0] visual_upper, visual_lower;
+    wire [103:0] visual_telemetry;
     reg status_active;
+    // v1 header: reserved=0, dashboard, XY-valid, FFT-valid; followed by
+    // active mode, displayed XY ratio/phase, three 6-bit meters, 16x5 FFT.
+    assign visual_snapshot={4'd1,1'b0,status_active,visual_telemetry[103:102],
+        visual_active,visual_telemetry[101:0]};
     wire [14:0] status_upper,status_lower;
     // RAM address prefetch: row prep requests x=0, each shift requests x+1.
     // Its result is available for the following S_PIXEL_PREP clock edge.
@@ -219,14 +230,16 @@ module hub75e_rhythm_display #(
             .reference_ratio(reference_ratio),.reference_phase(reference_phase),
             .mixed_sample(mixed_sample),.touch0(touch0),.touch1(touch1),
             .sensor_sample(sensor_sample),.guitar_sample(guitar_sample),
-            .pixel_x(visual_read_x),.pixel_row(scan_row),.upper_rgb(visual_upper),.lower_rgb(visual_lower)
+            .pixel_x(visual_read_x),.pixel_row(scan_row),.upper_rgb(visual_upper),.lower_rgb(visual_lower),
+            .telemetry(visual_telemetry)
         );
     end else begin: guide_only
         assign visual_upper = 0;
         assign visual_lower = 0;
+        assign visual_telemetry = 0;
     end endgenerate
     generate if(ENABLE_STATUS)begin: status_panel
-        hub75e_status u_status(
+        hub75e_status #(.ENABLE_TAKE_STATUS(ENABLE_TAKE_STATUS)) u_status(
             .clk(clk),.resetn(resetn),.display_boundary(display_boundary),
             .pixel_x(visual_read_x),.pixel_row(scan_row),
             .mode16(touch_mode16),.hold_notes(touch_hold),.pressure_pitch(pressure_pitch),
@@ -234,6 +247,7 @@ module hub75e_rhythm_display #(
             .note_gates(all_touch_keys),.ir_keys(ir_keys),.timbre(timbre),.analog_mode(analog_mode),
             .effect_mode(effect_mode),.effect_wet(effect_wet),.volume(volume),.master_gain(master_gain),
             .adc_sample(adc_sample),.analog_position(analog_position),.analog_valid(analog_valid),
+            .take_flags(take_flags),.take_error(take_error),.take_elapsed(take_elapsed),.take_count(take_count),
             .upper_rgb(status_upper),.lower_rgb(status_lower));
     end else begin: no_status
         assign status_upper=0;assign status_lower=0;
@@ -248,20 +262,31 @@ module hub75e_rhythm_display #(
 
     // Capture the row masks once per row scan. Only heads through HIT_Y
     // are drawn; their three-pixel glyph can extend through HIT_Y+2.
-    function [6:0] row_notes;
-        input [6:0] y;
-        reg [6:0] mask;
-        begin
-            mask = 0;
-            if (y <= HIT_Y)
-                mask = mask | note_rows[y];
-            if (y >= 1 && y-1 <= HIT_Y)
-                mask = mask | note_rows[y-1];
-            if (y >= 2 && y-2 <= HIT_Y)
-                mask = mask | note_rows[y-2];
-            row_notes = mask;
+    // Form each three-pixel glyph with fixed wiring BEFORE selecting a row.
+    // Two 32-row selections replace six independently addressed selections.
+    // These are combinational wires: a scroll/insert on the capture edge has
+    // exactly the same visibility as the original bitmap reads.
+    wire [6:0] glyph_rows [0:63];
+    genvar glyph_y;
+    generate for(glyph_y=0;glyph_y<64;glyph_y=glyph_y+1)begin: glyph
+        wire [6:0] head,previous,prior;
+        if(glyph_y<=HIT_Y)begin: head_valid
+            assign head=note_rows[glyph_y];
+        end else begin: head_empty
+            assign head=0;
         end
-    endfunction
+        if(glyph_y>=1 && glyph_y<=HIT_Y+1)begin: previous_valid
+            assign previous=note_rows[glyph_y-1];
+        end else begin: previous_empty
+            assign previous=0;
+        end
+        if(glyph_y>=2 && glyph_y<=HIT_Y+2)begin: prior_valid
+            assign prior=note_rows[glyph_y-2];
+        end else begin: prior_empty
+            assign prior=0;
+        end
+        assign glyph_rows[glyph_y]=head | previous | prior;
+    end endgenerate
 
     // Same seven-lane layout/colors as rhythm_guide.v. Sharing the bitmap
     // above avoids duplicating its per-note timers for the two panel halves.
@@ -327,8 +352,8 @@ module hub75e_rhythm_display #(
         end else begin
             case (state)
                 S_ROW_PREP: begin
-                    upper_notes <= row_notes(upper_y);
-                    lower_notes <= row_notes(lower_y);
+                    upper_notes <= glyph_rows[{1'b0,scan_row}];
+                    lower_notes <= glyph_rows[{1'b1,scan_row}];
                     column <= 0;
                     hub_CK <= 0;
                     hub_ST <= 0;

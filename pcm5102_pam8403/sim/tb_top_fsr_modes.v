@@ -113,16 +113,16 @@ module tb_top_fsr_modes;
         $display("PASS [mode I2S]: volume C4 light=%0.2f heavy=%0.2f; pitch C3=%0.2f intermediate=%0.2f C4=%0.2f, pressure changes frequency with fixed sustain amplitude; returned C4=%0.2f",volume_light,volume_heavy,pitch_low,pitch_mid,pitch_base,returned);
         pads=8'h7f;wait(dut.touch_keys==8'h7f);set_pressure(0);
         s1=1;#100000;s1=0;#45000000;
-        if(!dut.u_control.playing || dut.voice_gates!==4'hf ||
+        if(!dut.demo_score.u_control.playing || dut.voice_gates!==4'hf ||
            dut.touch_active[3:0]!==4'hf || dut.touch_active[7:4]!==4'h7)
             $fatal(1,"Seven notes plus four song voices failed");
         press_mode(1);set_pressure(1023);
-        if(dut.phase_increments[31:0]!==46025656 || dut.u_control.note_index!==0)
+        if(dut.phase_increments[31:0]!==46025656 || dut.demo_score.u_control.note_index!==0)
             $fatal(1,"Pressure changed the independent song pitch");
         measure(523.2511306,song_amp);
         if(song_amp<1140 || song_amp>1330) $fatal(1,"Independent C5 song tone missing: %f",song_amp);
         pads=0;wait(dut.touch_keys==0);#2000000;
-        if(dut.touch_mix0!==0 || !dut.u_control.playing) $fatal(1,"Note release affected song");
+        if(dut.touch_mix0!==0 || !dut.demo_score.u_control.playing) $fatal(1,"Note release affected song");
         s1=1;#100000;s1=0;#2000000;
         first=monitor.pcm_count;
         press_mode(0);#3000000;silence(first);

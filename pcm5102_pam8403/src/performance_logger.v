@@ -47,8 +47,12 @@ module performance_logger #(
     // Avoid implementation-specific RAM read-during-write behavior at full.
     wire push=resetn && capture && count<FIFO_DEPTH;
     wire [31:0] event_time=elapsed_ms+((capturing && ms_tick) ? 32'd1 : 32'd0);
-    reg [511:0] message;
-    reg [6:0] length, send_index;
+    // Longest line: EVT, + uint32 time + ,HH,M, + two uint16 fields
+    // and CRLF = 4+10+6+5+1+5+2 = 33 bytes. MAP needs 26,
+    // ERR,REC_OVERFLOW needs 29, and REC_END needs 20 at most.
+    localparam integer MESSAGE_BYTES=33, MESSAGE_BITS=MESSAGE_BYTES*8;
+    reg [MESSAGE_BITS-1:0] message;
+    reg [5:0] length, send_index;
     reg [5:0] align_remaining;
     reg [31:0] binary_value;
     reg [39:0] bcd, adjusted_bcd;
@@ -59,7 +63,7 @@ module performance_logger #(
     integer i;
     assign recording=capturing || map_pending || ending || final_pending || count!=0 || state!=IDLE;
     assign tx_valid=state==SEND;
-    assign tx_data=message[511:504];
+    assign tx_data=message[MESSAGE_BITS-1 -: 8];
     assign tx_last=state==SEND && send_index==length-1;
     // Keep the synchronous RAM output free of reset and final-event bypasses,
     // so inference can retain a single block-RAM read port.
@@ -93,7 +97,7 @@ module performance_logger #(
     endtask
     task append;
         input [7:0] ch;
-        begin message<={message[503:0],ch}; length<=length+1'b1; end
+        begin message<={message[MESSAGE_BITS-9:0],ch}; length<=length+1'b1; end
     endtask
     always @(posedge clk) begin
         if(!resetn) begin
@@ -141,7 +145,7 @@ module performance_logger #(
                             tens(map_snapshot[31:24]),ones(map_snapshot[31:24]),",",
                             tens(map_snapshot[39:32]),ones(map_snapshot[39:32]),",",
                             tens(map_snapshot[47:40]),ones(map_snapshot[47:40]),",",
-                            tens(map_snapshot[55:48]),ones(map_snapshot[55:48]),8'd13,8'd10} << (38*8);
+                            tens(map_snapshot[55:48]),ones(map_snapshot[55:48]),8'd13,8'd10} << ((MESSAGE_BYTES-26)*8);
                         length<=26; map_pending<=0; state<=SEND;
                     end else if(dropped!=reported_dropped) begin
                         message<="ERR,REC_OVERFLOW,"; length<=17; field<=3;
@@ -179,27 +183,27 @@ module performance_logger #(
                 end
                 APPEND_FIELDS: begin
                     if(field==0) begin
-                        message<={message[463:0],8'd44,hexchar({1'b0,held[39:37]}),hexchar(held[36:33]),
-                            8'd44,8'd48+{7'd0,held[32]},8'd44}; length<=length+7'd6;
+                        message<={message[MESSAGE_BITS-49:0],8'd44,hexchar({1'b0,held[39:37]}),hexchar(held[36:33]),
+                            8'd44,8'd48+{7'd0,held[32]},8'd44}; length<=length+6'd6;
                         field<=1; number({16'd0,held[31:16]});
                     end else if(field==1) begin
                         append(","); field<=2; number({16'd0,held[15:0]});
                     end else begin
-                        message<={message[495:0],8'd13,8'd10};
-                        length<=length+7'd2; align_remaining<=6'd62-length[5:0]; state<=ALIGN;
+                        message<={message[MESSAGE_BITS-17:0],8'd13,8'd10};
+                        length<=length+6'd2; align_remaining<=6'd31-length; state<=ALIGN;
                     end
                 end
                 // UART takes thousands of fabric clocks per byte. Align one
-                // byte per clock instead of building a 512-bit barrel shifter.
+                // byte per clock instead of building a wide barrel shifter.
                 ALIGN: begin
                     if(align_remaining==0) begin send_index<=0; state<=SEND; end
                     else begin
-                        message<={message[503:0],8'd0};
+                        message<={message[MESSAGE_BITS-9:0],8'd0};
                         align_remaining<=align_remaining-1'b1;
                     end
                 end
                 SEND: if(tx_ready) begin
-                    message<={message[503:0],8'd0}; send_index<=send_index+1'b1;
+                    message<={message[MESSAGE_BITS-9:0],8'd0}; send_index<=send_index+1'b1;
                     if(tx_last) state<=IDLE;
                 end
                 default: state<=IDLE;

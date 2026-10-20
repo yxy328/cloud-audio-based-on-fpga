@@ -68,11 +68,11 @@ module tb_top_fsr;
             if(monitor.pcm[k]!=0) $fatal(1,"Pressure alone/released note was not silent");
         pads=8'h7f;wait(dut.touch_keys==8'h7f);#2000000;
         s1=1;#100000;s1=0;#45000000;
-        if(dut.touch_keys!==8'h7f || dut.voice_gates!==4'hf || !dut.u_control.playing)
+        if(dut.touch_keys!==8'h7f || dut.voice_gates!==4'hf || !dut.demo_score.u_control.playing)
             $fatal(1,"FSR maximum with all 11 voices failed");
         pads=0;wait(dut.touch_keys==0);#2000000;
         settle_pressure(0);
-        if(!dut.u_control.playing || dut.touch_mix0!==0 || dut.song_sample===0)
+        if(!dut.demo_score.u_control.playing || dut.touch_mix0!==0 || dut.song_sample===0)
             $fatal(1,"Song did not remain independent of released touch/pressure");
         $display("PASS [top FSR]: on-chip ADC model/capture to continuous I2S dynamics, light loud/heavy quiet, no pressure-only trigger, independent release, 11 voices/no clipping, song independence; %0d stereo pairs",monitor.pair_count);
         $fclose(monitor.capture_file);$finish;

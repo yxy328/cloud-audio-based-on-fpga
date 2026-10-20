@@ -28,17 +28,18 @@ public final class AdsrEnvelopeView extends View {
         {px(value.attack+value.decay+HOLD/2f),py(value.sustain/100f)},
         {px(value.attack+value.decay+HOLD+value.release),py(0)}};}
     @Override protected void onDraw(Canvas canvas){super.onDraw(canvas);
-        paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(dp(1));paint.setColor(0xffdfe5f2);
+        paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(dp(1));paint.setColor(0x22e8447f);
         for(int i=0;i<=4;i++)canvas.drawLine(dp(28),py(i/4f),getWidth()-dp(20),py(i/4f),paint);
         Path line=new Path();float[][] points=value.points(HOLD);
         line.moveTo(px(points[0][0]),py(points[0][1]));
         for(int i=1;i<points.length;i++)line.lineTo(px(points[i][0]),py(points[i][1]));
-        paint.setColor(0xff5368df);paint.setStrokeWidth(dp(3));canvas.drawPath(line,paint);
+        // 曲线本体用霓虹粉，与主按钮同一家族。
+        paint.setColor(Theme.PINK);paint.setStrokeWidth(dp(3));canvas.drawPath(line,paint);
         paint.setStyle(Paint.Style.FILL);float[][] handles=handles();
         for(int i=0;i<handles.length;i++){
-            paint.setColor(i==dragging?0xffef9852:0xff5368df);canvas.drawCircle(handles[i][0],handles[i][1],dp(6),paint);
+            paint.setColor(i==dragging?Theme.CYAN:Theme.PINK);canvas.drawCircle(handles[i][0],handles[i][1],dp(6),paint);
         }
-        paint.setColor(0xff63728a);paint.setTextSize(dp(11));
+        paint.setColor(Theme.MUTED);paint.setTextSize(dp(11));
         canvas.drawText("100%",0,dp(14),paint);canvas.drawText("0%",0,py(0)+dp(4),paint);
         canvas.drawText("保持段为示意，S 是音量",dp(28),getHeight()-dp(7),paint);
     }

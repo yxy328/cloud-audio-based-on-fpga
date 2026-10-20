@@ -5,12 +5,15 @@ module tb_display_mode_control;
     wire restart;
     wire [1:0] visual;
     reg xy_write=0;
+    reg visual_write=0;
+    reg [1:0] remote_mode=0;
     reg [1:0] ratio_in=0,phase_in=0;
     wire [1:0] ratio,phase;
     integer restarts=0;
     display_mode_control #(.HOLD_FRAMES(4)) dut (
         .clk(clk),.resetn(resetn),.frame_ce(ce),.button_level(button),
         .xy_write(xy_write),.xy_ratio(ratio_in),.xy_phase(phase_in),
+        .visual_write(visual_write),.remote_mode(remote_mode),
         .reference_ratio(ratio),.reference_phase(phase),
         .restart(restart),.visual_mode(visual));
     always @(negedge clk) if(restart) restarts=restarts+1;
@@ -58,6 +61,15 @@ module tb_display_mode_control;
         if(visual!=3) $fatal(1,"Third hold did not select spectrum");
         button=0;frames(1);button=1;frames(4);
         if(visual!=0) $fatal(1,"Fourth hold did not return to guide");
+        // Remote page requests win over a threshold/release and suppress
+        // the remainder of a held local button; no score restart is emitted.
+        button=0;frames(1);button=1;frames(3);
+        remote_mode=2;visual_write=1;frames(1);visual_write=0;
+        if(visual!=2 || restart)$fatal(1,"Remote page did not win at hold threshold");
+        frames(8);button=0;frames(1);
+        if(visual!=2 || restarts!=1)$fatal(1,"Held local key undid remote page");
+        button=1;frames(1);button=0;remote_mode=1;visual_write=1;frames(1);visual_write=0;
+        if(visual!=1 || restarts!=1)$fatal(1,"Remote/local release race restarted score");
         @(negedge clk); resetn=0;
         repeat(3) @(negedge clk); button=0; resetn=1;
         repeat(3) @(negedge clk);

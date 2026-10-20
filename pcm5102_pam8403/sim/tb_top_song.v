@@ -17,14 +17,14 @@ module tb_top_song;
     always @(posedge clk) begin
         #2;
         if(dut.voice_gates[0] && !lead_previous) begin
-            if(dut.u_control.note_index!=events) $fatal(1,"Lost/reordered note at top interface");
+            if(dut.demo_score.u_control.note_index!=events) $fatal(1,"Lost/reordered note at top interface");
             events=events+1;
         end
         lead_previous=dut.voice_gates[0];
     end
     initial begin
         #100000;s1=1;#100000;s1=0;
-        wait(dut.u_control.playing);wait(!dut.u_control.playing);
+        wait(dut.demo_score.u_control.playing);wait(!dut.demo_score.u_control.playing);
         #3000000;
         if(events!=42 || monitor.pair_count<12000) $fatal(1,"Missing whole score at I2S top");
         for(k=0;k<monitor.pcm_count;k=k+1) if(monitor.pcm[k]!=0) nonzero=nonzero+1;

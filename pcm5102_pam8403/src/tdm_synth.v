@@ -29,7 +29,7 @@ module tdm_synth #(
     // No asynchronous memory reset: initialize two banks per voice.
     localparam integer CONTEXT_BITS=556, HALF_BITS=278;
     (* syn_ramstyle="block_ram" *) reg [HALF_BITS-1:0] contexts [0:VOICES*2-1];
-    reg [HALF_BITS-1:0] context_q, context_low;
+    reg [HALF_BITS-1:0] context_q;
     reg [CONTEXT_BITS-1:0] context_work;
     reg [4:0] slot, init_slot;
     reg init_half;
@@ -102,12 +102,20 @@ module tdm_synth #(
     reg [31:0] request_inc;
     reg [2:0] request_timbre;
     reg [16:0] request_frames;
-    reg [4:0] rank [0:VOICES-1];
+    // Most-recent to least-recent slot IDs. Moving one entry to the front
+    // replaces 32 parallel rank incrementers and a rank[slot] multiplexer.
+    // Free-slot preference and the exact oldest-voice policy are unchanged.
+    reg [4:0] rank_order [0:VOICES-1];
+    wire [VOICES:0] shift_rank;
+    assign shift_rank[0]=1'b1;
+    genvar rank_index;
+    generate for(rank_index=0;rank_index<VOICES;rank_index=rank_index+1)begin: rank_prefix
+        assign shift_rank[rank_index+1]=shift_rank[rank_index] && rank_order[rank_index]!=slot;
+    end endgenerate
     reg [4:0] allocation;
     integer a;
     always @(*) begin
-        allocation=0;
-        for (a=0;a<VOICES;a=a+1) if(rank[a]==VOICES-1) allocation=a;
+        allocation=rank_order[VOICES-1];
         for (a=VOICES-1;a>=0;a=a-1) if(!voice_active[a]) allocation=a;
     end
     function [31:0] test_pitch;
@@ -167,18 +175,25 @@ module tdm_synth #(
     wire signed [17:0] noise_wide={{2{noise[15]}},noise};
     wire signed [17:0] air_high=noise_wide-air_low;
     reg signed [17:0] body_wave,bright_wave;
+    reg signed [17:0] body0,body1,body2,body3,body4,body5,bright0,bright1,bright2;
     always @(*) begin
-        body_wave=0; bright_wave=0;
+        // Shared adder trees, with timbre selection on their operands.
+        // Arithmetic stays 18-bit signed, including every intermediate
+        // wrap, exactly as in the original per-timbre expressions.
+        body0=0;body1=0;body2=0;body3=0;body4=0;body5=0;
+        bright0=0;bright1=0;bright2=0;
         case(note_timbre)
-            0:body_wave=base;
-            1:begin body_wave=(base>>>1)+(base>>>2); bright_wave=(h2>>>3)+(h3>>>4)+(h4>>>4); end
-            2:body_wave=(base>>>1)+(base>>>2)+(h2>>>3)+(h3>>>4)+(air_high>>>7);
-            3:begin body_wave=(base>>>1)+(h2>>>2); bright_wave=(h3>>>3)+(h4>>>4)+(noise_wide>>>5); end
-            4:begin body_wave=(aux>>>1)+(aux>>>2)+(aux>>>3); bright_wave=noise_wide>>>4; end
-            5:if(EXTENDED_TIMBRES) begin body_wave=(base>>>1)+(h2>>>3); bright_wave=(h3>>>2)+(h4>>>4); end
-            6:if(EXTENDED_TIMBRES) begin body_wave=base>>>1; bright_wave=(aux>>>2)+(aux2>>>3); end
-            7:if(EXTENDED_TIMBRES) body_wave=(base>>>2)+(base>>>3)+(aux>>>2)+(h2>>>3)+(h3>>>4)+(h4>>>5);
+            0:body0=base;
+            1:begin body0=base>>>1;body1=base>>>2;bright0=h2>>>3;bright1=h3>>>4;bright2=h4>>>4;end
+            2:begin body0=base>>>1;body1=base>>>2;body2=h2>>>3;body3=h3>>>4;body4=air_high>>>7;end
+            3:begin body0=base>>>1;body1=h2>>>2;bright0=h3>>>3;bright1=h4>>>4;bright2=noise_wide>>>5;end
+            4:begin body0=aux>>>1;body1=aux>>>2;body2=aux>>>3;bright0=noise_wide>>>4;end
+            5:if(EXTENDED_TIMBRES)begin body0=base>>>1;body1=h2>>>3;bright0=h3>>>2;bright1=h4>>>4;end
+            6:if(EXTENDED_TIMBRES)begin body0=base>>>1;bright0=aux>>>2;bright1=aux2>>>3;end
+            7:if(EXTENDED_TIMBRES)begin body0=base>>>2;body1=base>>>3;body2=aux>>>2;body3=h2>>>3;body4=h3>>>4;body5=h4>>>5;end
         endcase
+        body_wave=((body0+body1)+(body2+body3))+(body4+body5);
+        bright_wave=bright0+bright1+bright2;
     end
 
     reg n_pending;
@@ -188,6 +203,34 @@ module tdm_synth #(
     reg [16:0] n_remaining;
     reg [8:0] n_gain;
     reg [23:0] n_body,n_bright;
+    // Select decay operands before the subtractors. The prior case table
+    // inferred a separate pair of 24-bit subtractors for each timbre.
+    reg [12:0] body_loss;
+    reg [15:0] bright_loss;
+    always @*begin
+        body_loss=0;bright_loss=0;
+        case(note_timbre)
+            1:begin body_loss=body_env>>14;bright_loss=bright_env>>11;end
+            3:begin body_loss=body_env>>13;bright_loss=bright_env>>10;end
+            4:begin body_loss=body_env>>11;bright_loss=bright_env>>8;end
+            5:begin body_loss=body_env>>15;bright_loss=bright_env>>11;end
+            6:begin body_loss=body_env>>15;bright_loss=bright_env>>13;end
+        endcase
+    end
+    wire decay_timbre=note_timbre==1 || note_timbre==3 || note_timbre==4 ||
+        (EXTENDED_TIMBRES && (note_timbre==5 || note_timbre==6));
+    wire [13:0] body_decrement={1'b0,body_loss}+14'd1;
+    wire [16:0] bright_decrement={1'b0,bright_loss}+17'd1;
+    reg [31:0] aux_add0,aux_add1,aux_add2;
+    always @*begin
+        aux_add0=0;aux_add1=0;aux_add2=0;
+        case(note_timbre)
+            4:begin aux_add0=phase_step;aux_add1=drum_glide;end
+            6:begin aux_add0=phase_step<<1;aux_add1=phase_step>>1;aux_add2=phase_step>>2;end
+            7:begin aux_add0=phase_step;aux_add1=phase_step>>8;end
+        endcase
+    end
+    wire [31:0] aux_advanced=(aux_phase+aux_add0)+(aux_add1+aux_add2);
     always @(*) begin
         n_env_state=env_state;n_env_left=env_left;n_env_phase=env_phase;
         n_env_start=env_start;n_env_target=env_target;
@@ -195,12 +238,12 @@ module tdm_synth #(
         n_remaining=remaining; n_gain=gain; n_body=body_env; n_bright=bright_env;
         n_phase=phase+phase_step; n_aux=aux_phase; n_aux2=aux2_phase; n_glide=drum_glide;
         case(note_timbre)
-            4:n_aux=aux_phase+phase_step+drum_glide;
+            4:n_aux=aux_advanced;
             6:if(EXTENDED_TIMBRES) begin
-                n_aux=aux_phase+(phase_step<<1)+(phase_step>>1)+(phase_step>>2);
+                n_aux=aux_advanced;
                 n_aux2=aux2_phase+(phase_step<<2)+phase_step+(phase_step>>2)+(phase_step>>3);
             end
-            7:if(EXTENDED_TIMBRES) n_aux=aux_phase+phase_step+(phase_step>>8);
+            7:if(EXTENDED_TIMBRES) n_aux=aux_advanced;
         endcase
         if(pending) begin
             if(delay_frames!=0) n_delay=delay_frames-1'b1;
@@ -226,28 +269,14 @@ module tdm_synth #(
             n_remaining=remaining-1'b1;
             if(gain<256) n_gain=gain+1'b1;
         end else if(gain!=0) n_gain=gain-1'b1;
+        if(decay_timbre)begin
+            if(body_env!=0)n_body=body_env-{10'd0,body_decrement};
+            if(bright_env!=0)n_bright=bright_env-{7'd0,bright_decrement};
+        end
         case(note_timbre)
-            1:begin
-                if(body_env!=0) n_body=body_env-(body_env>>14)-1'b1;
-                if(bright_env!=0) n_bright=bright_env-(bright_env>>11)-1'b1;
-            end
             2:n_body=(body_env<24'hFFC000) ? body_env+24'd16384 : 24'hFFFFFF;
-            3:begin
-                if(body_env!=0) n_body=body_env-(body_env>>13)-1'b1;
-                if(bright_env!=0) n_bright=bright_env-(bright_env>>10)-1'b1;
-            end
             4:begin
-                if(body_env!=0) n_body=body_env-(body_env>>11)-1'b1;
-                if(bright_env!=0) n_bright=bright_env-(bright_env>>8)-1'b1;
                 if(drum_glide!=0) n_glide=drum_glide-(drum_glide>>8)-1'b1;
-            end
-            5:if(EXTENDED_TIMBRES) begin
-                if(body_env!=0) n_body=body_env-(body_env>>15)-1'b1;
-                if(bright_env!=0) n_bright=bright_env-(bright_env>>11)-1'b1;
-            end
-            6:if(EXTENDED_TIMBRES) begin
-                if(body_env!=0) n_body=body_env-(body_env>>15)-1'b1;
-                if(bright_env!=0) n_bright=bright_env-(bright_env>>13)-1'b1;
             end
             7:if(EXTENDED_TIMBRES) n_body=(body_env<24'hFFE000) ? body_env+24'd8192 : 24'hFFFFFF;
         endcase
@@ -298,14 +327,14 @@ module tdm_synth #(
     integer r;
     always @(posedge clk) begin
         if(!resetn) begin
-            state<=INIT; init_slot<=0; init_half<=0; slot<=0; context_work<=0; context_low<=0;
+            state<=INIT; init_slot<=0; init_half<=0; slot<=0;
             read_ptr<=0; frame_limit<=0; command<=0; command_active<=0;
             request_adsr<=0;env_ramp_gain<=0;sub_note<=0; event_quota<=0; request_inc<=0; request_timbre<=0; request_frames<=0;
             voice_active<=0; voice_count<=0; sample<=0; mix<=0; overrun<=0;
             lfo_phase<=0; lookup_phase<=0; depth<=0; lfo_scaled<=0;
             base<=0; h2<=0; h3<=0; h4<=0; aux<=0; aux2<=0;
             mul_a<=0; mul_b<=0; body_product<=0; phase_step<=0;
-            for(r=0;r<VOICES;r=r+1) rank[r]<=r;
+            for(r=0;r<VOICES;r=r+1) rank_order[r]<=r;
         end else begin
             if((incoming && fifo_full) || (sample_ce && state!=IDLE && state!=INIT)) overrun<=1;
             case(state)
@@ -347,24 +376,23 @@ module tdm_synth #(
                     state<=EVENT_READY;
                 end
                 EVENT_READ:state<=EVENT_LOAD;
-                EVENT_LOAD:begin context_low<=context_q; state<=EVENT_HIGH_LOAD; end
-                EVENT_HIGH_LOAD:begin context_work<={context_q,context_low}; state<=EVENT_LOW_WRITE; end
+                EVENT_LOAD:begin context_work[HALF_BITS-1:0]<=context_q; state<=EVENT_HIGH_LOAD; end
+                EVENT_HIGH_LOAD:begin context_work[CONTEXT_BITS-1:HALF_BITS]<=context_q; state<=EVENT_LOW_WRITE; end
                 EVENT_LOW_WRITE:state<=EVENT_WRITE;
                 EVENT_WRITE:begin
                     if(!voice_active[slot]) voice_count<=voice_count+1'b1;
                     voice_active[slot]<=1;
-                    for(r=0;r<VOICES;r=r+1) begin
-                        if(r==slot) rank[r]<=0;
-                        else if(rank[r]<rank[slot]) rank[r]<=rank[r]+1'b1;
-                    end
+                    rank_order[0]<=slot;
+                    for(r=1;r<VOICES;r=r+1)
+                        if(shift_rank[r])rank_order[r]<=rank_order[r-1];
                     event_quota<=event_quota+1'b1; sub_note<=sub_note+1'b1;
                     if(command[53:52]==0 || (command[53:52]==1 && sub_note==3) ||
                        (command[53:52]==2 && sub_note==VOICES-1)) command_active<=0;
                     state<=EVENT_READY;
                 end
                 VOICE_READ:state<=VOICE_LOAD;
-                VOICE_LOAD:begin context_low<=context_q; state<=VOICE_HIGH_LOAD; end
-                VOICE_HIGH_LOAD:begin context_work<={context_q,context_low}; state<=LOOK_BASE; end
+                VOICE_LOAD:begin context_work[HALF_BITS-1:0]<=context_q; state<=VOICE_HIGH_LOAD; end
+                VOICE_HIGH_LOAD:begin context_work[CONTEXT_BITS-1:HALF_BITS]<=context_q; state<=LOOK_BASE; end
                 LOOK_BASE:begin
                     lookup_phase<=phase;state<=LOOK_H2;
                     mul_a<={9'd0,env_advance};mul_b<={{8{env_delta[9]}},env_delta};

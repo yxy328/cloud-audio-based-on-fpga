@@ -1,8 +1,143 @@
 # 本地验证记录
 
+## 2026-10-20：独立 HC-05 Flash PCM 音频目标
+
+新增 [路线2说明](HC05_AUDIO_ROUTE2.md)：原音质最多30秒，9600bps停止后回传约54分钟以上。独立工程为 `PCM5102_AUDIO_TAKE.gprj`；最终资源/时序及验证日志以交付包固定快照为准，不沿用默认HC-05或EVENT_TAKE资源数字。RTL、JVM/App构建、布局布线与实板状态分别记录；未自动烧录，实际Flash、手机SPP和播放仍待上板验收。
+
+## 2026-10-19：HC-05 默认配置，命令译码及资源优化
+
+已完成 [HC-05 资源优化](HC05_RESOURCE_OPTIMIZATION.md)：53 个命令模板共享同步 ROM/比较器，默认裁掉备用 USB 录音硬件，曲谱计时按上界缩为 23 位。保留手机命令、实时合成及 HUB75E；默认 `ENABLE_USB_AUDIO_RECORD=0`、`ENABLE_EVENT_TAKE=0`。App v1.11 继续使用现有 HC-05 9600bps 链路。
+
+同条件快照综合 Logic **21058→19393，减少 1665（7.91%）**；布局布线 Logic **21163→19506/23040**，Register **8856/23280**，CLS **10713/11520**，BSRAM **53/56**，DSP **20.5/28**。50MHz Setup/Hold 违反端点 **0/0**，Fmax **51.116MHz**，最差 Setup Slack **+0.437ns**。最终构建于上海时间 **15:27:18** 完成，0 ERROR、2 条默认未用输入 `CV0016` 告警。
+
+**19 组 RTL 测试通过**，含新旧译码器 512 次位级 UART 对照、128×60000ms 曲谱边界、默认 HC-05 整机发声/显示，以及显式启用备用 USB 的 712 采样兼容测试。详细范围、日志及固定输入见上述记录。独立位流为 `impl/pnr/PCM5102_HC05_ONLY.fs`，SHA256 **99249FC9FA132F48BE4FC3E1C9847B946BE86062DF3261760B7F478DBCECB326**，配套清单为 `PCM5102_HC05_ONLY_manifest.json`。
+
+已读取 Gitee 参考最新 fix41（提交 `03dae97`）；它已支持 HC-05，旧本地 fix28 的说明不代表线上现状。构建对应固定 `hc05_final` 快照，可选 TAKE 后续修改不属于本位流。**未烧录，未做本轮门级或实板验证**；本段是默认 HC-05 配置的最新资源记录，下面 USB 启用配置属于历史构建。
+
+## 2026-10-19：App v1.11 / Code12，仅HC-05通信，USB音频保留备用
+
+按用户当前硬件选择，手机与FPGA仅使用现有HC-05连接。App启动不创建USB音频接收器、不注册其设备权限/断开接收器、不启动其工作线程；USB录音入口继续隐藏。驱动、音频接收代码和FPGA预留引脚保留备用，无需USB模块、RTS或OTG，不将完整PCM/WAV改走现有9600bps链路。当前曲库、LED联动、演奏控制及板上录制相关界面保留，各自仍需支持相应命令的固件；板上事件录制回放的未完成项见[说明](RECORD_PLAYBACK.md)。
+
+### 构建与检查
+
+- 独立产物：`android_app/dist/FPGA-Score-hc05-only.apk`，v1.11 / versionCode12，包名`cn.fpga.score`，Android 10+、target/compile SDK35。Manifest与Gradle版本一致，USB Host仅保留为可选的备用能力。
+- Java、D8、APK打包、zipalign、v3签名及Manifest检查通过。JDK对旧API/Java8目标及签名工具本地访问仍有提示，不声称构建零警告。
+- `javap`检查编译后的`MainActivity.onCreate`：没有USB音频构造或调用；备用连接/开始录音方法也不会执行USB调用或发送AREC命令。对应反汇编为`android_app/build/hc05_only_MainActivity.javap.txt`，此项属于编译结果检查，未声称手机运行测试。
+- `android_app/test-core.ps1`的9组核心测试通过，共**22575项检查**：LED180、TakeStatus17、SongLibrary4118、DeviceControls4605、VoiceBend7229、AdsrProfile5032、SongCodec30、SppLink161、AudioRecording1203。另读取已有LED跨端夹具203项（含重复180项基线）及已有两份WAV夹具各11项；没有为本次通信选择重新运行FPGA仿真。
+- 161个相关本地文档链接检查通过。旧`FPGA-Score-debug.apk`及`FPGA-Score-led-remote.apk`保留，SHA256与本次开始前相同。
+
+新APK SHA256：`C4BC847AA8914A426A90FFEF47D72FF67ECD64DBEF231EEF7B441B401BDBF543`。
+日志：`android_app/build/hc05_only_apk.log`、`android_app/build/hc05_only_core.log`；源码与产物指纹：`android_app/build/hc05_only_hashes.json`。本次未修改FPGA RTL、引脚或位流，也未烧录实板；关闭USB初始化不需要为此重烧FPGA。尚未在手机/模拟器操作本次App或实测HC-05联动。
+
+## 2026-10-19：App v1.10 / Code11，手机切页、状态读回与实时预览
+
+已完成 [手机 LED 联动](LED_REMOTE.md)：`VIS,0..3` 直接切页，`VIS?` 区分请求/实际页面及请求/已发布 XY 参数，`VIZ?` 原子回传 16 段频谱、三组音源幅度和实际显示元数据。复用原扫描器、FFT 和缓存，不在音频链路插入处理级。
+
+### 配套构建
+
+- **2026-10-19 15:23:19（上海时间）**，Gowin V1.9.11.03 Education 完成冻结快照的 `top` 综合、布局布线和独立位流。脚本使用资源共享和 retiming，保留 50MHz 及原 ADC 时钟约束。
+- Setup/Hold 违反端点均 **0**，Fmax **50.344MHz**，最差 Setup Slack **+0.137ns**，最差 Hold Slack **+0.149ns**。
+- Logic **19920/23040**，Register **9200/23280**，CLS **10834/11520**，BSRAM **54/56**，DSP **20.5/28**，I/O **50/86**。
+- 最终 **0 ERROR、2 WARN**：`CV0016 flash_miso unused` 因该目标不启用 Flash 事件录制；`EX3791` 为曲谱前瞻加法结果装入 23 位计时量，生产上界 `128*60000+1500+1500+2 < 2^23`，本轮下载与整机曲谱检查通过。保留告警记录，不声称零警告。
+- 复用同期日志/显示资源优化；新增回复编码器分时使用已有 256 位回复寄存器。第一版并行编码超出容量，已替换，不交付失败构建。
+- 交付来自 `sim/build/led_remote_delivery/pcm5102_pam8403/` 固定源码；其中构建日志为 `sim/build/delivery_build_final.log`。快照配置 `ENABLE_EVENT_TAKE=0`、`ENABLE_USB_AUDIO_RECORD=1`，CTS 例外仅限第一级同步器。共享工作区同期仍有修改，故提供 `sim/build/LED_REMOTE_v1.10_sources.zip` 与快照指纹；早期 14:47 构建属于中间产物，不作为最终交付。
+- 资源/时序报告已复制到 `impl/pnr/PCM5102_LED_REMOTE.rpt.txt`、`impl/pnr/PCM5102_LED_REMOTE_tr_content.html`，最终 SHA256 以以下表格及冻结目录清单为准。
+
+| 产物 | 标识 / SHA256 |
+| --- | --- |
+| `impl/pnr/PCM5102_LED_REMOTE.fs` | UserCode **0x00000147**；`28240EA2A11572DA3861BA0AF82167A47708AFBE30CF075144A8DBAD3D2043F6` |
+| `android_app/dist/FPGA-Score-led-remote.apk` | **v1.10 / versionCode 11**；`B30E6145134BE4F8650EB91A62AAF58670805479931648F37333361B7B6B898C` |
+| `sim/build/LED_REMOTE_v1.10_sources.zip` | **217 个输入文件及两份清单**；`4E171E90C62312C6F2CCF46C9B1B255BAEAF798B3576FD4C0BE5BD00E1CF6EA2` |
+
+源码包中的 `source_manifest.json` 按相对路径记录所有输入的 SHA256，`delivery_manifest.json` 记录上述 APK/位流指纹和未烧录状态；解压后构建方法见 `DELIVERY.md`。不包含 SDK、签名私钥或构建缓存，重建产物的默认 UserCode/元数据可能变化，不保证重新构建的二进制逐字节相同。
+
+App 从快照 Java 编译，经 D8、对齐、APK v3 签名与 Manifest 检查通过，包名 `cn.fpga.score`，min SDK 29 / target 35，使用原调试签名。旧 APK 与旧 `PCM5102_PAM8403.fs` 保留。快照日志为 `android_app/build/delivery_apk.log`；JDK/签名工具有旧 API 与本地访问提示，不声称 App 构建零警告。
+
+### 数字验证
+
+本轮 **10 组 RTL 测试通过**，不是全部历史回归：
+
+- `tb_hc05_visual`：四页请求、请求/实际状态、单次脉冲、严格语法/边界、真实 32 字节 UART；发送中改变源快照，回复仍保持完整旧帧；XY/PING 共存。
+- `tb_display_mode_control`：保留 S2 长短按、四页和六预设；手机与按键阈值/松开同周期优先级、按住期间动作抑制，不重启曲谱。
+- `tb_audio_visualizer`、`tb_hub75e_audio_display`：65536 个采样坐标、幅度/衰减、波形/XY/FFT、外部 HUB 引脚、RGB5 整帧切换及隐藏曲谱推进。
+- `tb_hc05_download`、`tb_performance_logger`、`tb_hc05_extensions`、`tb_hc05_xy`：原曲谱下载、日志及控制/XY 命令继续通过。
+- `tb_top_audio_visual`：实际 I²S、相位、触摸/红外/吉他、S2 与手机四页并行；UART 快照与执行查询一拍的显示数据逐位一致，现场 C4 落入手机使用的频段；切页不重启曲谱或打断声音，继续从外部 HUB RGB/CLK/LAT 重建画面。
+- `tb_top_audio_record`：712 个录音采样仍与外部 I²S 逐字一致，保留 CTS 暂停、真实输入、音效/音量、TDM 期限与 HUB 扫描检查。
+
+最终快照 RTL 日志为其中的 `sim/build/delivery_regression.log`，显式启用交付 USB 配置的整机复查为 `sim/build/delivery_top_profile.log`。父目录早期日志仅作开发记录。
+
+**9 组 JVM 核心测试通过**：LED 协议 180、SPP 161，及原 TakeStatus、曲库、设备控制、滑音、ADSR、曲谱、音频接收。将快照真实 UART 的 `led_visual_protocol.txt` 和整机现场 C4 的 `led_top_preview.txt` 输入同一 Java 解析器，核对状态、16 段顺序、三组幅度、版本和有效位，共 **203 项检查通过**（含重复执行的 180 项基线）；另验证本轮 712 采样录音文件。快照日志 `android_app/build/delivery_core.log`，最终 C4 复查为 `android_app/build/delivery_cross_final.log`。
+
+App 最多约每秒查询 5 次，下载/录制或其他命令期间跳过查询，断线或切后台停止，1.5 秒无新数据清图。生命周期逻辑已编译并做代码检查，未在手机/模拟器操作新卡片。
+
+**未烧录本轮位流，未做本轮门级仿真，实体手机、HC-05 和 LED 联合验收待完成。** 使用时按 [说明](LED_REMOTE.md) 更新配套 APK 与独立主工程位流。板上事件录制/Flash 回放属于另一个开发目标，不能由本次结果代替验收。
+
+## 2026-10-19：日志与曲谱显示资源优化
+
+详见 [资源优化记录](RESOURCE_OPTIMIZATION.md)。同条件快照中，两处 RTL 优化使综合 Logic 从 23155 降到 22012（减少 1143，4.94%）；修正 CTS 第一级同步器 SDC 层级名。包含同期 UART 修改的最终整合快照完成综合、布局布线与独立位流生成：Logic 21745/23040、Register 9616、CLS 11363/11520、BSRAM 53/56、DSP 20.5/28；50MHz Setup/Hold 违例均为 0，Fmax 50.806MHz，最差 Setup Slack +0.317ns。
+
+12 组不同 RTL 回归通过，含日志最大 33 字节行/32 位计数边界、6173 对显示行参考检查及整机 712 个录音采样与外部 I2S 逐字一致。独立位流、SHA256、快照、日志和复现命令见上述记录；未烧录本轮位流，未完成新位流门级仿真或实板验收。
+
+## 2026-10-19：App v1.9 / Code10，手机 LED 轨迹控制功能包
+
+新增 [LED 控制卡片](android_app/LED_CONTROL.md)：六个参考/混音预设、频率比与相位选择，复用 `XY,r,p`。仍需板上 S2 进入 XY 页，不自动切页。参数等待设备 `OK` 后才显示“最近确认发送”；断线/重连清除确认，列表明确为待发送值，没有设备 XY 状态查询。正在下载或执行命令时禁用预设及参数选择。
+
+### 构建与兼容范围
+
+- 安装包 `android_app/dist/FPGA-Score-led.apk`，包名 `cn.fpga.score`，**v1.9 / versionCode 10**，Android 10+，target/compile SDK 35；Manifest 与 Gradle 版本一致。
+- Java 编译、D8、zipalign、APK 签名验证与 Manifest 检查通过。与原 `FPGA-Score-debug.apk`、`FPGA-Score-library.apk` 的签名证书 SHA256 一致，可覆盖同签名旧版；这两份旧包没有被本次构建覆盖。
+- APK SHA256：`CFC7F2328B6522E2F55096F1AE815978906F8B77BA72A5C43B120F0F71C0D623`。
+- 构建命令：在 `android_app` 中运行 `./build-apk.ps1 -OutputApk 'dist\FPGA-Score-led.apk'`；日志 `android_app/build/led_xy_apk.log`。JDK 25 对旧 API、Java 8 目标及签名工具本地访问给出提示/警告，构建无失败，不声称零警告。
+- 本次没有修改 FPGA RTL、重新综合或烧录位流；XY 功能依赖已有固件的命令支持。本包沿用当前工作区已有曲库、板上录制等界面，TAKE 按钮另需配套固件；本轮不将这些界面计为完成实板验收。
+
+### 验证
+
+- `android_app/test-core.ps1` 八组 JVM 核心测试通过，共 **22390 项检查**：TakeStatus 17、SongLibrary 4118、DeviceControls 4605、VoiceBend 7229、AdsrProfile 5032、SongCodec 30、SppLink 156、AudioRecording 1203。
+- SppLink 新覆盖全部 16 组 XY 编码、CRLF、分片 OK、穿插事件/录制结束消息、OK 到达前保持等待，以及不支持命令的固件返回 `ERR,CMD` 后不产生成功确认。保留原手势命令等待、下载、控制、断开、取消及超时检查。
+- 另用已有的 1501 样本模块串口文件与 712 样本顶层串口文件运行 Java/WAV 接收检查，各 11 项通过；**复用既有 RTL 数据，不是本轮重跑 RTL 仿真**。含这两组共 **22412 项检查**。日志 `android_app/build/led_xy_core.log`。
+- 文档链接与相关修改的 `git diff --check` 通过。
+
+尚未在实体 Android 手机或模拟器运行新卡片，未完成 HC-05、LED 面板与手机联合验收。远程切页、实时设备 XY 查询与手机实时频谱预览仍待开发。
+
+## 2026-10-18：App v1.6 / Code7，完整数字演奏录音（稳定安装包）
+
+新增[单向录音回传](AUDIO_RECORDING.md)：在I²S同一帧锁存最终16位混音副本，经独立1024样本FIFO、FAR1/CRC、2Mbps UART及USB串口送到手机，校验后保存/导出WAV。HC-05保留9600bps控制/事件日志；触摸16路、红外/手势32路原有TDM不变，没有新增预录PCM下载或播放通路。需增加3.3V且支持2Mbps与自动RTS/CTS的模块、两根J3信号、共地及手机OTG；原REC日志范围不变。
+
+### 当前构建
+
+- Gowin V1.9.11.03 Education，GW5A-LV25MG121NC1/I0，默认顶层`top`；上海时间 **2026-10-18 20:38:46** 完成综合、布局布线、静态时序、位流和仿真网表生成。此构建包含共享工作区已完成的告警修正；`WARNINGS.md`中的独立构建是另一份产物。
+- 最终Gowin完整日志 **0 WARN、0 ERROR**。50MHz：Setup/Hold违反端点均为 **0**；Fmax **50.722MHz**，最差Setup Slack **+0.285ns**。只对新增CTS第一级同步器设异步输入假路径，未放宽音频主时钟。
+- 资源：Logic **22827/23040**，Register **9890/23280**，CLS **11492/11520**，BSRAM **53/56**，DSP **20.5/28**，I/O **44/86**。CLS只余28个，后续叠加功能需重新评估容量与时序。
+- App **v1.6 / versionCode7**：保留已有主题资产与演奏控制；Java/D8/APK构建、对齐、v3签名、Manifest版本和可选USB Host特性检查通过。没有声称完成手机界面或USB硬件运行测试。
+
+### 数字验证
+
+本轮 **10组RTL测试通过**，包括新增3组及7组有针对性的兼容回归；没有重跑全部历史测试。
+
+- `tb_audio_record_stream`：实际2Mbps位时序，1501个采样逐字一致，CTS中途暂停、部分尾包、CRC/序号/会话/采样索引；长暂停溢出时保留64采样连续前缀并标记失败，中止后99采样新会话正常。
+- `tb_hc05_audio_record`：21条位级UART事务，AREC_START/STOP/ABORT/查询、会话边界与严格语法、未就绪/忙拒绝、单次脉冲；16键/锁存/模拟控制期间允许数字音频录制，旧REC事件日志守卫与PCM命令拒绝保持。
+- `tb_top_audio_record`：50MHz、音频/I²S及2Mbps UART保留真实时序；**712个回传采样与外部I²S引脚解码逐字一致**。覆盖真实触摸/IR引脚、分类后的手势注入、吉他、录制中EFFECT/VOLUME控制、CTS暂停、TDM期限与HUB75扫描。APDS光学分类不属于这项测试。
+- 回归：`tb_hc05_extensions`、`tb_hc05_download`、`tb_performance_logger`、`tb_touch_tdm_synth`、`tb_audio_effects`、`tb_audio_master_volume`、生产参数`tb_top_idle`通过。包含旧事件日志的溢出/结束及拒绝采样播放命令、16声部包络/频谱、59005采样音效参考模型等检查。
+- JVM共 **18224项检查**：DeviceControls4605、VoiceBend7229、AdsrProfile5032、SongCodec30、SppLink103、AudioRecording1203，另有两份真实RTL串口数据各11项。包含分片、粘包、随机有符号数据、CRC损坏、丢包、溢出、缺结束包、16位序号回绕、WAV头和全部采样字节。
+- 将模块1501采样和整机712采样串口文件送入手机同一Java接收器，输出WAV均逐字一致；再用Python标准库`wave`及独立`binascii.crc_hqx`复核包CRC、长度、序号、采样及WAV载荷通过。WAV整数率48828Hz，`srAT`块保存精确50000000/1024，不重采样。
+- 另尝试了PNR网表的`tb_top_idle`冒烟运行，编译完成但运行超过12分钟仍未观察到PASS，主动停止并记为**未完成**，不计入上述10组RTL通过数。日志为`sim/build/audio_record_netlist.log`；不据此声称门级功能仿真通过。
+
+### 当前产物与日志
+
+| 产物 | 标识 / SHA256 |
+| --- | --- |
+| `android_app/dist/FPGA-Score-debug.apk` | v1.6 / Code7；`C6B529F67CA9FA9E94EF75B2F8024CD933714E3BB85EDC65F5C7394F7BDD73E5` |
+| `impl/pnr/PCM5102_PAM8403.fs` | UserCode **0x000089A9**；`6A1279C604A10355EA6CBD7BA4EF6D6FD406C9D9CDAA2BDF3B9739B5191A2344` |
+
+源文件和产物指纹：`sim/build/audio_record_artifact_hashes.json`。构建日志：`sim/build/audio_record_build_final.log`；测试：`sim/build/tb_audio_record_stream.log`、`sim/build/tb_hc05_audio_record.log`、`sim/build/audio_record_top.log`、`sim/build/audio_record_regressions.log`、`android_app/build/audio_record_core_final.log`、`android_app/build/audio_record_apk.log`。
+
+尚未烧录实板，未实测USB转串口的持续吞吐/RTS、手机OTG/前台运行、模块供电、实际声音或长时间录音。完整录音指最终数字混音，不含DAC/功放/扬声器的模拟声音。丢包、溢出、断连或缺END的文件只能标为不完整；这不是整机实物验收通过的声明。
+
+以下保留此前版本的构建与验证历史。
+
 > 2026-10-18 仓库整理复核：统一App v1.4、8/16键接线、八音色、ADSR作用范围及快速上手，新增版本记录和首页状态页预览。检查22份文档中的169个链接（其中2个为明确保留的本地生成产物链接），主工程50项文件依赖均已纳入仓库。重跑App五组核心测试共16990项断言通过；`tb_hc05_extensions`、`tb_analog_expression`、`tb_touch_tdm_synth`、`tb_audio_effects`、`tb_audio_master_volume`通过。模拟输入测试在受限环境编译器异常退出，宿主环境复跑通过。核对APK与本地位流SHA256均与下表一致；本次整理没有重新综合或烧录实板。
 
-## 2026-10-18：App v1.4，8/16 键和参考工程迁移（当前版本）
+## 2026-10-18：App v1.4，8/16 键和参考工程迁移
 
 功能、串口协议、接线和限制见 [参考工程迁移说明](REFERENCE_MIGRATION.md)。
 新增 App 8/16 键选择、串行极性读回、完整 16 键和弦、回声/合唱、延音/PANIC、总音量、

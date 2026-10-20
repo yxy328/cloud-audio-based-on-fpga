@@ -57,6 +57,13 @@ module touch_tdm_synth #(parameter integer VOLUME_SHIFT=4)(
     wire [16:0] next_error={1'b0,error}+{1'b0,remainder};
     wire carry=next_error>={1'b0,length};
     wire [16:0] delta={1'b0,step}+carry;
+    // Keep the carry/borrow through the arithmetic, then explicitly select
+    // the 16-bit context word. Valid ADSR segments stay in 0..65535.
+    wire [16:0] error_next=carry ? next_error-{1'b0,length} : next_error;
+    wire [16:0] gain_next=target>=gain ? {1'b0,gain}+delta : {1'b0,gain}-delta;
+    // Q16 gain (high keys have one extra attenuation bit). Preserve the
+    // arithmetic shift before selecting the signed mixer/monitor widths.
+    wire signed [50:0] scaled_product=product>>>(index<7 ? (16+VOLUME_SHIFT) : (17+VOLUME_SHIFT));
     wire [16:0] shifted={div_remainder[15:0],quotient[15]};
     wire subtract=shifted>={1'b0,length};
     wire [16:0] rem_next=subtract ? shifted-{1'b0,length} : shifted;
@@ -130,8 +137,8 @@ module touch_tdm_synth #(parameter integer VOLUME_SHIFT=4)(
                                 div_remainder<=0;divide_left<=15;error<=0;state<=DIVIDE;
                             end else stage<=stage==2 ? 3 : 0;
                         end else begin
-                            ticks<=ticks-1'b1;error<=carry ? next_error-length : next_error;
-                            gain<=target>=gain ? gain+delta : gain-delta;
+                            ticks<=ticks-1'b1;error<=error_next[15:0];
+                            gain<=gain_next[15:0];
                         end
                     end else if(stage==3)gain<=sustain;
                     else gain<=0;
@@ -153,7 +160,7 @@ module touch_tdm_synth #(parameter integer VOLUME_SHIFT=4)(
                 GAIN:begin mul_a<=$signed(sine);mul_b<=$signed({2'b0,gain});state<=GAIN_WAIT;end
                 GAIN_WAIT:begin field<=0;state<=STORE;end
                 STORE:begin
-                    if(field==0)begin sum<=sum+(product>>>(index<7 ? (16+VOLUME_SHIFT) : (17+VOLUME_SHIFT)));active[index]<=stage!=0;end
+                    if(field==0)begin sum<=sum+$signed(scaled_product[23:0]);active[index]<=stage!=0;end
                     if(field==12)begin
                         if(index==15)state<=PUBLISH;else begin index<=index+1'b1;state<=LOAD;end
                     end else field<=field+1'b1;
@@ -170,7 +177,7 @@ module touch_tdm_synth #(parameter integer VOLUME_SHIFT=4)(
     reg [255:0] voice_samples;
     always @(posedge clk)begin
         if(!resetn)voice_samples<=0;
-        else if(state==STORE && field==0)voice_samples[index*16+:16]<=product>>>(index<7 ? (16+VOLUME_SHIFT) : (17+VOLUME_SHIFT));
+        else if(state==STORE && field==0)voice_samples[index*16+:16]<=scaled_product[15:0];
     end
     wire [255:0] gains;
     wire [47:0] states;

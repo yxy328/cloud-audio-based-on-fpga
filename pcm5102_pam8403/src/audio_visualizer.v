@@ -10,7 +10,8 @@ module audio_visualizer (
     input wire signed [15:0] mixed_sample, touch0, touch1, sensor_sample, guitar_sample,
     input wire [5:0] pixel_x,
     input wire [4:0] pixel_row,
-    output reg [14:0] upper_rgb, lower_rgb
+    output reg [14:0] upper_rgb, lower_rgb,
+    output wire [103:0] telemetry
 );
     // One BSRAM: wave banks 0..127, 64x32 XY bitmap banks 128..383.
     // Display reads are prefetched. XY read/modify/write uses row blanking,
@@ -164,6 +165,9 @@ module audio_visualizer (
     wire [5:0] guitar_level = amplitude({guitar_sample[15],guitar_sample});
     reg [5:0] touch_peak, sensor_peak, guitar_peak;
     reg [5:0] shown_touch, shown_sensor, shown_guitar;
+    // Read-only taps on the same frame-latched values rendered on the panel.
+    assign telemetry={display_valid,shown_spectrum_valid,shown_ratio,shown_phase,
+        shown_touch,shown_sensor,shown_guitar,shown_spectrum};
     reg [8:0] decay_count;
     always @(posedge clk) begin
         if (!resetn) begin

@@ -31,6 +31,13 @@ auth.json
 *.pem
 *.key
 
+# Explicit development review bundle; never a substitute for a release .fs.
+/pcm5102_pam8403/录制回放_开发验证/
+/pcm5102_pam8403/录制回放_开发验证.zip
+/pcm5102_pam8403/独立录放_完整工程/
+/pcm5102_pam8403/独立录放_完整工程.zip
+/pcm5102_pam8403/android_app/dist/FPGA-Event-Take-preview.apk
+
 # Duplicate generated archives already represented by source projects.
 /pcm5102_pam8403.zip
 /pcm5102_pam8403*.zip

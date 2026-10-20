@@ -1,0 +1,52 @@
+{
+  "target": "PCM5102_AUDIO_TAKE",
+  "status": "EXPERIMENTAL_HARDWARE_ACCEPTANCE_PENDING",
+  "created_utc": "2026-10-20T00:48:05.569201+00:00",
+  "resources_pnr": {
+    "Logic": 22500,
+    "CLS": 11442,
+    "BSRAM": 51,
+    "Register": 9435
+  },
+  "fmax_mhz": 50.084,
+  "worst_setup_slack_ns": 0.034,
+  "setup_violated_endpoints": 0,
+  "hold_violated_endpoints": 0,
+  "bitstream": {
+    "configuration_payload_bytes": 921781,
+    "reserved_configuration_bytes": 1048576,
+    "configuration_overlap": false,
+    "audio_slots": [
+      "100000",
+      "47E000"
+    ],
+    "slot_bytes": 3661824,
+    "erase_footprint_bytes": 2936832,
+    "event_partition": [
+      "7FC000",
+      "800000"
+    ],
+    "sha256": "04bcaff5f55ca74d64c0e2ec8a587947494270a3e248dc773ef994f3a57e02e8",
+    "physical_jedec_verified": false,
+    "physical_flash_readback_verified": false
+  },
+  "apk_sha256": "2557c41f090906752edb7b092dee43cd3035f2f7ec7a5389070d3b048aa313dc",
+  "source_files": 303,
+  "independent_python_crc32": {
+    "kind": "committed_audio",
+    "erasable": true,
+    "committed": true,
+    "samples": 1525,
+    "generation": 2,
+    "header_crc_ok": true,
+    "pcm_crc_stored": "A274E7DF",
+    "pcm_crc_computed": "A274E7DF",
+    "padding_blank": true
+  },
+  "rtl": "PASS; see logs; top UART accelerated only in simulation",
+  "app": "PASS JVM/FAR1/WAV/SPP mocks and APK build/signature; no physical phone tests",
+  "hardware": "NOT_RUN; no automatic programming; actual Flash/HC05/phone still pending",
+  "gate_level_audio": "NOT_RUN",
+  "signing_key_in_archive": false,
+  "sdk_in_archive": false
+}

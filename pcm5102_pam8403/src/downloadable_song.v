@@ -34,6 +34,10 @@ module downloadable_song #(
         PRIME=4, RUN=5;
     localparam integer MS_TICKS=(CLK_HZ/1000 < 1) ? 1 : CLK_HZ/1000;
     localparam integer PRE_ROLL_MS=ENABLE_LOOKAHEAD ? LOOKAHEAD_MS : 0;
+    // 128 events of at most 60000ms plus pre-roll and the lookahead
+    // comparison carry. This is 23 bits with the production parameters.
+    localparam integer REQUIRED_TIME_BITS=$clog2(64'd7680000+PRE_ROLL_MS+LOOKAHEAD_MS+64'd2);
+    localparam integer TIME_BITS=REQUIRED_TIME_BITS>32 ? 32 : REQUIRED_TIME_BITS;
     reg [2:0] state;
     reg [28:0] score [0:255]; // {MIDI 60..72 mask, duration_ms}; two banks
     reg [28:0] fetched;
@@ -43,22 +47,23 @@ module downloadable_song #(
     reg [55:0] checked_map;
     localparam MS_BITS=MS_TICKS<2 ? 1 : $clog2(MS_TICKS);
     reg [MS_BITS-1:0] ms_count;
-    reg [31:0] elapsed_ms;
+    reg [TIME_BITS-1:0] elapsed_ms;
 
     reg [28:0] cur_word, next_word, future_word;
     reg cur_have, next_have, future_have, current_finished, future_finished;
     reg [7:0] cur_index, future_index;
-    reg [31:0] cur_start_ms, cur_end_ms, future_start_ms;
+    reg [TIME_BITS-1:0] cur_start_ms, cur_end_ms, future_start_ms;
     reg read_enable, read_pending;
     reg [7:0] read_address;
     reg [1:0] read_target, pending_target;
     reg [12:0] covered_mask;
     wire available=state==IDLE || state==RUN || state==PRIME;
     assign busy=state!=IDLE;
-    wire [31:0] next_elapsed_ms=elapsed_ms+1'b1;
-    wire [31:0] event_elapsed_ms=ms_tick ? next_elapsed_ms : elapsed_ms;
-    wire [31:0] future_due_ms=future_start_ms+PRE_ROLL_MS;
-    wire [31:0] future_delay_ms=future_due_ms-event_elapsed_ms;
+    wire [TIME_BITS-1:0] next_elapsed_ms=elapsed_ms+1'b1;
+    wire [TIME_BITS-1:0] event_elapsed_ms=(ms_tick && !current_finished) ? next_elapsed_ms : elapsed_ms;
+    wire [TIME_BITS:0] future_due_full={1'b0,future_start_ms}+PRE_ROLL_MS;
+    wire [TIME_BITS-1:0] future_due_ms=future_due_full[TIME_BITS-1:0];
+    wire [TIME_BITS-1:0] future_delay_ms=future_due_ms-event_elapsed_ms;
     integer k;
 
     function [6:0] keys_for_mask;
@@ -221,7 +226,10 @@ module downloadable_song #(
                         else future_index<=future_index+1'b1;
                     end
                     if(ms_tick) begin
-                        elapsed_ms<=next_elapsed_ms;
+                        // Once audio has finished, every remaining visual
+                        // event is already due. Freeze time while note_ready
+                        // stalls instead of letting a bounded counter wrap.
+                        if(!current_finished)elapsed_ms<=next_elapsed_ms;
                         if(!current_finished && cur_have) begin
                             if(next_elapsed_ms>=cur_end_ms) begin
                                 if(cur_index==active_count-1) begin

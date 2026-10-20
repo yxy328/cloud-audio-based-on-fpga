@@ -8,6 +8,8 @@ module display_mode_control #(
     input wire clk, resetn, frame_ce, button_level,
     input wire xy_write,
     input wire [1:0] xy_ratio, xy_phase,
+    input wire visual_write,
+    input wire [1:0] remote_mode,
     output reg restart,
     output reg [1:0] visual_mode,
     output reg [1:0] reference_ratio, reference_phase
@@ -27,7 +29,12 @@ module display_mode_control #(
         end else begin
             previous_level <= button_level;
             restart <= 0;
-            if (!button_level) begin
+            if(visual_write) begin
+                visual_mode<=remote_mode;
+                held_frames<=0;
+                // A held local key cannot undo the remote command on release.
+                long_fired<=button_level;
+            end else if (!button_level) begin
                 held_frames <= 0;
                 long_fired <= 0;
                 if (previous_level && !long_fired) begin

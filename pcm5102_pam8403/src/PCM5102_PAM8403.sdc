@@ -18,3 +18,5 @@ set_false_path -from [get_ports {ir_beam[*]}] -to [get_pins {u_ir/beam_meta*/D}]
 # This master-clock constraint does not model cable / DAC output timing.
 
 set_false_path -from [get_ports {touch_sdo}] -to [get_pins {u_touch_serial/sdo_meta*/D}]
+# HC-05-only default: the optional USB recorder and its CTS synchronizer
+# are removed at elaboration, so there is no CTS timing exception here.

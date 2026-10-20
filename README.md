@@ -12,22 +12,23 @@
 | 查找全部功能文档 | [文档索引](docs/README.md) |
 | 接线、板上操作与音频参数 | [主工程说明](pcm5102_pam8403/README.md) |
 | 完整引脚、赛题要求和现场验收 | [引脚与功能验收表](pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md) |
-| 手机安装和曲谱下载 | [安卓 App 说明](pcm5102_pam8403/android_app/README.md) · [当前 APK](pcm5102_pam8403/android_app/dist/FPGA-Score-debug.apk) |
+| 手机安装和曲谱下载 | [安卓 App 说明](pcm5102_pam8403/android_app/README.md) · [HC-05通信版 APK](pcm5102_pam8403/android_app/dist/FPGA-Score-hc05-only.apk) |
 | 当前构建、位流标识和验证范围 | [验证记录](pcm5102_pam8403/VERIFICATION.md) |
 | 更新代码到 Gitee | [仓库维护](docs/REPOSITORY.md) |
 | 版本变化与升级要点 | [版本记录](docs/CHANGELOG.md) |
 
-## 当前功能（2026-10-18）
+## 当前功能（2026-10-19）
 
 - **新增迁移**：[8/16 键切换、16 键和弦、滑杆标定与四种用途、回声/合唱、延音、总音量和八种红外/手势音色](pcm5102_pam8403/REFERENCE_MIGRATION.md)。
 - **现场演奏**：16 路独立触摸 DDS/ADSR（默认 8 键接口）、FSR 压力音量或音高控制、八路红外与 APDS-9960 共享 32 声部 TDM 引擎，以及 Karplus–Strong 单弦吉他。
 - **手机控制**：键位映射、七声部独立滑音、触摸与红外/手势独立运行时 ADSR、音色/颤音设置和演奏事件日志。
+- **当前通信仅HC-05**：曲谱、参数、LED控制/低速预览及相应固件支持的事件/状态通信均走蓝牙。USB/RTS/OTG[高速音频方案保留备用，当前停用](pcm5102_pam8403/AUDIO_RECORDING.md)，不通过现有9600bps链路传完整PCM/WAV。
 - **曲谱**：导入 CSV/MIDI，经经典蓝牙 SPP 下载音符、和弦、休止和时长。`PLAY` / S1 启动无声演奏指引；`AUDITION` 显式启动 FPGA 实时合成试听（自 App v1.3 起支持）。曲谱仍限前七键，16键演奏不会扩大曲谱格式。
 - **64×64 LED，无需 OLED**：空闲总览显示 8/16 键、延音、音色、音量、滑杆/ADC、音效与红外；播放时自动显示曲谱。保留实际混音波形、参考/混音 XY、FFT。S2 长按约 1 秒切页；XY 页短按选图，其他页短按重启曲谱。
 
-曲谱、参数保存在 FPGA RAM，断电需重新设置。当前 App 使用本地曲谱文件与 HC-05，尚未接入互联网曲库。默认上电不自动演奏，音频由 FPGA 逐样本生成。
+曲谱、参数保存在 FPGA RAM，断电需重新设置。新增 [v1.8 分级曲库安装包](pcm5102_pam8403/android_app/dist/FPGA-Score-library.apk)，青铜、白银、黄金各三首，可离线选曲并匹配七键下载，保留文件夹 CSV/MIDI 导入及曲库 CSV 导出；来源、七键改编和验证范围见[曲库说明](pcm5102_pam8403/android_app/SONG_LIBRARY.md)。尚未接入在线更新服务。默认上电不自动演奏，音频由 FPGA 逐样本生成。
 
-当前 App 为 **v1.4 / versionCode 5**。与之配套的最近一次构建记录、SHA256 和实板验证边界均以 [VERIFICATION.md](pcm5102_pam8403/VERIFICATION.md) 顶部为准；已有仿真和布局布线结果不等同于整机实测验收。
+当前使用 **v1.11 / Code12 HC-05通信版**，关闭USB初始化与录音入口，保留当前曲库、LED及演奏控制；此前v1.6、v1.8、v1.9和v1.10安装包保留。LED切页/预览需要[v1.10对应的配套位流](pcm5102_pam8403/LED_REMOTE.md)，板上事件录制回放另查[开发说明](pcm5102_pam8403/RECORD_PLAYBACK.md)。各版本构建、SHA256和实板验证边界见[验证记录](pcm5102_pam8403/VERIFICATION.md)。
 
 ![64×64 LED 状态总览：数字仿真预览](pcm5102_pam8403/assets/status16.png)
 

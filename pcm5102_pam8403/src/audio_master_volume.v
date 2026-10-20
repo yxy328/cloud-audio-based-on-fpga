@@ -15,6 +15,10 @@ module audio_master_volume #(
     wire [12:0] bounded_gain=(target_gain>13'd4096) ? 13'd4096 : target_gain;
     wire [13:0] rise_distance={1'b0,bounded_gain}-{1'b0,applied_gain};
     wire [13:0] fall_distance={1'b0,applied_gain}-{1'b0,bounded_gain};
+    // Full-width intermediates retain carry/borrow. The distance test makes
+    // either selected ramp step stay between the current and bounded gain.
+    wire [13:0] rising_gain={1'b0,applied_gain}+SLEW_STEP[13:0];
+    wire [13:0] falling_gain={1'b0,applied_gain}-SLEW_STEP[13:0];
     reg signed [29:0] product;
     always @(posedge clk) begin
         if(!resetn) begin
@@ -23,9 +27,9 @@ module audio_master_volume #(
         end else begin
             if(frame_ce) begin
                 if(bounded_gain>applied_gain)
-                    applied_gain<=(rise_distance>SLEW_STEP) ? applied_gain+SLEW_STEP : bounded_gain;
+                    applied_gain<=(rise_distance>SLEW_STEP) ? rising_gain[12:0] : bounded_gain;
                 else if(bounded_gain<applied_gain)
-                    applied_gain<=(fall_distance>SLEW_STEP) ? applied_gain-SLEW_STEP : bounded_gain;
+                    applied_gain<=(fall_distance>SLEW_STEP) ? falling_gain[12:0] : bounded_gain;
             end
             product<=sample_in * $signed({1'b0,applied_gain});
         end

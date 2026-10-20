@@ -5,9 +5,11 @@
 HUB75E、原 FSR ADC、红外和 APDS-9960 的现有接口。硬件由用户改接；本次不自动烧录。
 最新构建指纹与验证结果见 [VERIFICATION.md](VERIFICATION.md)。
 
+当前采用App v1.11 / Code12，仅通过HC-05通信；本页保留v1.4引入的迁移功能说明。[2Mbps USB音频回传](AUDIO_RECORDING.md)保留备用、当前停用，无需USB模块、RTS或OTG。原REC事件日志限制不变，板上事件录制回放的独立目标见[说明](RECORD_PLAYBACK.md)。
+
 ## 手机使用
 
-安装 [v1.4 APK](android_app/dist/FPGA-Score-debug.apk)，同时使用配套新版 FPGA 位流。
+安装[当前v1.11 HC-05通信版APK](android_app/dist/FPGA-Score-hc05-only.apk)，使用支持所需演奏/LED命令的配套FPGA位流。
 连接后自动读取七键映射、演奏参数、串行极性和滑杆标定。界面“键盘模式与演奏控制”中：
 
 1. 松开全部键，停止曲谱，关闭延音锁存；选择 8 键或 16 键，点击“应用”。

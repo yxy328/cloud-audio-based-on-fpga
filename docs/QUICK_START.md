@@ -15,10 +15,10 @@ cd cloud-audio-based-on-fpga
 
 - FPGA：已有构建记录使用 Gowin V1.9.11.03 Education，需安装 IDE、Programmer 和开发板下载驱动。
 - RTL 仿真：Icarus Verilog；脚本默认路径为 `C:/iverilog/bin`，可用 `-IverilogDir` 覆盖。
-- 手机：Android 10+，安装 [当前 APK](../pcm5102_pam8403/android_app/dist/FPGA-Score-debug.apk)，使用 HC-05 经典蓝牙 SPP。
+- 手机：Android 10+，安装[HC-05通信版 APK](../pcm5102_pam8403/android_app/dist/FPGA-Score-hc05-only.apk)，使用HC-05经典蓝牙SPP，无需USB或OTG。
 - 修改 App 时再配置 JDK 和 Android SDK，步骤见 [App 文档](../pcm5102_pam8403/android_app/README.md)。现成 APK 可直接安装。
 
-安装当前 **App v1.4** 并构建配套 FPGA 工程。接线先查 [完整引脚表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)，新增接法与模块跳线查 [8/16键迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)。
+安装当前 **App v1.11 / Code12**，手机与FPGA只连接HC-05。接线先查[完整引脚表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)，键盘改接与跳线查[8/16键迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)；[USB高速音频方案](../pcm5102_pam8403/AUDIO_RECORDING.md)保留备用，当前不接USB模块、RTS或OTG。关闭App的USB初始化不需要修改或重烧FPGA；LED和板上事件录制各自仍需支持对应命令的固件。
 
 | 使用方式 | 接线与操作 |
 | --- | --- |
@@ -46,6 +46,8 @@ $gowinShell = 'C:/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe'
 ```
 
 生成位流：`pcm5102_pam8403/impl/pnr/PCM5102_PAM8403.fs`。该文件不在源码仓库中。检查构建日志和时序报告，最近已记录构建见 [VERIFICATION.md](../pcm5102_pam8403/VERIFICATION.md)；重新构建后的指纹可能不同。
+
+当前 HC-05 默认配置可用 `& $gowinShell ./pcm5102_pam8403/tools/build_hc05_only.tcl` 生成独立的 `PCM5102_HC05_ONLY.fs`。同条件资源对比、固定源码和验证范围见 [HC-05 资源优化](../pcm5102_pam8403/HC05_RESOURCE_OPTIMIZATION.md)。此配置综合时移除备用 USB 录音硬件，手机仍使用 App v1.11 和现有 HC-05。
 
 ## 4. 下载开发板
 
