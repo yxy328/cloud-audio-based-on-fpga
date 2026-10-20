@@ -2,6 +2,8 @@
 
 **v1.12-route2 / Code13实验版：** 配套独立音频工程可经现有9600bps HC-05回传原PCM并保存/播放WAV，详见[路线2操作及限制](../HC05_AUDIO_ROUTE2.md)。APK输出为`dist/FPGA-HC05-Audio-Route2.apk`，30秒录音需约54分钟以上；实际手机蓝牙/播放待验收。下文v1.11默认工程及USB备用说明保留历史用途。
 
+> **APK 归档说明：** `dist/` 只保留最新版 `FPGA-HC05-Audio-Route2.apk`。v1.0～v1.11 及 Event-Take 预览版等历史安装包已归档于 Git 提交历史（如 `e7276ea` 及更早提交），可在 Gitee 提交记录中下载；下文中的历史 dist 链接仅作版本记录。
+
 **当前通信选择：仅HC-05。** [App v1.11 / Code12](dist/FPGA-Score-hc05-only.apk)保留当前曲库、LED联动和演奏控制，关闭启动时的USB初始化，不显示USB录音入口。无需USB串口模块、RTS或OTG；完整PCM/WAV高速回传代码[保留备用](../AUDIO_RECORDING.md)，不改走现有9600bps通道。板上事件录制回放仍须配套专用固件，开发进度见[说明](../RECORD_PLAYBACK.md)。构建与测试见[验证记录](../VERIFICATION.md)。
 
 [**新增 v1.10 手机切页与实时预览**](dist/FPGA-Score-led-remote.apk)：四页切换、请求/实际状态读回、FPGA 频谱及三组幅度预览。需要配套新版 FPGA 位流，安装、协议和验证范围见 [手机 LED 联动说明](../LED_REMOTE.md)。
