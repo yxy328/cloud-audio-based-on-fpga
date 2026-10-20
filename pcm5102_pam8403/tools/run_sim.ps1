@@ -40,7 +40,7 @@ try {
     if (!$Netlist) { $rtl += @('src/audio_take_store.v','src/audio_nor_operation.v','src/top_audio_take.v','sim/audio_nor_model.v') }
     if (!$Netlist) { $rtl += @('sim/gowin_adc_model.v') }
     if (!$Netlist) { $defaultTests += @('tb_hc05_visual','tb_hc05_decoder_equivalence','tb_song_time_bound','tb_top_hc05_only') }
-    if (!$Netlist) { $rtl += @('sim/reference/hc05_keymap_parallel_reference.v') }
+    if (!$Netlist) { $rtl += @('sim/reference/hc05_keymap_parallel_reference.v','sim/reference/tdm_synth_parallel_reference.v','sim/reference/voice_pitch_scaler_reference.v','sim/reference/hub75e_rhythm_display_reference.v','sim/reference/sensor_poly_audio_reference.v') }
     $selectedTests = if ($Tests) { $Tests } else { $defaultTests }
     if ($Netlist -and ($selectedTests | Where-Object { $_ -in @('tb_top_hc05_map','tb_gowin_fsr_adc','tb_fsr_adc_capture','tb_fsr_modes','tb_top_touch_response','tb_top_fsr_modes','tb_top_fsr','tb_fsr_pipeline') })) {
         throw 'The Gowin ADC primitive library has no analog behavior model. These ADC tests use the RTL behavioral model; use -Netlist -Tests tb_top_idle for the production live-mode PNR smoke test.'

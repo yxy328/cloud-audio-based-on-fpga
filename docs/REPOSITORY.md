@@ -30,8 +30,9 @@ git status --short --branch
 
 - 主工程开发集中在 `pcm5102_pam8403/`；共享触摸模块保留在 `pmod_hub75e/src/`，避免破坏工程相对路径。
 - 保存 RTL、ROM 初始化数据、CST/SDC、Gowin 工程/IP配置、流程配置 JSON、仿真源文件、脚本和文档。
-- 安卓源码、核心测试和 `android_app/dist/` 安装包入库；当前安装入口固定为 `FPGA-Score-debug.apk`，带旧版本号的包是历史产物。
+- 安卓源码、核心测试和 `android_app/dist/` 安装包入库；当前安装入口是统一版 `FPGA-Music-Unified.apk`，带旧版本号的包是历史产物。
 - `impl/` 编译输出、`sim/build/` 日志/波形、SDK、密钥、工具安装包、重复 ZIP 和本机权限恢复文件由 `.gitignore` 排除。
+- `deliveries/` 交付包内的位流、APK、说明和报告随源码入库，与同名目录重复的 `.zip` 快照不入库；合并前的工程入口与专用脚本原样归档在 `pcm5102_pam8403/archive/`。
 - `fpga-musical-magic-box-master/` 及 `xqr/fpga-musical-magic-box-master/` 是本机外部参考副本，当前主工程已把所需 RTL 放入自身 `src/`；这些参考副本不作为构建依赖，也不随本仓库上传。迁移关系见 [迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)。
 - `ALL_IN/`、`pcm5102_dds_step1/` 和 `debug/` 保留历史快照。整理文档时不移动既有工程，历史接线与操作按对应版本理解。
 

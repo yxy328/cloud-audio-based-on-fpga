@@ -5,12 +5,14 @@ module audio_nor_operation #(
     parameter integer CLK_HZ=50_000_000,
     parameter integer HALF_CYCLES=5,
     parameter [23:0] DATA_BASE=24'h100000,
-    parameter [23:0] DATA_END=24'h7fc000
+    parameter [23:0] DATA_END=24'h7fc000,
+    parameter integer EXTERNAL_SPI=0,
+    parameter integer PARTITIONED=0
 )(
     input wire clk,resetn,start,
     input wire [2:0] kind, // 1=JEDEC, 2=read, 3=erase4K, 4=page program
     input wire [23:0] address,
-    input wire [9:0] length,
+    input wire [14:0] length,
     input wire [7:0] write_data,
     input wire write_valid,
     output wire write_ready,
@@ -18,7 +20,10 @@ module audio_nor_operation #(
     output wire read_valid,
     output reg busy,done,error,
     output wire cs_n,sck,mosi,
-    input wire miso
+    input wire miso,
+    output wire [60:0] spi_request,
+    input wire [11:0] spi_response,
+    input wire event_partition
 );
     localparam IDLE=0,DIRECT_WAIT=1,WREN_WAIT=2,WEL_WAIT=3,
         MUTATE_WAIT=4,POLL_WAIT=5;
@@ -26,22 +31,29 @@ module audio_nor_operation #(
     reg [2:0] state,saved_kind;
     reg go,authorized,address_valid,writing,spi_reset;
     reg [23:0] saved_address;
-    reg [9:0] saved_length;
+    reg [14:0] saved_length;
     reg [7:0] opcode;
     reg [23:0] op_address;
     reg [14:0] op_length;
-    reg [31:0] watchdog;
+    localparam integer WATCHDOG_BITS=$clog2(WATCHDOG_CYCLES+1);
+    reg [WATCHDOG_BITS-1:0] watchdog;
     wire raw_done,raw_error;
     wire [7:0] raw_read_data;
     wire raw_read_valid;
     assign read_data=raw_read_data;
     assign read_valid=raw_read_valid && (state==DIRECT_WAIT);
-    take_spi_transaction #(.HALF_CYCLES(HALF_CYCLES),.DATA_BASE(DATA_BASE),.DATA_END(DATA_END)) u_spi(
+    assign spi_request={resetn && !spi_reset,go,authorized,opcode,op_address,address_valid,writing,op_length,write_data,write_valid};
+    generate if(EXTERNAL_SPI)begin: external_spi
+        assign {raw_error,raw_done,raw_read_valid,write_ready,raw_read_data}=spi_response;
+        assign cs_n=1;assign sck=0;assign mosi=0;
+    end else begin: internal_spi
+    take_spi_transaction #(.HALF_CYCLES(HALF_CYCLES),.DATA_BASE(DATA_BASE),.DATA_END(DATA_END),.PARTITIONED(PARTITIONED)) u_spi(
         .clk(clk),.resetn(resetn && !spi_reset),.go(go),.authorized(authorized),.opcode(opcode),
         .address(op_address),.address_valid(address_valid),.writing(writing),.length(op_length),
         .write_data(write_data),.write_valid(write_valid),.write_ready(write_ready),
         .read_data(raw_read_data),.read_valid(raw_read_valid),.done(raw_done),.error(raw_error),
-        .cs_n(cs_n),.sck(sck),.mosi(mosi),.miso(miso));
+        .cs_n(cs_n),.sck(sck),.mosi(mosi),.miso(miso),.event_partition(event_partition));
+    end endgenerate
     task launch;
         input [7:0] command;
         input [23:0] addr;
@@ -69,7 +81,7 @@ module audio_nor_operation #(
                     busy<=1;error<=0;saved_kind<=kind;watchdog<=0;
                     saved_address<=address;saved_length<=length;
                     if(kind==1)begin launch(8'h9f,0,0,0,3);state<=DIRECT_WAIT;end
-                    else if(kind==2 && length!=0)begin launch(8'h03,address,1,0,{5'd0,length});state<=DIRECT_WAIT;end
+                    else if(kind==2 && length!=0)begin launch(8'h03,address,1,0,length);state<=DIRECT_WAIT;end
                     else if(kind==3 || (kind==4 && length!=0))begin
                         authorized<=1;launch(8'h06,0,0,0,0);state<=WREN_WAIT;
                     end else fail();
@@ -84,7 +96,7 @@ module audio_nor_operation #(
                     if(raw_error || !raw_read_data[1] || raw_read_data[0])fail();
                     else begin
                         if(saved_kind==3)launch(8'h20,saved_address,1,0,0);
-                        else launch(8'h02,saved_address,1,1,{5'd0,saved_length});
+                        else launch(8'h02,saved_address,1,1,saved_length);
                         state<=MUTATE_WAIT;
                     end
                 end

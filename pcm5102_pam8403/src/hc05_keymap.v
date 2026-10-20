@@ -12,7 +12,8 @@ module hc05_keymap #(
     // existing touch voices via guide_keys and needs no extra lookup.
     parameter integer ENABLE_DOWNLOADED_INCREMENT=1,
     parameter integer ENABLE_EVENT_TAKE=0,
-    parameter integer ENABLE_FLASH_AUDIO=0
+    parameter integer ENABLE_FLASH_AUDIO=0,
+    parameter integer DEFAULT_TOUCH_MODE16=ENABLE_EVENT_TAKE
 ) (
     input wire clk, resetn, rx,
     output wire tx,
@@ -139,9 +140,15 @@ module hc05_keymap #(
     reg [1:0] line_error;
     reg [31:0] line; // Only the last four argument bytes need parallel access.
     reg [6:0] line_length, parse_length, position;
-    reg [255:0] reply;
-    reg visual_reply,take_reply;
+    reg [111:0] reply;
+    reg [4:0] reply_format;
     reg [5:0] reply_remaining;
+    wire visual_reply=reply_format==18;
+    reg reply_char_ready;
+    (* syn_romstyle="block_rom" *) reg [7:0] reply_rom [0:1023];
+    reg [7:0] reply_template;
+    initial $readmemh("src/hc05_reply.hex",reply_rom);
+    always @(posedge clk)reply_template<=reply_rom[{reply_format,reply_remaining[4:0]}];
     wire [7:0] received;
     wire [7:0] reply_byte;
     wire received_valid, rx_fault, tx_ready;
@@ -152,7 +159,7 @@ module hc05_keymap #(
     wire select_stream=ENABLE_FLASH_AUDIO && (stream_owned || (state!=RESPOND && audio_stream_valid));
     wire block_log=ENABLE_FLASH_AUDIO && audio_stream_busy;
     wire select_log=!select_stream && !block_log && (log_owned || (state!=RESPOND && log_valid));
-    wire [7:0] requested_note=(line[15:8]-8'd48)*8'd10+(line[7:0]-8'd48);
+    wire [7:0] requested_note={4'd0,line[11:8]}*8'd10+{4'd0,line[3:0]};
     wire download_busy;
     wire edit_allowed=keys_ready && !song_busy && !download_busy && !notes_busy && !recording && !rec_busy;
     reg song_request, rec_start, rec_stop;
@@ -196,7 +203,7 @@ module hc05_keymap #(
         .clk(clk),.resetn(resetn),.rx(rx),.tx(tx),
         .rx_data(received),.rx_valid(received_valid),.rx_ready(state==COLLECT),
         .rx_fault(rx_fault),.tx_data(select_stream ? audio_stream_data : select_log ? log_data : reply_byte),
-        .tx_valid(select_stream ? audio_stream_valid : select_log ? log_valid : state==RESPOND),.tx_ready(tx_ready)
+        .tx_valid(select_stream ? audio_stream_valid : select_log ? log_valid : state==RESPOND && reply_char_ready),.tx_ready(tx_ready)
     );
     downloadable_song #(.CLK_HZ(CLK_HZ),.ENABLE_LOOKAHEAD(ENABLE_LOOKAHEAD),
         .LOOKAHEAD_MS(LOOKAHEAD_MS)) u_download (
@@ -233,20 +240,9 @@ module hc05_keymap #(
         input [3:0] n;
         begin hex_char=n<10 ? "0"+n : "A"+n-10;end
     endfunction
-    // Serialize one nibble at a time through a single hex encoder. Reusing
-    // reply storage avoids 28 parallel encoders on this nearly full device.
-    wire take_digit=reply_remaining==24 || reply_remaining==23 || reply_remaining==21 ||
-        (reply_remaining<=19 && reply_remaining>=14) ||
-        (reply_remaining<=12 && reply_remaining>=10) ||
-        (reply_remaining<=8 && reply_remaining>=3);
-    wire [7:0] encoded_hex=hex_char(reply[255:252]);
-    assign reply_byte = take_reply ?
-        (reply_remaining==29 ? "T" : reply_remaining==28 ? "A" :
-         reply_remaining==27 ? "K" : reply_remaining==26 ? "E" :
-         take_digit ? encoded_hex : reply_remaining==2 ? 8'd13 : reply_remaining==1 ? 8'd10 : ",") :
-        !visual_reply ? reply[255:248] :
-        reply_remaining==32 ? "V" : reply_remaining==31 ? "," :
-        reply_remaining==2 ? 8'd13 : reply_remaining==1 ? 8'd10 : encoded_hex;
+    // A single ROM streams punctuation and static text. Only binary values
+    // are snapshotted, and every dynamic digit shares one hex encoder.
+    assign reply_byte=reply_template==8'hff ? hex_char(reply[111:108]) : reply_template;
     function [7:0] tens;
         input [7:0] note;
         begin tens=(note<70) ? "6" : "7"; end
@@ -256,22 +252,22 @@ module hc05_keymap #(
         begin ones=8'd48+((note<70) ? note-8'd60 : note-8'd70); end
     endfunction
     task respond;
-        input [255:0] message;
+        input [4:0] format;
         input [5:0] length;
-        begin reply<=message << ((32-length)*8); reply_remaining<=length; visual_reply<=0;take_reply<=0;state<=RESPOND; end
+        begin reply_format<=format;reply_remaining<=length;reply_char_ready<=0;state<=RESPOND;end
     endtask
     task result;
         input [2:0] error_code;
         begin
             if(ENABLE_FLASH_AUDIO && audio_stream_busy)state<=COLLECT;
             else case(error_code)
-                0: respond({"OK",8'd13,8'd10},4);
-                1: respond({"ERR,BUSY",8'd13,8'd10},10);
-                2: respond({"ERR,RANGE",8'd13,8'd10},11);
-                3: respond({"ERR,STATE",8'd13,8'd10},11);
-                4: respond({"ERR,MISSING",8'd13,8'd10},13);
-                5: respond({"ERR,MAP",8'd13,8'd10},9);
-                default: respond({"ERR,CMD",8'd13,8'd10},9);
+                0: respond(5'd0,6'd4);
+                1: respond(5'd1,6'd10);
+                2: respond(5'd2,6'd11);
+                3: respond(5'd3,6'd11);
+                4: respond(5'd4,6'd13);
+                5: respond(5'd5,6'd9);
+                default: respond(5'd6,6'd9);
             endcase
         end
     endtask
@@ -287,7 +283,7 @@ module hc05_keymap #(
     always @(posedge clk) begin
         if(!resetn) begin
             note_map<=DEFAULT_MAP; state<=COLLECT; line_error<=NO_ERROR;
-            line<=0; line_length<=0; reply<=0; reply_remaining<=0; visual_reply<=0;take_reply<=0;log_owned<=0;
+            line<=0; line_length<=0; reply<=0; reply_remaining<=0;reply_format<=0;reply_char_ready<=0;log_owned<=0;
             song_request<=0; rec_start<=0; rec_stop<=0;
             downloaded_audition<=0; audition_pending<=0;
             song_operation<=0; song_arg0<=0; song_arg1<=0; song_arg2<=0;
@@ -296,7 +292,7 @@ module hc05_keymap #(
             sensor_test32<=0;
             audio_rec_prepare<=0;audio_rec_start<=0;audio_rec_stop<=0;audio_rec_abort<=0;audio_rec_send<=0;audio_rec_ack<=0;
             audio_rec_ack_sequence<=0;audio_rec_session<=0;take_command<=0;stream_owned<=0;
-            touch_mode16<=ENABLE_EVENT_TAKE!=0;serial_active_high<=0;touch_hold<=0;panic<=0;effect_mode<=0;effect_wet<=4;
+            touch_mode16<=DEFAULT_TOUCH_MODE16!=0;serial_active_high<=0;touch_hold<=0;panic<=0;effect_mode<=0;effect_wet<=4;
             master_volume<=16;analog_mode<=0;analog_min<=0;analog_max<=1023;pressure_write<=0;pressure_value<=0;control_parse<=0;
             xy_write<=0;xy_ratio<=2;xy_phase<=0;
             visual_write<=0;remote_mode<=0;
@@ -324,11 +320,12 @@ module hc05_keymap #(
                 if(state==COLLECT || state==EXECUTE || decoding) begin line<=0; line_length<=0; state<=COLLECT; end
             end
             if(state==RESPOND) begin
-                if(!select_log && !select_stream && tx_ready) begin
-                    if(!visual_reply && !take_reply)reply<={reply[247:0],8'd0};
-                    else if((take_reply && take_digit) || (visual_reply && reply_remaining<=30 && reply_remaining>=3))reply<={reply[251:0],4'd0};
+                if(!reply_char_ready)reply_char_ready<=1;
+                else if(!select_log && !select_stream && tx_ready) begin
+                    if(reply_template==8'hff)reply<={reply[107:0],4'd0};
+                    reply_char_ready<=0;
                     reply_remaining<=reply_remaining-1'b1;
-                    if(reply_remaining==1) state<=COLLECT;
+                    if(reply_remaining==1)state<=COLLECT;
                 end
             end else if(!rx_fault || (state!=COLLECT && state!=EXECUTE && !decoding)) begin
                 case(state)
@@ -351,28 +348,25 @@ module hc05_keymap #(
                         // Download owns the binary link; do not inject text on noise or unrelated commands.
                         if(ENABLE_FLASH_AUDIO && audio_stream_busy && (line_error!=NO_ERROR ||
                             (decoded_command!=CMD_AREC_ACK && decoded_command!=CMD_AREC_ABORT)))state<=COLLECT;
-                        else if(line_error==UART_ERROR) respond({"ERR,UART",8'd13,8'd10},10);
-                        else if(line_error==LENGTH_ERROR) respond({"ERR,LENGTH",8'd13,8'd10},12);
-                        else if(line_error==CHAR_ERROR) respond({"ERR,CMD",8'd13,8'd10},9);
-                        else if(decoded_command==CMD_PING) respond({"PONG",8'd13,8'd10},6);
+                        else if(line_error==UART_ERROR) respond(5'd7,6'd10);
+                        else if(line_error==LENGTH_ERROR) respond(5'd8,6'd12);
+                        else if(line_error==CHAR_ERROR) respond(5'd6,6'd9);
+                        else if(decoded_command==CMD_PING) respond(5'd9,6'd6);
                         else if(decoded_command==CMD_CTRL_QUERY) begin
-                            respond({"CTRL,",8'd48+{7'd0,touch_mode16},",",8'd48+{6'd0,effect_mode},",",
-                                8'd48+{4'd0,effect_wet},",",8'd48+{7'd0,touch_hold},",",
-                                8'd48+{5'd0,analog_mode},",",(master_volume>=10 ? 8'd49 : 8'd48),
-                                8'd48+(master_volume>=10 ? master_volume-8'd10 : {3'd0,master_volume}),",",
-                                8'd48+{7'd0,pressure_mode},8'd13,8'd10},21);
+                            reply<={{3'd0,touch_mode16},{2'd0,effect_mode},effect_wet,{3'd0,touch_hold},
+                                {1'd0,analog_mode},(master_volume>=10 ? 4'd1 : 4'd0),
+                                (master_volume>=10 ? master_volume[3:0]-4'd10 : master_volume[3:0]),{3'd0,pressure_mode},80'd0};
+                            respond(5'd10,6'd21);
                         end else if(decoded_command==CMD_SERIAL_QUERY) begin
-                            respond({"SERIAL,",8'd48+{7'd0,serial_active_high},8'd13,8'd10},10);
+                            reply<={{3'd0,serial_active_high},108'd0};respond(5'd11,6'd10);
                         end else if(decoded_command==CMD_SERIAL_SET) begin
                             control_parse<=8;parse_numbers(7,1);
                         end else if(decoded_command==CMD_CAL_QUERY) begin
-                            respond({"CAL,",hex_char({2'd0,analog_min[9:8]}),hex_char(analog_min[7:4]),hex_char(analog_min[3:0]),",",
-                                hex_char({2'd0,analog_max[9:8]}),hex_char(analog_max[7:4]),hex_char(analog_max[3:0]),8'd13,8'd10},13);
+                            reply<={2'd0,analog_min,2'd0,analog_max,88'd0};respond(5'd12,6'd13);
                         end else if(decoded_command==CMD_CAL_SET) begin
                             control_parse<=7;parse_numbers(4,2);
                         end else if(decoded_command==CMD_ADC_QUERY) begin
-                            respond({"ADC,",hex_char({2'd0,adc_sample[9:8]}),hex_char(adc_sample[7:4]),
-                                hex_char(adc_sample[3:0]),",",8'd48+{7'd0,adc_timeout},8'd13,8'd10},11);
+                            reply<={2'd0,adc_sample,3'd0,adc_timeout,96'd0};respond(5'd13,6'd11);
                         end else if(decoded_command==CMD_PANIC) begin
                             panic<=1;touch_hold<=0;downloaded_audition<=0;audition_pending<=0;
                             builtin_stop<=1;song_request<=1;song_operation<=5;state<=SONG_WAIT;
@@ -390,14 +384,13 @@ module hc05_keymap #(
                             control_parse<=6;parse_numbers(9,1);
                         end
                         else if(decoded_command==CMD_TAKE_QUERY && ENABLE_EVENT_TAKE)begin
-                            reply<={take_flags,take_error,take_elapsed,1'b0,take_count,take_duration,184'd0};
-                            reply_remaining<=29;visual_reply<=0;take_reply<=1;state<=RESPOND;
+                            reply<={take_flags,take_error,take_elapsed,1'b0,take_count,take_duration,40'd0};respond(5'd14,6'd29);
                         end else if(ENABLE_EVENT_TAKE &&
                             ((line_length==8 && (decoded_command==CMD_TAKE_REC || decoded_command==CMD_TAKE_DEL || decoded_command==CMD_TAKE_YES)) ||
                              (line_length==9 && (decoded_command==CMD_TAKE_STOP || decoded_command==CMD_TAKE_PLAY || decoded_command==CMD_TAKE_SAVE)) ||
                              (decoded_command==CMD_TAKE_NO)))begin
                             if(decoded_command==CMD_TAKE_STOP)begin take_command<=2;result(0);end
-                            else if(take_flags[5] || take_flags[1:0]!=0)result(1);
+                            else if(take_flags[5] || take_flags[1:0]!=0 || (ENABLE_FLASH_AUDIO && audio_rec_busy))result(1);
                             else begin
                                 if(decoded_command==CMD_TAKE_REC)take_command<=1;
                                 else if(line_length==9)take_command<=decoded_command==CMD_TAKE_SAVE ? 3'd7 : 3'd3;
@@ -414,19 +407,16 @@ module hc05_keymap #(
                         end else if(decoded_command==CMD_AREC_ABORT)begin
                             audio_rec_abort<=1;if(ENABLE_FLASH_AUDIO && audio_stream_busy)state<=COLLECT;else result(0);
                         end else if(decoded_command==CMD_AREC_QUERY)begin
-                            if(ENABLE_FLASH_AUDIO)respond({"AREC,",8'd48+{7'd0,audio_rec_busy},",",8'd48+{7'd0,audio_rec_ready},",",
-                                8'd48+{7'd0,audio_rec_overflow},",",8'd48+{7'd0,audio_rec_valid},",",
-                                hex_char(audio_rec_status),",",hex_char(audio_rec_error),",",
-                                hex_char(audio_rec_generation[15:12]),hex_char(audio_rec_generation[11:8]),
-                                hex_char(audio_rec_generation[7:4]),hex_char(audio_rec_generation[3:0]),",",
-                                hex_char({3'd0,audio_rec_stored_samples[20]}),hex_char(audio_rec_stored_samples[19:16]),
-                                hex_char(audio_rec_stored_samples[15:12]),hex_char(audio_rec_stored_samples[11:8]),
-                                hex_char(audio_rec_stored_samples[7:4]),hex_char(audio_rec_stored_samples[3:0]),8'd13,8'd10},30);
-                            else respond({"AREC,",8'd48+{7'd0,audio_rec_busy},",",8'd48+{7'd0,audio_rec_ready},",",
-                                8'd48+{7'd0,audio_rec_overflow},8'd13,8'd10},12);
+                            if(ENABLE_FLASH_AUDIO)begin
+                                reply<={{3'd0,audio_rec_busy},{3'd0,audio_rec_ready},{3'd0,audio_rec_overflow},
+                                    {3'd0,audio_rec_valid},audio_rec_status,audio_rec_error,audio_rec_generation,
+                                    3'd0,audio_rec_stored_samples,48'd0};respond(5'd15,6'd30);
+                            end else begin
+                                reply<={{3'd0,audio_rec_busy},{3'd0,audio_rec_ready},{3'd0,audio_rec_overflow},100'd0};respond(5'd16,6'd12);
+                            end
                         end
                         else if(decoded_command==CMD_AREC_PREP)begin
-                            if(!ENABLE_FLASH_AUDIO || audio_rec_busy)result(ENABLE_FLASH_AUDIO ? 1 : 3);
+                            if(!ENABLE_FLASH_AUDIO || audio_rec_busy || (ENABLE_EVENT_TAKE && take_flags[5]))result(ENABLE_FLASH_AUDIO ? 1 : 3);
                             else begin audio_rec_prepare<=1;result(0);end
                         end else if(decoded_command==CMD_AREC_SEND)begin
                             control_parse<=10;parse_numbers(10,1);
@@ -438,14 +428,12 @@ module hc05_keymap #(
                                 remote_mode<=line[1:0];visual_write<=1;result(0);
                             end else result(2);
                         end else if(decoded_command==CMD_VIS_QUERY) begin
-                            respond({"VIS,",8'd48+{6'd0,visual_requested},",",
-                                8'd48+{6'd0,visual_snapshot[103:102]},",",
-                                8'd48+{6'd0,reference_ratio},",",8'd48+{6'd0,reference_phase},",",
-                                8'd48+{6'd0,visual_snapshot[101:100]},",",8'd48+{6'd0,visual_snapshot[99:98]},",",
-                                hex_char(visual_snapshot[107:104]),8'd13,8'd10},19);
+                            reply<={{2'd0,visual_requested},{2'd0,visual_snapshot[103:102]},
+                                {2'd0,reference_ratio},{2'd0,reference_phase},{2'd0,visual_snapshot[101:100]},
+                                {2'd0,visual_snapshot[99:98]},visual_snapshot[107:104],84'd0};respond(5'd17,6'd19);
                         end else if(decoded_command==CMD_VIZ_QUERY) begin
                             // Exactly 32 UART bytes, captured atomically into the existing reply register.
-                            reply<={visual_snapshot,144'd0};reply_remaining<=32;visual_reply<=1;take_reply<=0;state<=RESPOND;
+                            reply<=visual_snapshot;respond(5'd18,6'd32);
                         end
                         else if(decoded_command==CMD_XY_SET && line[15:8]==",") begin
                             if(line[23:16]>="0" && line[23:16]<="3" && line[7:0]>="0" && line[7:0]<="3") begin
@@ -481,24 +469,18 @@ module hc05_keymap #(
                             else begin gesture_bank<=line[0]; result(0); end
                         end
                         else if(decoded_command==CMD_MAP_QUERY) begin
-                            respond({"MAP,",tens(note_map[7:0]),ones(note_map[7:0]),",",
-                                tens(note_map[15:8]),ones(note_map[15:8]),",",
-                                tens(note_map[23:16]),ones(note_map[23:16]),",",
-                                tens(note_map[31:24]),ones(note_map[31:24]),",",
-                                tens(note_map[39:32]),ones(note_map[39:32]),",",
-                                tens(note_map[47:40]),ones(note_map[47:40]),",",
-                                tens(note_map[55:48]),ones(note_map[55:48]),8'd13,8'd10},26);
+                            reply<={(note_map[7:0]<70 ? 4'd6 : 4'd7),(note_map[7:0]<70 ? note_map[3:0]-4'd12 : note_map[3:0]-4'd6),(note_map[15:8]<70 ? 4'd6 : 4'd7),(note_map[15:8]<70 ? note_map[11:8]-4'd12 : note_map[11:8]-4'd6),(note_map[23:16]<70 ? 4'd6 : 4'd7),(note_map[23:16]<70 ? note_map[19:16]-4'd12 : note_map[19:16]-4'd6),(note_map[31:24]<70 ? 4'd6 : 4'd7),(note_map[31:24]<70 ? note_map[27:24]-4'd12 : note_map[27:24]-4'd6),(note_map[39:32]<70 ? 4'd6 : 4'd7),(note_map[39:32]<70 ? note_map[35:32]-4'd12 : note_map[35:32]-4'd6),(note_map[47:40]<70 ? 4'd6 : 4'd7),(note_map[47:40]<70 ? note_map[43:40]-4'd12 : note_map[43:40]-4'd6),(note_map[55:48]<70 ? 4'd6 : 4'd7),(note_map[55:48]<70 ? note_map[51:48]-4'd12 : note_map[51:48]-4'd6),56'd0};respond(5'd19,6'd26);
                         end else if(decoded_command==CMD_MAP_RESET) begin
                             if(!edit_allowed) result(1);
-                            else begin note_map<=DEFAULT_MAP; respond({"OK,MAP_RESET",8'd13,8'd10},14); end
+                            else begin note_map<=DEFAULT_MAP; respond(5'd20,6'd14); end
                         end else if(decoded_command==CMD_MAP_SET && line[23:16]==",") begin
-                            if(line[31:24]<"1" || line[31:24]>"7") respond({"ERR,KEY",8'd13,8'd10},9);
+                            if(line[31:24]<"1" || line[31:24]>"7") respond(5'd21,6'd9);
                             else if(line[15:8]<"0" || line[15:8]>"9" || line[7:0]<"0" || line[7:0]>"9") result(7);
-                            else if(requested_note<60 || requested_note>72) respond({"ERR,NOTE",8'd13,8'd10},10);
+                            else if(requested_note<60 || requested_note>72) respond(5'd22,6'd10);
                             else if(!edit_allowed) result(1);
                             else begin
-                                note_map[(line[31:24]-8'd49)*8 +: 8]<=requested_note;
-                                respond({"OK,MAP,",line[31:24],",",line[15:0],8'd13,8'd10},13);
+                                note_map[(line[26:24]-3'd1)*8 +: 8]<=requested_note;
+                                reply<={line[27:24],line[11:8],line[3:0],100'd0};respond(5'd23,6'd13);
                             end
                         end else if(decoded_command==CMD_SONG_BEGIN) begin
                             song_operation<=1; parse_numbers(11,1);
@@ -562,10 +544,10 @@ module hc05_keymap #(
                                     8:if(accumulator>1)result(2);
                                       else if(!edit_allowed || touch_hold)result(1);
                                       else begin serial_active_high<=accumulator[0];result(0);end
-                                    9:if(audio_rec_busy)result(1);
+                                    9:if(audio_rec_busy || (ENABLE_FLASH_AUDIO && ENABLE_EVENT_TAKE && take_flags[5]))result(1);
                                       else if(!audio_rec_ready)result(3);
                                       else begin audio_rec_session<=accumulator;audio_rec_start<=1;result(0);end
-                                    10:if(!ENABLE_FLASH_AUDIO || audio_rec_busy)result(ENABLE_FLASH_AUDIO ? 1 : 3);
+                                    10:if(!ENABLE_FLASH_AUDIO || audio_rec_busy || (ENABLE_EVENT_TAKE && take_flags[5]))result(ENABLE_FLASH_AUDIO ? 1 : 3);
                                       else if(!audio_rec_valid)result(4);
                                       else begin audio_rec_session<=accumulator;audio_rec_send<=1;result(0);end
                                     11:begin audio_rec_ack_sequence<=accumulator;audio_rec_ack<=1;state<=COLLECT;end
@@ -596,7 +578,7 @@ module hc05_keymap #(
                             end
                         end else if(ch<"0" || ch>"9") result(7);
                         else if(accumulator>6553 || (accumulator==6553 && ch>"5")) result(2);
-                        else begin accumulator<=accumulator*16'd10+(ch-8'd48); have_digit<=1; position<=position+1'b1;state<=DECIMAL_READ; end
+                        else begin accumulator<=accumulator*16'd10+{12'd0,ch[3:0]}; have_digit<=1; position<=position+1'b1;state<=DECIMAL_READ; end
                     end
                     // Ignore a hardware-control completion on the cycle in
                     // which this new UART request is only being accepted.

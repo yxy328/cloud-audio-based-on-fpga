@@ -22,7 +22,7 @@ module uart_8n1 #(
     localparam integer HALF_TICKS = BIT_TICKS/2;
     localparam integer COUNT_W = (BIT_TICKS < 2) ? 1 : $clog2(BIT_TICKS);
     localparam [2:0] IDLE=0, START=1, DATA=2, STOP=3, RECOVER=4;
-    reg rx_meta, rx_sync;
+    (* syn_preserve=1, syn_srlstyle="registers" *) reg rx_meta, rx_sync;
     reg [2:0] rx_state, rx_index;
     reg [COUNT_W-1:0] rx_count;
     reg [7:0] rx_shift, received_byte;

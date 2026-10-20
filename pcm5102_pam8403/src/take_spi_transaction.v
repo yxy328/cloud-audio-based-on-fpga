@@ -5,7 +5,8 @@
 module take_spi_transaction #(
     parameter integer HALF_CYCLES=5,
     parameter [23:0] DATA_BASE=24'h7fc000,
-    parameter [23:0] DATA_END=24'h800000
+    parameter [23:0] DATA_END=24'h800000,
+    parameter integer PARTITIONED=0
 )(
     input wire clk,resetn,go,authorized,
     input wire [7:0] opcode,
@@ -18,7 +19,8 @@ module take_spi_transaction #(
     output reg [7:0] read_data,
     output reg read_valid,done,error,
     output reg cs_n,sck,mosi,
-    input wire miso
+    input wire miso,
+    input wire event_partition
 );
     localparam IDLE=0,PREP=1,BITS=2,ADVANCE=3,DATA=4,FINISH=5;
     localparam DW=HALF_CYCLES<2 ? 1 : $clog2(HALF_CYCLES);
@@ -29,16 +31,18 @@ module take_spi_transaction #(
     reg [23:0] addr;
     reg use_address,is_write;
     reg [14:0] remaining;
-    reg miso_meta,miso_sync;
+    (* syn_preserve=1, syn_srlstyle="registers" *) reg miso_meta,miso_sync;
     wire destructive=opcode==8'h06 || opcode==8'h02 || opcode==8'h20;
     wire whitelist=opcode==8'h9f || opcode==8'h05 || opcode==8'h03 ||
         opcode==8'h04 || destructive;
     // An aligned sector cannot leave the range. PP also checks page end
     // below, so a page wholly inside the range cannot wrap past 8MiB.
-    wire range_ok=address>=DATA_BASE && address<DATA_END;
+    wire range_ok=address>=DATA_BASE && address<DATA_END && (!PARTITIONED ||
+        (event_partition ? address>=24'h7fc000 : address<24'h7fc000));
+    wire [23:0] partition_end=PARTITIONED && !event_partition ? 24'h7fc000 : DATA_END;
     wire safe=whitelist && (!destructive || authorized) &&
         (opcode!=8'h02 || (range_ok && length!=0 && length<=256 &&
-            {1'b0,address[7:0]}+length<=256 && address+length<=DATA_END && address_valid && writing)) &&
+            {1'b0,address[7:0]}+length<=256 && address_valid && writing)) &&
         (opcode!=8'h20 || (range_ok && address[11:0]==0 && address_valid && length==0));
     assign write_ready=state==DATA && is_write && remaining!=0;
     task byte_start;

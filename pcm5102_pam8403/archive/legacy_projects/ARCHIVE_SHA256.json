@@ -1,0 +1,77 @@
+[
+  {
+    "Original": "PCM5102_PAM8403.gprj",
+    "Archived": "PCM5102_PAM8403.gprj.archived",
+    "SHA256": "D25D5BD1CCBDB0F4A4449DF43CE5BB3A0D5BBB7C3E568554CEFCBE86A889FE24"
+  },
+  {
+    "Original": "PCM5102_EVENT_TAKE.gprj",
+    "Archived": "PCM5102_EVENT_TAKE.gprj.archived",
+    "SHA256": "86A8B1B93235DA8A3343273B65044B964BB1CE1D429EB0DA9B7C317A563E50DA"
+  },
+  {
+    "Original": "PCM5102_AUDIO_TAKE.gprj",
+    "Archived": "PCM5102_AUDIO_TAKE.gprj.archived",
+    "SHA256": "A6913B990DA4B0EE0926089DFC127BDB0AF0935A9FD5927D7C9A5FE12F98DEC2"
+  },
+  {
+    "Original": "tools/build_audit.tcl",
+    "Archived": "tools/build_audit.tcl",
+    "SHA256": "DC398AEF123214DE1CC2E5877722CCA4FB3BEB8030E18C822C16E549656F4069"
+  },
+  {
+    "Original": "tools/build_hc05_only.tcl",
+    "Archived": "tools/build_hc05_only.tcl",
+    "SHA256": "DEE4491E8C06E7E3D4EC9B118126A62EC59D7D491FA6A91AF2616CC163F64858"
+  },
+  {
+    "Original": "tools/build_led_remote.tcl",
+    "Archived": "tools/build_led_remote.tcl",
+    "SHA256": "7714D45BFA84B51E37D2E046E88D0F4BA6629036AD4D847117FD3DB706DBD040"
+  },
+  {
+    "Original": "tools/build_audio_take.tcl",
+    "Archived": "tools/build_audio_take.tcl",
+    "SHA256": "961595638C76B4B682024E2D9D29020A31FE77099D8EDB1BABF09E78B87B9297"
+  },
+  {
+    "Original": "tools/build_take.tcl",
+    "Archived": "tools/build_take.tcl",
+    "SHA256": "B7CB212C6F6E6C58B3CEDBD0F109FE481B41248FC695436EEE04ACF9814B1DB8"
+  },
+  {
+    "Original": "tools/check_resources.tcl",
+    "Archived": "tools/check_resources.tcl",
+    "SHA256": "2670DCF90C04CBA99C5B1763F54B1B52F22CF1F5CBF0AF28780C128D3EEA931C"
+  },
+  {
+    "Original": "tools/check_resources.ps1",
+    "Archived": "tools/check_resources.ps1",
+    "SHA256": "D6F4B01F29B38D72A6EDF689FBE8E83B7C30942EEEFD3FB7F4085F3237CB6B55"
+  },
+  {
+    "Original": "tools/pnr_take.tcl",
+    "Archived": "tools/pnr_take.tcl",
+    "SHA256": "A9ADC0939358A154E718DDDB1EDA135A7A8A36E3BE6302AABA4B765A383519E4"
+  },
+  {
+    "Original": "tools/take_resource_audit.tcl",
+    "Archived": "tools/take_resource_audit.tcl",
+    "SHA256": "915A6B3EB7EFED653CC14782E2CD2CA37E2B1A0ED5A2B6351A6994C18069A4D6"
+  },
+  {
+    "Original": "tools/package_standalone_take.py",
+    "Archived": "tools/package_standalone_take.py",
+    "SHA256": "12DB80FA21629165F282FBAA778D8B6411696D916CDE5AADA685F5450CF650CB"
+  },
+  {
+    "Original": "tools/package_take_review.py",
+    "Archived": "tools/package_take_review.py",
+    "SHA256": "AC7897BF762A61031BC42917074C6E55D2E5B5AEC27C873009E40ABBF90957CF"
+  },
+  {
+    "Original": "tools/package_audio_route2.py",
+    "Archived": "tools/package_audio_route2.py",
+    "SHA256": "D03E591AEB3DFE80C867463E4A0B84A65BBE48E84BC65ADD1C65D481EB91D71B"
+  }
+]

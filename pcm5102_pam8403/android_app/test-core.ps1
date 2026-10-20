@@ -22,6 +22,12 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Flash audio status tests failed' }
     & javac --release 8 -Xlint:-options -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\AdsrProfile.java core_test\AdsrProfileTest.java app\src\main\java\cn\fpga\score\SongCodec.java app\src\main\java\cn\fpga\score\AudioRecording.java app\src\main\java\cn\fpga\score\SppLink.java core_test\SongCodecTest.java core_test\SppLinkTest.java core_test\android\bluetooth\BluetoothSocket.java core_test\android\bluetooth\BluetoothDevice.java
     if ($LASTEXITCODE -ne 0) { throw 'Core test compilation failed' }
+    & javac --release 8 -encoding UTF-8 -cp build\core -d build\core app\src\main\java\cn\fpga\score\RecordingSupport.java app\src\main\java\cn\fpga\score\AudioTakeStatus.java app\src\main\java\cn\fpga\score\TakeStatus.java app\src\main\java\cn\fpga\score\PhoneTake.java app\src\main\java\cn\fpga\score\PhoneTakeStore.java core_test\RecordingSupportTest.java core_test\PhoneTakeTest.java
+    if ($LASTEXITCODE -ne 0) { throw 'Recording support/MIDI compilation failed' }
+    & java -cp build\core cn.fpga.score.RecordingSupportTest
+    if ($LASTEXITCODE -ne 0) { throw 'Recording support tests failed' }
+    & java -cp build\core cn.fpga.score.PhoneTakeTest
+    if ($LASTEXITCODE -ne 0) { throw 'Event MIDI tests failed' }
     & javac --release 8 -encoding UTF-8 -cp build\core -d build\core app\src\main\java\cn\fpga\score\SongLibrary.java core_test\SongLibraryTest.java
     if ($LASTEXITCODE -ne 0) { throw 'Song library compilation failed' }
     & java -cp build\core cn.fpga.score.SongLibraryTest
@@ -51,6 +57,14 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'SPP Flash audio transport failed' }
         & java -cp build\core cn.fpga.score.AudioRecordingTest ../sim/build/audio_flash_top.bin ../sim/build/audio_flash_top_expected.txt flash
         if ($LASTEXITCODE -ne 0) { throw 'Flash PCM to WAV failed' }
+    }
+    if(Test-Path -LiteralPath ../sim/build/audio_unified_top.bin){
+        & javac --release 8 -encoding UTF-8 -cp build\core -d build\core core_test\SppAudioTest.java
+        if ($LASTEXITCODE -ne 0) { throw 'Unified SPP audio test compilation failed' }
+        & java -cp build\core cn.fpga.score.SppAudioTest ../sim/build/audio_unified_top.bin
+        if ($LASTEXITCODE -ne 0) { throw 'Unified SPP audio transport failed' }
+        & java -cp build\core cn.fpga.score.AudioRecordingTest ../sim/build/audio_unified_top.bin ../sim/build/audio_unified_top_expected.txt flash
+        if ($LASTEXITCODE -ne 0) { throw 'Unified PCM to WAV failed' }
     }
     if(Test-Path -LiteralPath ../sim/build/audio_record_stream.bin){
         & java -cp build\core cn.fpga.score.AudioRecordingTest ../sim/build/audio_record_stream.bin

@@ -9,16 +9,16 @@ git clone https://gitee.com/yxy0818/cloud-audio-based-on-fpga.git
 cd cloud-audio-based-on-fpga
 ```
 
-主工程为 `pcm5102_pam8403/PCM5102_PAM8403.gprj`，顶层 `top`，器件 `GW5A-LV25MG121NC1/I0`。保留同级 `pmod_hub75e/`，工程直接引用其中的触摸输入模块。
+主目录唯一工程为 `pcm5102_pam8403/PCM5102_UNIFIED.gprj`，顶层 `top_unified`，器件 `GW5A-LV25MG121NC1/I0`。保留同级 `pmod_hub75e/`，工程直接引用其中的触摸输入模块。合并前的三个工程及专用脚本已[归档](../pcm5102_pam8403/archive/legacy_projects/README.md)。
 
 ## 2. 准备工具和接线
 
 - FPGA：已有构建记录使用 Gowin V1.9.11.03 Education，需安装 IDE、Programmer 和开发板下载驱动。
 - RTL 仿真：Icarus Verilog；脚本默认路径为 `C:/iverilog/bin`，可用 `-IverilogDir` 覆盖。
-- 手机：Android 10+，安装[HC-05通信版 APK](../pcm5102_pam8403/android_app/dist/FPGA-Score-hc05-only.apk)，使用HC-05经典蓝牙SPP，无需USB或OTG。
+- 手机：Android 10+，安装[统一版 APK](../pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk)，使用HC-05经典蓝牙SPP，无需USB或OTG。
 - 修改 App 时再配置 JDK 和 Android SDK，步骤见 [App 文档](../pcm5102_pam8403/android_app/README.md)。现成 APK 可直接安装。
 
-安装当前 **App v1.11 / Code12**，手机与FPGA只连接HC-05。接线先查[完整引脚表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)，键盘改接与跳线查[8/16键迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)；[USB高速音频方案](../pcm5102_pam8403/AUDIO_RECORDING.md)保留备用，当前不接USB模块、RTS或OTG。关闭App的USB初始化不需要修改或重烧FPGA；LED和板上事件录制各自仍需支持对应命令的固件。
+安装当前 **App v1.13 / Code14**，配套 `PCM5102_UNIFIED.fs`，手机与FPGA只连接HC-05。接线先查[完整引脚表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)，键盘改接与跳线查[8/16键迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)；录制、保存和重放见[统一录制说明](../pcm5102_pam8403/android_app/UNIFIED_RECORDING.md)。
 
 | 使用方式 | 接线与操作 |
 | --- | --- |
@@ -45,9 +45,9 @@ $gowinShell = 'C:/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe'
 & $gowinShell ./pcm5102_pam8403/tools/build.tcl
 ```
 
-生成位流：`pcm5102_pam8403/impl/pnr/PCM5102_PAM8403.fs`。该文件不在源码仓库中。检查构建日志和时序报告，最近已记录构建见 [VERIFICATION.md](../pcm5102_pam8403/VERIFICATION.md)；重新构建后的指纹可能不同。
+生成位流：`pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.fs`。已验证的位流也可从[统一版交付包](../pcm5102_pam8403/deliveries/UNIFIED_RECORDING_20261020/)取得。检查构建日志和时序报告，统一版结果见 [RAM_GEOMETRY_VERIFICATION.md](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)；重新构建后的指纹可能不同。
 
-当前 HC-05 默认配置可用 `& $gowinShell ./pcm5102_pam8403/tools/build_hc05_only.tcl` 生成独立的 `PCM5102_HC05_ONLY.fs`。同条件资源对比、固定源码和验证范围见 [HC-05 资源优化](../pcm5102_pam8403/HC05_RESOURCE_OPTIMIZATION.md)。此配置综合时移除备用 USB 录音硬件，手机仍使用 App v1.11 和现有 HC-05。
+当前默认构建就是统一版，无需再分别构建 HC-05、事件录制或 PCM 录音目标。默认脚本仅编译，不自动烧录。
 
 ## 4. 下载开发板
 

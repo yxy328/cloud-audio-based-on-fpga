@@ -9,4 +9,4 @@ set_false_path -from [get_ports {hc05_rx}] -to [get_pins {u_main/u_keymap/u_uart
 set_false_path -from [get_ports {sda}] -to [get_pins {u_main/u_gesture/u_i2c/sda_meta*/D}]
 set_false_path -from [get_ports {ir_beam[*]}] -to [get_pins {u_main/u_ir/beam_meta*/D}]
 set_false_path -from [get_ports {touch_sdo}] -to [get_pins {u_main/u_touch_serial/sdo_meta*/D}]
-set_false_path -from [get_ports {flash_miso}] -to [get_pins {u_main/flash_pcm.u_audio_take/u_nor/u_spi/miso_meta*/D}]
+set_false_path -from [get_ports {flash_miso}] -to [get_pins {u_main/flash_pcm.u_audio_take/internal_nor.u_nor/internal_spi.u_spi/miso_meta*/D}]

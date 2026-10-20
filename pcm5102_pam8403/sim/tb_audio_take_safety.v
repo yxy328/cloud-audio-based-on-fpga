@@ -13,7 +13,7 @@ module tb_audio_take_safety;
     reg [7:0] received[0:8191];
     always #10 clk=~clk;
     // Same page/FIFO/slot geometry; short maximum keeps exhaustive scans fast.
-    audio_take_store #(.CLK_HZ(50000000),.SAMPLE_DIVISOR(65535),.MAX_SECONDS(2),.HALF_CYCLES(3),.ACK_TIMEOUT_CYCLES(100000)) dut(.*);
+    audio_take_store #(.CLK_HZ(50000000),.SAMPLE_DIVISOR(65535),.MAX_SECONDS(2),.HALF_CYCLES(3),.ACK_TIMEOUT_CYCLES(100000)) dut(.spi_request(),.spi_response(12'd0),.nor_request(),.nor_response(12'd0),.*);
     audio_nor_model flash(.*);
     task check;
         input condition;input [511:0] message;

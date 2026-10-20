@@ -51,6 +51,10 @@ auth.json
 *.lnk
 /pmod_hub75e/HUB75E.fs.7z
 
+# Delivery zips duplicate the same-named directories; source snapshots duplicate the repo itself.
+/pcm5102_pam8403/deliveries/*.zip
+/pcm5102_pam8403/deliveries/*/*_sources.zip
+
 # Keil build outputs and per-user UI settings for the STM32 reference project.
 /1-2-4-按键控制LED程序/*.o
 /1-2-4-按键控制LED程序/*.d

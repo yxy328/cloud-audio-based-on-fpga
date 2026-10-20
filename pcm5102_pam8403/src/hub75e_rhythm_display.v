@@ -73,7 +73,14 @@ module hub75e_rhythm_display #(
     localparam [REMAINDER_BITS-1:0] DIV2 = LEAD_MS*2;
     localparam [REMAINDER_BITS-1:0] DIV1 = LEAD_MS;
 
-    reg [6:0] note_rows [0:63];
+    // Circular rows turn a 448-bit parallel shift into one pointer update.
+    // Per-row valid bits clear the wrapped row without a second RAM write.
+    reg [5:0] head_top;
+    reg [63:0] head_valid;
+    (* syn_ramstyle="block_ram" *) reg [6:0] head_memory[0:63];
+    reg [6:0] head_read_q,write_previous;
+    reg head_read_forward;
+    wire [6:0] head_read_value=head_read_forward ? write_previous : head_read_q;
     reg [PHASE_BITS-1:0] motion_phase;
     wire [31:0] advanced_phase = motion_phase+TRAVEL;
     wire [31:0] wrapped_phase = advanced_phase-LEAD_MS;
@@ -142,10 +149,6 @@ module hub75e_rhythm_display #(
         keys_s2<=keys_s1;
     end
 
-    reg was_playing;
-    always @(posedge clk)begin
-        if(!resetn)was_playing<=0;else was_playing<=playing;
-    end
     integer row;
     always @(posedge clk) begin
         if (!resetn || !playing) begin
@@ -153,9 +156,6 @@ module hub75e_rhythm_display #(
             overflow <= 0;
             valid_s0 <= 0; valid_s1 <= 0; valid_s2 <= 0;
             scroll_s1 <= 0; scroll_s2 <= 0;
-            // Nothing writes rows while stopped; clear once on stop/reset.
-            if(!resetn || was_playing)
-                for (row=0; row<64; row=row+1)note_rows[row] <= 0;
         end else begin
             valid_s0 <= note_spawn && spawn_keys != 0;
             valid_s1 <= valid_s0;
@@ -166,25 +166,6 @@ module hub75e_rhythm_display #(
                 motion_phase <= next_phase;
             if (note_spawn && spawn_keys != 0 && spawn_delay_ms > LEAD_MS)
                 overflow <= 1; // Unsupported lookahead was clamped, never silent.
-            if (scroll || valid_s2) begin
-                for (row=0; row<64; row=row+1) begin
-                    if (scroll) begin
-                        if (row == 0)
-                            note_rows[row] <= 0;
-                        else
-                            note_rows[row] <= note_rows[row-1];
-                    end
-                    if (valid_s2 && insert_y == row) begin
-                        if (scroll) begin
-                            if (row == 0)
-                                note_rows[row] <= keys_s2;
-                            else
-                                note_rows[row] <= note_rows[row-1] | keys_s2;
-                        end else
-                            note_rows[row] <= note_rows[row] | keys_s2;
-                    end
-                end
-            end
         end
     end
 `ifndef SYNTHESIS
@@ -260,33 +241,71 @@ module hub75e_rhythm_display #(
         end
     end
 
-    // Capture the row masks once per row scan. Only heads through HIT_Y
-    // are drawn; their three-pixel glyph can extend through HIT_Y+2.
-    // Form each three-pixel glyph with fixed wiring BEFORE selecting a row.
-    // Two 32-row selections replace six independently addressed selections.
-    // These are combinational wires: a scroll/insert on the capture edge has
-    // exactly the same visibility as the original bitmap reads.
-    wire [6:0] glyph_rows [0:63];
-    genvar glyph_y;
-    generate for(glyph_y=0;glyph_y<64;glyph_y=glyph_y+1)begin: glyph
-        wire [6:0] head,previous,prior;
-        if(glyph_y<=HIT_Y)begin: head_valid
-            assign head=note_rows[glyph_y];
-        end else begin: head_empty
-            assign head=0;
+    // The first RAM is the insertion read/modify/write port. Six identical
+    // copies supply the upper/lower three-row glyph reads in parallel.
+    // This trades seven spare BSRAMs for the parallel shift and wide muxes.
+    // Prefetch addresses include the next scroll and next scan row, keeping
+    // ROW_PREP and the external 133-clock scan exactly cycle-equivalent.
+    wire head_write=resetn && playing && valid_s2 && insert_y<64;
+    wire [5:0] head_write_address=head_top+insert_y_s2+scroll_s2;
+    wire [5:0] wrapped_head=head_top-6'd1;
+    wire head_old_valid=head_valid[head_write_address] &&
+        !(scroll && head_write_address==wrapped_head);
+    wire [6:0] head_write_data=(head_old_valid ? head_read_value : 7'd0) | keys_s2;
+    // Predict the following cycle's insert address from quotient stage one.
+    // The two occurrences of this cycle's scroll cancel in circular space.
+    wire [5:0] head_request=head_top+HIT_Y[5:0]-
+        {quotient_hi_s1,lower_quotient}+scroll_s1;
+    wire head_collision=head_write && head_request==head_write_address;
+    wire [5:0] next_head_top=(!resetn || !playing) ? 6'd0 :
+        (scroll ? wrapped_head : head_top);
+    wire [4:0] next_scan_row=!resetn ? 5'd0 :
+        (state==S_LATCH_LOW ? scan_row+5'd1 : scan_row);
+    always @(posedge clk)begin
+        if(!resetn || !playing)begin head_top<=0;head_valid<=0;end
+        else begin
+            if(scroll)begin head_top<=wrapped_head;head_valid[wrapped_head]<=0;end
+            if(head_write)head_valid[head_write_address]<=1;
         end
-        if(glyph_y>=1 && glyph_y<=HIT_Y+1)begin: previous_valid
-            assign previous=note_rows[glyph_y-1];
-        end else begin: previous_empty
-            assign previous=0;
+        if(head_write)head_memory[head_write_address]<=head_write_data;
+        // Disable physical reads on a simultaneous same-address write.
+        // The explicitly forwarded value also handles consecutive OR merges.
+        if(!head_collision)head_read_q<=head_memory[head_request];
+        head_read_forward<=head_collision;
+        write_previous<=head_write_data;
+    end
+    wire [6:0] panel_heads[0:5];
+    genvar head_port;
+    generate for(head_port=0;head_port<6;head_port=head_port+1)begin: panel_memories
+        localparam integer OFFSET=(head_port<3 ? 0 : 32);
+        localparam integer DY=head_port%3;
+        (* syn_ramstyle="block_ram" *) reg [6:0] memory[0:63];
+        reg [6:0] q;
+        reg valid_q,forward_q;
+        wire [6:0] requested_y={2'd0,next_scan_row}+OFFSET;
+        wire [5:0] address=next_head_top+requested_y[5:0]-DY;
+        wire collision=head_write && address==head_write_address;
+        wire row_survives=head_valid[address] && !(scroll && address==wrapped_head);
+        always @(posedge clk)begin
+            if(head_write)memory[head_write_address]<=head_write_data;
+            if(!collision)q<=memory[address];
+            forward_q<=collision;
+            valid_q<=resetn && playing && requested_y>=DY && requested_y<=HIT_Y+DY &&
+                (collision || row_survives);
         end
-        if(glyph_y>=2 && glyph_y<=HIT_Y+2)begin: prior_valid
-            assign prior=note_rows[glyph_y-2];
-        end else begin: prior_empty
-            assign prior=0;
-        end
-        assign glyph_rows[glyph_y]=head | previous | prior;
+        assign panel_heads[head_port]=valid_q ? (forward_q ? write_previous : q) : 7'd0;
     end endgenerate
+    wire [6:0] upper_glyph=panel_heads[0] | panel_heads[1] | panel_heads[2];
+    wire [6:0] lower_glyph=panel_heads[3] | panel_heads[4] | panel_heads[5];
+`ifndef SYNTHESIS
+    // Preserve the logical-row debug view; this is absent from hardware.
+    wire [6:0] note_rows[0:63];
+    genvar debug_row;
+    generate for(debug_row=0;debug_row<64;debug_row=debug_row+1)begin: debug_heads
+        wire [5:0] address=head_top+debug_row;
+        assign note_rows[debug_row]=head_valid[address] ? head_memory[address] : 7'd0;
+    end endgenerate
+`endif
 
     // Same seven-lane layout/colors as rhythm_guide.v. Sharing the bitmap
     // above avoids duplicating its per-note timers for the two panel halves.
@@ -352,8 +371,8 @@ module hub75e_rhythm_display #(
         end else begin
             case (state)
                 S_ROW_PREP: begin
-                    upper_notes <= glyph_rows[{1'b0,scan_row}];
-                    lower_notes <= glyph_rows[{1'b1,scan_row}];
+                    upper_notes <= upper_glyph;
+                    lower_notes <= lower_glyph;
                     column <= 0;
                     hub_CK <= 0;
                     hub_ST <= 0;

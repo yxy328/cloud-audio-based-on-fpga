@@ -10,6 +10,8 @@ module top #(
     parameter ENABLE_DEMO_SCORE = 0,
     parameter ENABLE_EVENT_TAKE = 0,
     parameter ENABLE_FLASH_AUDIO = 0,
+    // Unified phone controls leave all sixteen pads available for music.
+    parameter EVENT_KEYS_ENABLE = 1,
     // Phone communication uses HC-05. The separate 2Mbps USB PCM uplink
     // is opt-in and consumes no FIFO/UART logic in the default build.
     parameter ENABLE_USB_AUDIO_RECORD = 0,
@@ -80,6 +82,7 @@ module top #(
     wire [23:0] perf_elapsed,perf_duration;
     wire [10:0] perf_count;
     wire [2:0] perf_command;
+    wire event_local_flash_request;
     wire nv_busy,nv_boot_done,nv_valid,nv_done,nv_ok,nv_save,nv_delete,nv_we,nv_full;
     wire [3:0] nv_error;
     wire [10:0] nv_count;
@@ -153,7 +156,7 @@ module top #(
     // only after an explicit AUDITION. No audio samples are stored in a score.
     wire [6:0] audition_keys;
     wire [15:0] physical_notes=touch_ready ? ((touch_mode16 ? touch_keys : {9'd0,touch_keys[6:0]}) &
-        (ENABLE_EVENT_TAKE ? 16'h0fff : 16'hffff)) : 16'd0;
+        (ENABLE_EVENT_TAKE && EVENT_KEYS_ENABLE ? 16'h0fff : 16'hffff)) : 16'd0;
     reg [15:0] held_notes,blocked_notes;
     reg previous_touch_mode;
     wire [15:0] live_note_gates=(physical_notes & ~blocked_notes) |
@@ -239,7 +242,7 @@ module top #(
         .DEFAULT_S(ADSR_SUSTAIN_LEVEL),.DEFAULT_R(TOUCH_ADSR_RELEASE_SAMPLES),.BAUD(HC05_BAUD),.ENABLE_DEMO_SCORE(ENABLE_DEMO_SCORE),
         .ENABLE_LOOKAHEAD(!ENABLE_DEMO_SCORE),.LOOKAHEAD_MS(GUIDE_LEAD_MS),
         .ENABLE_DOWNLOADED_INCREMENT(ENABLE_DEMO_SCORE),.ENABLE_EVENT_TAKE(ENABLE_EVENT_TAKE),
-        .ENABLE_FLASH_AUDIO(ENABLE_FLASH_AUDIO)) u_keymap (
+        .ENABLE_FLASH_AUDIO(ENABLE_FLASH_AUDIO),.DEFAULT_TOUCH_MODE16(ENABLE_EVENT_TAKE && EVENT_KEYS_ENABLE)) u_keymap (
         .clk(clk),.resetn(resetn),.rx(hc05_rx),.tx(hc05_tx),
         .keys_ready(touch_ready),
         .song_busy(song_playing || (|song_active) || s1_pressed || s2_action),
@@ -274,7 +277,7 @@ module top #(
         .audio_stream_busy(audio_stream_busy),.audio_stream_ready(audio_stream_ready),
         .audio_rec_prepare(audio_rec_prepare),.audio_rec_start(audio_rec_start),.audio_rec_stop(audio_rec_stop),.audio_rec_abort(audio_rec_abort),
         .audio_rec_send(audio_rec_send),.audio_rec_ack(audio_rec_ack),.audio_rec_ack_sequence(audio_rec_ack_sequence),
-        .audio_rec_session(audio_rec_session),.take_command(perf_command),.take_flags(perf_flags),
+        .audio_rec_session(audio_rec_session),.take_command(perf_command),.take_flags({perf_flags[7:6],nv_busy || event_local_flash_request,perf_flags[4:0]}),
         .take_error(perf_error),.take_elapsed(perf_elapsed),.take_duration(perf_duration),.take_count(perf_count)
     );
     // Sensor, score/panel and all voices share one 50MHz clock and frame CE.
@@ -342,7 +345,7 @@ module top #(
         .timbre(gesture_timbre),.analog_mode(analog_mode),.effect_mode(effect_mode),
         .effect_wet(effective_wet),.volume(master_volume),.master_gain(master_target),
         .adc_sample(fsr_adc_sample),.analog_position(analog_position),.analog_valid(analog_available),
-        .take_flags(perf_flags),.take_error(perf_error),.take_elapsed(perf_elapsed),.take_count(perf_count),
+        .take_flags({perf_flags[7:6],nv_busy || event_local_flash_request,perf_flags[4:0]}),.take_error(perf_error),.take_elapsed(perf_elapsed),.take_count(perf_count),
         .guide_keys(song_guide_keys),.playing(downloaded_playing && !guide_reset),
         .ms_tick(guide_ms_tick),.note_spawn(guide_note_spawn),
         .spawn_keys(guide_spawn_keys),.spawn_delay_ms(guide_spawn_delay),
@@ -521,20 +524,48 @@ module top #(
         .clk(clk), .resetn(resetn), .bck_fall_ce(bck_fall_ce),
         .bit_index(bit_index), .sample(audio_sample), .din(i2s_din)
     );
-    generate if(ENABLE_FLASH_AUDIO && !ENABLE_EVENT_TAKE)begin: flash_pcm
+    wire pcm_cs_n,pcm_sck,pcm_mosi,event_cs_n,event_sck,event_mosi;
+    wire [60:0] pcm_spi_request,event_spi_request;
+    wire [52:0] pcm_nor_request,event_nor_request;
+    wire [11:0] shared_spi_response;
+    wire pcm_resetn,nv_store_busy;
+    generate if(ENABLE_FLASH_AUDIO && ENABLE_EVENT_TAKE)begin: shared_flash
+        // Event boot owns SPI first. Both stores keep their independent
+        // partition checks; runtime flash operations are serialized below.
+        reg event_boot_ready;
+        always @(posedge clk)
+            if(!resetn)event_boot_ready<=0;
+            else if(nv_boot_done)event_boot_ready<=1;
+        assign pcm_resetn=resetn && event_boot_ready;
+        wire [52:0] request=nv_store_busy ? event_nor_request : pcm_nor_request;
+        audio_nor_operation #(.DATA_BASE(24'h100000),.DATA_END(24'h800000),.PARTITIONED(1)) u_nor(
+            .clk(clk),.resetn(request[52] && (!event_boot_ready || (event_nor_request[52] && pcm_nor_request[52]))),
+            .start(request[51]),.kind(request[50:48]),.address(request[47:24]),.length(request[23:9]),
+            .write_data(request[8:1]),.write_valid(request[0]),.write_ready(shared_spi_response[8]),
+            .read_data(shared_spi_response[7:0]),.read_valid(shared_spi_response[9]),.done(shared_spi_response[10]),
+            .error(shared_spi_response[11]),.busy(),.cs_n(flash_cs_n),.sck(flash_sck),.mosi(flash_mosi),
+            .miso(flash_miso),.event_partition(nv_store_busy),.spi_request(),.spi_response(12'd0));
+    end else begin: separate_flash
+        assign pcm_resetn=resetn;
+        assign flash_cs_n=ENABLE_FLASH_AUDIO ? pcm_cs_n : ENABLE_EVENT_TAKE ? event_cs_n : 1'b1;
+        assign flash_sck=ENABLE_FLASH_AUDIO ? pcm_sck : ENABLE_EVENT_TAKE ? event_sck : 1'b0;
+        assign flash_mosi=ENABLE_FLASH_AUDIO ? pcm_mosi : ENABLE_EVENT_TAKE ? event_mosi : 1'b0;
+    end endgenerate
+    generate if(ENABLE_FLASH_AUDIO)begin: flash_pcm
     wire [3:0] flash_audio_status,flash_audio_error;
     wire flash_audio_prepared,flash_audio_capturing;
     wire [20:0] flash_audio_samples,flash_audio_stored_samples;
     wire [15:0] flash_audio_generation;
-    audio_take_store u_audio_take(
-        .clk(clk),.resetn(resetn),.sample_ce(frame_ce),.sample(audio_sample),
-        .prepare(audio_rec_prepare),.start(audio_rec_start),.stop(audio_rec_stop),.abort(audio_rec_abort),.send(audio_rec_send),
+    audio_take_store #(.EXTERNAL_NOR(ENABLE_EVENT_TAKE)) u_audio_take(
+        .clk(clk),.resetn(pcm_resetn),.sample_ce(frame_ce),.sample(audio_sample),
+        .prepare(audio_rec_prepare && !nv_busy),.start(audio_rec_start && !nv_busy),.stop(audio_rec_stop),.abort(audio_rec_abort),.send(audio_rec_send && !nv_busy),
         .session(audio_rec_session),.ack_valid(audio_rec_ack),.ack_sequence(audio_rec_ack_sequence),
         .stream_data(audio_stream_data),.stream_valid(audio_stream_valid),.stream_last(audio_stream_last),.stream_ready(audio_stream_ready),
         .status(flash_audio_status),.error(flash_audio_error),.valid(audio_rec_valid),.prepared(flash_audio_prepared),
         .capturing(flash_audio_capturing),.overflow(audio_rec_overflow),.sample_count(flash_audio_samples),
         .stored_samples(flash_audio_stored_samples),.stored_generation(flash_audio_generation),.busy(audio_rec_busy),
-        .cs_n(flash_cs_n),.sck(flash_sck),.mosi(flash_mosi),.miso(flash_miso));
+        .cs_n(pcm_cs_n),.sck(pcm_sck),.mosi(pcm_mosi),.miso(flash_miso),.spi_request(pcm_spi_request),
+        .spi_response(12'd0),.nor_request(pcm_nor_request),.nor_response(nv_store_busy ? 12'd0 : shared_spi_response));
     assign audio_rec_ready=flash_audio_prepared;
     assign audio_rec_status=flash_audio_status;assign audio_rec_error=flash_audio_error;
     assign audio_rec_stored_samples=flash_audio_stored_samples;assign audio_rec_generation=flash_audio_generation;
@@ -556,10 +587,27 @@ module top #(
     end endgenerate
     generate if(ENABLE_EVENT_TAKE)begin: take_enabled
         wire [2:0] local_command;
-        take_key_control u_keys(.clk(clk),.resetn(resetn),.ready(touch_ready),.mode16(touch_mode16),
+        take_key_control u_keys(.clk(clk),.resetn(resetn),.ready(touch_ready && EVENT_KEYS_ENABLE),.mode16(touch_mode16),
             .keys(touch_keys[15:12]),.confirm(perf_confirm),.command(local_command));
+        assign event_local_flash_request=local_command==7 || (local_command==5 && perf_confirm==2);
+        wire [2:0] requested_command=local_command!=0 ? local_command : perf_command;
+        wire [2:0] allowed_command=ENABLE_FLASH_AUDIO && audio_rec_busy && requested_command!=2 ? 3'd0 : requested_command;
+        // A physical save can race a UART audio request. Queue that pulse
+        // until the PCM store releases SPI, rather than dropping the save.
+        reg pending_save,pending_delete;
+        wire event_launch=!ENABLE_FLASH_AUDIO || (!audio_rec_busy && !audio_rec_prepare && !audio_rec_start && !audio_rec_send);
+        wire store_save=event_launch && (nv_save || pending_save);
+        wire store_delete=event_launch && (nv_delete || pending_delete);
+        always @(posedge clk)begin
+            if(!resetn)begin pending_save<=0;pending_delete<=0;end
+            else begin
+                pending_save<=store_save ? 1'b0 : pending_save || nv_save;
+                pending_delete<=store_delete ? 1'b0 : pending_delete || nv_delete;
+            end
+        end
+        assign nv_busy=nv_store_busy || pending_save || pending_delete || nv_save || nv_delete;
         performance_take u_take(
-            .clk(clk),.resetn(resetn),.frame_ce(frame_ce),.command(panic ? 3'd2 : local_command!=0 ? local_command : perf_command),
+            .clk(clk),.resetn(resetn),.frame_ce(frame_ce),.command(panic ? 3'd2 : allowed_command),
             .live_state(perf_live_state),.live_pulses(perf_live_pulses),
             .play_state(perf_state),.play_valid(perf_replay),.play_pulses(perf_pulses),.recording(perf_recording),.playing(perf_playing),
             .kill(perf_kill),.available(perf_available),.saved(perf_saved),.full(perf_full),.error(perf_error),
@@ -567,17 +615,15 @@ module top #(
             .nv_busy(nv_busy),.nv_boot_done(nv_boot_done),.nv_valid(nv_valid),.nv_done(nv_done),.nv_ok(nv_ok),
             .nv_error(nv_error),.nv_count(nv_count),.nv_duration(nv_duration),.nv_full(nv_full),.nv_save(nv_save),.nv_delete(nv_delete),
             .nv_we(nv_we),.nv_address(nv_address),.nv_data(nv_data),.nv_q(nv_q));
-        take_nor_store u_store(
-            .clk(clk),.resetn(resetn),.save(nv_save),.delete_take(nv_delete),.count(perf_count),.duration(perf_duration),.take_full(perf_full),
-            .busy(nv_busy),.boot_done(nv_boot_done),.valid(nv_valid),.done(nv_done),.ok(nv_ok),.error(nv_error),
+        take_nor_store #(.EXTERNAL_NOR(ENABLE_FLASH_AUDIO)) u_store(
+            .clk(clk),.resetn(resetn),.save(store_save),.delete_take(store_delete),.count(perf_count),.duration(perf_duration),.take_full(perf_full),
+            .busy(nv_store_busy),.boot_done(nv_boot_done),.valid(nv_valid),.done(nv_done),.ok(nv_ok),.error(nv_error),
             .loaded_count(nv_count),.loaded_duration(nv_duration),.loaded_full(nv_full),.ram_we(nv_we),.ram_address(nv_address),
-            .ram_data(nv_data),.ram_q(nv_q),.cs_n(flash_cs_n),.sck(flash_sck),.mosi(flash_mosi),.miso(flash_miso));
+            .ram_data(nv_data),.ram_q(nv_q),.cs_n(event_cs_n),.sck(event_sck),.mosi(event_mosi),.miso(flash_miso),
+            .spi_request(event_spi_request),.spi_response(12'd0),.nor_request(event_nor_request),.nor_response(nv_store_busy ? shared_spi_response : 12'd0));
     end else begin: no_take
         assign perf_state=0;assign perf_pulses=0;assign perf_recording=0;assign perf_playing=0;assign perf_kill=0;
         assign perf_available=0;assign perf_replay=0;assign perf_saved=0;assign perf_full=0;assign perf_error=0;assign perf_confirm=0;
-        assign perf_elapsed=0;assign perf_duration=0;assign perf_count=0;assign nv_busy=0;
-        if(!ENABLE_FLASH_AUDIO)begin: no_audio_flash
-            assign flash_cs_n=1;assign flash_sck=0;assign flash_mosi=0;
-        end
+        assign perf_elapsed=0;assign perf_duration=0;assign perf_count=0;assign nv_busy=0;assign nv_store_busy=0;assign event_local_flash_request=0;
     end endgenerate
 endmodule

@@ -5,6 +5,7 @@ param(
     [string] $NetlistFile = 'impl/pnr/PCM5102_PAM8403.vo'
 )
 $ErrorActionPreference = 'Stop'
-# Build the current project with tools/build.tcl first. To inspect the audit
-# build, pass -NetlistFile impl/pnr/PCM5102_AUDIT.vo after build_audit.tcl.
+# Historical normal-top netlist check; these benches instantiate top.
+# The unified build uses top_unified. Supply a matching normal-top netlist
+# explicitly; the former audit builder is in archive/legacy_projects/tools/.
 & (Join-Path $PSScriptRoot 'run_sim.ps1') -IverilogDir $IverilogDir -GowinDir $GowinDir -Netlist -NetlistFile $NetlistFile

@@ -20,7 +20,16 @@ module sensor_poly_audio #(
     output wire overrun
 );
     reg [31:0] gesture_inc, ir_inc;
-    reg [16:0] event_frames;
+    function [16:0] frames_for_timbre;
+        input [2:0] timbre;
+        begin case(timbre)
+            1,5:frames_for_timbre=PIANO_FRAMES;
+            2,7:frames_for_timbre=FLUTE_FRAMES;
+            3,6:frames_for_timbre=UKULELE_FRAMES;
+            4:frames_for_timbre=DRUM_FRAMES;
+            default:frames_for_timbre=NOTE_FRAMES;
+        endcase end
+    endfunction
     always @(*) begin
         case ({start_dir,end_dir})
             {3'd1,3'd2}:gesture_inc=control_bank ? 34480283 : 23012828;
@@ -35,16 +44,14 @@ module sensor_poly_audio #(
             4:ir_inc=34480283; 5:ir_inc=38702809;
             6:ir_inc=43442435; 7:ir_inc=46025656;
         endcase
-        case (control_timbre)
-            1:event_frames=PIANO_FRAMES; 2:event_frames=FLUTE_FRAMES;
-            3:event_frames=UKULELE_FRAMES; 4:event_frames=DRUM_FRAMES;
-            5:event_frames=PIANO_FRAMES;6:event_frames=UKULELE_FRAMES;7:event_frames=FLUTE_FRAMES;
-            default:event_frames=NOTE_FRAMES;
-        endcase
     end
     wire gesture_event=sensor_ready && gesture_valid && dir_evaluated && gesture_inc!=0;
     // Four staging entries plus 64 engine FIFO entries.
-    reg [181:0] events [0:3];
+    // A simultaneous IR/gesture pair shares one atomic ADSR/timbre snapshot.
+    (* syn_ramstyle="distributed_ram" *) reg [132:0] configs[0:3];
+    reg [1:0] config_wr;
+    reg [1:0] config_tags[0:3];
+    reg [31:0] pitches[0:3];
     reg [1:0] wr,rd;
     reg [2:0] queued;
     reg queue_overrun,test_pending;
@@ -58,24 +65,29 @@ module sensor_poly_audio #(
     wire [1:0] second_wr=wr+take_ir;
     always @(posedge clk) begin
         if (!resetn) begin
-            wr<=0; rd<=0; queued<=0; queue_overrun<=0; test_pending<=0;
+            wr<=0; rd<=0; config_wr<=0; queued<=0; queue_overrun<=0; test_pending<=0;
         end else begin
             if (send_test) test_pending<=0;
             if (test32) test_pending<=1;
             if ((ir_note_valid && !take_ir) || (gesture_event && !take_gesture) ||
                 (test32 && test_pending && !send_test)) queue_overrun<=1;
-            if (take_ir) events[wr]<={adsr_config,event_frames,control_timbre,ir_inc};
-            if (take_gesture) events[second_wr]<={adsr_config,event_frames,control_timbre,gesture_inc};
+            if(pushes!=0)begin
+                configs[config_wr]<={adsr_config,control_timbre};config_wr<=config_wr+1'b1;
+            end
+            if(take_ir)begin pitches[wr]<=ir_inc;config_tags[wr]<=config_wr;end
+            if(take_gesture)begin pitches[second_wr]<=gesture_inc;config_tags[second_wr]<=config_wr;end
             wr<=wr+pushes;
             if (pop) rd<=rd+1'b1;
             queued<=queued+pushes-pop;
         end
     end
-    wire [181:0] next_event=events[rd];
-    tdm_synth #(.VOICES(32),.EXTENDED_TIMBRES(1),.RUNTIME_ADSR(1),.VOLUME_SHIFT(VOLUME_SHIFT)) u_synth (
+    wire [164:0] next_event={configs[config_tags[rd]],pitches[rd]};
+    tdm_synth #(.VOICES(32),.EXTENDED_TIMBRES(1),.RUNTIME_ADSR(1),.VOLUME_SHIFT(VOLUME_SHIFT),
+        .PRESET_FRAMES(1),.NOTE_FRAMES(NOTE_FRAMES),.PIANO_FRAMES(PIANO_FRAMES),
+        .FLUTE_FRAMES(FLUTE_FRAMES),.UKULELE_FRAMES(UKULELE_FRAMES),.DRUM_FRAMES(DRUM_FRAMES)) u_synth (
         .clk(clk),.resetn(resetn),.sample_ce(frame_ce),
         .event_valid(pop),.event_inc(next_event[31:0]),
-        .event_adsr(next_event[181:52]),.event_timbre(next_event[34:32]),.event_frames(next_event[51:35]),
+        .event_adsr(next_event[164:35]),.event_timbre(next_event[34:32]),.event_frames(frames_for_timbre(next_event[34:32])),
         .chord_valid(1'b0),.test_valid(send_test),.vibrato_enabled(control_vibrato),
         .voice_active(voice_active),.voice_count(voice_count),.sample(audio_sample),
         .event_ready(ready),.overrun(engine_overrun),.busy()

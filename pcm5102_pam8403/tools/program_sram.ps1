@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $projectDir = Split-Path -Parent $PSScriptRoot
 $cli = Join-Path $ProgrammerDir 'programmer_cli.exe'
-$bitstream = Join-Path $projectDir 'impl/pnr/PCM5102_PAM8403.fs'
+$bitstream = Join-Path $projectDir 'impl/pnr/PCM5102_UNIFIED.fs'
 foreach ($path in @($cli,$bitstream)) {
     if (!(Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing $path" }
 }
@@ -31,4 +31,4 @@ if ($readExit -ne 0 -or !$actualCode.Success -or $readText -match '(?im)\b(error
 if ([Convert]::ToUInt32($actualCode.Groups[1].Value.Substring(2),16) -ne [Convert]::ToUInt32($expectedCode.Groups[1].Value.Substring(2),16)) {
     throw "Device UserCode $($actualCode.Groups[1].Value) differs from bitstream $($expectedCode.Groups[1].Value)"
 }
-Write-Host "SRAM downloaded and UserCode checked: $($actualCode.Groups[1].Value). Touch keys generate notes; PLAY/S1/S2 control silent guidance. App v1.3 AUDITION explicitly auditions the downloaded score via live DDS/ADSR synthesis. See BLUETOOTH_MEDIA.md."
+Write-Host "PCM5102_UNIFIED SRAM downloaded and UserCode checked: $($actualCode.Groups[1].Value). See android_app/UNIFIED_RECORDING.md for playing and recording."

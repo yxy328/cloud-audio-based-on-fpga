@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module name="top_unified" T_Register="10691(0)" T_Alu="3430(0)" T_Lut="18388(0)" T_MULTALU27X18="8(0)" T_MULT12X12="5(0)" T_MULT27X36="7(0)" T_MULTADDALU12X12="2(0)" T_Bsram="39(0)" T_Ssram="40(0)">
+ <SubModule name="u_main" Register="73" Alu="5" Lut="730" T_Register="10691(73)" T_Alu="3430(5)" T_Lut="18388(730)" T_MULTALU27X18="8(0)" T_MULT12X12="5(0)" T_MULT27X36="7(0)" T_MULTADDALU12X12="2(0)" T_Bsram="39(0)" T_Ssram="40(0)">
+  <SubModule name="u_touch_serial" Register="119" Alu="38" Lut="165" T_Register="119(119)" T_Alu="38(38)" T_Lut="165(165)"/>
+  <SubModule name="u_keymap" Register="544" Alu="47" Lut="1440" MULTALU27X18="1" MULT12X12="1" Bsram="2" T_Register="1651(544)" T_Alu="267(47)" T_Lut="3734(1440)" T_MULTALU27X18="1(1)" T_MULT12X12="1(1)" T_Bsram="5(2)">
+   <SubModule name="u_command_decode" Register="45" Alu="22" Lut="85" Bsram="1" T_Register="45(45)" T_Alu="22(22)" T_Lut="85(85)" T_Bsram="1(1)"/>
+   <SubModule name="u_adsr_config" Register="485" Alu="58" Lut="407" T_Register="485(485)" T_Alu="58(58)" T_Lut="407(407)"/>
+   <SubModule name="u_uart" Register="90" Alu="12" Lut="339" Bsram="1" T_Register="90(90)" T_Alu="12(12)" T_Lut="339(339)" T_Bsram="1(1)"/>
+   <SubModule name="u_download" Register="487" Alu="128" Lut="1463" Bsram="1" T_Register="487(487)" T_Alu="128(128)" T_Lut="1463(1463)" T_Bsram="1(1)"/>
+  </SubModule>
+  <SubModule name="u_ir" Register="175" Alu="120" Lut="102" T_Register="175(175)" T_Alu="120(120)" T_Lut="102(102)"/>
+  <SubModule name="u_gesture" T_Register="2719(0)" T_Alu="1399(0)" T_Lut="3676(0)" T_MULT12X12="2(0)" T_MULT27X36="6(0)" T_MULTADDALU12X12="2(0)" T_Bsram="7(0)" T_Ssram="34(0)">
+   <SubModule name="u_i2c" Register="51" Lut="132" T_Register="51(51)" T_Lut="132(132)"/>
+   <SubModule name="u_ctrl" Register="496" Alu="532" Lut="908" MULT12X12="2" MULT27X36="2" MULTADDALU12X12="2" T_Register="496(496)" T_Alu="532(532)" T_Lut="908(908)" T_MULT12X12="2(2)" T_MULT27X36="2(2)" T_MULTADDALU12X12="2(2)"/>
+   <SubModule name="u_audio" Register="114" Alu="3" Lut="246" Ssram="34" T_Register="2172(114)" T_Alu="867(3)" T_Lut="2636(246)" T_MULT27X36="4(0)" T_Bsram="7(0)" T_Ssram="34(34)">
+    <SubModule name="u_synth" Register="2058" Alu="864" Lut="2390" MULT27X36="4" Bsram="7" T_Register="2058(2058)" T_Alu="864(864)" T_Lut="2390(2390)" T_MULT27X36="4(4)" T_Bsram="7(7)"/>
+   </SubModule>
+  </SubModule>
+  <SubModule name="u_string" Register="86" Alu="33" Lut="168" Bsram="1" T_Register="86(86)" T_Alu="33(33)" T_Lut="168(168)" T_Bsram="1(1)"/>
+  <SubModule name="u_extra_mix" Register="16" Alu="17" Lut="16" T_Register="16(16)" T_Alu="17(17)" T_Lut="16(16)"/>
+  <SubModule name="u_guide_display" Register="218" Alu="114" Lut="1095" MULT12X12="1" Bsram="7" Ssram="2" T_Register="1390(218)" T_Alu="532(114)" T_Lut="2346(1095)" T_MULTALU27X18="1(0)" T_MULT12X12="1(1)" T_Bsram="12(7)" T_Ssram="2(2)">
+   <SubModule name="audio_visual.u_visualizer" Register="222" Alu="42" Lut="332" Bsram="2" T_Register="964(222)" T_Alu="405(42)" T_Lut="960(332)" T_MULTALU27X18="1(0)" T_Bsram="3(2)">
+    <SubModule name="u_reference" Register="8" Alu="17" Lut="7" T_Register="8(8)" T_Alu="17(17)" T_Lut="7(7)"/>
+    <SubModule name="u_spectrum" Register="734" Alu="346" Lut="621" MULTALU27X18="1" Bsram="1" T_Register="734(734)" T_Alu="346(346)" T_Lut="621(621)" T_MULTALU27X18="1(1)" T_Bsram="1(1)"/>
+   </SubModule>
+   <SubModule name="status_panel.u_status" Register="208" Alu="13" Lut="291" Bsram="2" T_Register="208(208)" T_Alu="13(13)" T_Lut="291(291)" T_Bsram="2(2)"/>
+  </SubModule>
+  <SubModule name="u_note_lut" Register="189" Lut="51" Bsram="1" T_Register="189(189)" T_Lut="51(51)" T_Bsram="1(1)"/>
+  <SubModule name="u_fsr_adc" Register="5" Lut="7" T_Register="65(5)" T_Alu="15(0)" T_Lut="81(7)">
+   <SubModule name="u_capture" Register="60" Alu="15" Lut="74" T_Register="60(60)" T_Alu="15(15)" T_Lut="74(74)"/>
+  </SubModule>
+  <SubModule name="u_fsr_dynamics" Register="38" Alu="32" Lut="109" MULTALU27X18="1" T_Register="38(38)" T_Alu="32(32)" T_Lut="109(109)" T_MULTALU27X18="1(1)"/>
+  <SubModule name="u_fsr_pitch_dynamics" Register="31" Alu="32" Lut="121" MULTALU27X18="1" T_Register="31(31)" T_Alu="32(32)" T_Lut="121(121)" T_MULTALU27X18="1(1)"/>
+  <SubModule name="u_touch_input" Register="80" Alu="46" Lut="38" T_Register="80(80)" T_Alu="46(46)" T_Lut="38(38)"/>
+  <SubModule name="u_touch_mode_input" Register="72" Alu="46" Lut="34" T_Register="72(72)" T_Alu="46(46)" T_Lut="34(34)"/>
+  <SubModule name="u_fsr_mode" Register="2" Lut="6" T_Register="2(2)" T_Lut="6(6)"/>
+  <SubModule name="u_s1" Register="20" Alu="15" Lut="8" T_Register="20(20)" T_Alu="15(15)" T_Lut="8(8)"/>
+  <SubModule name="u_s2" Register="19" Alu="15" Lut="8" T_Register="19(19)" T_Alu="15(15)" T_Lut="8(8)"/>
+  <SubModule name="u_display_mode" Register="25" Alu="15" Lut="24" T_Register="25(25)" T_Alu="15(15)" T_Lut="24(24)"/>
+  <SubModule name="u_clk_div" Register="12" Alu="5" Lut="10" T_Register="12(12)" T_Alu="5(5)" T_Lut="10(10)"/>
+  <SubModule name="u_fsr_pitch_scaler" T_Register="263(0)" T_Alu="59(0)" T_Lut="267(0)" T_MULTALU27X18="1(0)" T_Bsram="1(0)" T_Ssram="4(0)">
+   <SubModule name="individual.u_bend" Register="263" Alu="59" Lut="267" MULTALU27X18="1" Bsram="1" Ssram="4" T_Register="263(263)" T_Alu="59(59)" T_Lut="267(267)" T_MULTALU27X18="1(1)" T_Bsram="1(1)" T_Ssram="4(4)"/>
+  </SubModule>
+  <SubModule name="u_touch_synth" Register="631" Alu="172" Lut="1101" MULT27X36="1" Bsram="1" T_Register="631(631)" T_Alu="172(172)" T_Lut="1101(1101)" T_MULT27X36="1(1)" T_Bsram="2(1)">
+   <SubModule name="u_sine" Bsram="1" T_Bsram="1(1)"/>
+  </SubModule>
+  <SubModule name="pressure_enabled.u_expression" MULTALU27X18="1" T_MULTALU27X18="1(1)"/>
+  <SubModule name="u_output_mix" Register="16" Alu="17" Lut="15" T_Register="16(16)" T_Alu="17(17)" T_Lut="15(15)"/>
+  <SubModule name="u_analog_expression" Register="82" Alu="71" Lut="179" MULT12X12="1" T_Register="82(82)" T_Alu="71(71)" T_Lut="179(179)" T_MULT12X12="1(1)"/>
+  <SubModule name="u_effects" Register="125" Alu="61" Lut="169" MULTALU27X18="1" Bsram="4" T_Register="125(125)" T_Alu="61(61)" T_Lut="169(169)" T_MULTALU27X18="1(1)" T_Bsram="4(4)"/>
+  <SubModule name="u_master_volume" Register="13" Alu="26" Lut="75" MULTALU27X18="1" T_Register="13(13)" T_Alu="26(26)" T_Lut="75(75)" T_MULTALU27X18="1(1)"/>
+  <SubModule name="u_i2s_tx" Register="33" Lut="34" T_Register="33(33)" T_Lut="34(34)"/>
+  <SubModule name="shared_flash.u_nor" Register="122" Lut="266" T_Register="211(122)" T_Alu="14(0)" T_Lut="533(266)">
+   <SubModule name="internal_spi.u_spi" Register="89" Alu="14" Lut="267" T_Register="89(89)" T_Alu="14(14)" T_Lut="267(267)"/>
+  </SubModule>
+  <SubModule name="flash_pcm.u_audio_take" Register="681" Alu="229" Lut="1851" Bsram="2" T_Register="681(681)" T_Alu="229(229)" T_Lut="1851(1851)" T_Bsram="2(2)"/>
+  <SubModule name="take_enabled.u_take" Register="1292" Alu="97" Lut="1434" Bsram="4" T_Register="1292(1292)" T_Alu="97(97)" T_Lut="1434(1434)" T_Bsram="4(4)"/>
+  <SubModule name="take_enabled.u_store" Register="562" Alu="52" Lut="1303" T_Register="562(562)" T_Alu="52(52)" T_Lut="1303(1303)"/>
+ </SubModule>
+</Module>

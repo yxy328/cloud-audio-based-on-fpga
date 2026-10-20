@@ -18,4 +18,4 @@ set_false_path -from [get_ports {ir_beam[*]}] -to [get_pins {u_main/u_ir/beam_me
 # This master-clock constraint does not model cable / DAC output timing.
 
 set_false_path -from [get_ports {touch_sdo}] -to [get_pins {u_main/u_touch_serial/sdo_meta*/D}]
-set_false_path -from [get_ports {flash_miso}] -to [get_pins {u_main/take_enabled.u_store/u_spi/miso_meta*/D}]
+set_false_path -from [get_ports {flash_miso}] -to [get_pins {u_main/take_enabled.u_store/internal_spi.u_spi/miso_meta*/D}]

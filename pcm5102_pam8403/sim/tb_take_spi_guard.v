@@ -6,7 +6,7 @@ module tb_take_spi_guard;
     reg [23:0] address=0;reg [14:0] length=0;
     wire write_ready,read_valid,done,error,cs_n,sck,mosi,miso;
     wire write_valid=1;wire [7:0] read_data;
-    take_spi_transaction dut(.*);
+    take_spi_transaction dut(.event_partition(1'b1),.*);
     take_nor_model flash(.*);
     integer checks=0,transactions=0;reg [23:0] received=0;
     always @(negedge cs_n)transactions=transactions+1;

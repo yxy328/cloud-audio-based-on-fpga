@@ -39,7 +39,7 @@ module hub75e_status #(parameter ENABLE_TAKE_STATUS=0)(
     reg [3:0] take_error_q;
     reg [10:0] take_count_q;
     reg [23:0] time_binary;
-    reg [31:0] time_bcd,time_digits,adjusted_bcd,time_display;
+    reg [31:0] time_bcd,adjusted_bcd,time_display;
     reg [4:0] time_left;
     integer digit;
     always @*begin
@@ -50,15 +50,14 @@ module hub75e_status #(parameter ENABLE_TAKE_STATUS=0)(
     always @(posedge clk)begin
         if(!resetn)begin
             take_q<=0;take_error_q<=0;take_count_q<=0;time_binary<=0;time_bcd<=0;
-            time_digits<=0;time_display<=0;time_left<=0;
+            time_display<=0;time_left<=0;
         end else if(ENABLE_TAKE_STATUS)begin
             if(display_boundary)begin
                 take_q<=take_flags;take_error_q<=take_error;take_count_q<=take_count;
-                time_binary<=take_elapsed;time_bcd<=0;time_left<=24;time_display<=time_digits;
+                time_binary<=take_elapsed;time_bcd<=0;time_left<=24;time_display<=time_bcd;
             end else if(time_left!=0)begin
                 time_bcd<={adjusted_bcd[30:0],time_binary[23]};time_binary<={time_binary[22:0],1'b0};
                 time_left<=time_left-1'b1;
-                if(time_left==1)time_digits<={adjusted_bcd[30:0],time_binary[23]};
             end
         end
     end

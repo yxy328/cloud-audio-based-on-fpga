@@ -8,6 +8,13 @@ module tdm_synth #(
     parameter integer RUNTIME_ADSR=0,
     parameter integer VOLUME_SHIFT=4,
     parameter integer EXTENDED_TIMBRES=0,
+    // Sensor producers choose duration solely from the latched timbre.
+    // In that integration, queue the timbre and reconstruct its duration,
+    // avoiding 17 redundant bits in every FIFO entry. Generic users retain
+    // the full event_frames interface with this parameter disabled.
+    parameter integer PRESET_FRAMES=0,
+    parameter [16:0] NOTE_FRAMES=14648,PIANO_FRAMES=58594,
+        FLUTE_FRAMES=24414,UKULELE_FRAMES=34180,DRUM_FRAMES=19531,
     parameter [16:0] CHORD_FRAMES=17'd97656,
     parameter [16:0] TEST_FRAMES=17'd131071
 )(
@@ -24,21 +31,27 @@ module tdm_synth #(
     output wire busy,
     output wire event_ready
 );
-    // Two 278-bit banks per voice avoid wasting blocks on a very wide,
-    // shallow context RAM. The next bank is read while this one is latched.
-    // No asynchronous memory reset: initialize two banks per voice.
-    localparam integer CONTEXT_BITS=556, HALF_BITS=278;
-    (* syn_ramstyle="block_ram" *) reg [HALF_BITS-1:0] contexts [0:VOICES*2-1];
-    reg [HALF_BITS-1:0] context_q;
+    // Sixteen 36-bit words per voice use the full depth of one 18K RAM.
+    // Port A prefetches a voice while the previous voice is calculated;
+    // port B drains its updated context during the next calculation.
+    localparam integer CONTEXT_BITS=556, CONTEXT_PAD=576;
+    (* syn_ramstyle="block_ram" *) reg [35:0] contexts [0:VOICES*16-1];
+    reg [35:0] context_q;
     reg [CONTEXT_BITS-1:0] context_work;
-    reg [4:0] slot, init_slot;
-    reg init_half;
+    reg [CONTEXT_PAD-1:0] prefetch;
+    wire [CONTEXT_PAD-1:0] assembled_context={context_q,prefetch[575:36]};
+    reg [4:0] slot,init_slot,read_slot;
+    reg [3:0] init_word,read_word,event_word;
+    reg read_running,read_valid;
+    reg [3:0] read_tag;
     // Simulation/debug accessor; never part of the synthesised datapath.
     function [364:0] peek_context;
         input [4:0] index;
-        reg [CONTEXT_BITS-1:0] full_context;
+        reg [CONTEXT_PAD-1:0] full_context;
+        integer word;
         begin
-            full_context={contexts[{index,1'b1}],contexts[{index,1'b0}]};
+            for(word=0;word<16;word=word+1)
+                full_context[word*36 +:36]=contexts[index*16+word];
             peek_context=full_context[364:0];
         end
     endfunction
@@ -82,18 +95,38 @@ module tdm_synth #(
     end
 
     // 64 commands; a chord/test occupies one entry and expands internally.
-    (* syn_ramstyle="block_ram" *) reg [183:0] fifo [0:63];
+    localparam integer FIFO_BITS=PRESET_FRAMES ? 167 : 184;
+    (* syn_ramstyle="block_ram" *) reg [FIFO_BITS-1:0] fifo [0:63];
     reg [6:0] write_ptr, read_ptr, frame_limit;
-    reg [183:0] fifo_q, command;
+    reg [FIFO_BITS-1:0] fifo_q;
+    reg [183:0] command;
+    function [16:0] frames_for_timbre;
+        input [2:0] timbre;
+        begin case(timbre)
+            1,5:frames_for_timbre=PIANO_FRAMES;
+            2,7:frames_for_timbre=FLUTE_FRAMES;
+            3,6:frames_for_timbre=UKULELE_FRAMES;
+            4:frames_for_timbre=DRUM_FRAMES;
+            default:frames_for_timbre=NOTE_FRAMES;
+        endcase end
+    endfunction
     wire fifo_full = (write_ptr-read_ptr)==7'd64;
     assign event_ready = !fifo_full;
     wire incoming = test_valid || chord_valid || event_valid;
     wire [1:0] incoming_type = test_valid ? 2'd2 : chord_valid ? 2'd1 : 2'd0;
+    wire [183:0] fifo_input={(RUNTIME_ADSR && !test_valid) ? event_adsr : 130'd0,
+        incoming_type,event_frames,event_timbre,event_inc};
+    wire [183:0] fifo_command;
+    generate if(PRESET_FRAMES)begin: preset_fifo
+        assign fifo_command={fifo_q[166:35],frames_for_timbre(fifo_q[34:32]),fifo_q[34:0]};
+    end else begin: general_fifo
+        assign fifo_command=fifo_q;
+    end endgenerate
     always @(posedge clk) begin
         fifo_q <= fifo[read_ptr[5:0]];
         if (!resetn) begin write_ptr<=0; end
         else if (incoming && !fifo_full) begin
-            fifo[write_ptr[5:0]] <= {(RUNTIME_ADSR && !test_valid) ? event_adsr : 130'd0,incoming_type,event_frames,event_timbre,event_inc};
+            fifo[write_ptr[5:0]] <= PRESET_FRAMES ? {fifo_input[183:52],fifo_input[34:0]} : fifo_input;
             write_ptr <= write_ptr+1'b1;
         end
     end
@@ -138,19 +171,36 @@ module tdm_synth #(
     end
 
     localparam [5:0] INIT=0, IDLE=1, LFO1=2, LFO2=3, LFO3=4, LFO4=5,
-        EVENT_READY=6, COMMAND_FETCH=7, EVENT_READ=8, EVENT_LOAD=9, EVENT_WRITE=10,
-        VOICE_READ=11, VOICE_LOAD=12, LOOK_BASE=13, LOOK_H2=14, LOOK_H3=15,
+        EVENT_READY=6, COMMAND_FETCH=7, EVENT_PATCH=8, EVENT_COMMIT=10,
+        VOICE_PRIME=11, VOICE_ACCEPT=12, LOOK_BASE=13, LOOK_H2=14, LOOK_H3=15,
         LOOK_H4=16, LOOK_AUX=17, LOOK_AUX2=18, PITCH_MUL=19, PITCH_WAIT=20,
         BODY_MUL=21, BODY_WAIT=22, BRIGHT_MUL=23, BRIGHT_WAIT=24,
-        GAIN_MUL=25, GAIN_WAIT=26, VOICE_WRITE=27, PUBLISH=28,
-        EVENT_HIGH_LOAD=29, EVENT_LOW_WRITE=30, VOICE_HIGH_LOAD=31, VOICE_LOW_WRITE=32;
+        GAIN_MUL=25, GAIN_WAIT=26, VOICE_COMMIT=27, PUBLISH=28, VOICE_DRAIN=29;
     reg [5:0] state;
     assign busy = state!=IDLE;
     reg [31:0] lfo_phase, lookup_phase, phase_step;
     reg [8:0] depth;
     reg signed [15:0] lfo_scaled;
-    wire signed [15:0] lookup_sample;
-    sine_lookup u_lookup (.phase(lookup_phase),.sample(lookup_sample));
+    // Prefetch the next lookup at the same state edge that previously
+    // registered lookup_phase. This retains the arithmetic schedule while
+    // mapping the exact legacy 256-point table into one block ROM.
+    (* syn_romstyle="block_rom" *) reg [15:0] sine_table[0:255];
+    initial $readmemh("src/tdm_sine256.hex",sine_table);
+    reg signed [15:0] lookup_sample;
+    reg [31:0] lookup_request;
+    always @*begin
+        case(state)
+            IDLE:lookup_request=lfo_phase;
+            LOOK_BASE:lookup_request=phase;
+            LOOK_H2:lookup_request=phase<<1;
+            LOOK_H3:lookup_request=phase+(phase<<1);
+            LOOK_H4:lookup_request=phase<<2;
+            LOOK_AUX:lookup_request=aux_phase;
+            LOOK_AUX2:lookup_request=aux2_phase;
+            default:lookup_request=0;
+        endcase
+    end
+    always @(posedge clk)lookup_sample<=sine_table[lookup_request[31:24]];
     reg signed [17:0] base,h2,h3,h4,aux,aux2;
     reg signed [32:0] mul_a;
     reg signed [17:0] mul_b;
@@ -221,16 +271,15 @@ module tdm_synth #(
         (EXTENDED_TIMBRES && (note_timbre==5 || note_timbre==6));
     wire [13:0] body_decrement={1'b0,body_loss}+14'd1;
     wire [16:0] bright_decrement={1'b0,bright_loss}+17'd1;
-    reg [31:0] aux_add0,aux_add1,aux_add2;
-    always @*begin
-        aux_add0=0;aux_add1=0;aux_add2=0;
-        case(note_timbre)
-            4:begin aux_add0=phase_step;aux_add1=drum_glide;end
-            6:begin aux_add0=phase_step<<1;aux_add1=phase_step>>1;aux_add2=phase_step>>2;end
-            7:begin aux_add0=phase_step;aux_add1=phase_step>>8;end
-        endcase
-    end
-    wire [31:0] aux_advanced=(aux_phase+aux_add0)+(aux_add1+aux_add2);
+    // Exact integer identities move constant multiply/add paths to spare
+    // DSP arithmetic. Correct the discarded low-bit carries explicitly.
+    (* syn_dspstyle="dsp" *) wire [37:0] bell_sum=phase_step*6'd43+{aux2_phase,3'd0};
+    wire [31:0] bell_next=bell_sum[34:3]-((phase_step[2:0]==3 || phase_step[2:0]>=6) ? 32'd1 : 32'd0);
+    (* syn_dspstyle="dsp" *) wire [41:0] string_sum=phase_step*9'd257+{aux_phase,8'd0};
+    (* syn_dspstyle="dsp" *) wire [35:0] metal_sum=phase_step*4'd11+{aux_phase,2'd0};
+    wire [31:0] metal_next=metal_sum[33:2]-(phase_step[1:0]==3 ? 32'd1 : 32'd0);
+    wire [31:0] aux_advanced=note_timbre==6 ? metal_next : note_timbre==7 ? string_sum[39:8] :
+        (aux_phase+phase_step)+drum_glide;
     always @(*) begin
         n_env_state=env_state;n_env_left=env_left;n_env_phase=env_phase;
         n_env_start=env_start;n_env_target=env_target;
@@ -241,7 +290,7 @@ module tdm_synth #(
             4:n_aux=aux_advanced;
             6:if(EXTENDED_TIMBRES) begin
                 n_aux=aux_advanced;
-                n_aux2=aux2_phase+(phase_step<<2)+phase_step+(phase_step>>2)+(phase_step>>3);
+                n_aux2=bell_next;
             end
             7:if(EXTENDED_TIMBRES) n_aux=aux_advanced;
         endcase
@@ -296,38 +345,80 @@ module tdm_synth #(
         n_pending,n_delay,pending_inc,pending_timbre,pending_frames,
         n_inc,n_timbre,n_remaining,n_gain,n_body,n_bright,n_phase,n_aux,n_aux2,
         n_glide,n_noise,n_air,amplified[15:0],gain,stage_gain};
-    wire [CONTEXT_BITS-1:0] requested_context={
-        request_adsr,env_state,env_left,env_phase,env_start,env_target,
-        1'b1,6'd32,request_inc,request_timbre,request_frames,
-        note_inc,note_timbre,17'd0,gain,body_env,bright_env,
-        phase,aux_phase,aux2_phase,drum_glide,noise_state,air_low,
-        prev_pcm,stage_gain,frame_gain};
-    // Seed calculation uses constant shifts, not another DSP multiplier.
+    // Event allocation changes only pending-note, remaining-time and ADSR
+    // words. Four boundary words are read/modified; full words need no read.
+    reg [35:0] event_data;
+    always @*begin
+        case(event_word)
+            7:event_data={context_q[35:19],17'd0,context_q[1:0]};
+            8:event_data={request_timbre[0],request_frames,context_q[17:0]};
+            9:event_data={2'd0,request_inc,request_timbre[2:1]};
+            10:event_data={context_q[35:5],1'b1,4'd8};
+            11:event_data={request_adsr[5:0],context_q[29:0]};
+            12:event_data=request_adsr[41:6];
+            13:event_data=request_adsr[77:42];
+            14:event_data=request_adsr[113:78];
+            default:event_data={20'd0,request_adsr[129:114]};
+        endcase
+    end
     wire [16:0] init_number={12'd0,init_slot};
     wire [16:0] init_seed=17'h1ACE1 ^ ((init_number<<12)+(init_number<<9)+
         (init_number<<5)+(init_number<<4)+(init_number<<2));
-    wire [CONTEXT_BITS-1:0] initial_context={
-        191'd0,1'b0,6'd0,32'd0,3'd0,17'd0,32'd0,3'd0,17'd0,9'd0,
-        24'd0,24'd0,32'd0,32'd0,32'd0,32'd0,init_seed,18'd0,16'd0,9'd0,9'd0};
-    wire memory_half=(state==EVENT_LOAD || state==VOICE_LOAD ||
-                      state==EVENT_WRITE || state==VOICE_WRITE);
-    wire [5:0] memory_address=(state==INIT) ? {init_slot,init_half} : {slot,memory_half};
-    always @(posedge clk) begin
-        context_q<=contexts[memory_address];
-        if(resetn) begin
-            if(state==INIT) contexts[memory_address]<=init_half ?
-                initial_context[CONTEXT_BITS-1:HALF_BITS] : initial_context[HALF_BITS-1:0];
-            else if(state==EVENT_LOW_WRITE) contexts[memory_address]<=requested_context[HALF_BITS-1:0];
-            else if(state==EVENT_WRITE) contexts[memory_address]<=requested_context[CONTEXT_BITS-1:HALF_BITS];
-            else if(state==VOICE_LOW_WRITE) contexts[memory_address]<=stepped_context[HALF_BITS-1:0];
-            else if(state==VOICE_WRITE) contexts[memory_address]<=stepped_context[CONTEXT_BITS-1:HALF_BITS];
+    reg [8:0] context_read_address;
+    always @*begin
+        context_read_address={read_slot,read_word};
+        if(state==EVENT_READY)context_read_address={allocation,4'd7};
+        else if(state==EVENT_PATCH)begin
+            case(event_word)
+                7:context_read_address={slot,4'd8};
+                8,9:context_read_address={slot,4'd10};
+                10:context_read_address={slot,4'd11};
+                default:context_read_address={slot,4'd0};
+            endcase
         end
+    end
+    // Update each word as soon as its result is ready. Immutable ADSR
+    // words 12..15 need no frame write. Scheduling the remaining twelve
+    // words across the arithmetic states removes the 576-bit output buffer
+    // and the final sixteen-clock drain without changing sample values.
+    reg voice_we;
+    reg [3:0] voice_write_word;
+    reg [35:0] voice_write_data;
+    always @*begin
+        voice_we=1;voice_write_word=0;voice_write_data=0;
+        case(state)
+            LOOK_BASE:begin voice_write_word=9;voice_write_data=stepped_context[324 +:36];end
+            LOOK_H2:begin voice_write_word=10;voice_write_data=stepped_context[360 +:36];end
+            LOOK_H3:begin voice_write_word=11;voice_write_data=stepped_context[396 +:36];end
+            LOOK_H4:begin voice_write_word=7;voice_write_data=stepped_context[252 +:36];end
+            LOOK_AUX:begin voice_write_word=6;voice_write_data=stepped_context[216 +:36];end
+            LOOK_AUX2:begin voice_write_word=8;voice_write_data=stepped_context[288 +:36];end
+            PITCH_MUL:begin voice_write_word=1;voice_write_data=stepped_context[36 +:36];end
+            BODY_WAIT:begin voice_write_word=2;voice_write_data=stepped_context[72 +:36];end
+            BRIGHT_MUL:begin voice_write_word=3;voice_write_data=stepped_context[108 +:36];end
+            BRIGHT_WAIT:begin voice_write_word=4;voice_write_data=stepped_context[144 +:36];end
+            GAIN_MUL:begin voice_write_word=5;voice_write_data=stepped_context[180 +:36];end
+            VOICE_COMMIT:begin voice_write_word=0;voice_write_data=stepped_context[0 +:36];end
+            default:voice_we=0;
+        endcase
+    end
+    wire context_we=state==INIT || state==EVENT_PATCH || voice_we;
+    wire [8:0] context_write_address=state==INIT ? {init_slot,init_word} :
+        state==EVENT_PATCH ? {slot,event_word} : {slot,voice_write_word};
+    wire [35:0] context_write_data=state==INIT ?
+        (init_word==1 ? {3'd0,init_seed,16'd0} : 36'd0) :
+        state==EVENT_PATCH ? event_data : voice_write_data;
+    always @(posedge clk)begin
+        context_q<=contexts[context_read_address];
+        if(resetn && context_we)contexts[context_write_address]<=context_write_data;
     end
 
     integer r;
     always @(posedge clk) begin
         if(!resetn) begin
-            state<=INIT; init_slot<=0; init_half<=0; slot<=0;
+            state<=INIT; init_slot<=0; init_word<=0; slot<=0;
+            read_slot<=0;read_word<=0;read_running<=0;read_valid<=0;read_tag<=0;
+            event_word<=0;
             read_ptr<=0; frame_limit<=0; command<=0; command_active<=0;
             request_adsr<=0;env_ramp_gain<=0;sub_note<=0; event_quota<=0; request_inc<=0; request_timbre<=0; request_frames<=0;
             voice_active<=0; voice_count<=0; sample<=0; mix<=0; overrun<=0;
@@ -336,14 +427,24 @@ module tdm_synth #(
             mul_a<=0; mul_b<=0; body_product<=0; phase_step<=0;
             for(r=0;r<VOICES;r=r+1) rank_order[r]<=r;
         end else begin
+            read_valid<=read_running;
+            read_tag<=read_word;
+            if(read_running)begin
+                if(read_word==15)begin
+                    read_word<=0;
+                    if(read_slot==VOICES-1)read_running<=0;
+                    else read_slot<=read_slot+1'b1;
+                end else read_word<=read_word+1'b1;
+            end
+            if(read_valid)prefetch<=assembled_context;
             if((incoming && fifo_full) || (sample_ce && state!=IDLE && state!=INIT)) overrun<=1;
             case(state)
                 INIT:begin
-                    init_half<=~init_half;
-                    if(init_half) begin
-                        if(init_slot==VOICES-1) state<=IDLE;
+                    if(init_word==15)begin
+                        init_word<=0;
+                        if(init_slot==VOICES-1)state<=IDLE;
                         else init_slot<=init_slot+1'b1;
-                    end
+                    end else init_word<=init_word+1'b1;
                 end
                 IDLE:if(sample_ce) begin
                     frame_limit<=write_ptr; mix<=0; event_quota<=0;
@@ -361,25 +462,26 @@ module tdm_synth #(
                 LFO4:state<=EVENT_READY;
                 EVENT_READY:begin
                     if(event_quota==32 || (!command_active && read_ptr==frame_limit)) begin
-                        slot<=0; state<=VOICE_READ;
+                        slot<=0;read_slot<=0;read_word<=0;read_running<=1;
+                        state<=VOICE_PRIME;
                     end else if(!command_active) state<=COMMAND_FETCH;
                     else begin
                         slot<=allocation; request_inc<=command_inc;request_adsr<=RUNTIME_ADSR ? command[183:54] : 130'd0;
                         request_timbre<=(command[53:52]==2) ? 3'd0 : command[34:32];
                         request_frames<=(command[53:52]==2) ? TEST_FRAMES :
                                         (command[53:52]==1) ? CHORD_FRAMES : command[51:35];
-                        state<=EVENT_READ;
+                        event_word<=7;state<=EVENT_PATCH;
                     end
                 end
                 COMMAND_FETCH:begin
-                    command<=fifo_q; read_ptr<=read_ptr+1'b1; command_active<=1; sub_note<=0;
+                    command<=fifo_command; read_ptr<=read_ptr+1'b1; command_active<=1; sub_note<=0;
                     state<=EVENT_READY;
                 end
-                EVENT_READ:state<=EVENT_LOAD;
-                EVENT_LOAD:begin context_work[HALF_BITS-1:0]<=context_q; state<=EVENT_HIGH_LOAD; end
-                EVENT_HIGH_LOAD:begin context_work[CONTEXT_BITS-1:HALF_BITS]<=context_q; state<=EVENT_LOW_WRITE; end
-                EVENT_LOW_WRITE:state<=EVENT_WRITE;
-                EVENT_WRITE:begin
+                EVENT_PATCH:begin
+                    if(event_word==15)state<=EVENT_COMMIT;
+                    else event_word<=event_word+1'b1;
+                end
+                EVENT_COMMIT:begin
                     if(!voice_active[slot]) voice_count<=voice_count+1'b1;
                     voice_active[slot]<=1;
                     rank_order[0]<=slot;
@@ -390,9 +492,9 @@ module tdm_synth #(
                        (command[53:52]==2 && sub_note==VOICES-1)) command_active<=0;
                     state<=EVENT_READY;
                 end
-                VOICE_READ:state<=VOICE_LOAD;
-                VOICE_LOAD:begin context_work[HALF_BITS-1:0]<=context_q; state<=VOICE_HIGH_LOAD; end
-                VOICE_HIGH_LOAD:begin context_work[CONTEXT_BITS-1:HALF_BITS]<=context_q; state<=LOOK_BASE; end
+                VOICE_PRIME,VOICE_ACCEPT:if(read_valid && read_tag==15)begin
+                    context_work<=assembled_context[555:0];state<=LOOK_BASE;
+                end
                 LOOK_BASE:begin
                     lookup_phase<=phase;state<=LOOK_H2;
                     mul_a<={9'd0,env_advance};mul_b<={{8{env_delta[9]}},env_delta};
@@ -425,14 +527,13 @@ module tdm_synth #(
                     mul_a<={{17{unscaled_wave[15]}},unscaled_wave}; mul_b<={9'd0,gain};
                     state<=GAIN_WAIT;
                 end
-                GAIN_WAIT:state<=VOICE_LOW_WRITE;
-                VOICE_LOW_WRITE:state<=VOICE_WRITE;
-                VOICE_WRITE:begin
+                GAIN_WAIT:state<=VOICE_COMMIT;
+                VOICE_COMMIT:begin
                     mix<=next_mix;
                     if(voice_active[slot] && !n_active) voice_count<=voice_count-1'b1;
                     voice_active[slot]<=n_active;
-                    if(slot==VOICES-1) state<=PUBLISH;
-                    else begin slot<=slot+1'b1; state<=VOICE_READ; end
+                    if(slot==VOICES-1)state<=PUBLISH;
+                    else begin slot<=slot+1'b1;state<=VOICE_ACCEPT;end
                 end
                 PUBLISH:begin
                     sample<=(mix>22'sd32767) ? 16'sh7FFF :

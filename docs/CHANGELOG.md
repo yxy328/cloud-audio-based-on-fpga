@@ -2,7 +2,19 @@
 
 [首页](../README.md) · [文档索引](README.md) · [完整验证记录](../pcm5102_pam8403/VERIFICATION.md)
 
-按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。
+按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得；当前安装入口只有统一版 `FPGA-Music-Unified.apk`。
+
+## 2026-10-20 · App v1.13 / Code14，单固件统一版
+
+三个工程入口合并为 `pcm5102_pam8403/PCM5102_UNIFIED.gprj`，顶层 `top_unified`，内部实例化原 `src/top.v`。同一份 `PCM5102_UNIFIED.fs` 同时提供正常演奏、曲谱、LED 遥控、板上事件录制重放与 HC-05 原音质 PCM 回传，不再按功能分别烧录。合并前的工程模板、专用构建与打包脚本原样保留在[历史归档](../pcm5102_pam8403/archive/legacy_projects/README.md)，`tools/build.tcl` 默认只构建统一版。
+
+App 在同一界面提供三种录制：手机琴键本地录制（停止即回放、命名保存、导出 MIDI，不依赖蓝牙）、板上事件录制与重放、板上最长 30 秒原音质录音经 9600bps 回传 WAV（约需 54 分钟）。收到 `ERR,STATE` / `ERR,CMD` / `ERR,BUSY` 时显示拒绝原因并保留连接；新 APK 仍可连接旧固件，缺失功能会提示。操作见[统一录制说明](../pcm5102_pam8403/android_app/UNIFIED_RECORDING.md)。
+
+成功构建 `shared_p2r0` 实测 Logic 22210/23040、CLS 11381/11520、BSRAM 46/56、DSP 26.5/28；50 MHz（20 ns）约束下 Fmax 50.717 MHz，最差 Setup 裕量 0.283 ns，Setup/Hold 违例端点均为 0。逐时钟等价、吞吐与复查脚本见 [RAM 几何优化与统一版验证](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)。本轮未记录位流 UserCode；开发板烧录、手机蓝牙与板上 Flash 仍待真机验收。位流、APK、报告与 SHA256 见[统一版交付包](../pcm5102_pam8403/deliveries/UNIFIED_RECORDING_20261020/)。
+
+## 2026-10-20 · App v1.12 / Code13 路线2独立音频版
+
+独立工程 `PCM5102_AUDIO_TAKE.gprj` 经现有 9600bps HC-05 回传板上录制的原音质 PCM，手机校验后保存与播放 WAV；[路线2说明](../pcm5102_pam8403/HC05_AUDIO_ROUTE2.md) 记录带宽与限制，30 秒录音回传约需 54 分钟以上。APK 为 `dist/FPGA-HC05-Audio-Route2.apk`，实板蓝牙与播放待验收。该工程入口与打包脚本现已归档，功能并入 v1.13 统一版，无需再单独烧录音频固件。
 
 ## 2026-10-19 · App v1.11 / Code12，仅HC-05通信
 

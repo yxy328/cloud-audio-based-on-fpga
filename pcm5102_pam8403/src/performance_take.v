@@ -47,7 +47,10 @@ module performance_take #(
     reg [FW-1:0] initial_next;
     reg [AW:0] cursor;
     (* syn_ramstyle="block_ram" *) reg [47:0] events[0:DEPTH-1];
-    reg [47:0] ram_q,held;
+    reg [47:0] ram_q;
+    // Playback keeps the read address fixed until the current event is
+    // consumed, so the synchronous RAM output already holds the event.
+    wire [47:0] held=ram_q;
     // Freeze a complete control group before serializing it into RAM.
     // In particular, both halves of a 32-bit DDS increment must agree.
     reg [WORDS*16-1:0] capture_state;
@@ -88,7 +91,7 @@ module performance_take #(
     assign play_valid=playing && primed;
     always @(posedge clk)begin
         if(resetn && state==C_READ)begin
-            previous_q<=history[field];capture_word<=capture_state[field*16 +: 16];
+            previous_q<=history[field];capture_word<=capture_state[15:0];
         end
         if(resetn && state==C_SCAN)history[field]<=capture_word;
     end
@@ -162,8 +165,11 @@ module performance_take #(
             confirm<=0;elapsed_ms<=0;duration_ms<=0;count<=0;field<=0;snapshot_time<=0;
             stop_time<=0;last_play_time<=0;pending_pulses<=0;snapshot_pulses<=0;
             force_snapshot<=0;changed<=0;stopping<=0;final_scan<=0;deleting<=0;
-            primed<=0;has_music<=0;group_active<=0;initial_next<=0;cursor<=0;held<=0;nv_save<=0;nv_delete<=0;
+            primed<=0;has_music<=0;group_active<=0;initial_next<=0;cursor<=0;nv_save<=0;nv_delete<=0;
         end else begin
+            // Fields are visited in order. Shifting the frozen group avoids
+            // a 33-way, 16-bit selector while keeping each group atomic.
+            if(state==C_READ)capture_state<=capture_state>>16;
             kill<=0;play_pulses<=0;nv_save<=0;nv_delete<=0;
             if(recording || (playing && primed))begin
                 if(tick)begin ms_div<=0;elapsed_ms<=elapsed_ms+1'b1;end
@@ -234,7 +240,7 @@ module performance_take #(
                     state<=IDLE;
                 end
                 P_FETCH:if(cursor>=count)fail(3);else state<=P_FETCH2;
-                P_FETCH2:begin held<=ram_q;state<=P_DECODE;end
+                P_FETCH2:state<=P_DECODE;
                 // A group starts on an audio-frame edge, AFTER consumers
                 // sampled the prior complete group. At most WORDS fields
                 // plus FE take 3*(WORDS+1) clocks, well inside 1024 clocks.

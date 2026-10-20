@@ -17,7 +17,8 @@ module tb_audio_take_store;
         .session(session),.ack_valid(ack_valid),.ack_sequence(ack_sequence),.stream_data(stream_data),.stream_valid(stream_valid),
         .stream_last(stream_last),.stream_ready(stream_ready),.status(status),.error(error),.valid(valid),.prepared(prepared),
         .capturing(capturing),.overflow(overflow),.sample_count(sample_count),.stored_samples(stored_samples),.stored_generation(stored_generation),
-        .busy(busy),.cs_n(cs_n),.sck(sck),.mosi(mosi),.miso(miso));
+        .busy(busy),.cs_n(cs_n),.sck(sck),.mosi(mosi),.miso(miso),
+        .spi_request(),.spi_response(12'd0),.nor_request(),.nor_response(12'd0));
     audio_nor_model flash(.*);
     task check;
         input condition;input [255:0] message;
@@ -38,7 +39,10 @@ module tb_audio_take_store;
         for(n=0;n<8;n=n+1)begin
             sample<=16'h1100+n;@(posedge clk);sample_ce<=1;@(posedge clk);sample_ce<=0;repeat(3)@(posedge clk);
         end
-        @(posedge clk);stop<=1;@(posedge clk);stop<=0;wait(!busy);check(valid,"verified commit becomes valid");check(stored_samples==8,"stored sample count");check(!overflow,"no capture overflow");
+        @(posedge clk);stop<=1;@(posedge clk);stop<=0;wait(!busy);
+        // Allow the committed-slot combinational outputs to settle after
+        // the same clock edge releases busy.
+        @(negedge clk);check(valid,"verified commit becomes valid");check(stored_samples==8,"stored sample count");check(!overflow,"no capture overflow");
         @(posedge clk);send<=1;@(posedge clk);send<=0;repeat(4)@(posedge clk);ack_sequence<=16'hffff;ack_valid<=1;@(posedge clk);ack_valid<=0;
         wait(!busy);check(packets==3,"START DATA END packets acknowledged");
         check(received[0]=="F"&&received[1]=="A"&&received[2]=="R"&&received[3]=="1","FAR1 magic");
@@ -46,5 +50,5 @@ module tb_audio_take_store;
         check(received[16]==8'h80&&received[17]==8'hf0&&received[18]==8'hfa&&received[20]==8'hff&&received[21]==8'hff&&received[22]==16&&received[23]==1,"exact rational sample format");
         $display("PASS audio take store: %0d checks, %0d packets, %0d stream bytes",checks,packets,bytes);$finish;
     end
-    initial begin #40000000;$display("timeout state=%0d op=%0d spi=%0d busy=%b err=%0d prep=%b cap=%b samples=%0d wr=%0d rd=%0d",dut.state,dut.u_nor.state,dut.u_nor.u_spi.state,busy,error,prepared,capturing,sample_count,dut.wr_pointer,dut.rd_pointer);$fatal(1,"timeout");end
+    initial begin #40000000;$display("timeout state=%0d op=%0d spi=%0d busy=%b err=%0d prep=%b cap=%b samples=%0d wr=%0d rd=%0d",dut.state,dut.internal_nor.u_nor.state,dut.internal_nor.u_nor.internal_spi.u_spi.state,busy,error,prepared,capturing,sample_count,dut.wr_pointer,dut.rd_pointer);$fatal(1,"timeout");end
 endmodule

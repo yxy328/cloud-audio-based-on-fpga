@@ -1,8 +1,8 @@
 `timescale 1ns/1ps
 // Sparse-behavior W25Q64 model for the audio partition. Only bytes touched by
 // the recorder are initialized/changed; the two headers start erased.
-module audio_nor_model(input wire cs_n,sck,mosi,output reg miso=1);
-    localparam BASE=24'h100000,END_ADDR=24'h7fc000,SIZE=END_ADDR-BASE;
+module audio_nor_model #(parameter [23:0] END_ADDR=24'h7fc000)(input wire cs_n,sck,mosi,output reg miso=1);
+    localparam BASE=24'h100000,SIZE=END_ADDR-BASE;
     reg [7:0] bytes[0:SIZE-1];
     reg [7:0] rx=0,tx=8'hff,command=0;
     reg [23:0] address=0;

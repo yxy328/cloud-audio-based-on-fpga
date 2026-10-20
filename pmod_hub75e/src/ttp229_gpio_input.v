@@ -24,7 +24,8 @@ module ttp229_gpio_input #(
     localparam STARTUP_TICKS = STARTUP_US * (CLK_FREQ / 1_000_000);
     localparam VALID_TICKS = VALID_PULSE_US * (CLK_FREQ / 1_000_000);
     localparam VALID_WIDTH = (VALID_TICKS < 2) ? 1 : $clog2(VALID_TICKS);
-    reg [7:0] input_meta, input_sync;
+    // Keep the asynchronous input synchronizer as two real flip-flop stages.
+    (* syn_preserve=1, syn_srlstyle="registers" *) reg [7:0] input_meta, input_sync;
     reg [MS_WIDTH-1:0] ms_count;
     reg ms_tick;
     reg [31:0] startup_count;

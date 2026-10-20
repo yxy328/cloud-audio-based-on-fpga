@@ -27,6 +27,7 @@ public final class MainActivity extends Activity {
     // do not create its receiver, permission handler or worker at startup.
     private static final boolean USB_AUDIO_BACKUP_ENABLED=false;
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
+    private final ExecutorService phoneWorker=Executors.newSingleThreadExecutor();
     private final Handler main=new Handler(Looper.getMainLooper());
     private SppLink link;
     private BluetoothAdapter adapter;
@@ -90,7 +91,14 @@ public final class MainActivity extends Activity {
     private long audioLastProgress;
     private MediaPlayer audioPlayer;
     private int audioStartGeneration;
-    private static final int PICK_SCORE=10,EXPORT_LOG=11,PERMISSION=12,EXPORT_AUDIO=13,EXPORT_SCORE=14;
+    private PhonePiano phonePiano;
+    private PhoneTake phoneDraft;
+    private PhoneTakeStore phoneStore;
+    private TextView phoneInfo;
+    private boolean phoneRecording,phoneDirty,phoneBusy;
+    private long phoneStart;
+    private byte[] phoneExportMidi;
+    private static final int PICK_SCORE=10,EXPORT_LOG=11,PERMISSION=12,EXPORT_AUDIO=13,EXPORT_SCORE=14,EXPORT_PHONE=15;
     @Override public void onCreate(Bundle state){super.onCreate(state);
         if(state!=null){String id=state.getString("exportingScore");for(SongLibrary.Entry entry:SongLibrary.all())if(entry.id.equals(id)){exportingScore=entry;break;}}
         link=new SppLink(new SppLink.Listener(){
@@ -259,7 +267,7 @@ public final class MainActivity extends Activity {
         audioRow=row(box);button(audioRow,"播放手机 WAV",this::playAudio,false);button(audioRow,"导出 WAV",this::exportAudio,false);
         button(box,"读取录音状态",()->task(this::readHc05AudioStatus,"录音状态已读取"),true);
         text(box,"格式固定为 50MHz/1024 = 48.828125kHz、16位单声道，不降采样、不压缩。30秒约2.79MiB；9600bps并逐包ACK时约54分钟。断线、CRC错误或10秒无进度时手机文件明确标记为不完整。",12,MUTED);
-        box=card(content,"EVT","事件录制与板上重放（不是音频）","K13 回放、K14 停止、K15 录制、K16 保存；此区记录控制事件，不能导出 WAV，也不替代上面的真实 PCM 录音。");
+        box=card(content,"EVT","事件录制与板上重放（不是音频）","统一版由下面按钮控制事件录制，16 个实体键保留演奏。独立事件版还可用 K13～K16 控制。");
         takeInfo=text(box,"连接新版 FPGA 固件后读取录制状态。",13,MUTED);
         button(box,"开始录制",()->takeAction("TAKE_REC"),true,1);
         LinearLayout takeRow=row(box);
@@ -269,6 +277,7 @@ public final class MainActivity extends Activity {
         button(box,"删除已录制内容",()->takeAction("TAKE_DEL"),true,2);
         button(box,"读取录制状态",()->takeAction(null),true);
         text(box,"等待显示 Flash 保存并读回校验成功后才能断电。容量为 1024 条事件；连续音量或音高变化会较快用满。覆盖与删除均需再次确认。",12,MUTED);
+        buildPhoneRecording(content);
         logs=text(box,"接收窗口\n",12,Theme.PANEL_TEXT);logs.setTextIsSelectable(true);logs.setTypeface(Typeface.MONOSPACE);logs.setPadding(dp(14),dp(13),dp(14),dp(13));logs.setBackground(rounded(Theme.PANEL,Theme.R_PANEL));logs.setLineSpacing(dp(2),1);
         TextView footer=text(content,"FPGA MUSIC LAB  ·  孤独摇滚 · 让灵感在指尖发声",11,MUTED);footer.setGravity(Gravity.CENTER);footer.setLetterSpacing(0.06f);footer.setBackground(rounded(0x8cfff6fb,Theme.R_CHIP));
     }
@@ -464,10 +473,68 @@ public final class MainActivity extends Activity {
     }
     private void takeAction(String command){
         task(()->{
+            RecordingSupport.readEvents(link);
             if(command!=null)link.command(command,"OK");
-            TakeStatus value=TakeStatus.parse(link.command("TAKE?","TAKE,"));
+            TakeStatus value=RecordingSupport.readEvents(link);
             main.post(()->showTake(value));
         },"录制状态已读取");
+    }
+    private void buildPhoneRecording(LinearLayout content){
+        LinearLayout box=card(content,"PHONE","手机琴键与我的录音","页面琴键在手机本地发声。手机录制与上方板上 Flash 录制分别保存，无需连接蓝牙即可使用。");
+        phoneInfo=text(box,"开始手机录制 → 弹奏下方琴键 → 停止 → 回放 → 命名保存。录制前先松开琴键。",13,MUTED);
+        String[] names={"C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","A5","B5","C6","D6"};
+        for(int r=0;r<4;r++){LinearLayout keys=row(box);for(int c=0;c<4;c++){final int key=r*4+c;Button pad=button(keys,names[key],()->{},false,1);pad.setOnTouchListener((view,event)->{
+            int action=event.getActionMasked();if(action==MotionEvent.ACTION_DOWN){phoneKey(key,true);pad.setPressed(true);return true;}
+            if(action==MotionEvent.ACTION_UP||action==MotionEvent.ACTION_CANCEL){phoneKey(key,false);pad.setPressed(false);return true;}return true;});}}
+        button(box,"开始手机录制",this::startPhoneRecording,false,1);LinearLayout controls=row(box);
+        button(controls,"停止录制 / 回放",this::stopPhoneRecording,false);button(controls,"回放当前录制",()->{if(phoneRecording){alert("请先停止手机录制");return;}playPhoneTake(phoneDraft,"当前手机录制");},false,1);
+        button(box,"命名并保存录制",()->savePhoneRecording(null),false);button(box,"我的录音 · 回放 / 改名 / 删除",this::showPhoneLibrary,false);
+        button(box,"导出当前手机 MIDI",()->exportPhoneTake(phoneDraft,"手机演奏"),false);
+        text(box,"每次保存新增一份，数量由手机可用空间决定；每份最多10000个音符。记录音符、节奏、按键时长和力度，回放由手机合成。保存后关闭重开仍可在“我的录音”找到。",12,MUTED);
+    }
+    private PhonePiano phonePiano(){if(phonePiano==null)phonePiano=new PhonePiano();return phonePiano;}
+    private int phoneTime(){return (int)Math.min(Integer.MAX_VALUE,Math.max(0,SystemClock.uptimeMillis()-phoneStart));}
+    private void phoneKey(int key,boolean on){
+        try{if(on){PhonePiano piano=phonePiano();if(piano.replaying())piano.stop();piano.key(key,true);}else if(phonePiano!=null)phonePiano.key(key,false);
+            if(phoneRecording){int ms=phoneTime();if(on){if(!phoneDraft.down(key,100,ms)){stopPhoneRecording();alert("已达到10000个音符，本次手机录制已停止，可回放或保存");}else phoneDirty=true;}else phoneDraft.up(key,ms);}}
+        catch(Exception e){alert("手机琴键未完成："+e.getMessage());}
+    }
+    private void startPhoneRecording(){
+        if(phoneBusy){alert("手机录制文件正在处理，请稍候");return;}if(phoneRecording)return;
+        if(phoneDraft!=null&&phoneDirty&&phoneDraft.notes()>0){new AlertDialog.Builder(this).setTitle("保留当前手机录制？").setMessage("当前录制尚未保存。")
+            .setPositiveButton("保存后开始",(d,w)->savePhoneRecording(this::beginPhoneRecording)).setNegativeButton("放弃并开始",(d,w)->beginPhoneRecording()).setNeutralButton("取消",null).show();return;}
+        beginPhoneRecording();
+    }
+    private void beginPhoneRecording(){if(phonePiano!=null)phonePiano.stop();phoneDraft=new PhoneTake();phoneRecording=true;phoneDirty=false;phoneStart=SystemClock.uptimeMillis();getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);updatePhoneRecordingTime(phoneStart);}
+    private void updatePhoneRecordingTime(long start){if(!phoneRecording||start!=phoneStart)return;phoneInfo.setText(String.format(Locale.CHINA,"手机录制中 · %.1f秒 · %d音符",phoneTime()/1000.0,phoneDraft.notes()));main.postDelayed(()->updatePhoneRecordingTime(start),250);}
+    private void stopPhoneRecording(){
+        if(phonePiano!=null)phonePiano.stop();if(phoneRecording){phoneDraft.finish(phoneTime());phoneRecording=false;phoneDirty=phoneDraft.notes()>0;}
+        if(phoneDraft!=null)phoneInfo.setText(String.format(Locale.CHINA,"当前手机录制 · %d音符 · %.2f秒%s",phoneDraft.notes(),phoneDraft.duration()/1000.0,phoneDirty?" · 未保存":""));
+        if(!busy&&!link.audioActive())getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+    private void playPhoneTake(PhoneTake take,String name){
+        if(take==null||!take.finished()||take.notes()==0){alert("请先完成一段手机录制，或从“我的录音”选择");return;}
+        try{if(audioPlayer!=null){audioPlayer.release();audioPlayer=null;}phonePiano().play(take,()->main.post(()->phoneInfo.setText("手机回放完成："+name)));phoneInfo.setText("手机回放："+name);}
+        catch(Exception e){alert("手机回放失败："+e.getMessage());}
+    }
+    private PhoneTakeStore phoneStore()throws IOException {if(phoneStore==null)phoneStore=new PhoneTakeStore(new File(getFilesDir(),"phone-recordings"));return phoneStore;}
+    private void phoneWork(Work action,String done){if(phoneBusy){alert("手机录制文件正在处理，请稍候");return;}phoneBusy=true;phoneInfo.setText("正在处理手机录制…");phoneWorker.execute(()->{try{action.run();main.post(()->{phoneBusy=false;if(!phoneRecording&&(phonePiano==null||!phonePiano.replaying()))phoneInfo.setText(done);});}catch(Exception e){main.post(()->{phoneBusy=false;phoneInfo.setText("未完成："+e.getMessage()+"；当前录制仍保留");alert(e.getMessage());});}});}
+    private void savePhoneRecording(Runnable after){
+        if(phoneRecording||phoneDraft==null||phoneDraft.notes()==0){alert("请先停止手机录制，并至少录入一个音符");return;}final PhoneTake take=phoneDraft;
+        EditText name=new EditText(this);name.setSingleLine(true);name.setText("手机演奏 "+new java.text.SimpleDateFormat("MM-dd HH:mm:ss",Locale.CHINA).format(new Date()));
+        new AlertDialog.Builder(this).setTitle("保存手机录制").setView(name).setPositiveButton("新增保存",(d,w)->{final String title=name.getText().toString();phoneWork(()->{phoneStore().save(title,take);main.post(()->{if(phoneDraft==take)phoneDirty=false;if(after!=null)after.run();});},"手机录制已新增保存，可在“我的录音”查看");}).setNegativeButton("取消",null).show();
+    }
+    private void showPhoneLibrary(){phoneWork(()->{List<PhoneTakeStore.Entry> entries=phoneStore().list();main.post(()->{if(entries.isEmpty()){alert("暂无已保存的手机录制");return;}String[] labels=new String[entries.size()];for(int n=0;n<labels.length;n++)labels[n]=entries.get(n).toString();new AlertDialog.Builder(this).setTitle("我的录音 · "+entries.size()+"份").setItems(labels,(d,n)->phoneEntryActions(entries.get(n))).setNegativeButton("关闭",null).show();});},"已读取手机录制列表");}
+    private void phoneEntryActions(PhoneTakeStore.Entry entry){new AlertDialog.Builder(this).setTitle(entry.name).setItems(new String[]{"手机回放","修改名称","导出 MIDI","删除"},(d,choice)->{
+        if(choice==0)phoneWork(()->{PhoneTake take=phoneStore().load(entry);main.post(()->playPhoneTake(take,entry.name));},"已载入手机录制："+entry.name);
+        else if(choice==1){EditText name=new EditText(this);name.setSingleLine(true);name.setText(entry.name);new AlertDialog.Builder(this).setTitle("修改录制名称").setView(name).setPositiveButton("保存名称",(a,b)->{final String title=name.getText().toString();phoneWork(()->phoneStore().rename(entry,title),"录制名称已更新");}).setNegativeButton("取消",null).show();}
+        else if(choice==2)phoneWork(()->{PhoneTake take=phoneStore().load(entry);main.post(()->exportPhoneTake(take,entry.name));},"已载入待导出的手机录制");
+        else new AlertDialog.Builder(this).setTitle("删除这份手机录制？").setMessage(entry.name).setPositiveButton("确认删除",(a,b)->phoneWork(()->phoneStore().delete(entry),"所选手机录制已删除")).setNegativeButton("取消",null).show();
+    }).show();}
+    private void exportPhoneTake(PhoneTake take,String name){
+        if(take==null||!take.finished()||take.notes()==0){alert("请先完成手机录制");return;}
+        try{phoneExportMidi=take.midi();Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType("audio/midi");intent.putExtra(Intent.EXTRA_TITLE,name.replaceAll("[\\\\/:*?\"<>|]","_")+".mid");startActivityForResult(intent,EXPORT_PHONE);}
+        catch(Exception e){alert("MIDI 导出未开始："+e.getMessage());}
     }
     private void showTake(TakeStatus value){
         takeInfo.setText(value.description());
@@ -546,9 +613,9 @@ public final class MainActivity extends Activity {
             else for(int i=0;i<paired.size();i++)if(safeName(paired.get(i)).toUpperCase(Locale.ROOT).contains("HC")){devices.setSelection(i);break;}
         }catch(SecurityException e){alert("请允许附近设备权限后刷新");}}
     private String safeName(BluetoothDevice d){String n=d.getName();return n==null?"未命名设备":n;}
-    private void connectSelected(){if(recording||recordDraining){alert("请先停止录制并等待 REC_END，再重新连接；也可点断开以中断此次录制。");return;}int selected=devices.getSelectedItemPosition();if(selected<0||selected>=paired.size()){alert("请先刷新并选择已配对 HC-05");return;}BluetoothDevice d=paired.get(selected);forgetBendConnection();forgetControls();mapping=null;mapInfo.setText("连接中，尚未读取键位");task(()->{link.connect(d);link.command("PING","PONG");readMapping();readControls();},"HC-05 已连接，已读取键位与演奏模式");}
+    private void connectSelected(){if(recording||recordDraining){alert("请先停止录制并等待 REC_END，再重新连接；也可点断开以中断此次录制。");return;}int selected=devices.getSelectedItemPosition();if(selected<0||selected>=paired.size()){alert("请先刷新并选择已配对 HC-05");return;}BluetoothDevice d=paired.get(selected);forgetBendConnection();forgetControls();mapping=null;mapInfo.setText("连接中，尚未读取键位");task(()->{link.connect(d);link.command("PING","PONG");readMapping();readControls();RecordingSupport support=RecordingSupport.probe(link);if(support.audio!=null){audioTakeActive=support.audio.busy&&(support.audio.state==4||support.audio.state==6);audioStartGeneration=support.audio.generation;}else audioTakeActive=false;main.post(()->{audioInfo.setText(support.audio==null?RecordingSupport.AUDIO_UNAVAILABLE:support.audio.description());takeInfo.setText(support.events==null?RecordingSupport.EVENTS_UNAVAILABLE:support.events.description());});},"HC-05 已连接，已读取键位、演奏模式和录制功能");}
     private void setStatus(String s){status.setText(s);}
-    private void setBusy(boolean value){busy=value;for(Button b:lockedButtons)b.setEnabled(!value);libraryTier.setEnabled(!value);libraryTracks.setEnabled(!value);updateXyControls();getWindow().setFlags(value||link.audioActive()?WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON:0,WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);}
+    private void setBusy(boolean value){busy=value;for(Button b:lockedButtons)b.setEnabled(!value);libraryTier.setEnabled(!value);libraryTracks.setEnabled(!value);updateXyControls();getWindow().setFlags(value||link.audioActive()||phoneRecording?WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON:0,WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);}
     private interface Work {void run()throws Exception;}
     private void task(Work work,String done){if(busy)return;setBusy(true);cancelled=false;setStatus("处理中…");worker.execute(()->{try{work.run();main.post(()->{setBusy(false);if(!cancelled)setStatus(done);});}catch(Exception e){main.post(()->{setBusy(false);if(!cancelled){if(!link.connected()){mapping=null;forgetControls();recordingInterrupted();mapInfo.setText("连接已关闭，请重新连接后重试");}setStatus("未完成："+e.getMessage());alert(e.getMessage());}});}});}
     private void recordingInterrupted(){if(recording||recordDraining){recordingOverflow=true;recordingCompleted=false;}recording=false;recordDraining=false;}
@@ -645,10 +712,13 @@ public final class MainActivity extends Activity {
     }
     private void exportLog(){if(recordingText.length()==0){alert("暂无日志，请先 REC_START 记录演奏事件");return;}Intent i=new Intent(Intent.ACTION_CREATE_DOCUMENT);i.addCategory(Intent.CATEGORY_OPENABLE);i.setType("text/plain");i.putExtra(Intent.EXTRA_TITLE,"fpga-performance-"+System.currentTimeMillis()+".txt");startActivityForResult(i,EXPORT_LOG);}
     private AudioTakeStatus readHc05AudioStatus()throws Exception {
-        AudioTakeStatus state=AudioTakeStatus.parse(link.command("AREC?","AREC"));
+        AudioTakeStatus state=RecordingSupport.readAudio(link);
         main.post(()->audioInfo.setText(state.description()));return state;
     }
     private void prepareHc05Audio(){task(()->{
+        AudioTakeStatus before=readHc05AudioStatus();
+        if(before.prepared&&!before.busy&&before.error==0)return;
+        if(before.busy)throw new IOException("板上录音正在忙，请稍后读取状态："+before.description());
         link.command("AREC_PREP","OK");main.post(()->audioInfo.setText("正在擦除备用槽；上一条有效录音保持不变。典型约30～60秒，器件最坏情况可能更久。"));
         for(int n=0;n<360;n++){Thread.sleep(1000);AudioTakeStatus s=readHc05AudioStatus();if(s.error!=0)throw new IOException(s.description());if(s.prepared)return;if(!s.busy)throw new IOException("Flash准备失败："+s.description());}
         throw new IOException("Flash准备超过6分钟，请检查供电、JEDEC型号和状态码");
@@ -666,7 +736,7 @@ public final class MainActivity extends Activity {
         final int session=new java.security.SecureRandom().nextInt(65536),generation=++audioGeneration;
         final File file=new File(getFilesDir(),"fpga-hc05-"+System.currentTimeMillis()+".INCOMPLETE.wav");
         task(()->{AudioRecording take=new AudioRecording(file,session);hc05Audio=take;
-            try{stopLedPreviewForAudio();audioTakeActive=true;link.downloadAudio(take);audioLastProgress=SystemClock.uptimeMillis();
+            try{AudioTakeStatus available=readHc05AudioStatus();if(available.busy||!available.valid)throw new IOException("请先完成板上PCM录制并校验："+available.description());stopLedPreviewForAudio();audioTakeActive=true;link.downloadAudio(take);audioLastProgress=SystemClock.uptimeMillis();
                 main.post(()->{getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);audioInfo.setText("等待FAR1开始包；随后每包CRC并ACK。请保持App前台。 ");watchHc05Audio(generation);});
             }catch(Exception e){take.close();hc05Audio=null;audioTakeActive=false;throw e;}
         },"HC-05音频回传已启动");
@@ -744,19 +814,20 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onSaveInstanceState(Bundle state){super.onSaveInstanceState(state);if(exportingScore!=null)state.putString("exportingScore",exportingScore.id);}
     @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(appearance.onActivityResult(request,result,data))return;if(result!=RESULT_OK||data==null||data.getData()==null){if(request==EXPORT_SCORE)exportingScore=null;return;}Uri uri=data.getData();
-        if(request==PICK_SCORE){String display="导入曲谱";try(Cursor c=getContentResolver().query(uri,new String[]{OpenableColumns.DISPLAY_NAME},null,null,null)){if(c!=null&&c.moveToFirst())display=c.getString(0);}catch(Exception ignored){}final String name=display;
+        if(request==EXPORT_PHONE){final byte[] midi=phoneExportMidi;if(midi==null){alert("请重新选择手机录制后导出");return;}phoneWork(()->{try(OutputStream out=getContentResolver().openOutputStream(uri)){if(out==null)throw new IOException("无法创建 MIDI 文件");out.write(midi);}},"手机 MIDI 已导出");
+        }else if(request==PICK_SCORE){String display="导入曲谱";try(Cursor c=getContentResolver().query(uri,new String[]{OpenableColumns.DISPLAY_NAME},null,null,null)){if(c!=null&&c.moveToFirst())display=c.getString(0);}catch(Exception ignored){}final String name=display;
             task(()->{byte[] bytes;try(InputStream in=getContentResolver().openInputStream(uri);ByteArrayOutputStream out=new ByteArrayOutputStream()){if(in==null)throw new IOException("无法打开文件");byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1){if(out.size()+n>2*1024*1024)throw new IOException("文件超过 2MB");out.write(b,0,n);}bytes=out.toByteArray();}SongCodec.Song parsed=SongCodec.parse(name,bytes);main.post(()->{song=parsed;showSong();});},"曲谱已导入；下载前会核对实际键位");
         }else if(request==EXPORT_SCORE){final SongLibrary.Entry selected=exportingScore;exportingScore=null;if(selected==null)return;
             task(()->{try(OutputStream out=getContentResolver().openOutputStream(uri)){if(out==null)throw new IOException("无法创建曲谱文件");out.write(selected.csv());}},"《"+selected.title+"》已保存到所选文件夹，可通过 CSV 导入入口再次使用");
         }else if(request==EXPORT_LOG){final byte[] bytes=("# FPGA performance events; audio is not recorded\n# complete="+(recordingCompleted&&!recordingOverflow)+"\n"+recordingText).getBytes(StandardCharsets.UTF_8);task(()->{try(OutputStream out=getContentResolver().openOutputStream(uri)){if(out==null)throw new IOException("无法创建日志文件");out.write(bytes);}},"事件日志已导出");
         }else if(request==EXPORT_AUDIO){final File source=lastAudioFile;task(()->{
             try(InputStream in=new FileInputStream(source);OutputStream out=getContentResolver().openOutputStream(uri)){
-                if(out==null)throw new IOException("无法创建WAV文件");byte[] buffer=new byte[65536];int n;
+                if(out==null)throw new IOException("无法创建导出文件");byte[] buffer=new byte[65536];int n;
                 while((n=in.read(buffer))!=-1)out.write(buffer,0,n);
             }
         },"录音WAV已导出");}
     }
     private void alert(String message){new AlertDialog.Builder(this).setTitle("提示").setMessage(message).setPositiveButton("知道了",null).show();}
-    @Override protected void onStop(){if(ledPreviewRunning)stopLedPreview("App 已离开前台，预览已停止。");super.onStop();}
-    @Override protected void onDestroy(){stopLedPreview("预览已停止。");voiceBend.clearPending();if(audioUsb!=null)audioUsb.destroy();if(audioPlayer!=null)audioPlayer.release();main.removeCallbacksAndMessages(null);cancelled=true;link.close();worker.shutdownNow();if(appearance!=null)appearance.close();super.onDestroy();}
+    @Override protected void onStop(){if(ledPreviewRunning)stopLedPreview("App 已离开前台，预览已停止。");if(phoneRecording)stopPhoneRecording();if(phonePiano!=null){phonePiano.close();phonePiano=null;}super.onStop();}
+    @Override protected void onDestroy(){stopLedPreview("预览已停止。");voiceBend.clearPending();if(audioUsb!=null)audioUsb.destroy();if(audioPlayer!=null)audioPlayer.release();if(phonePiano!=null)phonePiano.close();main.removeCallbacksAndMessages(null);cancelled=true;link.close();worker.shutdownNow();phoneWorker.shutdownNow();if(appearance!=null)appearance.close();super.onDestroy();}
 }

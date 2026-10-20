@@ -59,7 +59,11 @@ public final class SppLinkTest {
             try{controlAck.get(100,TimeUnit.MILLISECONDS);}catch(TimeoutException expected){stillWaiting=true;}
             yes(stillWaiting);a.feed("OK\r\n");yes(controlAck.get(1,TimeUnit.SECONDS).equals("OK"));controlThread.shutdownNow();
         }
-        a.onCommand=c->a.feed("ERR,MAP\r\n");fails(()->link.command("SONG_END","OK"),"ERR,MAP");yes(!link.connected());
+        for(String error:new String[]{"ERR,STATE","ERR,CMD","ERR,BUSY","ERR,RANGE","ERR,MISSING","ERR,MAP","ERR,KEY","ERR,NOTE"}){
+            a.onCommand=c->a.feed(error+"\r\n");fails(()->link.command("AREC_PREP","OK"),error);yes(link.connected());
+            a.onCommand=c->a.feed("PONG\r\n");yes(link.command("PING","PONG").equals("PONG"));
+        }
+        a.onCommand=c->a.feed("ERR,UART\r\n");fails(()->link.command("PING","PONG"),"ERR,UART");yes(!link.connected());
         BluetoothSocket b=new BluetoothSocket();link.connect(new BluetoothDevice(b));b.onCommand=c->b.eof();fails(()->link.command("PING","PONG"),"断开");yes(lost.await(1,TimeUnit.SECONDS));
         // A user cancel wakes the waiting command immediately and closes the socket.
         BluetoothSocket c=new BluetoothSocket();CountDownLatch sent=new CountDownLatch(1);c.onCommand=x->sent.countDown();link.connect(new BluetoothDevice(c));ExecutorService thread=Executors.newSingleThreadExecutor();
@@ -68,7 +72,7 @@ public final class SppLinkTest {
         BluetoothSocket d=new BluetoothSocket();link.connect(new BluetoothDevice(d));long begin=System.nanoTime();fails(()->link.command("SONG_CHORD,0,1,500","OK"),"超时");yes(!link.connected());yes(TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-begin)>=3900);
         BluetoothSocket e=new BluetoothSocket();e.onCommand=x->e.feed("OK\r\n");link.connect(new BluetoothDevice(e));d.feed("OK\r\n");yes(link.command("SONG_BEGIN,1","OK").equals("OK"));link.close();
         BluetoothSocket oldFirmware=new BluetoothSocket();oldFirmware.onCommand=x->oldFirmware.feed("ERR,CMD\r\n");link.connect(new BluetoothDevice(oldFirmware));
-        fails(()->link.command("XY,2,0","OK"),"ERR,CMD");yes(!link.connected());
+        fails(()->link.command("XY,2,0","OK"),"ERR,CMD");yes(link.connected());link.close();
         System.out.println("PASS SppLink: "+checks+" assertions");
     }
 }

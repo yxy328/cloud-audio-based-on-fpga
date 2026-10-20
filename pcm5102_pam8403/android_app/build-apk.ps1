@@ -1,6 +1,6 @@
 param(
     [string]$SdkPath = (Join-Path $PSScriptRoot 'tools\sdk'),
-    [string]$OutputApk = 'dist\FPGA-HC05-Audio-Route2.apk'
+    [string]$OutputApk = 'dist\FPGA-Music-Unified.apk'
 )
 $ErrorActionPreference = 'Stop'
 Push-Location $PSScriptRoot

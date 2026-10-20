@@ -1,5 +1,9 @@
 # 本地验证记录
 
+## 当前入口：统一版
+
+主目录唯一工程为 `PCM5102_UNIFIED.gprj` / `top_unified`，默认 `gw_sh tools/build.tcl` 输出 `PCM5102_UNIFIED.fs`。统一版验证结果见 [RAM_GEOMETRY_VERIFICATION.md](RAM_GEOMETRY_VERIFICATION.md)，录制操作见 [UNIFIED_RECORDING.md](android_app/UNIFIED_RECORDING.md)。下文是按日期保留的历史验证记录，其中旧工程和旧构建脚本现已[归档](archive/legacy_projects/README.md)。
+
 ## 2026-10-20：独立 HC-05 Flash PCM 音频目标
 
 新增 [路线2说明](HC05_AUDIO_ROUTE2.md)：原音质最多30秒，9600bps停止后回传约54分钟以上。独立工程为 `PCM5102_AUDIO_TAKE.gprj`；最终资源/时序及验证日志以交付包固定快照为准，不沿用默认HC-05或EVENT_TAKE资源数字。RTL、JVM/App构建、布局布线与实板状态分别记录；未自动烧录，实际Flash、手机SPP和播放仍待上板验收。

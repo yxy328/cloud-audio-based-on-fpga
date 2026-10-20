@@ -2,7 +2,9 @@
 
 基于 **Tang Primer 25K / GW5A-25A** 的实时音频合成工程：触摸、压力、红外和手势输入驱动 FPGA 合成声音，经 PCM5102 + PAM8403 输出；安卓 App 通过 HC-05 下载音符曲谱、调整音色和演奏参数，64×64 HUB75E 屏幕提供曲谱与音频可视化。
 
-**当前主工程：[pcm5102_pam8403/PCM5102_PAM8403.gprj](pcm5102_pam8403/PCM5102_PAM8403.gprj)**，顶层 `top`，器件 `GW5A-LV25MG121NC1/I0`。请克隆整个仓库，主工程依赖 `pmod_hub75e/` 中的共享触摸模块。
+**当前唯一主工程：[pcm5102_pam8403/PCM5102_UNIFIED.gprj](pcm5102_pam8403/PCM5102_UNIFIED.gprj)**，顶层 `top_unified`，器件 `GW5A-LV25MG121NC1/I0`。请克隆整个仓库，主工程依赖 `pmod_hub75e/` 中的共享触摸模块。
+
+当前使用 [v1.13 统一版 APK](pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk)，同一位流包含正常演奏、曲谱、LED 遥控、事件录制重放及 PCM 录音回传。下载 [统一版交付包](pcm5102_pam8403/deliveries/UNIFIED_RECORDING_20261020/)，操作见 [统一录制说明](pcm5102_pam8403/android_app/UNIFIED_RECORDING.md)。旧工程与专用构建脚本已[归档](pcm5102_pam8403/archive/legacy_projects/README.md)；下文按日期保留的旧版功能、APK 和位流说明作为历史记录。
 
 ## 从这里开始
 
@@ -12,23 +14,24 @@
 | 查找全部功能文档 | [文档索引](docs/README.md) |
 | 接线、板上操作与音频参数 | [主工程说明](pcm5102_pam8403/README.md) |
 | 完整引脚、赛题要求和现场验收 | [引脚与功能验收表](pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md) |
-| 手机安装和曲谱下载 | [安卓 App 说明](pcm5102_pam8403/android_app/README.md) · [HC-05通信版 APK](pcm5102_pam8403/android_app/dist/FPGA-Score-hc05-only.apk) |
-| 当前构建、位流标识和验证范围 | [验证记录](pcm5102_pam8403/VERIFICATION.md) |
+| 手机安装和曲谱下载 | [统一版 App 说明](pcm5102_pam8403/android_app/UNIFIED_RECORDING.md) · [统一版 APK](pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk) |
+| 当前构建、位流标识和验证范围 | [统一版验证结果](pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md) · [历史验证记录](pcm5102_pam8403/VERIFICATION.md) |
 | 更新代码到 Gitee | [仓库维护](docs/REPOSITORY.md) |
 | 版本变化与升级要点 | [版本记录](docs/CHANGELOG.md) |
 
-## 当前功能（2026-10-19）
+## 当前功能（2026-10-20）
 
 - **新增迁移**：[8/16 键切换、16 键和弦、滑杆标定与四种用途、回声/合唱、延音、总音量和八种红外/手势音色](pcm5102_pam8403/REFERENCE_MIGRATION.md)。
 - **现场演奏**：16 路独立触摸 DDS/ADSR（默认 8 键接口）、FSR 压力音量或音高控制、八路红外与 APDS-9960 共享 32 声部 TDM 引擎，以及 Karplus–Strong 单弦吉他。
 - **手机控制**：键位映射、七声部独立滑音、触摸与红外/手势独立运行时 ADSR、音色/颤音设置和演奏事件日志。
-- **当前通信仅HC-05**：曲谱、参数、LED控制/低速预览及相应固件支持的事件/状态通信均走蓝牙。USB/RTS/OTG[高速音频方案保留备用，当前停用](pcm5102_pam8403/AUDIO_RECORDING.md)，不通过现有9600bps链路传完整PCM/WAV。
+- **当前通信仅HC-05**：曲谱、参数、LED控制/低速预览及相应固件支持的事件/状态通信均走蓝牙。USB/RTS/OTG[高速音频方案保留备用，当前停用](pcm5102_pam8403/AUDIO_RECORDING.md)，原音质 PCM 改由统一固件经现有 9600bps 链路分帧回传。
+- **单固件三种录制**：手机页面琴键录制（停止即回放、命名保存、导出 MIDI，不依赖蓝牙）、板上事件录制与重放、板上最长 30 秒原音质录音（48828.125 Hz/16 位单声道）经 HC-05 回传 WAV，9600bps 下约需 54 分钟。操作与限制见[统一录制说明](pcm5102_pam8403/android_app/UNIFIED_RECORDING.md)。
 - **曲谱**：导入 CSV/MIDI，经经典蓝牙 SPP 下载音符、和弦、休止和时长。`PLAY` / S1 启动无声演奏指引；`AUDITION` 显式启动 FPGA 实时合成试听（自 App v1.3 起支持）。曲谱仍限前七键，16键演奏不会扩大曲谱格式。
 - **64×64 LED，无需 OLED**：空闲总览显示 8/16 键、延音、音色、音量、滑杆/ADC、音效与红外；播放时自动显示曲谱。保留实际混音波形、参考/混音 XY、FFT。S2 长按约 1 秒切页；XY 页短按选图，其他页短按重启曲谱。
 
 曲谱、参数保存在 FPGA RAM，断电需重新设置。新增 [v1.8 分级曲库安装包](pcm5102_pam8403/android_app/dist/FPGA-Score-library.apk)，青铜、白银、黄金各三首，可离线选曲并匹配七键下载，保留文件夹 CSV/MIDI 导入及曲库 CSV 导出；来源、七键改编和验证范围见[曲库说明](pcm5102_pam8403/android_app/SONG_LIBRARY.md)。尚未接入在线更新服务。默认上电不自动演奏，音频由 FPGA 逐样本生成。
 
-当前使用 **v1.11 / Code12 HC-05通信版**，关闭USB初始化与录音入口，保留当前曲库、LED及演奏控制；此前v1.6、v1.8、v1.9和v1.10安装包保留。LED切页/预览需要[v1.10对应的配套位流](pcm5102_pam8403/LED_REMOTE.md)，板上事件录制回放另查[开发说明](pcm5102_pam8403/RECORD_PLAYBACK.md)。各版本构建、SHA256和实板验证边界见[验证记录](pcm5102_pam8403/VERIFICATION.md)。
+当前使用 **v1.13 / Code14 统一版**，配套统一位流 `PCM5102_UNIFIED.fs`；正常演奏、曲谱、LED 遥控/预览、板上事件录制重放与 HC-05 原音质回传合并在同一固件中，无需按功能换烧。v1.6～v1.12 的安装包与说明保留为历史记录，其 `dist/` 链接对应的旧安装包可从 Gitee 提交记录取得；当前安装入口只有统一版 [FPGA-Music-Unified.apk](pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk)。LED 切页/预览功能页见[v1.10 说明](pcm5102_pam8403/LED_REMOTE.md)，事件录制回放开发说明见[录制回放](pcm5102_pam8403/RECORD_PLAYBACK.md)。统一版资源与时序结果见[RAM 几何优化与统一版验证](pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)，各版本构建、SHA256和实板验证边界见[验证记录](pcm5102_pam8403/VERIFICATION.md)。
 
 ![64×64 LED 状态总览：数字仿真预览](pcm5102_pam8403/assets/status16.png)
 
@@ -57,4 +60,4 @@ git clone https://gitee.com/yxy0818/cloud-audio-based-on-fpga.git
 cd cloud-audio-based-on-fpga
 ```
 
-仓库保存源码、约束、工程配置、测试、文档和 App 安装包。主工程位流、编译缓存、SDK、工具安装包及重复备份不随源码上传，需要按 [快速上手](docs/QUICK_START.md) 在本机生成。
+仓库保存源码、约束、工程配置、测试、文档、App 安装包，以及 `pcm5102_pam8403/deliveries/` 中已验证的交付包（位流、APK 与报告）。日常构建输出 `impl/`、仿真日志 `sim/build/`、SDK、工具安装包及重复压缩包不入库，需按 [快速上手](docs/QUICK_START.md) 在本机生成；重新构建的指纹可能与交付包不同。

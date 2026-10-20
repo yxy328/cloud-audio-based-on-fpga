@@ -8,7 +8,7 @@ module tb_take_nor_store;
     wire ram_we;wire [5:0] ram_address;wire [47:0] ram_data;reg [47:0] ram_q;
     wire cs_n,sck,mosi,miso;
     reg [47:0] memory[0:63];reg [47:0] reference[0:63];
-    take_nor_store #(.DEPTH(64)) dut(.*);
+    take_nor_store #(.DEPTH(64)) dut(.spi_request(),.spi_response(12'd0),.nor_request(),.nor_response(12'd0),.*);
     take_nor_model flash(.*);
     always @(posedge clk)begin
         ram_q<=memory[ram_address];

@@ -9,6 +9,13 @@ import java.util.concurrent.*;
 
 /** Classic Bluetooth SPP. One command in flight; a timeout closes the session. */
 public final class SppLink implements Closeable {
+    /** A complete device refusal ends this command without losing the SPP session. */
+    public static final class CommandRejectedException extends IOException {
+        public final String command,response;
+        private CommandRejectedException(String command,String response){
+            super("设备返回 "+response);this.command=command;this.response=response;
+        }
+    }
     public interface Listener {
         void line(String line);void disconnected(String reason);
         void audioProgress(AudioRecording recording);void audioFinished(AudioRecording recording);
@@ -90,13 +97,16 @@ public final class SppLink implements Closeable {
             for(;;){long remaining=deadline-System.nanoTime();if(remaining<=0)throw new IOException("等待回复超时；请重新连接并重新下载，原有效曲谱保留");
                 String response=responses.poll(remaining,TimeUnit.NANOSECONDS);if(response==null)continue;
                 if(response.equals("!DISCONNECTED"))throw new IOException("蓝牙已断开；重新连接后可从头重试下载");
+                if(response.matches("ERR,(STATE|CMD|BUSY|RANGE|MISSING|MAP|KEY|NOTE)"))
+                    throw new CommandRejectedException(command,response);
                 if(response.startsWith("ERR,"))throw new IOException("设备返回 "+response);
                 String type=expected.endsWith(",")?expected.substring(0,expected.length()-1):expected;
                 if((type.equals("MAP")||type.equals("CTRL")||type.equals("ADC")||type.equals("CAL")||type.equals("SERIAL")||type.equals("AREC")||type.equals("VIS")||type.equals("V")||type.equals("TAKE"))&&response.startsWith(type+","))return response;
                 if(expected.equals("OK")&&(response.equals("OK")||response.startsWith("OK,")))return response;
                 if(expected.equals("PONG")&&response.equals("PONG"))return response;
             }
-        }catch(IOException|InterruptedException e){close();throw e;}finally{waiting=false;}
+        }catch(CommandRejectedException e){throw e;}
+        catch(IOException|InterruptedException e){close();throw e;}finally{waiting=false;}
     }
     @Override public void close(){waiting=false;BluetoothSocket s=socket;socket=null;AudioRecording audio=audioRecording;
         if(s!=null)try{s.close();}catch(IOException ignored){}if(audio!=null)finishAudio(audio);

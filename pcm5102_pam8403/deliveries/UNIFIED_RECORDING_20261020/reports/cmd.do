@@ -1,0 +1,21 @@
+-d E:\130_FPGA_Verilog\TP-25K\pmod_hub75e_TTP229\pcm5102_pam8403\sim\build\unified\shared_p2r0\pcm5102_pam8403\impl\gwsynthesis\PCM5102_UNIFIED.vg
+-p GW5A-25A-MBGA121N-1
+-pn GW5A-LV25MG121NC1/I0
+-cst E:\130_FPGA_Verilog\TP-25K\pmod_hub75e_TTP229\pcm5102_pam8403\sim\build\unified\shared_p2r0\pcm5102_pam8403\src\PCM5102_EVENT_TAKE.cst
+-cfg E:\130_FPGA_Verilog\TP-25K\pmod_hub75e_TTP229\pcm5102_pam8403\sim\build\unified\shared_p2r0\pcm5102_pam8403\impl\pnr\device.cfg
+-sdc E:\130_FPGA_Verilog\TP-25K\pmod_hub75e_TTP229\pcm5102_pam8403\sim\build\unified\shared_p2r0\pcm5102_pam8403\src\PCM5102_UNIFIED.sdc
+-bit
+-tr
+-ph
+-o
+-init_all
+-timing
+-cst_error
+-convert_sdp32_36_to_sdp16_18
+-place_option 2
+-route_option 0
+-clock_route_order 0
+-correct_hold 1
+-route_maxfan 23
+-global_freq 50.000
+-enable_dsrm 1

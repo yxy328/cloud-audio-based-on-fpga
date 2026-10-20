@@ -99,7 +99,7 @@ module apds9960_ctrl #(
         S_RD_GCONF2 = 5'd22, S_WAIT_GCONF2 = 5'd23,
         S_RD_GPULSE = 5'd24, S_WAIT_GPULSE = 5'd25;
 
-    reg [4:0]  state;
+    (* syn_encoding="onehot" *) reg [4:0]  state;
     reg [23:0] delay_cnt;
     reg [7:0]  gstatus_reg, gflvl_reg;
     reg [7:0]  batch_peak;

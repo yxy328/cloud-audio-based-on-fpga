@@ -2,6 +2,8 @@
 
 [仓库首页](../README.md) · [文档索引](../docs/README.md) · [快速上手](../docs/QUICK_START.md) · [完整接线与验收](PIN_FUNCTION_REQUIREMENTS.md)
 
+**当前唯一工程：[PCM5102_UNIFIED.gprj](PCM5102_UNIFIED.gprj)，顶层 `top_unified`。** 同一位流包含正常演奏、曲谱、LED 遥控、事件录制重放与 PCM 录音回传。安装 [v1.13 统一版 APK](android_app/dist/FPGA-Music-Unified.apk)，操作见[统一录制说明](android_app/UNIFIED_RECORDING.md)，已验证位流与源码见[交付包](deliveries/UNIFIED_RECORDING_20261020/)。合并前的三个工程及专用构建脚本已[归档](archive/legacy_projects/README.md)。下文的旧版发布说明保留为历史记录，以本段和统一版说明为准。
+
 最新 [HC-05 资源优化](HC05_RESOURCE_OPTIMIZATION.md)：默认综合移除备用 USB 录音电路，现有 53 个命令共享译码，曲谱计时缩位；同条件综合 Logic 减少 7.91%，独立位流 `PCM5102_HC05_ONLY.fs` 完成 50MHz 布局布线，尚未烧录。
 
 新增 [App v1.10 手机 LED 联动与配套主工程位流](LED_REMOTE.md)：四页直接切换、请求/实际显示状态和频谱/幅度预览。需要同时更新 APK 与位流；手机和面板实物联调待验。
@@ -21,7 +23,7 @@
 2026-10-15 修正：赛题要求输出由 FPGA 根据实时演奏指令逐音、逐样本生成，基础复音数 ≥4，支持实时变调、ADSR 与混音，禁止预录 PCM 播放、预置推流和整段录音触发。
 此前将《结算画面》转成 PCM 下载播放的方案违反该要求，已撤回。**旧位流 UserCode=0x00009C48 不用于比赛或本轮验收**；当前曲谱与屏幕版本的位流标识、时序、测试及 SHA256 统一见 [验证记录](VERIFICATION.md)。
 
-继续使用原工程 `PCM5102_PAM8403.gprj`，器件 `GW5A-LV25MG121NC1/I0`，顶层 `top`。
+当前使用 `PCM5102_UNIFIED.gprj`，器件 `GW5A-LV25MG121NC1/I0`，顶层 `top_unified`，内部实例化 `src/top.v`。
 PCM5102 可以保留，它只把 FPGA 实时合成的 I²S 采样转换为模拟声音；PAM8403 负责功率放大。
 
 ```text
@@ -143,8 +145,8 @@ FPGA 输入后的仿真延迟不包含 TTP229 自身扫描、DAC 和功放模拟
 & 'E:/130_FPGA_Verilog/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe' tools/build.tcl
 ```
 
-位流路径仍为 `impl/pnr/PCM5102_PAM8403.fs`。必须使用 [验证记录](VERIFICATION.md) 确认的修正版，不能根据同名路径判断旧位流已更新。
-Gowin IDE 已打开旧工程时关闭再重开同一 `.gprj`，刷新新增/删除的文件清单；编译不会自动更新板上 SRAM。
+位流路径为 `impl/pnr/PCM5102_UNIFIED.fs`，统一版资源及时序结果见 [RAM_GEOMETRY_VERIFICATION.md](RAM_GEOMETRY_VERIFICATION.md)。已验证产物位于 `deliveries/UNIFIED_RECORDING_20261020/PCM5102_UNIFIED.fs`；默认烧录脚本使用本地重新构建的 `impl/pnr/PCM5102_UNIFIED.fs`，需先完成构建。
+Gowin IDE 已打开旧工程时，关闭后打开 `PCM5102_UNIFIED.gprj`；编译不会自动更新板上 SRAM。
 用户连接开发板后可用 Programmer 的 **SRAM Program**，或 `./tools/program_sram.ps1` 下载；SRAM 断电丢失，本轮不自动写 Flash。
 
 共享输入模块为 `../pmod_hub75e/src/ttp229_gpio_input.v`，移动工程时保留相对目录。

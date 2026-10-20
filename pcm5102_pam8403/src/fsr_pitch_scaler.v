@@ -72,10 +72,8 @@ module fsr_pitch_scaler #(
 endmodule
 
 // Per-touch Q2.14 bend, multiplied after the common FSR Q0.16 ratio.
-// Both passes reuse ONE 26x16 multiplier (MIDI 60..72 steps fit 26 bits).
-// Two synchronous small block RAMs
-// store targets/current values; no wide per-voice multiplier bank is inferred.
-// At most 43 clocks/frame, versus 1024 available. Never resets DDS or ADSR.
+// A distributed target bank plus one current-value RAM save one BSRAM.
+// The shared multiplier and original 43-clock scan schedule are retained.
 module voice_pitch_scaler #(
     parameter [223:0] NOTE_INCREMENTS={32'd43442435,32'd38702809,32'd34480283,
         32'd30718440,32'd28994347,32'd25831026,32'd23012828},
@@ -90,7 +88,9 @@ module voice_pitch_scaler #(
     output reg [255:0] phase_increments
 );
     localparam INIT=0,IDLE=1,READ=2,LOAD=3,FSR_WAIT=4,FSR_DONE=5,BEND_WAIT=6,BEND_DONE=7;
-    (* syn_ramstyle="block_ram" *) reg [15:0] targets[0:7];
+    // Tiny target bank uses LUT RAM, with synchronous capture of old data
+    // on a same-edge UART write, matching the original target pipeline.
+    (* syn_ramstyle="distributed_ram" *) reg [15:0] targets[0:7];
     (* syn_ramstyle="block_ram" *) reg [15:0] currents[0:7];
     reg [15:0] target_q,current_q;
     reg [3:0] clear_left;
@@ -102,7 +102,10 @@ module voice_pitch_scaler #(
         ((target_q-current_q>SLEW_STEP) ? current_q+SLEW_STEP : target_q) :
         ((current_q-target_q>SLEW_STEP) ? current_q-SLEW_STEP : target_q);
     always @(posedge clk) begin
-        target_q<=targets[index]; current_q<=currents[index];
+        target_q<=targets[index];
+        // The read result is used in LOAD, after a READ cycle. Hold it on
+        // writes to infer supported normal mode, avoiding read-before-write.
+        if(!(resetn && (state==INIT || state==LOAD))) current_q<=currents[index];
         if(resetn) begin
             if(clear_left!=0) targets[clear_left[2:0]-3'd1]<=16'd16384;
             else if(bend_write && bend_index<7 && bend_ratio>=8192 && bend_ratio<=32768)

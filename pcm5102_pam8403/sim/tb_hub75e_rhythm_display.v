@@ -256,8 +256,17 @@ module tb_hub75e_rhythm_display;
         if(latches < 1024) $fatal(1,"insufficient scan coverage");
         // Scan every row/PWM plane with different combinations of lanes,
         // including nonzero clipped heads at rows 55..63.
-        @(negedge clk); playing=1;
-        for(k=0;k<64;k=k+1) dut.note_rows[k]=(k*37+11)&127;
+        wait(dut.state==1);@(negedge clk); playing=1;
+        dut.head_valid=64'hffffffffffffffff;
+        for(k=0;k<64;k=k+1)begin
+            dut.head_memory[k]=(k*37+11)&127;
+            dut.panel_memories[0].memory[k]=(k*37+11)&127;
+            dut.panel_memories[1].memory[k]=(k*37+11)&127;
+            dut.panel_memories[2].memory[k]=(k*37+11)&127;
+            dut.panel_memories[3].memory[k]=(k*37+11)&127;
+            dut.panel_memories[4].memory[k]=(k*37+11)&127;
+            dut.panel_memories[5].memory[k]=(k*37+11)&127;
+        end
         repeat(133*32*32) @(negedge clk);
         if(checked_rows<1024) $fatal(1,"insufficient glyph selection coverage");
         $display("PASS hub75e_rhythm_display: external RGB5/133-clock scan, descent/bursts/scroll/STOP, 3002 arithmetic cases, %0d reference row pairs",checked_rows);

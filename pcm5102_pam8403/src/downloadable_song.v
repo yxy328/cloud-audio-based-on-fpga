@@ -38,7 +38,7 @@ module downloadable_song #(
     // comparison carry. This is 23 bits with the production parameters.
     localparam integer REQUIRED_TIME_BITS=$clog2(64'd7680000+PRE_ROLL_MS+LOOKAHEAD_MS+64'd2);
     localparam integer TIME_BITS=REQUIRED_TIME_BITS>32 ? 32 : REQUIRED_TIME_BITS;
-    reg [2:0] state;
+    (* syn_encoding="onehot" *) reg [2:0] state;
     reg [28:0] score [0:255]; // {MIDI 60..72 mask, duration_ms}; two banks
     reg [28:0] fetched;
     reg active_bank, staging, check_play;
