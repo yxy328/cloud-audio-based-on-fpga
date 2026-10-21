@@ -48,7 +48,11 @@ module hc05_keymap #(
     output reg [1:0] remote_mode,
     input wire [1:0] visual_requested,reference_ratio,reference_phase,
     input wire [111:0] visual_snapshot,
-    output reg touch_mode16,touch_hold,panic,serial_active_high,
+    output reg touch_mode16,panic,serial_active_high,
+    output reg [1:0] touch_hold,
+    output reg [4:0] poly_limit,
+    input wire [4:0] touch_voice_count,
+    input wire pedal_clear,take_recording,
     output reg [1:0] effect_mode,
     output reg [3:0] effect_wet,
     output reg [4:0] master_volume,
@@ -134,6 +138,8 @@ module hc05_keymap #(
     localparam [5:0] CMD_AREC_PREP=6'd54;
     localparam [5:0] CMD_AREC_SEND=6'd55;
     localparam [5:0] CMD_AREC_ACK=6'd56;
+    localparam [5:0] CMD_POLY_SET=6'd57;
+    localparam [5:0] CMD_CTRL2_QUERY=6'd58;
     // END GENERATED HC05 COMMAND IDS
     localparam NO_ERROR=0, LENGTH_ERROR=1, CHAR_ERROR=2, UART_ERROR=3;
     reg [3:0] state;
@@ -292,7 +298,7 @@ module hc05_keymap #(
             sensor_test32<=0;
             audio_rec_prepare<=0;audio_rec_start<=0;audio_rec_stop<=0;audio_rec_abort<=0;audio_rec_send<=0;audio_rec_ack<=0;
             audio_rec_ack_sequence<=0;audio_rec_session<=0;take_command<=0;stream_owned<=0;
-            touch_mode16<=DEFAULT_TOUCH_MODE16!=0;serial_active_high<=0;touch_hold<=0;panic<=0;effect_mode<=0;effect_wet<=4;
+            touch_mode16<=DEFAULT_TOUCH_MODE16!=0;serial_active_high<=0;touch_hold<=0;poly_limit<=16;panic<=0;effect_mode<=0;effect_wet<=4;
             master_volume<=16;analog_mode<=0;analog_min<=0;analog_max<=1023;pressure_write<=0;pressure_value<=0;control_parse<=0;
             xy_write<=0;xy_ratio<=2;xy_phase<=0;
             visual_write<=0;remote_mode<=0;
@@ -352,11 +358,14 @@ module hc05_keymap #(
                         else if(line_error==LENGTH_ERROR) respond(5'd8,6'd12);
                         else if(line_error==CHAR_ERROR) respond(5'd6,6'd9);
                         else if(decoded_command==CMD_PING) respond(5'd9,6'd6);
-                        else if(decoded_command==CMD_CTRL_QUERY) begin
-                            reply<={{3'd0,touch_mode16},{2'd0,effect_mode},effect_wet,{3'd0,touch_hold},
+                        else if(decoded_command==CMD_CTRL_QUERY || decoded_command==CMD_CTRL2_QUERY)begin
+                            reply<={{3'd0,touch_mode16},{2'd0,effect_mode},effect_wet,
+                                (decoded_command==CMD_CTRL_QUERY ? {3'd0,touch_hold!=0} : {2'd0,touch_hold}),
                                 {1'd0,analog_mode},(master_volume>=10 ? 4'd1 : 4'd0),
-                                (master_volume>=10 ? master_volume[3:0]-4'd10 : master_volume[3:0]),{3'd0,pressure_mode},80'd0};
-                            respond(5'd10,6'd21);
+                                (master_volume>=10 ? master_volume[3:0]-4'd10 : master_volume[3:0]),{3'd0,pressure_mode},
+                                (poly_limit>=10 ? 4'd1 : 4'd0),(poly_limit>=10 ? poly_limit[3:0]-4'd10 : poly_limit[3:0]),
+                                (touch_voice_count>=10 ? 4'd1 : 4'd0),(touch_voice_count>=10 ? touch_voice_count[3:0]-4'd10 : touch_voice_count[3:0]),64'd0};
+                            respond(decoded_command==CMD_CTRL_QUERY ? 5'd10 : 5'd26,decoded_command==CMD_CTRL_QUERY ? 6'd21 : 6'd28);
                         end else if(decoded_command==CMD_SERIAL_QUERY) begin
                             reply<={{3'd0,serial_active_high},108'd0};respond(5'd11,6'd10);
                         end else if(decoded_command==CMD_SERIAL_SET) begin
@@ -375,7 +384,14 @@ module hc05_keymap #(
                         end else if(decoded_command==CMD_EFFECT_SET) begin
                             control_parse<=2;parse_numbers(7,2);
                         end else if(decoded_command==CMD_HOLD_SET) begin
-                            control_parse<=3;parse_numbers(5,1);
+                            if(line_length==6 && line[7:0]=="?")begin
+                                reply<={2'd0,touch_hold,108'd0};respond(5'd24,6'd8);
+                            end else begin control_parse<=3;parse_numbers(5,1);end
+                        end else if(decoded_command==CMD_POLY_SET)begin
+                            if(line_length==6 && line[7:0]=="?")begin
+                                reply<={(poly_limit>=10 ? 4'd1 : 4'd0),
+                                    (poly_limit>=10 ? poly_limit[3:0]-4'd10 : poly_limit[3:0]),104'd0};respond(5'd25,6'd9);
+                            end else begin control_parse<=12;parse_numbers(5,1);end
                         end else if(decoded_command==CMD_VOLUME_SET) begin
                             control_parse<=4;parse_numbers(7,1);
                         end else if(decoded_command==CMD_ANALOG_SET) begin
@@ -390,6 +406,8 @@ module hc05_keymap #(
                              (line_length==9 && (decoded_command==CMD_TAKE_STOP || decoded_command==CMD_TAKE_PLAY || decoded_command==CMD_TAKE_SAVE)) ||
                              (decoded_command==CMD_TAKE_NO)))begin
                             if(decoded_command==CMD_TAKE_STOP)begin take_command<=2;result(0);end
+                            else if((decoded_command==CMD_TAKE_REC || (decoded_command==CMD_TAKE_YES && take_flags[7:6]==1)) &&
+                                    (touch_hold==2 || poly_limit!=16))result(1);
                             else if(take_flags[5] || take_flags[1:0]!=0 || (ENABLE_FLASH_AUDIO && audio_rec_busy))result(1);
                             else begin
                                 if(decoded_command==CMD_TAKE_REC)take_command<=1;
@@ -528,9 +546,9 @@ module hc05_keymap #(
                                       else begin touch_mode16<=accumulator==16;result(0);end
                                     2:if(value0>2 || accumulator>8)result(2);
                                       else begin effect_mode<=value0[1:0];effect_wet<=accumulator[3:0];result(0);end
-                                    3:if(accumulator>1)result(2);
-                                      else if(rec_busy || recording)result(1);
-                                      else begin touch_hold<=accumulator[0];result(0);end
+                                    3:if(accumulator>2)result(2);
+                                      else if(rec_busy || recording || (accumulator==2 && take_recording))result(1);
+                                      else begin touch_hold<=accumulator[1:0];result(0);end
                                     4:if(accumulator>16)result(2);
                                       else begin master_volume<=accumulator[4:0];result(0);end
                                     5:if(accumulator>4)result(2);
@@ -551,6 +569,9 @@ module hc05_keymap #(
                                       else if(!audio_rec_valid)result(4);
                                       else begin audio_rec_session<=accumulator;audio_rec_send<=1;result(0);end
                                     11:begin audio_rec_ack_sequence<=accumulator;audio_rec_ack<=1;state<=COLLECT;end
+                                    12:if(accumulator!=1 && accumulator!=2 && accumulator!=4 && accumulator!=8 && accumulator!=16)result(2);
+                                       else if(rec_busy || recording || take_recording)result(1);
+                                       else begin poly_limit<=accumulator[4:0];result(0);end
                                     default:result(7);
                                 endcase
                             end else if(bend_parse) begin
@@ -598,6 +619,7 @@ module hc05_keymap #(
             if(toggle_play || restart) begin
                 downloaded_audition<=0; audition_pending<=0;
             end
+            if(pedal_clear && touch_hold==2)touch_hold<=0;
         end
     end
 endmodule

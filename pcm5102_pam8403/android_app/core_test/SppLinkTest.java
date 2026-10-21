@@ -18,13 +18,17 @@ public final class SppLinkTest {
         a.onCommand=c->{a.feed("EVT,120,01,0,39321,65535\r");a.feed("\nERR,REC_OVERFLOW,1\r\nO");a.feed("K\r\n");};
         yes(link.command("STOP","OK").equals("OK"));yes(link.connected());yes(lines.contains("ERR,REC_OVERFLOW,1"));
         // New controls use the same acknowledged transport while recording lines arrive.
-        for(String control:new String[]{"GUITAR","TONE,0","TONE,1","TONE,2","TONE,3","TONE,4","VIBRATO,0","VIBRATO,1","BANK,0","BANK,1","ADSR,TOUCH,10,80,60,200","ADSR,SENSOR,10,80,60,200","ADSR_RESET,TOUCH","ADSR_RESET,SENSOR","BEND,1,8192","BEND,4,16384","BEND,7,32768","BEND_RESET","TOUCH,8","TOUCH,16","EFFECT,1,8","EFFECT,2,4","HOLD,1","HOLD,0","VOLUME,0","VOLUME,16","ANALOG,1","ANALOG,2","ANALOG,3","ANALOG,4","PRESSURE,1","CAL,0,590","SERIAL,0","SERIAL,1","PANIC"}){
+        for(String control:new String[]{"GUITAR","TONE,0","TONE,1","TONE,2","TONE,3","TONE,4","VIBRATO,0","VIBRATO,1","BANK,0","BANK,1","ADSR,TOUCH,10,80,60,200","ADSR,SENSOR,10,80,60,200","ADSR_RESET,TOUCH","ADSR_RESET,SENSOR","BEND,1,8192","BEND,4,16384","BEND,7,32768","BEND_RESET","TOUCH,8","TOUCH,16","EFFECT,1,8","EFFECT,2,4","HOLD,1","HOLD,0","HOLD,2","POLY,1","POLY,2","POLY,4","POLY,8","POLY,16","VOLUME,0","VOLUME,16","ANALOG,1","ANALOG,2","ANALOG,3","ANALOG,4","PRESSURE,1","CAL,0,590","SERIAL,0","SERIAL,1","PANIC"}){
             final String expected=control+"\r\n";
             a.onCommand=c->{yes(c.equals(expected));a.feed("EVT,140,03,1,30000,65535\r\nERR,REC_OVERFLOW,2\r\nOK\r\n");};
             yes(link.command(control,"OK").equals("OK"));
         }
         a.onCommand=c->a.feed("EVT,1,0,0,0,0\r\nCTRL,1,2,8,1,4,16,0\r\n");
         yes(link.command("CTRL?","CTRL").equals("CTRL,1,2,8,1,4,16,0"));
+        a.onCommand=c->a.feed("CTRL2,1,2,8,2,4,16,0,04,03\r\n");
+        yes(link.command("CTRL2?","CTRL2").equals("CTRL2,1,2,8,2,4,16,0,04,03"));
+        a.onCommand=c->a.feed("HOLD,2\r\n");yes(link.command("HOLD,?","HOLD").equals("HOLD,2"));
+        a.onCommand=c->a.feed("POLY,04\r\n");yes(link.command("POLY,?","POLY").equals("POLY,04"));
         a.onCommand=c->a.feed("ADC,3FF,0\r\n");yes(link.command("ADC?","ADC").equals("ADC,3FF,0"));
         a.onCommand=c->a.feed("CAL,000,24E\r\n");yes(link.command("CAL?","CAL").equals("CAL,000,24E"));
         a.onCommand=c->a.feed("SERIAL,1\r\n");yes(link.command("SERIAL?","SERIAL").equals("SERIAL,1"));

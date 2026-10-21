@@ -11,7 +11,7 @@ public final class RecordingSupportTest {
             socket.onCommand=c->{if(c.equals("AREC?\r\n"))socket.feed(audio?"AREC,0,0,0,0,0,0,0000,000000\r\n":"AREC,0,1,0\r\n");else if(c.equals("TAKE?\r\n"))socket.feed(event?"TAKE,00,0,000000,000,000000\r\n":"ERR,CMD\r\n");else if(c.equals("PING\r\n"))socket.feed("PONG\r\n");else throw new AssertionError("Probe mutated device: "+c);};
             link.connect(new BluetoothDevice(socket));RecordingSupport support=RecordingSupport.probe(link);
             check((support.audio!=null)==audio);check((support.events!=null)==event);check(link.connected());check(link.command("PING","PONG").equals("PONG"));
-            if(!audio)try{RecordingSupport.readAudio(link);throw new AssertionError();}catch(RecordingSupport.UnsupportedFeatureException expected){check(expected.getMessage().contains("PCM5102_UNIFIED.fs"));check(link.connected());}
+            if(!audio)try{RecordingSupport.readAudio(link);throw new AssertionError();}catch(RecordingSupport.UnsupportedFeatureException expected){check(expected.getMessage().contains("已关闭")&&expected.getMessage().contains("手机本地录制"));check(link.connected());}
         }
         BluetoothSocket bad=new BluetoothSocket();bad.onCommand=c->bad.feed("AREC,broken\r\n");link.connect(new BluetoothDevice(bad));
         try{RecordingSupport.probe(link);throw new AssertionError();}catch(RecordingSupport.UnsupportedFeatureException e){throw new AssertionError("Malformed response became unsupported",e);}catch(IOException expected){check(true);}

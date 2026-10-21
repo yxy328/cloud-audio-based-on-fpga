@@ -75,7 +75,10 @@ module tb_hc05_decoder_equivalence;
     task transact;
         input [527:0] text;input integer length;
         integer n,target,waited;
-        begin
+        begin: legacy_transaction
+            // New commands and HOLD mode 2 are covered by tb_top_pedal, not this frozen reference.
+            if(text=="HOLD,?" || text=="HOLD,2" || text=="CTRL2?" ||
+               (length>=6 && (text>>((length-5)*8))=="POLY,"))disable legacy_transaction;
             target=count0+1;
             for(n=length-1;n>=0;n=n-1)send_byte(text[n*8 +: 8]);
             send_byte(10);waited=0;

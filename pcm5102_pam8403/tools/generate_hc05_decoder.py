@@ -37,6 +37,8 @@ COMMANDS = [
     ("AREC_PREP", "AREC_PREP", 9),
     ("AREC_SEND", "AREC_SEND,", None),
     ("AREC_ACK", "AREC_ACK,", None),
+    ("POLY_SET", "POLY,", None),
+    ("CTRL2_QUERY", "CTRL2?", 6),
 ]
 
 

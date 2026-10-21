@@ -2,7 +2,7 @@
 module tb_hc05_take;
     reg clk=0;always #10 clk=~clk;
     reg resetn=0,rx=1;wire tx;wire [2:0] take_command;
-    reg [7:0] take_flags=0;reg [3:0] take_error=0;
+    reg [7:0] take_flags=0;reg [3:0] take_error=0;reg take_recording=0;
     reg [23:0] take_elapsed=24'h123456,take_duration=24'h010203;
     reg [10:0] take_count=11'd1024;
     hc05_keymap #(.CLK_HZ(100000),.BAUD(10000),.ENABLE_EVENT_TAKE(1)) dut(
@@ -12,6 +12,7 @@ module tb_hc05_take;
         .note_ready(1'b1),.adc_sample(10'd0),.adc_timeout(1'b0),
         .audio_rec_busy(1'b0),.audio_rec_ready(1'b0),.audio_rec_overflow(1'b0),
         .take_command(take_command),.take_flags(take_flags),.take_error(take_error),
+        .pedal_clear(1'b0),.take_recording(take_recording),.touch_voice_count(5'd0),
         .take_elapsed(take_elapsed),.take_duration(take_duration),.take_count(take_count));
     integer replies=0,bitno,pulses=0,checks=0;
     reg [2:0] last_command=0;reg [255:0] incoming=0,last_reply=0;reg [7:0] data;
@@ -52,6 +53,19 @@ module tb_hc05_take;
         transact("TAKE?\n",6,{"TAKE,4C,8,123456,400,010203",8'd13,8'd10},0);
         transact("TAKE_PLAY,1\n",12,{"ERR,CMD",8'd13,8'd10},0);
         transact("REC_START\n",10,{"ERR,STATE",8'd13,8'd10},0);
+        take_flags=0;
+        transact("HOLD,2\n",7,{"OK",8'd13,8'd10},0);
+        transact("TAKE_REC\n",9,{"ERR,BUSY",8'd13,8'd10},0);
+        take_flags=8'h40;transact("TAKE_YES\n",9,{"ERR,BUSY",8'd13,8'd10},0);
+        transact("HOLD,0\n",7,{"OK",8'd13,8'd10},0);
+        transact("POLY,8\n",7,{"OK",8'd13,8'd10},0);
+        take_flags=0;transact("TAKE_REC\n",9,{"ERR,BUSY",8'd13,8'd10},0);
+        transact("POLY,16\n",8,{"OK",8'd13,8'd10},0);
+        transact("TAKE_REC\n",9,{"OK",8'd13,8'd10},1);
+        take_recording=1;
+        transact("HOLD,2\n",7,{"ERR,BUSY",8'd13,8'd10},0);
+        transact("POLY,4\n",7,{"ERR,BUSY",8'd13,8'd10},0);
+        transact("HOLD,1\n",7,{"OK",8'd13,8'd10},0);
         $display("PASS tb_hc05_take: %0d bit-level UART transactions",checks);$finish;
     end
     initial begin #10000000;$fatal(1,"UART take timeout");end

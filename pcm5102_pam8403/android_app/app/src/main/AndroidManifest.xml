@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="cn.fpga.score" android:versionCode="14" android:versionName="1.13-unified">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="cn.fpga.score" android:versionCode="15" android:versionName="1.14-pedal">
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="35" />
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />

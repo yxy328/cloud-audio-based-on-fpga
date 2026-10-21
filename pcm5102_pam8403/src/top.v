@@ -29,6 +29,8 @@ module top #(
     parameter [15:0] ADSR_SUSTAIN_LEVEL = 16'd39321,
     parameter ADSR_RELEASE_SAMPLES = 4883, // ~100ms, matches melody articulation
     parameter TOUCH_ADSR_RELEASE_SAMPLES = 488, // ~10ms tail for live note keys.
+    parameter integer PEDAL_TAIL_MS = 1200,
+    parameter integer DAMPER_MS = 10,
     parameter SONG_BEAT_SAMPLES = 19531,
     parameter SONG_GAP_SAMPLES = 4883,
     parameter SONG_INTRO_SAMPLES = 1953,
@@ -123,7 +125,9 @@ module top #(
     wire touch_idle = TOUCH_ACTIVE_LOW ? 1'b1 : 1'b0;
     wire [7:0] note_keys, note_keys_raw, mode_keys, mode_keys_raw;
     wire note_ready, mode_ready;
-    wire touch_mode16,touch_hold,panic,serial_active_high;
+    wire touch_mode16,panic,serial_active_high;
+    wire [1:0] touch_hold;
+    wire [4:0] touch_poly,touch_voice_count;
     reg serial_polarity_previous;
     wire serial_polarity_changed=serial_active_high!=serial_polarity_previous;
     always @(posedge clk)begin
@@ -160,7 +164,7 @@ module top #(
     reg [15:0] held_notes,blocked_notes;
     reg previous_touch_mode;
     wire [15:0] live_note_gates=(physical_notes & ~blocked_notes) |
-        (touch_hold ? held_notes : 16'd0) | {9'd0,audition_keys};
+        (touch_hold==1 ? held_notes : 16'd0) | {9'd0,audition_keys};
     wire [15:0] touch_note_gates=perf_playing ? perf_state[512 +: 16] : live_note_gates;
     always @(posedge clk)begin
         if(!resetn)begin held_notes<=0;blocked_notes<=0;previous_touch_mode<=0;end
@@ -169,7 +173,7 @@ module top #(
             if(panic || (perf_kill && !perf_recording) || previous_touch_mode!=touch_mode16)begin held_notes<=0;blocked_notes<=physical_notes;end
             else if(frame_ce)begin
                 blocked_notes<=blocked_notes & physical_notes;
-                held_notes<=touch_hold ? held_notes | (physical_notes & ~blocked_notes) : 16'd0;
+                held_notes<=touch_hold==1 ? held_notes | (physical_notes & ~blocked_notes) : 16'd0;
             end
         end
     end
@@ -267,6 +271,8 @@ module top #(
         .visual_requested(visual_mode),.reference_ratio(reference_ratio),.reference_phase(reference_phase),
         .visual_snapshot(visual_snapshot),
         .touch_mode16(touch_mode16),.touch_hold(touch_hold),.panic(panic),.serial_active_high(serial_active_high),
+        .poly_limit(touch_poly),.touch_voice_count(touch_voice_count),
+        .pedal_clear(perf_kill || previous_touch_mode!=touch_mode16),.take_recording(perf_recording),
         .effect_mode(effect_mode),.effect_wet(effect_wet),.master_volume(master_volume),
         .analog_mode(analog_mode),.pressure_write(pressure_write),.pressure_value(pressure_value),
         .analog_min(analog_min),.analog_max(analog_max),.adc_sample(fsr_adc_sample),.adc_timeout(fsr_adc_timeout),
@@ -477,9 +483,13 @@ module top #(
         .bend_write(bend_write),.bend_reset(bend_reset),.bend_index(bend_index),.bend_ratio(bend_ratio),
         .phase_increments(touch_phase_increments)
     );
-    touch_tdm_synth #(.VOLUME_SHIFT(VOLUME_SHIFT)) u_touch_synth (
-        .clk(clk),.resetn(resetn && !panic && !perf_kill),.sample_ce(frame_ce),
+    touch_tdm_synth #(.VOLUME_SHIFT(VOLUME_SHIFT),.EXTENDED_CONTROL(1),
+        .PEDAL_TAIL_MS(PEDAL_TAIL_MS),.DAMPER_MS(DAMPER_MS)) u_touch_synth (
+        .clk(clk),.resetn(resetn && !panic && !perf_kill && previous_touch_mode==touch_mode16),.sample_ce(frame_ce),
         .gates(touch_note_gates),.low_steps(perf_replay ? perf_state[223:0] : touch_phase_increments[223:0]),
+        .physical_gates(perf_playing ? touch_note_gates : physical_notes),
+        .pedal_mode(perf_playing ? 2'd0 : touch_hold),.poly_limit(perf_playing ? 5'd16 : touch_poly),
+        .voice_count(touch_voice_count),
         .adsr_config(perf_replay ? perf_state[224 +: 64] : touch_adsr),
         .pitch_ratio(perf_replay ? perf_state[448 +: 16] : effective_pitch_ratio),
         .sample(touch_sample),.active(touch_active),.clipped(),.overrun());
@@ -591,7 +601,9 @@ module top #(
             .keys(touch_keys[15:12]),.confirm(perf_confirm),.command(local_command));
         assign event_local_flash_request=local_command==7 || (local_command==5 && perf_confirm==2);
         wire [2:0] requested_command=local_command!=0 ? local_command : perf_command;
-        wire [2:0] allowed_command=ENABLE_FLASH_AUDIO && audio_rec_busy && requested_command!=2 ? 3'd0 : requested_command;
+        wire [2:0] allowed_command=((ENABLE_FLASH_AUDIO && audio_rec_busy && requested_command!=2) ||
+            ((requested_command==1 || (requested_command==5 && perf_confirm==1)) &&
+             (touch_hold==2 || touch_poly!=16))) ? 3'd0 : requested_command;
         // A physical save can race a UART audio request. Queue that pulse
         // until the PCM store releases SPI, rather than dropping the save.
         reg pending_save,pending_delete;

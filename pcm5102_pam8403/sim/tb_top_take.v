@@ -1,10 +1,18 @@
 `timescale 1ns/1ps
 module tb_top_take;
+`ifdef AUDIO_QUICK_SIM
+    localparam PAD_HALF=50,PAD_GAP=2500,PAD_QUIET=100,PAD_TIMEOUT=40000;
+    localparam CAPTURE="sim/build/take_i2s_quick.csv";
+`else
+    localparam PAD_HALF=500,PAD_GAP=125000,PAD_QUIET=1000,PAD_TIMEOUT=2000000;
+    localparam CAPTURE="sim/build/take_i2s.csv";
+`endif
     reg clk=0;always #10 clk=~clk;
     reg rx=1;reg [15:0] keys=0;reg [7:0] ir=0;
     wire tx,bck,lrck,din,tscl,sdo,cs_n,sck,mosi,miso,hck,lat,oe;
     tri1 scl,sda;
     top #(.ENABLE_EVENT_TAKE(1),.HC05_BAUD(500000),.TOUCH_STARTUP_US(100),
+        .TOUCH_SERIAL_HALF_CYCLES(PAD_HALF),.TOUCH_SERIAL_GAP_CYCLES(PAD_GAP),.TOUCH_SERIAL_QUIET_CYCLES(PAD_QUIET),
         .ADSR_ATTACK_SAMPLES(4),.ADSR_DECAY_SAMPLES(4),.TOUCH_ADSR_RELEASE_SAMPLES(16),
         .FSR_ENABLE(0),.IR_FILTER_CYCLES(100),.GUITAR_STRING_LENGTH(16)) dut(
         .clk(clk),.key_s1(1'b0),.key_s2(1'b0),.touch_out(8'd0),.touch_sdo(sdo),.touch_scl(tscl),
@@ -12,9 +20,13 @@ module tb_top_take;
         .i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din),.scl(scl),.sda(sda),
         .hub_CK(hck),.hub_ST(lat),.hub_OE(oe),
         .flash_cs_n(cs_n),.flash_sck(sck),.flash_mosi(mosi),.flash_miso(miso));
-    ttp229_model chip(.rst_n(dut.resetn),.scl(tscl),.connected(1'b1),.dv(1'b0),.stuck_low(1'b0),.keys(keys),.sdo(sdo));
+`ifdef AUDIO_QUICK_SIM
+    // Shorten peripheral waits while preserving the 50MHz/1024 audio schedule.
+    defparam dut.take_enabled.u_store.HALF_CYCLES=3;
+`endif
+    ttp229_model #(.TIMEOUT_NS(PAD_TIMEOUT)) chip(.rst_n(dut.resetn),.scl(tscl),.connected(1'b1),.dv(1'b0),.stuck_low(1'b0),.keys(keys),.sdo(sdo));
     take_nor_model flash(.*);
-    i2s_pcm_monitor #(.PCM_MIN(-32768),.PCM_MAX(32767),.SUPPORT_RESET(1),.CAPTURE_FILE("sim/build/take_i2s.csv")) monitor(
+    i2s_pcm_monitor #(.PCM_MIN(-32768),.PCM_MAX(32767),.SUPPORT_RESET(1),.CAPTURE_FILE(CAPTURE)) monitor(
         .bck(bck),.lrck(lrck),.din(din),.resetn(dut.resetn));
     integer replies=0,b,frames=0,columns=0,latches=0,checks=0,nonzero=0;
     reg [255:0] incoming=0,last_reply=0;reg [7:0] data;

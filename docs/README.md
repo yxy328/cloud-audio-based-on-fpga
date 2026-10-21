@@ -2,7 +2,7 @@
 
 [返回仓库首页](../README.md)
 
-当前唯一主工程是 `pcm5102_pam8403/PCM5102_UNIFIED.gprj`，顶层 `top_unified`。首次使用按“快速上手 → 接线 → [统一版 App 与录制](../pcm5102_pam8403/android_app/UNIFIED_RECORDING.md) → [统一版验证结果](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)”的顺序阅读。合并前的工程及专用脚本见[历史归档](../pcm5102_pam8403/archive/legacy_projects/README.md)。
+当前主工程是 `pcm5102_pam8403/PCM5102_UNIFIED.gprj`，顶层 `top_unified`，当前固件为 2026-10-21 钢琴踏板版。首次使用按“快速上手 → 接线 → [App 说明](../pcm5102_pam8403/android_app/README.md) → [验证记录](../pcm5102_pam8403/VERIFICATION.md)”的顺序阅读。合并前的工程及专用脚本见[历史归档](../pcm5102_pam8403/archive/legacy_projects/README.md)。
 
 ## 使用与调试
 
@@ -12,26 +12,27 @@
 | [主工程说明](../pcm5102_pam8403/README.md) | 整体架构、触摸操作、音频接口和默认参数 |
 | [引脚与功能验收表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md) | 完整接线、功能实现状态、赛题口径和现场验收步骤 |
 | [8/16 键与参考功能迁移](../pcm5102_pam8403/REFERENCE_MIGRATION.md) | 模式、串行极性、16 键和弦、音效、延音、滑杆标定、64×64 状态页图例 |
-| [统一版 App 与录制](../pcm5102_pam8403/android_app/UNIFIED_RECORDING.md) | App v1.13、手机录制、板上事件录制、PCM 录音回传与演奏控制 |
+| [安卓曲谱助手](../pcm5102_pam8403/android_app/README.md) | App v1.14-pedal 安装入口、制音踏板与复音上限控件、曲库与 LED 控制 |
+| [录制操作与限制](../pcm5102_pam8403/android_app/UNIFIED_RECORDING.md) | 手机本地录制、板上事件录制重放；PCM 原音回传章节属于 2026-10-20 历史统一版 |
 | [备用高速音频录制](../pcm5102_pam8403/AUDIO_RECORDING.md) | 当前停用；保留2Mbps USB/RTS与FAR1协议，不改走现有9600bps |
 | [蓝牙曲谱与事件日志](../pcm5102_pam8403/BLUETOOTH_MEDIA.md) | 曲谱协议、PLAY/AUDITION/STOP、日志与错误码 |
-| [HC-05 与键位映射](../pcm5102_pam8403/HC05_KEYMAP.md) | UART 接线、通信参数和改键 |
+| [HC-05 与键位映射](../pcm5102_pam8403/HC05_KEYMAP.md) | UART 接线、通信参数和改键，含 `HOLD,2` 踏板与 `POLY,n` 命令及查询 |
 | [压力输入](../pcm5102_pam8403/FSR402.md) | FSR402、ADC 分压、力度和音高模式 |
-| [运行时 ADSR](../pcm5102_pam8403/ADSR_RUNTIME.md) | 两套音源包络、App 编辑与生效时机 |
+| [运行时 ADSR](../pcm5102_pam8403/ADSR_RUNTIME.md) | 两套音源包络、App 编辑与生效时机；踏板四段尾音与制音参数 |
 | [七声部独立滑音](../pcm5102_pam8403/VOICE_PITCH.md) | 每键音分调节与 FSR 叠加 |
 | [七轨曲谱指引](../pcm5102_pam8403/RHYTHM_GUIDE.md) | 下落音符、和弦、休止及显示范围 |
 | [音频可视化](../pcm5102_pam8403/AUDIO_VISUAL.md) | 波形、参考/混音 XY、FFT、S2 切页与 XY 命令 |
 | [LED 视觉与 App 联动](../pcm5102_pam8403/LED_VISUAL_APP_PLAN.md) | 功能总表、现有联动、手机 LED 控件建议、带宽与资源边界 |
 | [手机 LED 轨迹控制](../pcm5102_pam8403/android_app/LED_CONTROL.md) | App v1.9 安装、六个 XY 预设、频率比/相位与设备确认 |
 | [手机切页与实时预览](../pcm5102_pam8403/LED_REMOTE.md) | App v1.10 与配套位流、四页切换、实际状态、频谱与幅度回传 |
-| [统一版验证结果](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md) | 统一位流的资源、时序、逐时钟等价与吞吐结果，含构建复查脚本 |
-| [验证记录](../pcm5102_pam8403/VERIFICATION.md) | 顶部指向统一版；其余按时间倒序记录历史构建、指纹、仿真结果和未完成的实板验证 |
+| [统一版历史验证](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md) | 2026-10-20 含 PCM 录制版本的 RAM 优化、逐时钟等价与吞吐结果，含构建复查脚本 |
+| [验证记录](../pcm5102_pam8403/VERIFICATION.md) | 顶部为当前踏板版的构建、UserCode、SHA256 与仿真范围；其余按时间倒序记录历史构建和未完成的实板验证 |
 | [FPGA 资源优化](../pcm5102_pam8403/RESOURCE_OPTIMIZATION.md) | 日志缓存定宽、曲谱行选择共享、同条件快照对比与独立位流 |
 | [HC-05 资源优化](../pcm5102_pam8403/HC05_RESOURCE_OPTIMIZATION.md) | 默认裁掉 USB 硬件、共享 53 命令译码、曲谱计时缩位、最新位流与 19 组 RTL 验证 |
 | [仓库维护](REPOSITORY.md) | Git 更新、目录约定、文档维护和上传范围 |
 | [版本记录](CHANGELOG.md) | App/FPGA 配套版本、升级要点与兼容范围 |
 
-完整接线以验收表及统一工程实际引用的 `src/PCM5102_EVENT_TAKE.cst`、`src/PCM5102_UNIFIED.sdc` 为依据。最新位流和 App 配套信息查[统一版验证结果](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)与[验证记录](../pcm5102_pam8403/VERIFICATION.md)顶部；历史段落中的编号不代表当前版本。
+完整接线以验收表及统一工程实际引用的 `src/PCM5102_EVENT_TAKE.cst`、`src/PCM5102_UNIFIED.sdc` 为依据。最新位流和 App 配套信息以[验证记录](../pcm5102_pam8403/VERIFICATION.md)顶部为准；历史段落与上一版[统一版历史验证](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)中的编号不代表当前版本。
 
 ## 独立工程与历史资料
 

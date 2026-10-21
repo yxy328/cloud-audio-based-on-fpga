@@ -2,7 +2,7 @@
 
 [仓库首页](../README.md) · [文档索引](../docs/README.md) · [快速上手](../docs/QUICK_START.md) · [完整接线与验收](PIN_FUNCTION_REQUIREMENTS.md)
 
-**当前唯一工程：[PCM5102_UNIFIED.gprj](PCM5102_UNIFIED.gprj)，顶层 `top_unified`。** 同一位流包含正常演奏、曲谱、LED 遥控、事件录制重放与 PCM 录音回传。安装 [v1.13 统一版 APK](android_app/dist/FPGA-Music-Unified.apk)，操作见[统一录制说明](android_app/UNIFIED_RECORDING.md)，已验证位流与源码见[交付包](deliveries/UNIFIED_RECORDING_20261020/)。合并前的三个工程及专用构建脚本已[归档](archive/legacy_projects/README.md)。下文的旧版发布说明保留为历史记录，以本段和统一版说明为准。
+**当前工程：[PCM5102_UNIFIED.gprj](PCM5102_UNIFIED.gprj)，顶层 `top_unified`。** 2026-10-21 钢琴踏板版新增 `HOLD,2` 与 `POLY,1/2/4/8/16`，保留正常演奏、曲谱、LED 遥控及事件录制重放；按用户授权关闭 FPGA Flash PCM 原音录制，以释放演奏资源。手机本地录制仍保留，板上事件录制需先设 `HOLD,0/1`、`POLY,16`。配套 [踏板版 APK](android_app/dist/FPGA-Music-Pedal.apk)，当前验证见[验证记录](VERIFICATION.md)。[2026-10-20 交付包](deliveries/UNIFIED_RECORDING_20261020/)是包含 PCM 录制的历史版本，不含新踏板功能；[统一录制说明](android_app/UNIFIED_RECORDING.md)保留其操作说明。合并前工程及专用脚本已[归档](archive/legacy_projects/README.md)。
 
 最新 [HC-05 资源优化](HC05_RESOURCE_OPTIMIZATION.md)：默认综合移除备用 USB 录音电路，现有 53 个命令共享译码，曲谱计时缩位；同条件综合 Logic 减少 7.91%，独立位流 `PCM5102_HC05_ONLY.fs` 完成 50MHz 布局布线，尚未烧录。
 
@@ -145,7 +145,7 @@ FPGA 输入后的仿真延迟不包含 TTP229 自身扫描、DAC 和功放模拟
 & 'E:/130_FPGA_Verilog/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe' tools/build.tcl
 ```
 
-位流路径为 `impl/pnr/PCM5102_UNIFIED.fs`，统一版资源及时序结果见 [RAM_GEOMETRY_VERIFICATION.md](RAM_GEOMETRY_VERIFICATION.md)。已验证产物位于 `deliveries/UNIFIED_RECORDING_20261020/PCM5102_UNIFIED.fs`；默认烧录脚本使用本地重新构建的 `impl/pnr/PCM5102_UNIFIED.fs`，需先完成构建。
+位流路径为 `impl/pnr/PCM5102_UNIFIED.fs`，当前踏板版资源、时序、指纹见 [VERIFICATION.md](VERIFICATION.md) 顶部，已同步本轮通过布局布线的产物。`deliveries/UNIFIED_RECORDING_20261020/PCM5102_UNIFIED.fs` 为不含踏板的历史PCM录制版；默认烧录脚本使用标准输出路径，烧录前核对验证记录中的SHA256。
 Gowin IDE 已打开旧工程时，关闭后打开 `PCM5102_UNIFIED.gprj`；编译不会自动更新板上 SRAM。
 用户连接开发板后可用 Programmer 的 **SRAM Program**，或 `./tools/program_sram.ps1` 下载；SRAM 断电丢失，本轮不自动写 Flash。
 

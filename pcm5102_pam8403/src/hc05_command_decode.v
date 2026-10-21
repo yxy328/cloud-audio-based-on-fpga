@@ -10,7 +10,7 @@ module hc05_command_decode(
     output reg done,
     output reg [5:0] command
 );
-    localparam integer COMMAND_COUNT=56, ROM_BYTES=COMMAND_COUNT*32;
+    localparam integer COMMAND_COUNT=58, ROM_BYTES=COMMAND_COUNT*32;
     localparam [2:0] IDLE=0,HEADER_WAIT=1,HEADER=2,LENGTH_WAIT=3,
         LENGTH=4,CHAR_WAIT=5,CHARACTER=6;
     (* syn_ramstyle="block_ram" *) reg [7:0] dictionary [0:ROM_BYTES-1];
@@ -599,6 +599,23 @@ module hc05_command_decode(
                 1768: initial_byte=8'd67;
                 1769: initial_byte=8'd75;
                 1770: initial_byte=8'd44;
+                // 57: POLY_SET
+                1792: initial_byte=8'd133;
+                1793: initial_byte=8'd5;
+                1794: initial_byte=8'd80;
+                1795: initial_byte=8'd79;
+                1796: initial_byte=8'd76;
+                1797: initial_byte=8'd89;
+                1798: initial_byte=8'd44;
+                // 58: CTRL2_QUERY
+                1824: initial_byte=8'd6;
+                1825: initial_byte=8'd6;
+                1826: initial_byte=8'd67;
+                1827: initial_byte=8'd84;
+                1828: initial_byte=8'd82;
+                1829: initial_byte=8'd76;
+                1830: initial_byte=8'd50;
+                1831: initial_byte=8'd63;
                 default:initial_byte=0;
             endcase
         end

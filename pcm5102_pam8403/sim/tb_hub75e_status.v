@@ -2,7 +2,8 @@
 // Reconstruct all 32 PWM planes only from the external HUB75E pins.
 module tb_hub75e_status;
     reg clk=0;always #10 clk=~clk;
-    reg resetn=0,playing=0,mode16=1,hold_notes=1,pressure=1,recording=0,ready=1;
+    reg resetn=0,playing=0,mode16=1,pressure=1,recording=0,ready=1;
+    reg [1:0] hold_notes=1;
     reg [15:0] physical=16'h8101,gates=16'h8103;
     reg [7:0] ir=8'h81;
     reg [2:0] timbre=7,analog_mode=4;
@@ -101,8 +102,11 @@ module tb_hub75e_status;
         check_pixel(6,60,2,3,5); // Automatic return to original guide.
         playing=0;wait(frames==8);#1;
         check_pixel(56,16,28,16,0); // Return to status after stop.
+        hold_notes=2;wait(frames==10);#1;
+        check_pixel(26,3,28,16,0);
+        save_frame("sim/build/status_pedal.ppm");
         $display("PASS HUB status: 32-plane external RGB reconstruction, 8/16 keys, hold, IR, fonts, exact bars, ADC alarm, whole-frame snapshots, guide transition, 133-clock scan");
         $finish;
     end
-    initial begin #25000000;$fatal(1,"status timeout");end
+    initial begin #31000000;$fatal(1,"status timeout");end
 endmodule

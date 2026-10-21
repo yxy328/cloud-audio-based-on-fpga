@@ -49,7 +49,7 @@ public final class SppLink implements Closeable {
                     continue;
                 }
                 if(ch=='\n'){String line=new String(b.toByteArray(),StandardCharsets.US_ASCII).trim();b.reset();if(line.isEmpty())continue;
-                    listener.line(line);if(waiting&&!line.startsWith("ERR,REC_OVERFLOW,")&&(line.equals("OK")||line.startsWith("OK,")||line.startsWith("ERR,")||line.startsWith("MAP,")||line.startsWith("CTRL,")||line.startsWith("ADC,")||line.startsWith("CAL,")||line.startsWith("SERIAL,")||line.startsWith("AREC,")||line.startsWith("VIS,")||line.startsWith("V,")||line.startsWith("TAKE,")||line.equals("PONG")))responses.offer(line);
+                    listener.line(line);if(waiting&&!line.startsWith("ERR,REC_OVERFLOW,")&&(line.equals("OK")||line.startsWith("OK,")||line.startsWith("ERR,")||line.startsWith("MAP,")||line.startsWith("CTRL,")||line.startsWith("CTRL2,")||line.startsWith("HOLD,")||line.startsWith("POLY,")||line.startsWith("ADC,")||line.startsWith("CAL,")||line.startsWith("SERIAL,")||line.startsWith("AREC,")||line.startsWith("VIS,")||line.startsWith("V,")||line.startsWith("TAKE,")||line.equals("PONG")))responses.offer(line);
                 }else if(ch!='\r'){if(b.size()>=1024)throw new IOException("接收行过长，连接已关闭");b.write(ch);}}
             throw new IOException("设备已断开");
         }catch(IOException e){if(socket==s){socket=null;AudioRecording audio=audioRecording;
@@ -101,7 +101,7 @@ public final class SppLink implements Closeable {
                     throw new CommandRejectedException(command,response);
                 if(response.startsWith("ERR,"))throw new IOException("设备返回 "+response);
                 String type=expected.endsWith(",")?expected.substring(0,expected.length()-1):expected;
-                if((type.equals("MAP")||type.equals("CTRL")||type.equals("ADC")||type.equals("CAL")||type.equals("SERIAL")||type.equals("AREC")||type.equals("VIS")||type.equals("V")||type.equals("TAKE"))&&response.startsWith(type+","))return response;
+                if((type.equals("MAP")||type.equals("CTRL")||type.equals("CTRL2")||type.equals("HOLD")||type.equals("POLY")||type.equals("ADC")||type.equals("CAL")||type.equals("SERIAL")||type.equals("AREC")||type.equals("VIS")||type.equals("V")||type.equals("TAKE"))&&response.startsWith(type+","))return response;
                 if(expected.equals("OK")&&(response.equals("OK")||response.startsWith("OK,")))return response;
                 if(expected.equals("PONG")&&response.equals("PONG"))return response;
             }

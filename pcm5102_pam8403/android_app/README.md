@@ -1,10 +1,10 @@
 # 安卓 HC-05 曲谱助手
 
-**当前版本为 [v1.13 / Code14 统一版 APK](dist/FPGA-Music-Unified.apk)，配套 `../PCM5102_UNIFIED.gprj` / `top_unified` / `PCM5102_UNIFIED.fs`。** 正常演奏、曲谱、LED 遥控、手机录制、板上事件录制与 PCM 录音回传统一在此版本使用，具体操作见 [UNIFIED_RECORDING.md](UNIFIED_RECORDING.md)。下面的独立音频版、旧 APK 及固件说明保留为历史记录；旧工程入口已[归档](../archive/legacy_projects/README.md)。
+**当前版本为 [v1.14-pedal / Code15 踏板版 APK](dist/FPGA-Music-Pedal.apk)，配套 `../PCM5102_UNIFIED.gprj` / `top_unified` / `PCM5102_UNIFIED.fs`。** 新增制音踏板 `HOLD,2` 与复音上限 `POLY,1/2/4/8/16`，`CTRL2?` 回报真实模式、上限与实际声部数；正常演奏、曲谱、LED 遥控、手机本地录制和板上事件录制重放在同一版本使用，命令与兼容边界见 [HC-05 键位与命令](../HC05_KEYMAP.md)，录制操作见 [UNIFIED_RECORDING.md](UNIFIED_RECORDING.md)。本构建按用户授权关闭板上 Flash 原音 PCM 录制；[v1.13 统一版 APK](dist/FPGA-Music-Unified.apk) 及 UNIFIED_RECORDING.md 的 PCM 章节保留为历史说明。下面的独立音频版、旧 APK 及固件说明同样仅作历史记录；旧工程入口已[归档](../archive/legacy_projects/README.md)。
 
 **v1.12-route2 / Code13实验版：** 配套独立音频工程可经现有9600bps HC-05回传原PCM并保存/播放WAV，详见[路线2操作及限制](../HC05_AUDIO_ROUTE2.md)。APK输出为`dist/FPGA-HC05-Audio-Route2.apk`，30秒录音需约54分钟以上；实际手机蓝牙/播放待验收。下文v1.11默认工程及USB备用说明保留历史用途。
 
-> **APK 归档说明：** `dist/` 只保留最新版 `FPGA-HC05-Audio-Route2.apk`。v1.0～v1.11 及 Event-Take 预览版等历史安装包已归档于 Git 提交历史（如 `e7276ea` 及更早提交），可在 Gitee 提交记录中下载；下文中的历史 dist 链接仅作版本记录。
+> **APK 归档说明：** `dist/` 保留当前 `FPGA-Music-Pedal.apk` 与历史 `FPGA-Music-Unified.apk`、`FPGA-HC05-Audio-Route2.apk`。v1.0～v1.11 及 Event-Take 预览版等更早安装包已归档于 Git 提交历史（如 `e7276ea` 及更早提交），可在 Gitee 提交记录中下载；下文中的历史 dist 链接仅作版本记录。
 
 **当前通信选择：仅HC-05。** [App v1.11 / Code12](dist/FPGA-Score-hc05-only.apk)保留当前曲库、LED联动和演奏控制，关闭启动时的USB初始化，不显示USB录音入口。无需USB串口模块、RTS或OTG；完整PCM/WAV高速回传代码[保留备用](../AUDIO_RECORDING.md)，不改走现有9600bps通道。板上事件录制回放仍须配套专用固件，开发进度见[说明](../RECORD_PLAYBACK.md)。构建与测试见[验证记录](../VERIFICATION.md)。
 

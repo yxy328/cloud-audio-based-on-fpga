@@ -1,8 +1,66 @@
 # 本地验证记录
 
-## 当前入口：统一版
+## 当前入口：钢琴踏板版（2026-10-21）
 
-主目录唯一工程为 `PCM5102_UNIFIED.gprj` / `top_unified`，默认 `gw_sh tools/build.tcl` 输出 `PCM5102_UNIFIED.fs`。统一版验证结果见 [RAM_GEOMETRY_VERIFICATION.md](RAM_GEOMETRY_VERIFICATION.md)，录制操作见 [UNIFIED_RECORDING.md](android_app/UNIFIED_RECORDING.md)。下文是按日期保留的历史验证记录，其中旧工程和旧构建脚本现已[归档](archive/legacy_projects/README.md)。
+主目录工程为 `PCM5102_UNIFIED.gprj` / `top_unified`，默认 `gw_sh tools/build.tcl` 输出 `PCM5102_UNIFIED.fs`。新增 HOLD,2 和 POLY；按用户授权关闭生产配置的 FPGA Flash PCM 原音录制（`ENABLE_FLASH_AUDIO=0`），保留事件录制重放。10秒仅减少录制计数范围，仍需 CRC、Flash 提交及下载通路，故采用关闭方案；旧 PCM 源码、旧交付包和独立目标保留。以下 2026-10-20 及更早的 PCM、资源数据属于历史构建。
+
+### 当前行为与兼容边界
+
+- HOLD,0/1、默认 POLY,16 保持原行为和幅度；HOLD,2 为四段有限尾音，默认1200ms；抬踏板只对已松手音制音，默认10ms。相位连续，再踩不重新起音。
+- POLY,1/2/4/8/16 是物理键优先的软上限：每帧至多选一个最旧松键声部进入短释音，按住键数或尚未完成的短释音可使实际声部数超过上限。32位饱和age放入context字13/14，字2存新状态，字15仍空闲，无新增声部RAM或16路运算单元。
+- 新路径在触摸音源饱和前使用Q12的1/N增益，复用原乘法器和 `audio_master_volume` 的SLEW。旧HOLD0/1、POLY16及事件回放强制unity。
+- 原 `CTRL?` 仍为七字段，模式2映射为延音启用1以兼容旧App；`CTRL2?` 回报真实模式、上限和实际声部数。POLY命令ID57、CTRL2查询58，由生成器生成；HOLD,?和POLY,?复用各自设置命令ID。
+- 528位事件格式及原gates打包不变。本阶段事件录制不支持新踏板和限复音：新状态下拒绝开始事件录制，事件录制期间拒绝HOLD,2/POLY写入；回放按踏板0、POLY16运行。手机本地录制不受影响；半踏板暂未实现。
+
+### 本轮已完成检查
+
+- `tb_top_pedal -Quick`：真实50MHz/1024音频时序，UART和TTP229输入，外部I²S协议、基频幅值和相位检查；覆盖有限尾音、抬踏板隔离、再踩、最旧尾音抢占、物理键优先、全部POLY值、逐字节查询/错误回复、16音齐发、PANIC/perf_kill/模式清除。快速参数为80ms，最坏工作 **1011/1024 clk**，全程overrun、触摸和输出混音clipped均为0。
+- `tb_top_touch16 -Quick`：旧HOLD,1保持全部16音的原断言通过，包含8/16键切换、全部16音I²S频谱、忙保护、PANIC和返回GPIO；`tb_touch_tdm_synth`：4096采样频谱及独立ADSR快照、释音、共享变调和期限检查通过。
+- `tb_touch_pedal_timing`：默认1200ms逐采样验证，四段精确14649/14649/14648/14648采样，总计58594，终点严格为0、相位连续、overrun/clipped为0；独立声部仿真补充快速顶层80ms用例，未将快速用例表述为1200ms完整顶层运行。
+- `tb_hc05_take`：24次逐位UART事务，含旧录制命令和新状态双向互锁；`tb_performance_take`：25项事件状态机检查。
+- `tb_top_take -Quick`：16项顶层检查全部通过，记录46条事件、回放246个非零I²S帧，覆盖录制、回放、保存时继续演奏、NOR提交校验、复位后Flash恢复、恢复后的回放/停止清尾音和HUB75扫描。快速用例仅加速TTP扫描与SPI（HALF_CYCLES=3，满足原模块下限），50MHz/1024音频期限不变；默认非Quick参数保持原值。原速用例已通过45条事件的RAM回放及独立SAVE，快速用例完成全部断电恢复检查后停止重复原速运行，不将原速用例记为完整通过。
+- `tb_hc05_extensions`、`tb_hc05_control_races`、`tb_hub75e_status` 通过；H2琥珀色由外部HUB75引脚重建验证。`tb_hc05_decoder_equivalence` 的512次UART旧命令差分全部通过，明确排除新增命令，冻结参考模型保持不变。
+- Android核心测试通过：DeviceControls 4695、SppLink 206、RecordingSupport 22、PhoneTake 10043，以及原LED、音色、ADSR、曲库和PCM/WAV夹具测试。原PCM夹具复用历史仿真输出，只证明App兼容性，不证明当前位流启用PCM录制。
+
+### 构建与复现
+
+冻结输入：`sim/build/unified/pedal_final_constraints_20261021/sources.json`；50MHz、布局2、布线0、最大扇出23。PCM关闭后NOR改用事件存储内部SPI，因此SDC只更新Flash MISO第一级同步器实例路径，第二级仍参与时序分析。
+
+2026-10-21 16:47（上海时间）完成Gowin V1.9.11.03 Education布局布线。下表按实际PnR报告比较；旧基线包含PCM录制，本轮按用户授权关闭该功能，因此是整机功能取舍后的净变化，不声称踏板单独实现仅增加300 LUT。
+
+| 资源 | 2026-10-20 基线 | 本轮踏板版 | 净变化 |
+| --- | --- | --- | --- |
+| Logic / 23040 | 22210（97%） | 20939（91%） | -1271 |
+| LUT | 18363 | 17223 | -1140 |
+| CLS / 11520 | 11381（99%） | 11055（96%） | -326 |
+| Register / 23280 | 10691（46%） | 10039（44%） | -652 |
+| BSRAM / 56 | 46 | 44 | -2 |
+| DSP / 28 | 26.5 | 26.5 | 0 |
+
+主时钟Fmax **51.236MHz**，最小Setup裕量 **0.483ns**、Hold裕量 **0.150ns**；clk与fsr_adc_clk的Setup/Hold违例端点均0。报告提示ADC生成时钟没有可计算Fmax的路径，故不另行声称其Fmax。综合LUT为18388→17246，PnR LUT为18363→17223，两种口径分别比较。
+
+已将本轮产物同步到标准输出 `impl/pnr/PCM5102_UNIFIED.fs`，并复制对应综合、资源及完整HTML时序报告；未执行烧录。位流UserCode **0x0000782D**。
+
+- 位流SHA256：`E9D74F20402F4914D6471DC32A36F939B676713B6CCF3298ABE16B6214FF39DB`
+- APK SHA256：`FA2E949EE6D9EAC6C52A201E0DCE4DFB14DE908C56B92EFCDB69FB531D480211`
+- PnR报告（本地构建产物，不入库）：资源 `impl/pnr/PCM5102_UNIFIED.rpt.txt`、时序 `impl/pnr/PCM5102_UNIFIED.tr.html`；冻结构建日志 `sim/build/unified/pedal_final_constraints_20261021/pnr.log`。
+- 仿真日志：`sim/build/pedal_final_sim.log`、`sim/build/pedal_take_timing_regression.log`、`sim/build/pedal_take_quick_regression.log`、`sim/build/pedal_regression_updated.log`；App测试与验签日志：`sim/build/pedal_android_core.log`、`sim/build/pedal_apk.log`。
+
+```powershell
+& ./tools/run_sim.ps1 -Quick -Tests @('tb_top_pedal','tb_top_touch16','tb_touch_tdm_synth','tb_hc05_decoder_equivalence')
+& ./tools/run_sim.ps1 -Tests @('tb_touch_pedal_timing','tb_hc05_take','tb_performance_take')
+& ./tools/run_sim.ps1 -Quick -Tests tb_top_take
+python ./tools/generate_hc05_decoder.py --check
+python ./tools/generate_hc05_replies.py --check
+& ./android_app/test-core.ps1
+& ./android_app/build-apk.ps1 -OutputApk 'dist/FPGA-Music-Pedal.apk'
+& ./tools/check_unified_build.ps1 -Label pedal_rebuild -SynthesisOnly
+& ./tools/resume_unified_pnr.ps1 -Label pedal_rebuild
+```
+
+App为1.14-pedal / versionCode15，包名不变；能力探测会提示当前PCM录制关闭，不会建议误刷旧同名位流来获得新踏板功能。本轮没有烧录开发板、安装手机App或进行模拟声音实测。
+
+历史统一版验证结果见 [RAM_GEOMETRY_VERIFICATION.md](RAM_GEOMETRY_VERIFICATION.md)，录制操作见 [UNIFIED_RECORDING.md](android_app/UNIFIED_RECORDING.md)。其中旧工程和旧脚本已[归档](archive/legacy_projects/README.md)。
 
 ## 2026-10-20：独立 HC-05 Flash PCM 音频目标
 

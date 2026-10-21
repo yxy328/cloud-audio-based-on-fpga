@@ -94,7 +94,7 @@ module tb_hc05_extensions;
         transact("EFFECT,3,4\n",11,{"ERR,RANGE",8'd13,"\n"});
         transact("EFFECT,1,9\n",11,{"ERR,RANGE",8'd13,"\n"});
         transact("EFFECT,1,4,0\n",13,{"ERR,CMD",8'd13,"\n"});
-        transact("HOLD,2\n",7,{"ERR,RANGE",8'd13,"\n"});
+        transact("HOLD,3\n",7,{"ERR,RANGE",8'd13,"\n"});
         transact("VOLUME,17\n",10,{"ERR,RANGE",8'd13,"\n"});
         transact("ANALOG,5\n",9,{"ERR,RANGE",8'd13,"\n"});
         transact("PRESSURE,2\n",11,{"ERR,RANGE",8'd13,"\n"});

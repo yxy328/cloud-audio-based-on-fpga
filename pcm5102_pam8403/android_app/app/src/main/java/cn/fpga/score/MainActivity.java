@@ -40,7 +40,7 @@ public final class MainActivity extends Activity {
     private Spinner devices,gestureTone,gestureVibrato,gestureBank;
     private EditText mappingInput,calibrationInput;
     private TextView controlsInfo,volumeLabel,wetLabel,adcInfo;
-    private Spinner touchMode,serialPolarity,effectChoice,holdChoice,analogChoice,pressureChoice;
+    private Spinner touchMode,serialPolarity,effectChoice,holdChoice,analogChoice,pressureChoice,polyChoice;
     private SeekBar volumeBar,wetBar;
     private DeviceControls confirmedControls;
     private Spinner xyRatio,xyPhase;
@@ -256,8 +256,8 @@ public final class MainActivity extends Activity {
         text(box,"选择后点击应用，收到 OK 才生效；列表显示待发送值。吉他每点一次拨弦一次，无需手势传感器就绪。不改变触摸键或曲谱指引。板上 S1 开始/停止，S2 从头重启。",12,MUTED);
         buildAdsrControls(content);
         buildBendControls(content);
-        box=card(content,"07","HC-05 原音质录音","录制 FPGA 最终数字混音，停止并读回 CRC 校验后保存到板上 Flash，再经现有 HC-05 回传 WAV。");
-        audioInfo=text(box,"先准备空闲录音槽；准备会擦除非当前槽，上一条有效录音仍保留。",13,MUTED);
+        box=card(content,"07","HC-05 原音质录音","需要支持原音录制的固件。钢琴踏板版已关闭板上 PCM 录音，可使用手机本地录制或板上事件录制。");
+        audioInfo=text(box,"连接后读取功能支持状态；已有 WAV 仍可播放、导出。",13,MUTED);
         button(box,"1 · 准备 30 秒录音槽",this::prepareHc05Audio,true,1);
         LinearLayout audioRow=row(box);
         button(audioRow,"2 · 开始录制",this::startHc05Audio,true,1);
@@ -634,11 +634,14 @@ public final class MainActivity extends Activity {
         button(box,"应用串行极性",()->{if(recording||recordDraining){alert("请先结束事件录制");return;}applyControl("SERIAL,"+serialPolarity.getSelectedItemPosition(),"串行极性已确认；进入串行时重新等待校准");},true);
         pressureChoice=choices(box,"FSR 压力用途（16 键时由手机切换）",new String[]{"控制触摸音量","控制触摸音高"});
         button(box,"应用压力用途",()->applyControl("PRESSURE,"+pressureChoice.getSelectedItemPosition(),"压力用途已确认"),true);
-        holdChoice=choices(box,"延音锁存",new String[]{"关闭：松键进入释音","开启：松键后继续保持，关闭时释放"});
-        button(box,"应用延音锁存",()->{
+        holdChoice=choices(box,"延音 / 踏板",new String[]{"关闭：松键进入释音","无限锁存：关闭时释放","钢琴踏板：松键尾音约 1.2 秒，抬起时制音"});
+        button(box,"应用延音 / 踏板",()->{
             if(recording||recordDraining){alert("请先结束事件录制");return;}
-            applyControl("HOLD,"+holdChoice.getSelectedItemPosition(),"延音锁存已确认");
+            applyControl("HOLD,"+holdChoice.getSelectedItemPosition(),"延音 / 踏板已确认");
         },true);
+        polyChoice=choices(box,"复音上限（物理按键优先）",new String[]{"1","2","4","8","16"});polyChoice.setSelection(4);
+        button(box,"应用复音上限",()->applyControl("POLY,"+new int[]{1,2,4,8,16}[polyChoice.getSelectedItemPosition()],"复音上限已确认"),true);
+        text(box,"超过上限时优先释掉最旧的松键尾音；按住的键始终保留。钢琴踏板与限复音暂不支持演出事件录制 / 回放。",12,MUTED);
         effectChoice=choices(box,"全局音效",new String[]{"原声","反馈回声 · 约 84 ms","合唱 · 缓慢变延迟"});
         wetLabel=text(box,"音效湿度 · 4 / 8",13,INK);wetBar=new SeekBar(this);wetBar.setMax(8);wetBar.setProgress(4);box.addView(wetBar);
         wetBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int n,boolean user){wetLabel.setText("音效湿度 · "+n+" / 8");}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});
@@ -668,13 +671,17 @@ public final class MainActivity extends Activity {
     }
     private void applyControl(String command,String done){task(()->{link.command(command,"OK");readControls();},done);}
     private void readControls()throws Exception{
-        DeviceControls state=DeviceControls.parse(link.command("CTRL?","CTRL"));
+        DeviceControls read;
+        try{read=DeviceControls.parse(link.command("CTRL2?","CTRL2"));}
+        catch(SppLink.CommandRejectedException e){if(!e.response.equals("ERR,CMD"))throw e;read=DeviceControls.parse(link.command("CTRL?","CTRL"));}
+        final DeviceControls state=read;
         String serial=link.command("SERIAL?","SERIAL");if(!serial.equals("SERIAL,0")&&!serial.equals("SERIAL,1"))throw new IOException("串行极性回报无效");
         String[] cal=link.command("CAL?","CAL").split(",",-1);
         if(cal.length!=3||!cal[1].matches("[0-3][0-9A-F]{2}")||!cal[2].matches("[0-3][0-9A-F]{2}"))throw new IOException("滑杆标定回报无效");
         int lo=Integer.parseInt(cal[1],16),hi=Integer.parseInt(cal[2],16);if(hi-lo<32)throw new IOException("滑杆标定范围无效");
         main.post(()->{confirmedControls=state;controlsInfo.setText("设备已确认：\n"+state.summary());touchMode.setSelection(state.mode16);serialPolarity.setSelection(serial.equals("SERIAL,1")?1:0);
             effectChoice.setSelection(state.effect);wetBar.setProgress(state.wet);holdChoice.setSelection(state.hold);
+            polyChoice.setSelection(state.poly==1?0:state.poly==2?1:state.poly==4?2:state.poly==8?3:4);
             analogChoice.setSelection(state.analog);volumeBar.setProgress(state.volume);pressureChoice.setSelection(state.pressure);calibrationInput.setText(lo+","+hi);});
     }
     private void forgetControls(){confirmedControls=null;if(controlsInfo!=null)controlsInfo.setText("模式未知，请连接并读取设备状态");if(adcInfo!=null)adcInfo.setText("ADC 尚未读取");if(xyInfo!=null)xyInfo.setText("轨迹参数未知；连接后请重新应用，列表仅为待发送值。");if(ledStatus!=null)ledStatus.setText("显示状态未知，请重新读取。");stopLedPreview("连接状态改变，预览已停止。");}

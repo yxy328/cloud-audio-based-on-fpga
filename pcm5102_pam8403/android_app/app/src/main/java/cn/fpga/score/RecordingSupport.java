@@ -4,7 +4,7 @@ import java.io.IOException;
 
 /** Discover recording features with read-only queries before offering write commands. */
 public final class RecordingSupport {
-    public static final String AUDIO_UNAVAILABLE="当前板端未启用 HC-05 Flash 原音质录音。请使用配套统一固件 PCM5102_UNIFIED.fs，或独立 PCM5102_AUDIO_TAKE.fs。更换 App 不能替代更新 FPGA 固件。";
+    public static final String AUDIO_UNAVAILABLE="当前板端未启用 HC-05 Flash 原音质录音。钢琴踏板版为保留演奏资源已关闭此功能，手机本地录制与板上事件录制仍可使用。原音质录音需另用支持该功能的旧版或独立 PCM5102_AUDIO_TAKE 固件。";
     public static final String EVENTS_UNAVAILABLE="当前板端未启用事件录制与板上重放。请使用配套统一固件 PCM5102_UNIFIED.fs，或独立 FINAL_EVENT_RECORDER.fs。更换 App 不能替代更新 FPGA 固件。";
     public final AudioTakeStatus audio;
     public final TakeStatus events;

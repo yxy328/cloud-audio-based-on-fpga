@@ -6,7 +6,8 @@ module hub75e_status #(parameter ENABLE_TAKE_STATUS=0)(
     input wire clk,resetn,display_boundary,
     input wire [5:0] pixel_x,
     input wire [4:0] pixel_row,
-    input wire mode16,hold_notes,pressure_pitch,recording,keys_ready,
+    input wire mode16,pressure_pitch,recording,keys_ready,
+    input wire [1:0] hold_notes,
     input wire [15:0] physical_keys,note_gates,
     input wire [7:0] ir_keys,
     input wire [2:0] timbre,analog_mode,
@@ -26,7 +27,8 @@ module hub75e_status #(parameter ENABLE_TAKE_STATUS=0)(
         K=23,H=24,T=25,R=26,V=27,P=28,W=29,ALERT=30,BLANK=31;
     localparam [3:0] BLACK=0,WHITE=1,CYAN=2,GREEN=3,AMBER=4,
         RED=5,BLUE_DIM=6,GRAY_DIM=7,AMBER_DIM=8;
-    reg mode_q,hold_q,pressure_q,record_q,ready_q,adc_valid_q;
+    reg mode_q,pressure_q,record_q,ready_q,adc_valid_q;
+    reg [1:0] hold_q;
     reg [15:0] physical_q,gates_q;
     reg [7:0] ir_q;
     reg [2:0] timbre_q,analog_q;
@@ -121,7 +123,7 @@ module hub75e_status #(parameter ENABLE_TAKE_STATUS=0)(
                     0:begin glyph=K;fg=ready_q ? CYAN : RED;end
                     1:glyph=mode_q ? 16 : 8;
                     2:glyph=H;
-                    3:begin glyph={5'd0,hold_q};fg=hold_q ? GREEN : GRAY_DIM;end
+                    3:begin glyph={4'd0,hold_q};fg=hold_q==2 ? AMBER : hold_q==1 ? GREEN : GRAY_DIM;end
                     4:glyph=T;
                     5:glyph={3'd0,timbre_q};
                     6:begin glyph=R;fg=record_q ? RED : GRAY_DIM;end
