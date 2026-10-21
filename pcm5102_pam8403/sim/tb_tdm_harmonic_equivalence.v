@@ -10,7 +10,7 @@ module tb_tdm_harmonic_equivalence;
     wire [31:0] voice_active,reference_active;
     wire [5:0] voice_count,reference_count;
     wire busy,reference_busy,overrun,reference_overrun,event_ready;
-    tdm_synth #(.RUNTIME_ADSR(1),.EXTENDED_TIMBRES(1)) dut(.*);
+    tdm_synth #(.RUNTIME_ADSR(1),.EXTENDED_TIMBRES(1)) dut(.tuning_ratio(16'd16384),.vibrato_inc(32'd527766),.vibrato_depth(10'd256),.vibrato_delay(16'd0),.vibrato_update(1'b0),.*);
     tdm_synth_parallel_reference #(.RUNTIME_ADSR(1),.EXTENDED_TIMBRES(1)) reference(
         .clk(clk),.resetn(resetn),.sample_ce(sample_ce),.event_valid(event_valid),.chord_valid(chord_valid),
         .test_valid(test_valid),.vibrato_enabled(vibrato_enabled),.event_inc(event_inc),.event_timbre(event_timbre),

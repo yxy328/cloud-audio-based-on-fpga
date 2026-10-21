@@ -39,8 +39,10 @@ try {
     $rtl += @('sim/i2s_pcm_monitor.v')
     if (!$Netlist) { $rtl += @('src/audio_take_store.v','src/audio_nor_operation.v','src/top_audio_take.v','sim/audio_nor_model.v') }
     if (!$Netlist) { $rtl += @('sim/gowin_adc_model.v') }
-    if (!$Netlist) { $defaultTests += @('tb_hc05_visual','tb_hc05_decoder_equivalence','tb_song_time_bound','tb_top_hc05_only','tb_top_pedal','tb_touch_pedal_timing') }
-    if (!$Netlist) { $rtl += @('sim/reference/hc05_keymap_parallel_reference.v','sim/reference/tdm_synth_parallel_reference.v','sim/reference/voice_pitch_scaler_reference.v','sim/reference/hub75e_rhythm_display_reference.v','sim/reference/sensor_poly_audio_reference.v') }
+    if (!$Netlist) { $defaultTests += @('tb_hc05_visual','tb_hc05_decoder_equivalence','tb_song_time_bound','tb_top_hc05_only','tb_top_pedal','tb_touch_pedal_timing','tb_performance_params','tb_command_protocol','tb_vibrato_params','tb_tuning_params','tb_top_performance') }
+    if (!$Netlist) { $rtl += @('sim/reference/hc05_keymap_parallel_reference.v','sim/reference/tdm_synth_parallel_reference.v','sim/reference/voice_pitch_scaler_reference.v','sim/reference/vibrato_fixed_reference.v','sim/reference/hub75e_rhythm_display_reference.v','sim/reference/sensor_poly_audio_reference.v') }
+    if (!$Netlist) { $rtl += @('sim/reference/tdm_synth_fixed_reference.v') }
+    if (!$Netlist) { $rtl += @('sim/reference/audio_effects_fixed_reference.v'); $defaultTests += @('tb_echo_params') }
     $selectedTests = if ($Tests) { $Tests } else { $defaultTests }
     if ($Netlist -and ($selectedTests | Where-Object { $_ -in @('tb_top_hc05_map','tb_gowin_fsr_adc','tb_fsr_adc_capture','tb_fsr_modes','tb_top_touch_response','tb_top_fsr_modes','tb_top_fsr','tb_fsr_pipeline') })) {
         throw 'The Gowin ADC primitive library has no analog behavior model. These ADC tests use the RTL behavioral model; use -Netlist -Tests tb_top_idle for the production live-mode PNR smoke test.'

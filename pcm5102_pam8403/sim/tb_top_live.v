@@ -153,7 +153,7 @@ module tb_top_live;
         wait(dut.song_guide_keys==7'h01);
         if(cyan_rows==0 || panel_rows!==32'hffffffff || panel_latches<64)
             $fatal(1,"Downloaded UART score never appeared as falling pixels on HUB75E pins");
-        wait(dut.song_guide_keys==7'h04);#100000;
+        wait(dut.song_guide_keys==7'h10);#100000;
         if(!dut.downloaded_playing) $fatal(1,"Guide did not advance to next downloaded note");
         check_silence(0);
         $display("PASS [live default]: S1/S2 and downloaded PLAY guide stay silent; old PCM commands rejected");

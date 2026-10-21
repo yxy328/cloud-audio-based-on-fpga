@@ -8,7 +8,7 @@ module tb_tdm_queue;
     wire busy,overrun;
     integer i,cycles,max_cycles=0,positive_clip=0,negative_clip=0;
     always #10 clk=~clk;
-    tdm_synth dut(.clk(clk),.resetn(resetn),.sample_ce(ce),.event_valid(event_valid),
+    tdm_synth dut(.tuning_ratio(16'd16384),.vibrato_inc(32'd527766),.vibrato_depth(10'd256),.vibrato_delay(16'd0),.vibrato_update(1'b0),.clk(clk),.resetn(resetn),.sample_ce(ce),.event_valid(event_valid),
         .chord_valid(chord),.test_valid(test32),.vibrato_enabled(1'b0),
         .event_inc(inc),.event_timbre(3'd0),.event_frames(17'd1000),
         .voice_active(active),.voice_count(count),.sample(pcm),.busy(busy),.overrun(overrun));

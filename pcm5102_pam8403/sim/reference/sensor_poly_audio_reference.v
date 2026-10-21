@@ -77,7 +77,8 @@ module sensor_poly_audio_reference #(
     wire [164:0] next_event=events[rd];
     tdm_synth #(.VOICES(32),.EXTENDED_TIMBRES(1),.RUNTIME_ADSR(1),.VOLUME_SHIFT(VOLUME_SHIFT),
         .PRESET_FRAMES(1),.NOTE_FRAMES(NOTE_FRAMES),.PIANO_FRAMES(PIANO_FRAMES),
-        .FLUTE_FRAMES(FLUTE_FRAMES),.UKULELE_FRAMES(UKULELE_FRAMES),.DRUM_FRAMES(DRUM_FRAMES)) u_synth (
+        .FLUTE_FRAMES(FLUTE_FRAMES),.UKULELE_FRAMES(UKULELE_FRAMES),.DRUM_FRAMES(DRUM_FRAMES)) u_synth (.tuning_ratio(16'd16384),
+        .vibrato_inc(32'd527766),.vibrato_depth(10'd256),.vibrato_delay(16'd0),.vibrato_update(1'b0),
         .clk(clk),.resetn(resetn),.sample_ce(frame_ce),
         .event_valid(pop),.event_inc(next_event[31:0]),
         .event_adsr(next_event[164:35]),.event_timbre(next_event[34:32]),.event_frames(frames_for_timbre(next_event[34:32])),

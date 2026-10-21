@@ -1,6 +1,16 @@
 # 本地验证记录
 
-## 当前入口：B1半音阶（2026-10-21）
+## 当前入口：四档回声优先版（2026-10-22）
+
+保留84 /168 /336 /504 ms四档回声，长档仅湿声降采样；C7移调 /A4缩为红外与手势共享，触摸键与吉他保持原音高。合唱维持原固定速率。协议、裁剪项和实物待办见 [PERFORMANCE_PARAMS.md](PERFORMANCE_PARAMS.md)，交付文件见 [ECHO_PRIORITY_20261022](deliveries/ECHO_PRIORITY_20261022/README.md)。
+
+最终冻结构建 `performance_echo_release_20261022` 与当前94份输入逐项匹配。Logic21088、CLS11060、BSRAM44、DSP26.5、Register10239；相对B1的C成本为121 Logic /7 CLS，无BSRAM或DSP增量。剩余1952 Logic /460 CLS /12 BSRAM，满足D、B2、E100与安全垫的1650 /365 /4预留。50MHz下Fmax50.096MHz，setup /hold违例端点均0，无未布通报错。
+
+新增参数的六个相关仿真、默认逐时钟对照、RAM几何检查和App核心测试通过；Code22 /1.21-echo已打包、验签。另有107项RTL全量回归仍在运行，不计为全部通过，实时结果在 `sim/build/regression_20261022/results.json`。没有烧录、安装手机或耳机口对录，实物验收仍待完成。
+
+标准输出位流已同步：UserCode **0x0000589C**，SHA256 **E236EB634F02FB24B93E004C9AA5B68229D1E693EE5D678AAD173DE232F97EDE**。APK SHA256 **BEF1A3F01945BF32D283B1EF4988A58D2D27793B797A19D4B6AFA46EB5E4226A**。以下B1及更早数据保留为历史记录。
+
+## B1半音阶（2026-10-21）
 
 接线按用户确认：K1～K12依次C4～B4，K13～K16暂作C5/D5/E5/F5。仅改前七键默认映射与高键常量，协议、MAP键号、曲谱通道及RAM几何不变；App为Code17 / 1.16-chromatic，提供钢琴布局与图形映射，并保留旧手机录音原音。
 

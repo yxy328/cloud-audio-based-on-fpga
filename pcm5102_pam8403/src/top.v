@@ -242,6 +242,12 @@ module top #(
     assign phase_increments=downloaded_valid ? {96'd0,downloaded_increment} : builtin_increments;
     assign audition_keys=(downloaded_audition && downloaded_gate) ? song_guide_keys : 7'd0;
     // Include synchronized raw pads, debounced gates, and release tails.
+    wire [15:0] bend_min,bend_max,bend_slew,tuning_ratio;
+    wire [31:0] vibrato_inc;
+    wire [9:0] vibrato_depth;
+    wire [15:0] vibrato_delay;
+    wire [1:0] echo_tap;
+    wire vibrato_update;
     hc05_keymap #(.DEFAULT_A(ADSR_ATTACK_SAMPLES),.DEFAULT_D(ADSR_DECAY_SAMPLES),
         .DEFAULT_S(ADSR_SUSTAIN_LEVEL),.DEFAULT_R(TOUCH_ADSR_RELEASE_SAMPLES),.BAUD(HC05_BAUD),.ENABLE_DEMO_SCORE(ENABLE_DEMO_SCORE),
         .ENABLE_LOOKAHEAD(!ENABLE_DEMO_SCORE),.LOOKAHEAD_MS(GUIDE_LEAD_MS),
@@ -266,6 +272,9 @@ module top #(
         .gesture_vibrato(gesture_vibrato),.gesture_bank(gesture_bank),
         .sensor_test32(sensor_test32),.touch_adsr(touch_adsr),.sensor_adsr(sensor_adsr),
         .bend_write(bend_write),.bend_reset(bend_reset),.bend_index(bend_index),.bend_ratio(bend_ratio),
+        .bend_min(bend_min),.bend_max(bend_max),.bend_slew(bend_slew),.tuning_ratio(tuning_ratio),
+        .vibrato_inc(vibrato_inc),.vibrato_depth(vibrato_depth),.vibrato_delay(vibrato_delay),.vibrato_update(vibrato_update),
+        .echo_tap(echo_tap),
         .xy_write(xy_write),.xy_ratio(xy_ratio),.xy_phase(xy_phase),
         .visual_write(visual_write),.remote_mode(remote_visual_mode),
         .visual_requested(visual_mode),.reference_ratio(reference_ratio),.reference_phase(reference_phase),
@@ -319,6 +328,7 @@ module top #(
         .clk(clk),.resetn(resetn && !(panic && !ENABLE_EVENT_TAKE)),.frame_ce(frame_ce),
         .key_s1(1'b0),.key_s2(1'b0),.scl(scl),.sda(sda),
         .control_timbre(perf_replay ? perf_state[496 +: 3] : gesture_timbre),
+        .vibrato_inc(vibrato_inc),.vibrato_depth(vibrato_depth),.vibrato_delay(vibrato_delay),.vibrato_update(vibrato_update),.tuning_ratio(tuning_ratio),
         .control_vibrato(perf_replay ? perf_state[499] : gesture_vibrato),
         .control_bank(perf_replay ? perf_state[500] : gesture_bank),.audio_sample(gesture_sample),
         .ir_note_valid(perf_playing ? replay_ir_valid : ir_note_valid),
@@ -478,6 +488,7 @@ module top #(
     // Serial K1..12 follow the physical chromatic octave; K1..7 retain HC-05 remapping.
     // Fs=48828.125Hz. Pressure pitch changes preserve each DDS phase.
     fsr_pitch_scaler #(.PER_VOICE_BEND(1)) u_fsr_pitch_scaler (
+        .bend_min(bend_min),.bend_max(bend_max),.bend_slew(bend_slew),
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce), .pitch_ratio(effective_pitch_ratio),
         .note_increments(touch_base_increments),
         .bend_write(bend_write),.bend_reset(bend_reset),.bend_index(bend_index),.bend_ratio(bend_ratio),
@@ -487,6 +498,7 @@ module top #(
         .PEDAL_TAIL_MS(PEDAL_TAIL_MS),.DAMPER_MS(DAMPER_MS)) u_touch_synth (
         .clk(clk),.resetn(resetn && !panic && !perf_kill && previous_touch_mode==touch_mode16),.sample_ce(frame_ce),
         .gates(touch_note_gates),.low_steps(perf_replay ? perf_state[223:0] : touch_phase_increments[223:0]),
+
         .physical_gates(perf_playing ? touch_note_gates : physical_notes),
         .pedal_mode(perf_playing ? 2'd0 : touch_hold),.poly_limit(perf_playing ? 5'd16 : touch_poly),
         .voice_count(touch_voice_count),
@@ -523,6 +535,7 @@ module top #(
     // Dry bypass retains the original frame timing. Wet modes add the
     // reference effect pipeline, and the panel observes the final PCM.
     audio_effects #(.ADDRESS_BITS(12)) u_effects (
+        .echo_tap(echo_tap),
         .clk(clk),.resetn(resetn && !panic && !perf_kill),.sample_valid(frame_ce),.dry(dry_audio_sample),
         .mode(perf_replay ? perf_state[484 +: 2] : effect_mode),
         .wet(perf_replay ? perf_state[480 +: 4] : effective_wet),.sample(effect_sample),.valid(effect_valid));

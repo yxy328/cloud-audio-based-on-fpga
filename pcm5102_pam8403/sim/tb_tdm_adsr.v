@@ -4,7 +4,7 @@ module tb_tdm_adsr;
     reg resetn=0,ce=0,ev=0,test32=0;
     reg [129:0] cfg={1'b1,16'd4,16'd4,16'd8,9'd128,24'd4194304,24'd4194304,24'd2097152};
     wire busy,overrun;wire [5:0] count;wire signed [15:0] pcm;
-    tdm_synth #(.RUNTIME_ADSR(1)) dut(.clk(clk),.resetn(resetn),.sample_ce(ce),
+    tdm_synth #(.RUNTIME_ADSR(1)) dut(.tuning_ratio(16'd16384),.vibrato_inc(32'd527766),.vibrato_depth(10'd256),.vibrato_delay(16'd0),.vibrato_update(1'b0),.clk(clk),.resetn(resetn),.sample_ce(ce),
         .event_valid(ev),.event_inc(32'd23012828),.event_timbre(3'd0),.event_frames(17'd20),
         .event_adsr(cfg),.chord_valid(1'b0),.test_valid(test32),.vibrato_enabled(1'b0),
         .voice_active(),.voice_count(count),.sample(pcm),.busy(busy),.overrun(overrun),.event_ready());

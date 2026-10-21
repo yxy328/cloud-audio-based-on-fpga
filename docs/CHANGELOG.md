@@ -2,7 +2,23 @@
 
 [首页](../README.md) · [文档索引](README.md) · [完整验证记录](../pcm5102_pam8403/VERIFICATION.md)
 
-按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口（内容为最新版本），各版本另存同名版本包；当前为踏板版 `FPGA-Music-Pedal.apk` 与半音阶版 `FPGA-Music-Chromatic.apk`。
+按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口（内容为最新版本），上一版另存 `dist/FPGA-Music-Chromatic.apk`，更早版本另存 `dist/FPGA-Music-Pedal.apk`。
+
+## 2026-10-22 · App v1.21-echo / Code22，四档回声优先版
+
+按用户确认的取舍，优先保留四档回声 `EFFECT2,tap`（约 84 / 168 / 336 / 504 ms，tap0 每帧读写保持原采样率，长三档每 2 / 4 / 6 帧只捕获湿声并加一阶低通，最长档湿声采样上限约 4.07 kHz，存在残余混叠；干声与原 84 ms 档保持原样，切档清旧尾音）。新增三条 HC-05 命令：59 `PITCH,lower,upper,slew,base`（弯音上下界 Q2.14、滑音斜率 Q8.8、共享基准）、60 `VIB,hi,lo,depth,delay`（32 位颤音增量分高低 16 位、深度 0～1023、起振等待 0～39063 帧）、62 `EFFECT2,tap`；回复模板仅在末尾追加 kind 27 / 28 / 29，原 1～58 号命令与 AREC 七项原位保留，字典共 61 项，61 / 63 号空闲。App 提供草稿 / 确认三态、按 BPM 20～300 就近选档与恢复默认；换算全部在纯 Java `PerformanceParams` 中完成，RTL 不新增除法器或 DSP。
+
+覆盖范围收敛：共享移调 / A4（−12～+12 半音、415 / 432 / 440 / 442 / 466 Hz）只作用红外与手势共享音源，16 触摸键保持 B1 音高映射、Karplus–Strong 吉他保持固定音高；弯音范围只作用 BEND1～7；颤音为红外 / 手势共享并需配合 `VIBRATO` 开关，起振等待是整体使能而非逐音符。合唱速率维持原固定值约 0.745058 Hz，C6 震音与 C8 律制原型超预算撤回，`EFFECT2` 的 chorusInc 字段与 TEMP 查询未交付。
+
+升级注意事项：`PITCH` / `VIB` 的空字段与省略尾字段保持原值，查询回报是定长大写十六进制、不能原样当十进制回填；修改弯音范围需松键、等释音完成并停止曲谱与下载，否则 `ERR,BUSY`；非 16384 基准与 `ANALOG2` 双向互斥，冲突回 `ERR,STATE`；528 位 TAKE 事件格式未扩展，新增参数不写入快照，录制与回放前需保持同一套设置；录制硬条件分别检查（TAKE 为 `HOLD∈{0,1}` 且 `POLY=16`，事件日志为 8 键、`HOLD=0`、`ANALOG=0`），各有一键配置。
+
+`performance_echo_release_20261022` 冻结复现构建，94 份输入与当前源码逐项 SHA256 一致：Logic 21088/23040、CLS 11060/11520、BSRAM 44/56、DSP 26.5/28、Register 10239；相对 B1 的 C 成本为 +121 Logic / +7 CLS / +200 Register，无 BSRAM 或 DSP 增量，低于 400 / 100 预算；50 MHz 约束下 Fmax 50.096 MHz，Setup / Hold 违例端点均 0，无未布通报错。位流 UserCode `0x0000589C`，位流 SHA256 `E236EB634F02FB24B93E004C9AA5B68229D1E693EE5D678AAD173DE232F97EDE`，APK SHA256 `BEF1A3F01945BF32D283B1EF4988A58D2D27793B797A19D4B6AFA46EB5E4226A`。
+
+通过项：六个新增参数相关仿真、默认逐时钟对照、弯音 RAM 180000 时钟比较、四档脉冲与相位回绕、81 次实际 UART 回复、真实 50 MHz 顶层 UART → 参数 → DDS / I2S / 面板联调、RAM 几何检查，以及含 `PerformanceParams` 8690 项检查的 App 纯 Java 核心测试。未通过或未做完项：107 项 RTL 全量回归在交付时点仍在独立目录运行（快照 10 通过 / 10 运行中），不计为全部通过；按用户确认本轮未烧录开发板、未安装手机、未做耳机口对录，实物验收全部待办。范围、公式与逐项预算见[演奏参数与四档回声](../pcm5102_pam8403/PERFORMANCE_PARAMS.md)，交付文件见 [ECHO_PRIORITY_20261022](../pcm5102_pam8403/deliveries/ECHO_PRIORITY_20261022/README.md)，阶段 E 的 100 CLS 缩减口径见 [E_SCOPE.md](../pcm5102_pam8403/E_SCOPE.md)。
+
+## 2026-10-21 · App v1.19-performance / Code20，阶段 C 全覆盖候选（已被取代）
+
+C 阶段的首个通过布局布线的候选包：弯音范围、滑音、红外 / 手势共享颤音与全局起振等待，并把移调 / A4 同时覆盖 16 触摸键与红外 / 手势。`performance_tuning_20261021` 冻结输入与当时活动源码 94 项逐项 SHA256 匹配，Logic 21141 / CLS 11018 / BSRAM 44 / DSP 26.5 / Register 10275，Fmax 50.550 MHz；该包未记录 UserCode、未烧录、未做实物对录。因四档回声与合唱加入后超出 C 预算，本包的触摸调音、C8 律制与 C6 震音均未进入 v1.21-echo，四档回声优先版另用 `EFFECT2,tap` 编号 62。源码、报告与指纹见 [PERFORMANCE_PARAMS_C7_20261021](../pcm5102_pam8403/deliveries/PERFORMANCE_PARAMS_C7_20261021/README.md)，失败与撤回的原型留在各冻结目录，不以「生成了 fs」代替预算或时序验收。
 
 ## 2026-10-21 · App v1.16-chromatic / Code17，B1 十二键半音阶
 

@@ -13,6 +13,11 @@ module sensor_poly_audio #(
     input wire [2:0] ir_note_index,
     input wire [2:0] control_timbre,
     input wire control_vibrato, control_bank, test32,
+    input wire [31:0] vibrato_inc,
+    input wire [9:0] vibrato_depth,
+    input wire [15:0] vibrato_delay,
+    input wire vibrato_update,
+    input wire [15:0] tuning_ratio,
     input wire [129:0] adsr_config,
     output wire signed [15:0] audio_sample,
     output wire [31:0] voice_active,
@@ -89,6 +94,7 @@ module sensor_poly_audio #(
         .event_valid(pop),.event_inc(next_event[31:0]),
         .event_adsr(next_event[164:35]),.event_timbre(next_event[34:32]),.event_frames(frames_for_timbre(next_event[34:32])),
         .chord_valid(1'b0),.test_valid(send_test),.vibrato_enabled(control_vibrato),
+        .vibrato_inc(vibrato_inc),.vibrato_depth(vibrato_depth),.vibrato_delay(vibrato_delay),.vibrato_update(vibrato_update),.tuning_ratio(tuning_ratio),
         .voice_active(voice_active),.voice_count(voice_count),.sample(audio_sample),
         .event_ready(ready),.overrun(engine_overrun),.busy()
     );

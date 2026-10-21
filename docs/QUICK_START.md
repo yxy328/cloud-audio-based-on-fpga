@@ -15,10 +15,10 @@ cd cloud-audio-based-on-fpga
 
 - FPGA：已有构建记录使用 Gowin V1.9.11.03 Education，需安装 IDE、Programmer 和开发板下载驱动。
 - RTL 仿真：Icarus Verilog；脚本默认路径为 `C:/iverilog/bin`，可用 `-IverilogDir` 覆盖。
-- 手机：Android 10+，安装[当前安装包](../pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk)（内容为 v1.16-chromatic，同内容另存 `dist/FPGA-Music-Chromatic.apk`），使用HC-05经典蓝牙SPP，无需USB或OTG。
+- 手机：Android 10+，安装[当前安装包](../pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk)（内容为 v1.21-echo，上一版半音阶另存 `dist/FPGA-Music-Chromatic.apk`），使用HC-05经典蓝牙SPP，无需USB或OTG。
 - 修改 App 时再配置 JDK 和 Android SDK，步骤见 [App 文档](../pcm5102_pam8403/android_app/README.md)。现成 APK 可直接安装。
 
-安装当前 **App v1.16-chromatic / Code17**，配套 `PCM5102_UNIFIED.fs`（本轮 UserCode `0x000015CD`），手机与FPGA只连接HC-05。接线先查[完整引脚表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)，键盘改接与跳线查[8/16键迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)；16 键串行的默认音高、K13～K16 高音条与实机测频待办见[B1 半音阶说明](../pcm5102_pam8403/CHROMATIC_KEYS.md)；踏板 `HOLD,2`、复音上限 `POLY,n` 与 `CTRL2?` 回报见[键位与协议](../pcm5102_pam8403/HC05_KEYMAP.md)，界面分区见[侧边栏说明](../pcm5102_pam8403/android_app/SIDEBAR.md)，录制与重放操作见[录制说明](../pcm5102_pam8403/android_app/UNIFIED_RECORDING.md)。当前构建已关闭板上 Flash 原音 PCM 录制，手机本地录制和板上事件录制仍可用；事件录制前需设为 `HOLD,0/1`、`POLY,16`。
+安装当前 **App v1.21-echo / Code22**，配套 `PCM5102_UNIFIED.fs`（本轮 UserCode `0x0000589C`），手机与FPGA只连接HC-05。接线先查[完整引脚表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)，键盘改接与跳线查[8/16键迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)；16 键串行的默认音高、K13～K16 高音条与实机测频待办见[B1 半音阶说明](../pcm5102_pam8403/CHROMATIC_KEYS.md)；踏板 `HOLD,2`、复音上限 `POLY,n`、新增 `PITCH` / `VIB` / `EFFECT2,tap` 与 `CTRL2?` 回报见[键位与协议](../pcm5102_pam8403/HC05_KEYMAP.md)，参数公式、四档回声范围与未完成的实物对录见[演奏参数与四档回声](../pcm5102_pam8403/PERFORMANCE_PARAMS.md)，界面分区见[侧边栏说明](../pcm5102_pam8403/android_app/SIDEBAR.md)，录制与重放操作见[录制说明](../pcm5102_pam8403/android_app/UNIFIED_RECORDING.md)。当前构建已关闭板上 Flash 原音 PCM 录制，手机本地录制和板上事件录制仍可用；事件录制前需设为 `HOLD,0/1`、`POLY,16`，且新增演奏参数不写入事件快照。
 
 | 使用方式 | 接线与操作 |
 | --- | --- |
@@ -36,7 +36,7 @@ cd cloud-audio-based-on-fpga
 & ./pcm5102_pam8403/tools/run_sim.ps1 -Tests tb_hc05_extensions,tb_analog_expression,tb_touch_tdm_synth
 ```
 
-完整 RTL 回归省略 `-Tests`。仅检查自动试听时可指定 `-Tests tb_top_audition`；这些顶层音频仿真耗时较长。软件核心测试入口为 `./pcm5102_pam8403/android_app/test-core.ps1`。
+完整 RTL 回归省略 `-Tests`；默认列表已含本轮新增的 `tb_performance_params`、`tb_command_protocol`、`tb_vibrato_params`、`tb_tuning_params`、`tb_echo_params` 与 `tb_top_performance`。仅检查自动试听时可指定 `-Tests tb_top_audition`；这些顶层音频仿真耗时较长。软件核心测试入口为 `./pcm5102_pam8403/android_app/test-core.ps1`，其中包含纯 Java 的 `PerformanceParams` 换算检查。
 
 用 Gowin IDE 打开主工程并执行完整综合、布局布线与位流生成，或使用命令行（将下面路径替换为本机安装路径）：
 
@@ -45,9 +45,9 @@ $gowinShell = 'C:/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe'
 & $gowinShell ./pcm5102_pam8403/tools/build.tcl
 ```
 
-生成位流：`pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.fs`。当前 B1 半音阶版的资源、时序、UserCode 和 SHA256 见 [验证记录](../pcm5102_pam8403/VERIFICATION.md) 顶部；[统一版交付包](../pcm5102_pam8403/deliveries/UNIFIED_RECORDING_20261020/) 是包含 PCM 录制但不含踏板与半音阶的历史位流，三者的功能与指纹不要混用。重新构建后的指纹可能不同。上一版的 RAM 与等价验证保留在 [RAM_GEOMETRY_VERIFICATION.md](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)。
+生成位流：`pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.fs`。当前四档回声优先版的资源、时序、UserCode 和 SHA256 见 [验证记录](../pcm5102_pam8403/VERIFICATION.md) 顶部，交付文件见 [ECHO_PRIORITY_20261022](../pcm5102_pam8403/deliveries/ECHO_PRIORITY_20261022/README.md)；[统一版交付包](../pcm5102_pam8403/deliveries/UNIFIED_RECORDING_20261020/) 是包含 PCM 录制但不含踏板、半音阶与演奏参数的历史位流，各版本的功能与指纹不要混用。重新构建后的指纹可能不同。上一版的 RAM 与等价验证保留在 [RAM_GEOMETRY_VERIFICATION.md](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)。
 
-当前默认构建就是统一工程（现为踏板版），无需再分别构建 HC-05、事件录制或 PCM 录音目标。默认脚本仅编译，不自动烧录。
+当前默认构建就是统一工程（现为四档回声优先版），无需再分别构建 HC-05、事件录制或 PCM 录音目标。默认脚本仅编译，不自动烧录。
 
 ## 4. 下载开发板
 
@@ -61,7 +61,7 @@ $gowinShell = 'C:/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe'
 
 ## 5. 首次演奏和曲谱试听
 
-1. 默认8键模式先用K1～K7演奏C4～B4，K8切压力用途。16键接线和配置完成后K1～K16全部演奏，K8～K16固定C5～D6，压力用途改由App选择。
+1. 默认8键模式先用K1～K7演奏C4～B4，K8切压力用途。16键接线和配置完成后K1～K16全部演奏，自 v1.16 起 K1～K12 依次 C4～B4 半音阶、K13～K16 暂作 C5/D5/E5/F5，压力用途改由App选择。
 2. 手机系统配对 HC-05，再在 App 中连接已配对设备。Android 12+ 需允许“附近的设备”。
 3. 载入示例或导入 CSV/MIDI，点击“校验键位并下载”，等待显示已提交。
 4. 自己演奏使用 `PLAY` 或板上 S1：预备1.5秒后显示无声曲谱指引，按键实时发声。

@@ -10,7 +10,7 @@ module tb_voice_bend;
     reg [255:0] previous;
     reg [47:0] expected;
     integer i,j;
-    fsr_pitch_scaler #(.PER_VOICE_BEND(1)) dut(.clk(clk),.resetn(resetn),.sample_ce(ce),
+    fsr_pitch_scaler #(.PER_VOICE_BEND(1)) dut(.bend_min(16'd8192),.bend_max(16'd32768),.bend_slew(16'd4096),.clk(clk),.resetn(resetn),.sample_ce(ce),
         .pitch_ratio(ratio),.note_increments(BASE),.bend_write(wr),.bend_reset(rst),
         .bend_index(key),.bend_ratio(bend),.phase_increments(steps));
     task frame;

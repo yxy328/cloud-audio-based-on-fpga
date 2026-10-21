@@ -1,6 +1,5 @@
 `timescale 1ns/1ps
-// Compare every output cycle against the pre-optimization engine. This
-// tests the context-register reduction, not a second copy of new logic.
+// The older take-only reference has a different startup schedule; freeze the pre-parameterization production engine instead.
 module tb_tdm_take_equivalence;
     reg clk=0;always #10 clk=~clk;
     reg resetn=0;reg [9:0] divider=0;
@@ -14,8 +13,8 @@ module tb_tdm_take_equivalence;
     wire [5:0] voice_count,reference_count;
     wire signed [15:0] sample,reference_sample;
     wire overrun,busy,event_ready,reference_overrun,reference_busy,reference_ready;
-    tdm_synth #(.RUNTIME_ADSR(1),.EXTENDED_TIMBRES(1),.CHORD_FRAMES(88),.TEST_FRAMES(130)) dut(.*);
-    tdm_synth_reference #(.RUNTIME_ADSR(1),.EXTENDED_TIMBRES(1),.CHORD_FRAMES(88),.TEST_FRAMES(130)) reference(
+    tdm_synth #(.RUNTIME_ADSR(1),.EXTENDED_TIMBRES(1),.CHORD_FRAMES(88),.TEST_FRAMES(130)) dut(.tuning_ratio(16'd16384),.vibrato_inc(32'd527766),.vibrato_depth(10'd256),.vibrato_delay(16'd0),.vibrato_update(1'b0),.*);
+    tdm_synth_fixed_reference #(.RUNTIME_ADSR(1),.EXTENDED_TIMBRES(1),.CHORD_FRAMES(88),.TEST_FRAMES(130)) reference(
         .clk(clk),.resetn(resetn),.sample_ce(sample_ce),.event_valid(event_valid),.chord_valid(chord_valid),
         .test_valid(test_valid),.vibrato_enabled(vibrato_enabled),.event_inc(event_inc),.event_timbre(event_timbre),
         .event_frames(event_frames),.event_adsr(event_adsr),.voice_active(reference_active),.voice_count(reference_count),

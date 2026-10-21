@@ -12,7 +12,7 @@ module tb_sensor_poly_audio;
     reg [2:0] tone=0,index=0;
     integer f=0;
     always @(negedge clk) if(ce) f=f+1;
-    sensor_poly_audio #(.NOTE_FRAMES(400)) dut (
+    sensor_poly_audio #(.NOTE_FRAMES(400)) dut (.tuning_ratio(16'd16384),.vibrato_inc(32'd527766),.vibrato_depth(10'd256),.vibrato_delay(16'd0),.vibrato_update(1'b0),
         .clk(clk),.resetn(resetn),.frame_ce(ce),.sensor_ready(ready_sensor),
         .gesture_valid(gv),.dir_evaluated(1'b1),.start_dir(3'd1),.end_dir(3'd2),
         .ir_note_valid(ir),.ir_note_index(index),.control_timbre(tone),

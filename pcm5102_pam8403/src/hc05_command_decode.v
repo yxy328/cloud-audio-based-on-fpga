@@ -10,7 +10,7 @@ module hc05_command_decode(
     output reg done,
     output reg [5:0] command
 );
-    localparam integer COMMAND_COUNT=58, ROM_BYTES=COMMAND_COUNT*32;
+    localparam integer COMMAND_COUNT=61, ROM_BYTES=COMMAND_COUNT*32;
     localparam [2:0] IDLE=0,HEADER_WAIT=1,HEADER=2,LENGTH_WAIT=3,
         LENGTH=4,CHAR_WAIT=5,CHARACTER=6;
     (* syn_ramstyle="block_ram" *) reg [7:0] dictionary [0:ROM_BYTES-1];
@@ -616,6 +616,33 @@ module hc05_command_decode(
                 1829: initial_byte=8'd76;
                 1830: initial_byte=8'd50;
                 1831: initial_byte=8'd63;
+                // 59: PITCH_SET
+                1856: initial_byte=8'd134;
+                1857: initial_byte=8'd6;
+                1858: initial_byte=8'd80;
+                1859: initial_byte=8'd73;
+                1860: initial_byte=8'd84;
+                1861: initial_byte=8'd67;
+                1862: initial_byte=8'd72;
+                1863: initial_byte=8'd44;
+                // 60: VIB_SET
+                1888: initial_byte=8'd132;
+                1889: initial_byte=8'd4;
+                1890: initial_byte=8'd86;
+                1891: initial_byte=8'd73;
+                1892: initial_byte=8'd66;
+                1893: initial_byte=8'd44;
+                // 62: EFFECT2_SET
+                1920: initial_byte=8'd136;
+                1921: initial_byte=8'd8;
+                1922: initial_byte=8'd69;
+                1923: initial_byte=8'd70;
+                1924: initial_byte=8'd70;
+                1925: initial_byte=8'd69;
+                1926: initial_byte=8'd67;
+                1927: initial_byte=8'd84;
+                1928: initial_byte=8'd50;
+                1929: initial_byte=8'd44;
                 default:initial_byte=0;
             endcase
         end
@@ -630,6 +657,7 @@ module hc05_command_decode(
     reg [2:0] state;
     reg [5:0] template_index;
     wire [5:0] next_template=template_index+6'd1;
+    wire [5:0] matched_command=template_index==6'd60 ? 6'd62 : template_index+6'd1;
     reg [4:0] pattern_length;
     reg [6:0] saved_length;
     task advance;
@@ -665,7 +693,7 @@ module hc05_command_decode(
                 CHAR_WAIT:state<=CHARACTER;
                 CHARACTER:if(character!=rom_q)advance;
                     else if(position=={1'b0,pattern_length}-6'd1)begin
-                        command<=template_index+6'd1;done<=1;state<=IDLE;
+                        command<=matched_command;done<=1;state<=IDLE;
                     end else begin
                         position<=position+6'd1;rom_address<=rom_address+11'd1;
                         state<=CHAR_WAIT;

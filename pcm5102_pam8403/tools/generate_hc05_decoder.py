@@ -39,17 +39,24 @@ COMMANDS = [
     ("AREC_ACK", "AREC_ACK,", None),
     ("POLY_SET", "POLY,", None),
     ("CTRL2_QUERY", "CTRL2?", 6),
+    ("PITCH_SET", "PITCH,", None),
+    ("VIB_SET", "VIB,", None),
+    ("EFFECT2_SET", "EFFECT2,", None),
 ]
+
+FIXED_IDS = {"PITCH_SET": 59, "VIB_SET": 60, "EFFECT2_SET": 62}
 
 
 def generate():
     assert len(COMMANDS) < 64
+    command_ids = [FIXED_IDS.get(name, index) for index, (name, _, _) in enumerate(COMMANDS, 1)]
+    assert len(set(command_ids)) == len(command_ids) and max(command_ids) < 64
     init = []
     for index, (name, pattern, total) in enumerate(COMMANDS):
         encoded = pattern.encode("ascii")
         assert len(encoded) <= 30 and (total is None or total >= len(encoded))
         data = [128 + len(encoded) if total is None else total, len(encoded), *encoded]
-        init.append(f"                // {index + 1}: {name}")
+        init.append(f"                // {command_ids[index]}: {name}")
         init.extend(f"                {index * 32 + offset}: initial_byte=8'd{value};"
                     for offset, value in enumerate(data))
     code = '''`timescale 1ns/1ps
@@ -87,6 +94,7 @@ module hc05_command_decode(
     reg [2:0] state;
     reg [5:0] template_index;
     wire [5:0] next_template=template_index+6'd1;
+    wire [5:0] matched_command=@MATCHED@;
     reg [4:0] pattern_length;
     reg [6:0] saved_length;
     task advance;
@@ -122,7 +130,7 @@ module hc05_command_decode(
                 CHAR_WAIT:state<=CHARACTER;
                 CHARACTER:if(character!=rom_q)advance;
                     else if(position=={1'b0,pattern_length}-6'd1)begin
-                        command<=template_index+6'd1;done<=1;state<=IDLE;
+                        command<=matched_command;done<=1;state<=IDLE;
                     end else begin
                         position<=position+6'd1;rom_address<=rom_address+11'd1;
                         state<=CHAR_WAIT;
@@ -132,11 +140,13 @@ module hc05_command_decode(
         end
     end
 endmodule
-'''.replace("@COUNT@", str(len(COMMANDS))).replace("@INIT@", "\n".join(init))
+'''.replace("@COUNT@", str(len(COMMANDS))).replace("@INIT@", "\n".join(init)).replace(
+        "@MATCHED@", "".join(f"template_index==6'd{i} ? 6'd{command_id} : "
+                            for i, command_id in enumerate(command_ids) if command_id != i + 1) + "template_index+6'd1")
     ids = "    // BEGIN GENERATED HC05 COMMAND IDS\n"
     ids += "    localparam [5:0] CMD_UNKNOWN=0;\n"
     ids += "".join(f"    localparam [5:0] CMD_{name}=6'd{i};\n"
-                   for i, (name, _, _) in enumerate(COMMANDS, 1))
+                   for i, (name, _, _) in zip(command_ids, COMMANDS))
     ids += "    // END GENERATED HC05 COMMAND IDS"
     return code, ids
 

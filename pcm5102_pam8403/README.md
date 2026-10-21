@@ -2,6 +2,10 @@
 
 [仓库首页](../README.md) · [文档索引](../docs/README.md) · [快速上手](../docs/QUICK_START.md) · [完整接线与验收](PIN_FUNCTION_REQUIREMENTS.md)
 
+**E 预算修订：[100 CLS 范围复核](E_SCOPE.md)。** 保留 B2、D 与安全垫；撤销三源七族全覆盖承诺，按 E0 → E4 → E2 → E3 → E1 逐项测量准入。
+
+**2026-10-22 四档回声优先版：[演奏参数与验证](PERFORMANCE_PARAMS.md) · [App Code22 /1.21-echo](android_app/dist/FPGA-Music-Unified.apk)。** 保留84 /168 /336 /504 ms回声，长档仅湿声降采样；移调 /A4缩为红外与手势共享，触摸键保持原音高。合唱速率维持旧固定值。通过版本PnR为Logic21088、CLS11060、BSRAM44、DSP26.5、Register10239，Fmax50.096 MHz；满足C的400 /100预算，保留D、B2、E100和安全垫。完整107项RTL回归与实机对录状态见该文档。
+
 **2026-10-21 B1半音阶：[接线 / 音高表与验证](CHROMATIC_KEYS.md) · [App v1.16-chromatic / Code17](android_app/dist/FPGA-Music-Unified.apk)。** 按用户确认的扫描顺序，K1～K12默认C4～B4，K13～K16暂作C5/D5/E5/F5；手机琴键和七键图形映射同步。MAP仍只支持前七个扫描键，曲谱 / LED仍为七通道。PnR为Logic20967、CLS11053、BSRAM44、DSP26.5，Fmax52.026MHz；未烧录或做实机测频。
 
 **2026-10-21 App 阶段 A：[v1.15-sidebar / Code16 安装包](android_app/dist/FPGA-Music-Unified.apk)。** 新增六分区侧边栏、触摸 / 红外 / 手势七分组、草稿与设备确认三态、板上事件录制条件说明及一键切换；撤掉停用的 HC-05 PCM 录音与回传入口。操作和测试范围见 [SIDEBAR.md](android_app/SIDEBAR.md)，后续资源与命令号预算问题见 [方案审查](SIDEBAR_REVIEW.md)。本次不改 RTL 或协议，手机与板上联动待实机验收。
@@ -149,7 +153,7 @@ FPGA 输入后的仿真延迟不包含 TTP229 自身扫描、DAC 和功放模拟
 & 'E:/130_FPGA_Verilog/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe' tools/build.tcl
 ```
 
-位流路径为 `impl/pnr/PCM5102_UNIFIED.fs`，当前踏板版资源、时序、指纹见 [VERIFICATION.md](VERIFICATION.md) 顶部，已同步本轮通过布局布线的产物。`deliveries/UNIFIED_RECORDING_20261020/PCM5102_UNIFIED.fs` 为不含踏板的历史PCM录制版；默认烧录脚本使用标准输出路径，烧录前核对验证记录中的SHA256。
+位流路径为 `impl/pnr/PCM5102_UNIFIED.fs`，已同步四档回声优先版。资源、时序、指纹与仍待完成的全量回归 /实物对录见 [PERFORMANCE_PARAMS.md](PERFORMANCE_PARAMS.md)；可核对 [本次交付包](deliveries/ECHO_PRIORITY_20261022/README.md)。`deliveries/UNIFIED_RECORDING_20261020/PCM5102_UNIFIED.fs` 为不含踏板的历史PCM录制版；默认烧录脚本使用标准输出路径，烧录前核对当前位流SHA256。
 Gowin IDE 已打开旧工程时，关闭后打开 `PCM5102_UNIFIED.gprj`；编译不会自动更新板上 SRAM。
 用户连接开发板后可用 Programmer 的 **SRAM Program**，或 `./tools/program_sram.ps1` 下载；SRAM 断电丢失，本轮不自动写 Flash。
 

@@ -20,6 +20,11 @@ module tdm_synth #(
 )(
     input wire clk, resetn, sample_ce,
     input wire event_valid, chord_valid, test_valid, vibrato_enabled,
+    input wire [31:0] vibrato_inc,
+    input wire [9:0] vibrato_depth,
+    input wire [15:0] vibrato_delay,
+    input wire vibrato_update,
+    input wire [15:0] tuning_ratio,
     input wire [31:0] event_inc,
     input wire [2:0] event_timbre,
     input wire [16:0] event_frames,
@@ -179,8 +184,14 @@ module tdm_synth #(
     reg [5:0] state;
     assign busy = state!=IDLE;
     reg [31:0] lfo_phase, lookup_phase, phase_step;
-    reg [8:0] depth;
-    reg signed [15:0] lfo_scaled;
+    reg [15:0] frame_tuning;
+    reg [9:0] depth;
+    reg signed [17:0] lfo_scaled;
+    reg [15:0] vibrato_wait;
+    always @(posedge clk)begin
+        if(!resetn || vibrato_update || !vibrato_enabled)vibrato_wait<=vibrato_delay;
+        else if(state==LFO1 && vibrato_wait!=0)vibrato_wait<=vibrato_wait-1'b1;
+    end
     // Prefetch the next lookup at the same state edge that previously
     // registered lookup_phase. This retains the arithmetic schedule while
     // mapping the exact legacy 256-point table into one block ROM.
@@ -206,7 +217,7 @@ module tdm_synth #(
     reg signed [17:0] mul_b;
     reg signed [50:0] mul_product;
     wire signed [50:0] pitch_delta=mul_product>>>21;
-    wire signed [50:0] adjusted_pitch=$signed({19'd0,note_inc})+pitch_delta;
+    wire signed [50:0] adjusted_pitch=$signed({{18{mul_a[32]}},mul_a})+pitch_delta;
     // The only variable multiplication in this module. Every timbre, voice,
     // envelope and vibrato operation uses this registered arithmetic path.
     always @(posedge clk) begin
@@ -423,6 +434,7 @@ module tdm_synth #(
             request_adsr<=0;env_ramp_gain<=0;sub_note<=0; event_quota<=0; request_inc<=0; request_timbre<=0; request_frames<=0;
             voice_active<=0; voice_count<=0; sample<=0; mix<=0; overrun<=0;
             lfo_phase<=0; lookup_phase<=0; depth<=0; lfo_scaled<=0;
+            frame_tuning<=16384;
             base<=0; h2<=0; h3<=0; h4<=0; aux<=0; aux2<=0;
             mul_a<=0; mul_b<=0; body_product<=0; phase_step<=0;
             for(r=0;r<VOICES;r=r+1) rank_order[r]<=r;
@@ -448,17 +460,18 @@ module tdm_synth #(
                 end
                 IDLE:if(sample_ce) begin
                     frame_limit<=write_ptr; mix<=0; event_quota<=0;
-                    lookup_phase<=lfo_phase; lfo_phase<=lfo_phase+32'd527766;
+                    lookup_phase<=lfo_phase; lfo_phase<=lfo_phase+vibrato_inc;
+                    frame_tuning<=tuning_ratio;
                     state<=LFO1;
                 end
                 LFO1:begin
                     mul_a<={{17{lookup_sample[15]}},lookup_sample};
-                    mul_b<={9'd0,depth}; state<=LFO2;
-                    if(vibrato_enabled && depth<256) depth<=depth+1'b1;
-                    else if(!vibrato_enabled && depth!=0) depth<=depth-1'b1;
+                    mul_b<={8'd0,depth}; state<=LFO2;
+                    if(vibrato_enabled && vibrato_wait==0 && depth<vibrato_depth)depth<=depth+1'b1;
+                    else if((!vibrato_enabled || vibrato_wait!=0 || depth>vibrato_depth) && depth!=0)depth<=depth-1'b1;
                 end
                 LFO2:state<=LFO3;
-                LFO3:begin lfo_scaled<=mul_product[23:8]; state<=LFO4; end
+                LFO3:begin lfo_scaled<=mul_product[25:8]; state<=LFO4; end
                 LFO4:state<=EVENT_READY;
                 EVENT_READY:begin
                     if(event_quota==32 || (!command_active && read_ptr==frame_limit)) begin
@@ -503,12 +516,17 @@ module tdm_synth #(
                 LOOK_H3:begin
                     env_ramp_gain<=$signed({7'd0,env_start})+$signed(mul_product[39:24]);
                     h2<={{2{lookup_sample[15]}},lookup_sample}; lookup_phase<=phase+(phase<<1); state<=LOOK_H4; end
-                LOOK_H4:begin h3<={{2{lookup_sample[15]}},lookup_sample}; lookup_phase<=phase<<2; state<=LOOK_AUX; end
+                LOOK_H4:begin
+                    h3<={{2{lookup_sample[15]}},lookup_sample};lookup_phase<=phase<<2;state<=LOOK_AUX;
+                    // Envelope interpolation is consumed in LOOK_H3; this free DSP slot precedes pitch vibrato.
+                    if(frame_tuning!=16384)begin mul_a<={1'b0,note_inc};mul_b<=$signed({2'd0,frame_tuning});end
+                end
                 LOOK_AUX:begin h4<={{2{lookup_sample[15]}},lookup_sample}; lookup_phase<=aux_phase; state<=LOOK_AUX2; end
                 LOOK_AUX2:begin aux<={{2{lookup_sample[15]}},lookup_sample}; lookup_phase<=aux2_phase; state<=PITCH_MUL; end
                 PITCH_MUL:begin
                     aux2<={{2{lookup_sample[15]}},lookup_sample};
-                    mul_a<={1'b0,note_inc}; mul_b<={{2{lfo_scaled[15]}},lfo_scaled}; state<=PITCH_WAIT;
+                    mul_a<={1'b0,frame_tuning==16384 ? note_inc : mul_product[45:14]};
+                    mul_b<=lfo_scaled;state<=PITCH_WAIT;
                 end
                 PITCH_WAIT:state<=BODY_MUL;
                 BODY_MUL:begin

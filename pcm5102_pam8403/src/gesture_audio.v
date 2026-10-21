@@ -160,7 +160,7 @@ module gesture_audio #(
     // Pitch is latched per gesture: switching group must not retune a note
     // already sounding or extend its duration.
     wire [31:0] phase_inc;
-    vibrato u_vibrato (
+    vibrato u_vibrato (.vibrato_inc(32'd527766),.vibrato_depth(10'd256),.vibrato_delay(16'd0),.vibrato_update(1'b0),
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce),
         .enabled(vibrato_enabled), .nominal_inc(note_inc), .phase_inc(phase_inc)
     );

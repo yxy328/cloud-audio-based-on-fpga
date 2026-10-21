@@ -1,0 +1,58 @@
+{
+  "builtAt": "2026-10-22 01:10:24 +08:00",
+  "sourceSnapshot": "sim/build/unified/performance_echo_release_20261022",
+  "matchingRtlInputs": 94,
+  "resources": {
+    "Logic": {
+      "used": 21088.0,
+      "capacity": 23040.0,
+      "remaining": 1952.0
+    },
+    "CLS": {
+      "used": 11060.0,
+      "capacity": 11520.0,
+      "remaining": 460.0
+    },
+    "BSRAM": {
+      "used": 44.0,
+      "capacity": 56.0,
+      "remaining": 12.0
+    },
+    "DSP": {
+      "used": 26.5,
+      "capacity": 28.0,
+      "remaining": 1.5
+    },
+    "Register": {
+      "used": 10239.0,
+      "capacity": 23280.0,
+      "remaining": 13041.0
+    }
+  },
+  "stageCCostVsB1": {
+    "Logic": 121,
+    "CLS": 7,
+    "BSRAM": 0,
+    "DSP": 0,
+    "Register": 200
+  },
+  "fmaxMHz": 50.096,
+  "setupViolatedEndpoints": 0,
+  "holdViolatedEndpoints": 0,
+  "userCode": "0x0000589C",
+  "apkVersionCode": 22,
+  "apkVersionName": "1.21-echo",
+  "regressionSnapshotAt": "2026-10-22T01:15:09.181794+08:00",
+  "regressionSnapshot": {
+    "running": 10,
+    "passed": 10
+  },
+  "regressionTotal": 107,
+  "regressionStatus": "in_progress",
+  "hardwareValidation": "deferred_by_user; physical wiring not ready; simulation and build delivered first",
+  "bitstreamSha256": "E236EB634F02FB24B93E004C9AA5B68229D1E693EE5D678AAD173DE232F97EDE",
+  "apkSha256": "BEF1A3F01945BF32D283B1EF4988A58D2D27793B797A19D4B6AFA46EB5E4226A",
+  "ramGeometryCheck": "passed",
+  "relatedRtlTests": "six parameter benches passed; default and RAM equivalence checks passed",
+  "javaCoreTests": "passed; PerformanceParams 8690 checks"
+}

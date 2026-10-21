@@ -17,7 +17,12 @@ public final class TakeWorkflowTest {
         for(String flags:new String[]{"24","44","84"}){TakeWorkflow wait=new TakeWorkflow(controls(0,16),take(flags));check(!wait.canRecord&&!wait.canPlay&&!wait.canSave&&!wait.canDelete);}
         check(!TakeWorkflow.logBlockReason(controls(0,16)).isEmpty());
         check(TakeWorkflow.logBlockReason(DeviceControls.parse("CTRL2,0,0,4,0,0,16,0,16,0")).isEmpty());
-        check(!TakeWorkflow.logBlockReason(DeviceControls.parse("CTRL2,0,0,4,0,0,16,0,8,0")).isEmpty());
+        check(TakeWorkflow.logBlockReason(DeviceControls.parse("CTRL2,0,0,4,0,0,16,0,8,0")).isEmpty());
+        for(int mode=0;mode<2;mode++)for(int hold=0;hold<3;hold++)for(int analog=0;analog<5;analog++)for(int poly:new int[]{1,16}){
+            String reason=TakeWorkflow.logBlockReason(DeviceControls.parse("CTRL2,"+mode+",0,4,"+hold+","+analog+",16,0,"+poly+",0"));
+            check(reason.isEmpty()==(mode==0&&hold==0&&analog==0));
+            check(reason.contains("8 键直连")== (mode!=0));check(reason.contains("HOLD=0")== (hold!=0));check(reason.contains("ANALOG=0")== (analog!=0));
+        }
         check(!new TakeWorkflow(DeviceControls.parse("CTRL,0,0,4,0,0,16,0"),take("00")).canRecord);
         System.out.println("PASS TakeWorkflow: "+checks+" checks");
     }

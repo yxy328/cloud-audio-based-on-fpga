@@ -1,0 +1,15 @@
+{
+  "commands": 61,
+  "replyTemplates": 30,
+  "originalCommandsPreserved": 58,
+  "originalRepliesPreserved": 27,
+  "unusedCommandIds": [
+    61,
+    63
+  ],
+  "unusedReplyKinds": [
+    30,
+    31
+  ],
+  "matchingBuildInputs": 94
+}

@@ -11,7 +11,7 @@ module tb_sensor_eight_timbres;
     integer frame=0,t,i,j,nonzero;
     reg [31:0] fingerprints[0:7];
     sensor_poly_audio #(.NOTE_FRAMES(64),.PIANO_FRAMES(64),.FLUTE_FRAMES(64),
-        .UKULELE_FRAMES(64),.DRUM_FRAMES(64)) dut(
+        .UKULELE_FRAMES(64),.DRUM_FRAMES(64)) dut(.tuning_ratio(16'd16384),.vibrato_inc(32'd527766),.vibrato_depth(10'd256),.vibrato_delay(16'd0),.vibrato_update(1'b0),
         .clk(clk),.resetn(rst),.frame_ce(ce),.sensor_ready(1'b0),
         .gesture_valid(1'b0),.dir_evaluated(1'b0),.start_dir(3'd0),.end_dir(3'd0),
         .ir_note_valid(ir),.ir_note_index(3'd0),.control_timbre(tone),

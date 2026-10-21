@@ -43,6 +43,18 @@ public final class MainActivity extends Activity {
     private TextView controlsInfo,volumeLabel,wetLabel,adcInfo;
     private Spinner touchMode,serialPolarity,effectChoice,holdChoice,analogChoice,pressureChoice,polyChoice;
     private SeekBar volumeBar,wetBar;
+    private final SeekBar[] performanceBars=new SeekBar[5];
+    private final TextView[] performanceLabels=new TextView[5];
+    private SeekBar performanceTempo;
+    private TextView performanceTempoLabel,performanceState;
+    private boolean defaultGlide=true;
+    private int[] confirmedPitch,confirmedVibrato,confirmedEcho;
+    private Spinner echoChoice,echoDivision;
+    private SeekBar echoTempo;
+    private TextView echoLabel,echoState;
+    private SeekBar tuningBar;
+    private Spinner standardPitch;
+    private TextView tuningLabel;
     private DeviceControls confirmedControls;
     private Spinner xyRatio,xyPhase;
     private TextView xyInfo;
@@ -260,7 +272,7 @@ public final class MainActivity extends Activity {
         sensorTonePanel=card(sourceGroups[1][2],"TONE","共享音色","作用于：红外 + 手势（共用一套参数）。调整后两个音源同时改变；阶段 E0/E1（免～中成本）再分源。");
         gestureTone=choices(sensorTonePanel,"红外 / 手势音色",new String[]{"正弦","钢琴","长笛","尤克里里","鼓","电钢琴","钟声","弦乐"});
         button(sensorTonePanel,"应用音源音色",()->{int value=gestureTone.getSelectedItemPosition();sendSimple("TONE,"+value,"红外 / 手势音色已确认："+gestureTone.getSelectedItem());},true);
-        sensorExpressionPanel=card(sourceGroups[1][4],"VIB","共享颤音","作用于：红外 + 手势（共用一套参数）。阶段 C3/C4/C5、E0（低成本）补齐分源速率、深度与延迟。");
+        sensorExpressionPanel=card(sourceGroups[1][4],"VIB","共享颤音","作用于：红外 + 手势（共用一套参数）。下方颤音改变音高；起振延迟从整体使能或应用参数时计时，不是逐音符延迟。");
         gestureVibrato=choices(sensorExpressionPanel,"红外 / 手势颤音",new String[]{"关闭","开启"});
         button(sensorExpressionPanel,"应用音源颤音",()->{int value=gestureVibrato.getSelectedItemPosition();sendSimple("VIBRATO,"+value,"红外 / 手势颤音已确认："+gestureVibrato.getSelectedItem());},true);
         gestureBank=choices(sourceGroups[2][0],"手势音符组",new String[]{"低音组 C4～F4","高音组 G4～C5"});
@@ -271,6 +283,7 @@ public final class MainActivity extends Activity {
         button(sections[4],"TEST32 · 32 路频谱验证",()->sendSimple("TEST32","已触发 32 路不同频率正弦，约 2.7 秒；颤音关闭"),true);
         buildAdsrControls(sourceGroups[0][3]);
         buildBendControls(sourceGroups[0][1]);
+        buildPerformanceControls();
         box=card(sections[5],"EVT","板上事件 · RAM / Flash · 板上回放","统一版由下面按钮控制事件录制，16 个实体键保留演奏。独立事件版还可用 K13～K16 控制。");
         takeInfo=text(box,"连接新版 FPGA 固件后读取录制状态。",13,MUTED);
         text(box,"录的是按键和表情事件，不是音频；保存在板上，当前不提供文件导出。停止后可直接回放或保存，无需先回放才能保存。",12,MUTED);
@@ -290,7 +303,7 @@ public final class MainActivity extends Activity {
         logStart=button(box,"REC_START · 开始事件日志",this::startRecording,true,1);
         logStop=button(box,"REC_STOP · 停止事件日志",this::stopRecording,true);
         button(box,"导出事件日志 .txt",this::exportLog,false);
-        button(box,"切到日志配置 · 8 键 / FSR / 复音 16",this::configureLog,true);
+        button(box,"一键切到日志配置 · 8 键 / 关闭延音 / FSR",this::configureLog,true);
         logs=text(box,"接收窗口\n",12,Theme.PANEL_TEXT);logs.setTextIsSelectable(true);logs.setTypeface(Typeface.MONOSPACE);logs.setPadding(dp(14),dp(13),dp(14),dp(13));logs.setBackground(rounded(Theme.PANEL,Theme.R_PANEL));logs.setLineSpacing(dp(2),1);
         installDraftBindings();buildDrawer(root);uiReady=true;showSection(0);showSource(0);refreshControlUi();
         TextView footer=text(sections[0],"FPGA MUSIC LAB  ·  孤独摇滚 · 让灵感在指尖发声",11,MUTED);footer.setGravity(Gravity.CENTER);footer.setLetterSpacing(0.06f);footer.setBackground(rounded(0x8cfff6fb,Theme.R_CHIP));
@@ -316,7 +329,7 @@ public final class MainActivity extends Activity {
         unavailable(sourceGroups[0][2],"本音源暂不支持音色切换：当前只有正弦。由阶段 E1 补齐，成本：中。");
         text(sourceGroups[1][0],"固定 8 路光束触发；当前无需设置触发模式。",13,MUTED);
         for(int source=1;source<3;source++){
-            unavailable(sourceGroups[source][1],"本音源暂不支持定弦、弯音和移调。由阶段 E2 补齐，成本：低；目前音高由固定音符表决定。");
+            text(sourceGroups[source][1],"支持混音页的共享移调与 A4 标准音；逐弦定弦和逐声部弯音尚未实现，须在 E 的 100 CLS 预算内另作评估。",13,MUTED);
             unavailable(sourceGroups[source][5],"本音源暂不支持 HOLD / POLY：使用固定的 32 复音与音符时长。延音与复音分源列入阶段 E 资源审查，成本按高类风险处理、尚未测量；未获预算前不启用。");
         }
         for(int source=0;source<3;source++)unavailable(sourceGroups[source][6],source==0?
@@ -380,7 +393,7 @@ public final class MainActivity extends Activity {
     private void bindDraft(String key,int section,String label,Supplier<String> draft,View... inputs){
         Button apply=findButton(label);LinearLayout parent=(LinearLayout)apply.getParent();TextView badge=new TextView(this);badge.setTextSize(10);badge.setTextColor(Theme.PINK_INK);badge.setGravity(Gravity.END);parent.addView(badge,parent.indexOfChild(apply));
         draftBindings.add(new DraftBinding(key,section,apply,badge,draft));controlState.edit(key,section,draft.get());
-        String scope=section==2||section==4?"作用于：全局混音":key.equals("tone")||key.equals("vibrato")||key.equals("bank")?"作用于：红外 + 手势（共用一套参数）":"作用于：触摸键盘";
+        String scope=key.equals("perf_tuning")?"作用于：红外 + 手势（共享移调与标准音）":section==2||section==4?"作用于：全局混音":key.equals("tone")||key.equals("vibrato")||key.equals("bank")||key.equals("perf_vib")?"作用于：红外 + 手势（共用一套参数）":"作用于：触摸键盘";
         TextView scopeLabel=new TextView(this);scopeLabel.setText(scope);scopeLabel.setTextSize(12);scopeLabel.setTextColor(MUTED);parent.addView(scopeLabel,parent.indexOfChild(apply)+1);
         for(View input:inputs){deviceInputs.add(input);if(input instanceof Spinner){Spinner spinner=(Spinner)input;AdapterView.OnItemSelectedListener previous=spinner.getOnItemSelectedListener();spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
                 public void onItemSelected(AdapterView<?> p,View view,int position,long id){if(previous!=null)previous.onItemSelected(p,view,position,id);refreshControlUi();}
@@ -393,6 +406,10 @@ public final class MainActivity extends Activity {
     private String clean(EditText input){return ControlState.numbers(input.getText().toString());}
     private String adsrValue(int target){AdsrProfile p=adsrDrafts[target];return p.attack+","+p.decay+","+p.sustain+","+p.release;}
     private void installDraftBindings(){
+        bindDraft("perf_pitch",1,"应用弯音与滑音",this::pitchDraft,performanceBars[0],performanceBars[1]);
+        bindDraft("perf_vib",1,"应用颤音参数",this::vibratoDraft,performanceBars[2],performanceBars[3],performanceBars[4]);
+        bindDraft("perf_echo",2,"应用回声抽头",()->choice(echoChoice),echoChoice);
+        bindDraft("perf_tuning",2,"应用移调与标准音",()->""+tuningDraft(),tuningBar,standardPitch);
         bindDraft("touch",1,"应用 8 / 16 键模式",()->choice(touchMode),touchMode);
         bindDraft("serial",1,"应用串行极性",()->choice(serialPolarity),serialPolarity);
         bindDraft("pressure",1,"应用压力用途",()->choice(pressureChoice),pressureChoice);
@@ -423,6 +440,10 @@ public final class MainActivity extends Activity {
         if(c==null)confirmed[9]=mapping==null?null:join(mapping);
         for(int n=0;n<keys.length;n++)controlState.confirm(keys[n],connected?confirmed[n]:null);
         for(String key:new String[]{"tone","vibrato","bank"})controlState.confirm(key,connected?acknowledged.get(key):null);
+        controlState.confirm("perf_pitch",connected&&confirmedPitch!=null?PerformanceParams.values(Arrays.copyOf(confirmedPitch,3)):null);
+        controlState.confirm("perf_vib",connected&&confirmedVibrato!=null?PerformanceParams.values(confirmedVibrato):null);
+        controlState.confirm("perf_echo",connected&&confirmedEcho!=null?""+confirmedEcho[0]:null);
+        controlState.confirm("perf_tuning",connected&&confirmedPitch!=null?""+confirmedPitch[3]:null);
         for(int target=0;target<2;target++){String key="adsr"+target;controlState.edit(key,1,adsrValue(target));controlState.confirm(key,connected?acknowledged.get(key):null);}
         for(int key=0;key<7;key++){controlState.edit("bend"+key,1,""+voiceBend.value(key));controlState.confirm("bend"+key,connected&&bendConfirmed[key]!=null?""+bendConfirmed[key]:null);}
         for(DraftBinding binding:draftBindings){boolean dirty=controlState.dirty(binding.key);binding.badge.setText(dirty?"•待发送"+(controlState.confirmed(binding.key)==null?" · 设备值未知":" · 设备："+controlState.confirmed(binding.key)):"✓ 已确认");binding.badge.setTextColor(dirty?Theme.PINK_INK:Theme.MUTED);((SegmentButton)binding.apply).selection(dirty?ControlState.Selection.DRAFT:ControlState.Selection.OFF);binding.apply.setEnabled(controlState.enabled());}
@@ -461,7 +482,7 @@ public final class MainActivity extends Activity {
     }
     private void configureLog(){
         touchMode.setSelection(0);holdChoice.setSelection(0);polyChoice.setSelection(4);analogChoice.setSelection(0);
-        task(()->{link.command("HOLD,0","OK");link.command("POLY,16","OK");link.command("TOUCH,8","OK");link.command("ANALOG,0","OK");readControls();},"日志配置已确认；若 REC_START 返回 ERR,MISSING，当前固件未启用日志通路");
+        task(()->{link.command("HOLD,0","OK");link.command("TOUCH,8","OK");link.command("ANALOG,0","OK");readControls();},"日志配置已确认；若 REC_START 返回 ERR,MISSING，当前固件未启用日志通路");
     }
     private void acceptLedState(LedState value){
         confirmedLed=value;acceptDisplay(value.activeMode,value.shownRatio,value.shownPhase,(value.flags&2)!=0);
@@ -643,8 +664,8 @@ public final class MainActivity extends Activity {
         intent.putExtra(Intent.EXTRA_TITLE,exportingScore.id+".csv");startActivityForResult(intent,EXPORT_SCORE);
     }
     private void buildBendControls(LinearLayout content){
-        LinearLayout box=card(content,"06","七声部弯音","弯音是目标音高偏移。按住和弦时分别调节第 1～7 键，范围 ±1200 音分；FSR 全局音高比率继续叠加。");
-        text(box,"过渡速率目前由固件固定（从原音上行 1200 音分约 21ms），下一版可调。作用于：触摸键盘。",12,MUTED);
+        LinearLayout box=card(content,"06","七声部弯音","弯音是目标音高偏移。按住和弦时分别调节第 1～7 键；已回读设备时，拖动会限制在设备当前弯音范围内。FSR 全局音高比率继续叠加。");
+        text(box,"作用于：前七触摸声部。范围与过渡速率在下方弯音 / 滑音卡片调整；缩小范围后，原草稿须重新拖动或回正再发送。",12,MUTED);
         for(int i=0;i<7;i++){
             final int index=i;bendLabels[i]=text(box,"",13,MUTED);
             SeekBar bar=new SeekBar(this);bendBars[i]=bar;bar.setMax(2400);bar.setProgress(1200);
@@ -654,7 +675,9 @@ public final class MainActivity extends Activity {
             bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
                 public void onProgressChanged(SeekBar b,int p,boolean fromUser){
                     if(!fromUser)return;
-                    voiceBend.edit(index,p-1200,link.connected());updateBendLabel(index);
+                    int cents=confirmedPitch==null?p-1200:PerformanceParams.clampBend(p-1200,confirmedPitch[0],confirmedPitch[1]);
+                    if(cents!=p-1200)b.setProgress(cents+1200);
+                    voiceBend.edit(index,cents,link.connected());updateBendLabel(index);
                     if(link.connected())scheduleBend();else setStatus("音高为离线草稿；连接后点击发送全部音高");
                 }
                 public void onStartTrackingTouch(SeekBar b){}
@@ -664,6 +687,7 @@ public final class MainActivity extends Activity {
         text(box,"连线时约每 100ms 发送一个最新位置，逐条等 OK；其他任务期间暂存拖动。未连接时只编辑草稿，重连后须手动发送。已确认值是目标音高，FPGA 平滑过渡；改动持续到再次调节、全部回正或板子复位。",12,MUTED);
         button(box,"发送全部音高",()->{
             final int[] values=voiceBend.snapshot();voiceBend.clearPending();
+            for(int cents:values)if(!bendWithinDevice(cents))return;
             task(()->{try{for(int i=0;i<7;i++){link.command(VoiceBend.command(i+1,values[i]),"OK");final int key=i;main.post(()->confirmBend(key,values[key]));}}
                 catch(Exception e){main.post(this::forgetBendConnection);throw e;}},"七个声部目标音高均已确认");
         },true,1);
@@ -769,9 +793,15 @@ public final class MainActivity extends Activity {
         if(busy){if(voiceBend.hasPending())scheduleBend();return;}
         final int key=voiceBend.take();if(key<0)return;
         final int cents=voiceBend.value(key);
+        if(!bendWithinDevice(cents)){voiceBend.clearPending();return;}
         task(()->{try{link.command(VoiceBend.command(key+1,cents),"OK");main.post(()->confirmBend(key,cents));}
             catch(Exception e){main.post(this::forgetBendConnection);throw e;}},"声部 "+(key+1)+" 目标音高已确认："+VoiceBend.label(cents));
         if(voiceBend.hasPending())scheduleBend();
+    }
+    private boolean bendWithinDevice(int cents){
+        if(confirmedPitch==null){setStatus("请先读取设备演奏参数，再发送弯音");return false;}
+        if(PerformanceParams.bendAllowed(cents,confirmedPitch[0],confirmedPitch[1]))return true;
+        setStatus("弯音草稿超出设备已确认范围，请重新拖动该声部或全部回正");return false;
     }
     private void buildAdsrControls(LinearLayout content){
         LinearLayout box=card(content,"05","ADSR 包络编辑","滑块或拖动曲线控制点编辑；曲线表示待发送参数，点击应用后新发音生效。");
@@ -822,7 +852,7 @@ public final class MainActivity extends Activity {
         if(recording||recordDraining){alert("请先停止录制并等待 REC_END，再重新连接；也可点断开以中断此次录制。");return;}
         int selected=devices.getSelectedItemPosition();if(selected<0||selected>=paired.size()){alert("请先刷新并选择已配对 HC-05");return;}
         BluetoothDevice device=paired.get(selected);forgetBendConnection();forgetControls();mapping=null;mapInfo.setText("连接中，尚未读取键位");
-        task(()->{link.connect(device);link.command("PING","PONG");readMapping();readControls();
+        task(()->{link.connect(device);link.command("PING","PONG");readMapping();readControls();readPerformance();
             try{TakeStatus take=RecordingSupport.readEvents(link);main.post(()->showTake(take));}
             catch(RecordingSupport.UnsupportedFeatureException e){main.post(()->takeInfo.setText(e.getMessage()));}
             readLedState();main.post(()->{refreshControlUi();scheduleDisplayPoll();});
@@ -839,6 +869,120 @@ public final class MainActivity extends Activity {
     private void task(Work work,String done){if(busy)return;setBusy(true);cancelled=false;setStatus("处理中…");worker.execute(()->{try{work.run();main.post(()->{setBusy(false);if(!cancelled)setStatus(done);});}catch(Exception e){main.post(()->{setBusy(false);if(!cancelled){if(!link.connected()){mapping=null;forgetControls();recordingInterrupted();mapInfo.setText("连接已关闭，请重新连接后重试");}setStatus("未完成："+e.getMessage());alert(e.getMessage());}});}});}
     private void recordingInterrupted(){if(recording||recordDraining){recordingOverflow=true;recordingCompleted=false;}recording=false;recordDraining=false;}
     private void disconnect(){forgetBendConnection();forgetControls();cancelled=true;link.close();mapping=null;recordingInterrupted();mapInfo.setText("尚未连接");setStatus("已断开。下载未提交时旧谱保留；重新连接后可重新下载。");}
+    private String pitchDraft(){
+        int range=performanceBars[0].getProgress();
+        int step=defaultGlide?PerformanceParams.DEFAULT_SLEW:PerformanceParams.glideStep(range,performanceBars[1].getProgress());
+        return PerformanceParams.rangeLower(range)+","+PerformanceParams.rangeUpper(range)+","+step;
+    }
+    private int tuningDraft(){return PerformanceParams.tuningRatio(tuningBar.getProgress()-12,new int[]{415,432,440,442,466}[standardPitch.getSelectedItemPosition()]);}
+    private String vibratoDraft(){return PerformanceParams.vibratoValues(performanceBars[2].getProgress()/10.0,performanceBars[3].getProgress(),performanceBars[4].getProgress());}
+    private void buildPerformanceControls(){
+        LinearLayout pitch=card(sourceGroups[0][1],"PITCH","弯音范围与滑音","作用于：前七个扫描键。滑音时间标定为原音到所选正向弯音上限；距离较短或下行时，实际时间会更短。修改范围前松键并停止曲谱。");
+        performanceState=text(pitch,"演奏参数尚未读取；下方均为草稿。需要配套参数版位流。",13,MUTED);
+        button(pitch,"读取设备演奏参数",()->task(this::readPerformance,"已读取弯音、滑音与颤音参数"),true);
+        performanceTempoLabel=text(pitch,"",13,INK);performanceTempo=new SeekBar(this);performanceTempo.setMin(20);performanceTempo.setMax(300);performanceTempo.setProgress(125);pitch.addView(performanceTempo);
+        performanceTempo.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(SeekBar bar,int value,boolean user){updatePerformanceLabels();}
+            public void onStartTrackingTouch(SeekBar bar){}public void onStopTrackingTouch(SeekBar bar){}
+        });
+        button(pitch,"参考速度恢复 125 BPM",()->performanceTempo.setProgress(125),false);
+        LinearLayout tuning=card(sections[2],"TUNE","移调与 A4 标准音","作用于红外与手势（共用一套参数）。为保留四档回声，触摸键移调未保留，触摸键与吉他保持原音高。本版仍与电位器音高用途 ANALOG=2 互斥。");
+        tuningLabel=text(tuning,"移调 0 半音（0 音分）",13,INK);tuningBar=new SeekBar(this);tuningBar.setMax(24);tuningBar.setProgress(12);tuning.addView(tuningBar);
+        tuningBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(SeekBar b,int value,boolean user){tuningLabel.setText(String.format(Locale.ROOT,"移调 %+d 半音（%+d 音分）",value-12,(value-12)*100));refreshControlUi();}
+            public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}
+        });
+        standardPitch=choices(tuning,"A4 标准音",new String[]{"415 Hz","432 Hz","440 Hz","442 Hz","466 Hz"});standardPitch.setSelection(2);
+        button(tuning,"移调恢复 0 半音并应用当前 A4",()->{tuningBar.setProgress(12);applyPerformance("PITCH,,,,"+tuningDraft());},true);
+        button(tuning,"A4 恢复 440 Hz 并应用当前移调",()->{standardPitch.setSelection(2);applyPerformance("PITCH,,,,"+tuningDraft());},true);
+        button(tuning,"应用移调与标准音",()->applyPerformance("PITCH,,,,"+tuningDraft()),true);
+        button(tuning,"移调 / 标准音同时恢复 0 / 440",()->{tuningBar.setProgress(12);standardPitch.setSelection(2);applyPerformance("PITCH,,,,16384");},true);
+        int[] minima={50,5,30,5,0},maxima={1200,500,80,100,800},defaults={1200,21,60,27,0};
+        String[] names={"弯音范围","滑音时间","颤音速率","颤音深度","起振延迟"};
+        for(int n=0;n<5;n++){
+            final int parameter=n;LinearLayout parent=n<2?pitch:sensorExpressionPanel;
+            performanceLabels[n]=text(parent,"",13,INK);SeekBar bar=new SeekBar(this);performanceBars[n]=bar;
+            bar.setMin(minima[n]);bar.setMax(maxima[n]);bar.setProgress(defaults[n]);bar.setContentDescription(names[n]);parent.addView(bar);
+            bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+                public void onProgressChanged(SeekBar b,int value,boolean user){if(parameter<2&&user)defaultGlide=false;updatePerformanceLabels();refreshControlUi();}
+                public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}
+            });
+            button(parent,names[n]+" · 恢复默认",()->restorePerformance(parameter),true);
+        }
+        button(pitch,"应用弯音与滑音",()->applyPerformance("PITCH,"+pitchDraft()),true);
+        text(sensorExpressionPanel,"颤音改变音高，震音改变振幅；本栏只调整颤音。全局震音另受资源预算限制，未启用。应用参数会重新计起振延迟，延迟结束后深度逐帧渐入。",12,MUTED);
+        button(sensorExpressionPanel,"应用颤音参数",()->applyPerformance("VIB,"+vibratoDraft()),true);
+        buildEchoControls();
+        text(pitch,"TAKE不保存新增演奏参数；录制前请记下移调和颤音设置，回放前恢复相同值。",12,MUTED);
+        updatePerformanceLabels();
+    }
+    private void buildEchoControls(){
+        LinearLayout box=card(sections[2],"ECHO","四档回声","作用于全局混音，需在音效栏启用回声。长三档只降低湿声采样率，干声保持原样；最长档湿声采样上限约4.07 kHz，低通还会削弱高频。切换档位会清除旧尾音。");
+        echoState=text(box,"设备回声档位尚未回读",13,MUTED);
+        echoChoice=choices(box,"回声名义延时",new String[]{"83.89 ms · 原采样率","167.77 ms · 湿声 1/2 采样率","335.54 ms · 湿声 1/4 采样率","503.32 ms · 湿声 1/6 采样率"});
+        echoDivision=choices(box,"目标节拍比例",new String[]{"1/4 拍","3/8 拍","1/2 拍"});
+        echoLabel=text(box,"",13,INK);echoTempo=new SeekBar(this);echoTempo.setMin(20);echoTempo.setMax(300);echoTempo.setProgress(125);box.addView(echoTempo);
+        echoTempo.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(SeekBar b,int value,boolean user){updateEchoLabels();}
+            public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}
+        });
+        AdapterView.OnItemSelectedListener listener=new AdapterView.OnItemSelectedListener(){
+            public void onItemSelected(AdapterView<?> p,View view,int position,long id){updateEchoLabels();refreshControlUi();}
+            public void onNothingSelected(AdapterView<?> p){}
+        };echoChoice.setOnItemSelectedListener(listener);echoDivision.setOnItemSelectedListener(listener);
+        button(box,"按 BPM 选择最近抽头（草稿）",()->{echoChoice.setSelection(PerformanceParams.echoTap(echoTempo.getProgress(),echoDivision.getSelectedItemPosition()));updateEchoLabels();},false);
+        button(box,"回声抽头恢复默认 83.89 ms",()->{echoChoice.setSelection(0);applyPerformance("EFFECT2,0");},true);
+        button(box,"回声参考恢复 125 BPM / 1/4 拍",()->{echoTempo.setProgress(125);echoDivision.setSelection(0);updateEchoLabels();},false);
+        button(box,"应用回声抽头",()->applyPerformance("EFFECT2,"+choice(echoChoice)),true);
+        text(box,"仅选择最近的四档，不能与任意BPM严格同步；实际误差显示在上方。合唱速率保留旧固定值约0.745 Hz。TAKE不保存新增参数，录制和回放前需使用相同的移调、颤音与回声设置。",12,MUTED);
+        updateEchoLabels();
+    }
+    private void updateEchoLabels(){
+        if(echoTempo==null)return;
+        int bpm=echoTempo.getProgress(),division=echoDivision.getSelectedItemPosition(),tap=echoChoice.getSelectedItemPosition();
+        double target=PerformanceParams.echoTargetMilliseconds(bpm,division),actual=PerformanceParams.echoMilliseconds(tap);
+        echoLabel.setText(String.format(Locale.ROOT,"参考 %d BPM（每拍 %.2f ms）；目标 %.2f ms；草稿 %.2f ms（约 %.3f 拍；误差 %+.2f ms）",bpm,60000.0/bpm,target,actual,actual*bpm/60000,actual-target));
+    }
+    private void updatePerformanceLabels(){
+        if(performanceBars[4]==null)return;
+        int bpm=performanceTempo.getProgress(),range=performanceBars[0].getProgress();
+        performanceTempoLabel.setText(String.format(Locale.ROOT,"参考速度 %d BPM（每拍 %.2f ms；仅用于单位说明）",bpm,60000.0/bpm));
+        performanceLabels[0].setText(String.format(Locale.ROOT,"弯音范围 ±%d 音分（±%.2f 半音）",range,range/100.0));
+        int step=defaultGlide?PerformanceParams.DEFAULT_SLEW:PerformanceParams.glideStep(range,performanceBars[1].getProgress());
+        performanceLabels[1].setText("滑音全程约 "+PerformanceParams.timeLabel(PerformanceParams.glideMilliseconds(range,step),bpm)+(defaultGlide?" · 默认过渡速率":" · 实际全程时间"));
+        double hz=performanceBars[2].getProgress()/10.0;
+        performanceLabels[2].setText(String.format(Locale.ROOT,"颤音速率 %.1f Hz（每拍约 %.2f 次 @%d BPM）",hz,hz*60/bpm,bpm));
+        int cents=performanceBars[3].getProgress();performanceLabels[3].setText(String.format(Locale.ROOT,"颤音深度约 ±%d 音分（约 ±%.2f 半音）",cents,cents/100.0));
+        performanceLabels[4].setText("起振延迟 "+PerformanceParams.timeLabel(performanceBars[4].getProgress(),bpm));
+    }
+    private void restorePerformance(int parameter){
+        int[] defaults={1200,21,60,27,0};if(parameter==1)defaultGlide=true;performanceBars[parameter].setProgress(defaults[parameter]);updatePerformanceLabels();
+        String[] commands={"PITCH,8192,32768","PITCH,,,4096","VIB,8,3478","VIB,,,256","VIB,,,,0"};applyPerformance(commands[parameter]);
+    }
+    private void applyPerformance(String command){
+        if(command.startsWith("PITCH,")){
+            String[] fields=command.split(",",-1);
+            if(fields.length==5&&!fields[4].isEmpty()&&confirmedControls!=null&&!PerformanceParams.tuningAllowed(confirmedControls.analog,Integer.parseInt(fields[4]))){
+                performanceState.setText("当前为电位器音高 ANALOG=2，不能启用移调 / 非440标准音；请先在模拟用途切到 0 / 1 / 3 / 4。");return;
+            }
+        }
+        task(()->{link.command(command,"OK");readPerformance();},"演奏参数已确认；设备回读显示在弯音与滑音卡片");
+    }
+    private void readPerformance()throws Exception{
+        final int[] pitch=PerformanceParams.parsePitch(link.command("PITCH,?","PITCH"));
+        final int[] vibrato=PerformanceParams.parseVibrato(link.command("VIB,?","VIB"));
+        final int[] echo=PerformanceParams.parseEcho(link.command("EFFECT2,?","EFFECT2"));
+        main.post(()->{
+            if(cancelled||!link.connected())return;
+            confirmedPitch=pitch;confirmedVibrato=vibrato;confirmedEcho=echo;
+            echoState.setText(String.format(Locale.ROOT,"设备已确认：回声 %.5f ms（第%d档）",PerformanceParams.echoMilliseconds(echo[0]),echo[0]+1));
+            int range=(int)Math.round(PerformanceParams.bendCents(pitch[1]));
+            performanceState.setText(String.format(Locale.ROOT,"设备已确认：弯音 %.2f～%+.2f 音分；本范围正向全程约 %.2f ms；\n红外 / 手势颤音 %.4f Hz，深度约 ±%.2f 音分，整体起振延迟 %.2f ms。",
+                PerformanceParams.bendCents(pitch[0]),PerformanceParams.bendCents(pitch[1]),PerformanceParams.glideMilliseconds(range,pitch[2]),
+                PerformanceParams.vibratoHz((vibrato[0]<<16)|vibrato[1]),PerformanceParams.depthCents(vibrato[2]),PerformanceParams.delayMilliseconds(vibrato[3]))+"\n红外 / 手势："+PerformanceParams.tuningLabel(pitch[3]));
+            refreshControlUi();
+        });
+    }
     private void buildControls(LinearLayout content){
         LinearLayout box=card(content,"K","键盘模式与演奏控制","切换前松开全部键，停止曲谱并关闭延音。选择只修改草稿，点击应用后才发送。");
         controlsInfo=text(box,"尚未读取设备状态",14,ACCENT);
@@ -853,7 +997,7 @@ public final class MainActivity extends Activity {
         serialPolarity=choices(box,"16 键串行极性（匹配模块 TP1 / SAHL）",new String[]{"低有效：参考工程 TP1 开路","高有效：TP1 已装跳帽"});
         button(box,"应用串行极性",()->{if(recording||recordDraining){alert("请先结束事件录制");return;}applyControl("SERIAL,"+serialPolarity.getSelectedItemPosition(),"串行极性已确认；进入串行时重新等待校准");},true);
         box=sourceGroups[0][4];
-        text(box,"触摸颤音仅在 ANALOG,3 电位器档可用（当前为全局单向下摆）；滑音时间、颤音速率 / 深度 / 延迟由阶段 C2～C5（免～低成本）补齐。",12,MUTED);
+        text(box,"触摸颤音仍使用 ANALOG,3 电位器档，保留原单向下摆。前七扫描键的弯音范围和滑音时间可在“音高与弯音”分组调整；红外 / 手势颤音参数在对应页签。",12,MUTED);
         pressureChoice=choices(box,"FSR 压力用途（16 键时由手机切换）",new String[]{"控制触摸音量","控制触摸音高"});
         button(box,"应用压力用途",()->applyControl("PRESSURE,"+pressureChoice.getSelectedItemPosition(),"压力用途已确认"),true);
         box=sourceGroups[0][5];
@@ -877,6 +1021,7 @@ public final class MainActivity extends Activity {
         analogChoice=choices(box,"模拟输入用途",new String[]{"0 · 原 FSR 压力（保持原标定）","1 · 滑动变阻器：总音量","2 · 滑动变阻器：触摸音高 0.5～1 倍","3 · 滑动变阻器：触摸颤音深度","4 · 滑动变阻器：音效湿度"});
         button(box,"应用模拟输入用途",()->{
             if(recording||recordDraining){alert("请先结束事件录制");return;}
+            if(analogChoice.getSelectedItemPosition()==2&&confirmedPitch!=null&&confirmedPitch[3]!=16384){adcInfo.setText("当前移调 / 标准音基准不是原音，不能切到电位器音高；请先恢复 0 半音 / A4=440。");return;}
             applyControl("ANALOG,"+analogChoice.getSelectedItemPosition(),"模拟输入用途已确认");
         },true);
         text(box,"滑动变阻器复用原 ADC 模拟输入，替换 FSR，不是同时采两路。滑杆音量受手机总音量上限约束；ADC 必须经过分压保持在 0～1V。湿度控制需先开启回声或合唱。",12,MUTED);
@@ -913,7 +1058,9 @@ public final class MainActivity extends Activity {
         });
     }
     private void forgetControls(){
-        mapping=null;confirmedControls=null;confirmedSerial=null;confirmedCalibration=null;confirmedLed=null;confirmedTake=null;acknowledged.clear();controlState.connected(false);
+        mapping=null;confirmedControls=null;confirmedPitch=null;confirmedVibrato=null;confirmedEcho=null;confirmedSerial=null;confirmedCalibration=null;confirmedLed=null;confirmedTake=null;acknowledged.clear();controlState.connected(false);
+        if(performanceState!=null)performanceState.setText("演奏参数未知，请重新读取设备参数");
+        if(echoState!=null)echoState.setText("回声档位未知，请重新读取设备参数");
         if(controlsInfo!=null)controlsInfo.setText("模式未知，请连接并读取设备状态");if(adcInfo!=null)adcInfo.setText("ADC 尚未读取");
         if(xyInfo!=null)xyInfo.setText("轨迹参数未知；列表为待发送草稿。");if(ledStatus!=null)ledStatus.setText("显示状态未知，请重新读取。");
         if(takeInfo!=null)takeInfo.setText("板上事件状态未知，请连接后读取。");

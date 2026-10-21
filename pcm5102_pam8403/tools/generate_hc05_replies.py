@@ -12,10 +12,14 @@ FORMATS = [
     'MAP,' + ','.join(['##'] * 7) + '\r\n', 'OK,MAP_RESET\r\n',
     'ERR,KEY\r\n', 'ERR,NOTE\r\n', 'OK,MAP,#,##\r\n',
     'HOLD,#\r\n', 'POLY,##\r\n', 'CTRL2,#,#,#,#,#,##,#,##,##\r\n',
+    'PITCH,####,####,####,####\r\n',
+    'VIB,####,####,###,####\r\n',
+    'EFFECT2,#\r\n',
 ]
 
 
 def generate():
+    assert len(FORMATS) <= 32
     rom = [0] * 1024
     for kind, template in enumerate(FORMATS):
         assert len(template) <= 32

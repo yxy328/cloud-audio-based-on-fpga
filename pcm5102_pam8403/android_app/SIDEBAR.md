@@ -1,6 +1,6 @@
 # 阶段 A：侧边栏与草稿 / 确认状态
 
-2026-10-21，本文记录阶段A的Code16 / 1.15-sidebar初次交付。后续B1已升级为Code17并加入钢琴键盘与图形映射，当前版本以 [App首页](README.md) 和 [B1说明](../CHROMATIC_KEYS.md) 为准。
+2026-10-21，本文记录阶段A的Code16 / 1.15-sidebar初次交付，下面的占位清单保留当时状态。当前Code22 /1.21-echo已加入演奏参数与四档回声，C7移调仅覆盖红外 /手势，详细范围以 [App首页](README.md) 和 [演奏参数说明](../PERFORMANCE_PARAMS.md) 为准；B1接线见 [半音阶说明](../CHROMATIC_KEYS.md)。
 [安装包](dist/FPGA-Music-Unified.apk) · [方案审查](../SIDEBAR_REVIEW.md) · [App 首页](README.md)
 
 ## 分区与入口

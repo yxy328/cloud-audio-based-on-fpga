@@ -42,6 +42,12 @@ module hc05_keymap #(
     output reg bend_write,bend_reset,
     output reg [2:0] bend_index,
     output reg [15:0] bend_ratio,
+    output reg [15:0] bend_min,bend_max,bend_slew,tuning_ratio,
+    output reg [31:0] vibrato_inc,
+    output reg [1:0] echo_tap,
+    output reg [9:0] vibrato_depth,
+    output reg [15:0] vibrato_delay,
+    output reg vibrato_update,
     output reg xy_write,
     output reg [1:0] xy_ratio,xy_phase,
     output reg visual_write,
@@ -140,6 +146,9 @@ module hc05_keymap #(
     localparam [5:0] CMD_AREC_ACK=6'd56;
     localparam [5:0] CMD_POLY_SET=6'd57;
     localparam [5:0] CMD_CTRL2_QUERY=6'd58;
+    localparam [5:0] CMD_PITCH_SET=6'd59;
+    localparam [5:0] CMD_VIB_SET=6'd60;
+    localparam [5:0] CMD_EFFECT2_SET=6'd62;
     // END GENERATED HC05 COMMAND IDS
     localparam NO_ERROR=0, LENGTH_ERROR=1, CHAR_ERROR=2, UART_ERROR=3;
     reg [3:0] state;
@@ -178,6 +187,11 @@ module hc05_keymap #(
     reg [2:0] field_index, field_count;
     reg [15:0] accumulator, value0, value1, value2;
     reg have_digit;
+    reg [1:0] performance_parse;
+    wire [15:0] performance3=(field_index==3 && have_digit) ? accumulator : performance_parse==1 ? tuning_ratio : vibrato_delay;
+    wire [15:0] pitch0=(field_index==0 && have_digit) ? accumulator : value0;
+    wire [15:0] pitch1=(field_index==1 && have_digit) ? accumulator : value1;
+    wire [15:0] pitch2=(field_index==2 && have_digit) ? accumulator : value2;
     (* syn_ramstyle="block_ram" *) reg [7:0] command_bytes [0:63];
     reg [7:0] ch;
     reg adsr_parse,adsr_target,adsr_request,adsr_restore;
@@ -303,6 +317,9 @@ module hc05_keymap #(
             xy_write<=0;xy_ratio<=2;xy_phase<=0;
             visual_write<=0;remote_mode<=0;
             bend_parse<=0;bend_write<=0;bend_reset<=0;bend_index<=0;bend_ratio<=16384;
+            performance_parse<=0;bend_min<=8192;bend_max<=32768;bend_slew<=4096;tuning_ratio<=16384;
+            vibrato_inc<=527766;vibrato_depth<=256;vibrato_delay<=0;vibrato_update<=0;
+            echo_tap<=0;
             adsr_parse<=0;adsr_target<=0;adsr_request<=0;adsr_restore<=0;
             adsr_a<=0;adsr_d<=0;adsr_s<=0;adsr_r<=0;value2<=0;
             field_index<=0; field_count<=0; accumulator<=0; value0<=0; value1<=0;
@@ -311,7 +328,7 @@ module hc05_keymap #(
             song_request<=0; rec_start<=0; rec_stop<=0; builtin_play<=0; builtin_stop<=0;
             guitar_pluck<=0;panic<=0;pressure_write<=0;
             sensor_test32<=0;adsr_request<=0;
-            bend_write<=0;bend_reset<=0;
+            bend_write<=0;bend_reset<=0;vibrato_update<=0;
             xy_write<=0;
             visual_write<=0;
             audio_rec_prepare<=0;audio_rec_start<=0;audio_rec_stop<=0;audio_rec_abort<=0;audio_rec_send<=0;audio_rec_ack<=0;
@@ -350,7 +367,7 @@ module hc05_keymap #(
                     DECODE_START:state<=line_error==NO_ERROR ? DECODE_WAIT : EXECUTE;
                     DECODE_WAIT:if(decode_done)state<=EXECUTE;
                     EXECUTE: begin
-                        line_length<=0; line_error<=NO_ERROR;adsr_parse<=0;adsr_restore<=0;bend_parse<=0;control_parse<=0;
+                        line_length<=0; line_error<=NO_ERROR;adsr_parse<=0;adsr_restore<=0;bend_parse<=0;control_parse<=0;performance_parse<=0;
                         // Download owns the binary link; do not inject text on noise or unrelated commands.
                         if(ENABLE_FLASH_AUDIO && audio_stream_busy && (line_error!=NO_ERROR ||
                             (decoded_command!=CMD_AREC_ACK && decoded_command!=CMD_AREC_ABORT)))state<=COLLECT;
@@ -358,6 +375,30 @@ module hc05_keymap #(
                         else if(line_error==LENGTH_ERROR) respond(5'd8,6'd12);
                         else if(line_error==CHAR_ERROR) respond(5'd6,6'd9);
                         else if(decoded_command==CMD_PING) respond(5'd9,6'd6);
+                        else if(decoded_command==CMD_EFFECT2_SET)begin
+                            if(line_length==9 && line[7:0]=="?")begin
+                                reply<={2'd0,echo_tap,108'd0};respond(5'd29,6'd11);
+                            end else begin
+                                performance_parse<=3;parse_numbers(8,1);
+                                value0<={14'd0,echo_tap};
+                            end
+                        end
+                        else if(decoded_command==CMD_VIB_SET)begin
+                            if(line_length==5 && line[7:0]=="?")begin
+                                reply<={vibrato_inc,2'd0,vibrato_depth,vibrato_delay,52'd0};respond(5'd28,6'd24);
+                            end else begin
+                                performance_parse<=2;parse_numbers(4,4);
+                                value0<=vibrato_inc[31:16];value1<=vibrato_inc[15:0];value2<={6'd0,vibrato_depth};
+                            end
+                        end
+                        else if(decoded_command==CMD_PITCH_SET) begin
+                            if(line_length==7 && line[7:0]=="?")begin
+                                reply<={bend_min,bend_max,bend_slew,tuning_ratio,48'd0};respond(5'd27,6'd27);
+                            end else begin
+                                performance_parse<=1;parse_numbers(6,4);
+                                value0<=bend_min;value1<=bend_max;value2<=bend_slew;
+                            end
+                        end
                         else if(decoded_command==CMD_CTRL_QUERY || decoded_command==CMD_CTRL2_QUERY)begin
                             reply<={{3'd0,touch_mode16},{2'd0,effect_mode},effect_wet,
                                 (decoded_command==CMD_CTRL_QUERY ? {3'd0,touch_hold!=0} : {2'd0,touch_hold}),
@@ -538,7 +579,24 @@ module hc05_keymap #(
                     ADSR_WAIT:if(adsr_done && !adsr_request) result(0);
                     DECIMAL: begin
                         if(position==parse_length) begin
-                            if(!have_digit || field_count==0 || field_index!=field_count-1) result(7);
+                            if(performance_parse==1)begin
+                                if(pitch0<8192 || pitch0>15918 || pitch1<16864 || pitch1>32768 || pitch2==0 || performance3<7727 || performance3>34704)result(2);
+                                else if(analog_mode==2 && performance3!=16384)result(3);
+                                else if(rec_busy || recording || take_recording ||
+                                    ((!edit_allowed) && (pitch0!=bend_min || pitch1!=bend_max)))result(1);
+                                else begin bend_min<=pitch0;bend_max<=pitch1;bend_slew<=pitch2;tuning_ratio<=performance3;result(0);end
+                            end else if(performance_parse==2)begin
+                                if({pitch0,pitch1}<32'd263883 || {pitch0,pitch1}>32'd703687 || pitch2>1023 || performance3>39063)result(2);
+                                else if(rec_busy || recording || take_recording)result(1);
+                                else begin
+                                    vibrato_inc<={pitch0,pitch1};vibrato_depth<=pitch2[9:0];
+                                    vibrato_delay<=performance3;vibrato_update<=1;result(0);
+                                end
+                            end else if(performance_parse==3)begin
+                                if(pitch0>3)result(2);
+                                else if(rec_busy || recording || take_recording)result(1);
+                                else begin echo_tap<=pitch0[1:0];result(0);end
+                            end else if(!have_digit || field_count==0 || field_index!=field_count-1) result(7);
                             else if(control_parse!=0) begin
                                 case(control_parse)
                                     1:if(accumulator!=8 && accumulator!=16)result(2);
@@ -553,6 +611,7 @@ module hc05_keymap #(
                                       else begin master_volume<=accumulator[4:0];result(0);end
                                     5:if(accumulator>4)result(2);
                                       else if(rec_busy || recording)result(1);
+                                      else if(accumulator==2 && tuning_ratio!=16384)result(3);
                                       else begin analog_mode<=accumulator[2:0];result(0);end
                                     6:if(accumulator>1)result(2);
                                       else begin pressure_write<=1;pressure_value<=accumulator[0];result(0);end
@@ -575,7 +634,7 @@ module hc05_keymap #(
                                     default:result(7);
                                 endcase
                             end else if(bend_parse) begin
-                                if(value0<1 || value0>7 || accumulator<8192 || accumulator>32768) result(2);
+                                if(value0<1 || value0>7 || accumulator<bend_min || accumulator>bend_max) result(2);
                                 else begin
                                     bend_index<=value0[2:0]-1'b1;bend_ratio<=accumulator;bend_write<=1;result(0);
                                 end
@@ -591,10 +650,12 @@ module hc05_keymap #(
                                 song_request<=1; state<=SONG_WAIT;
                             end
                         end else if(ch==",") begin
-                            if(!have_digit) result(7);
+                            if(!have_digit && performance_parse==0) result(7);
                             else if(field_index>=field_count-1) result(7);
                             else begin
-                                if(field_index==0) value0<=accumulator; else if(field_index==1) value1<=accumulator; else value2<=accumulator;
+                                if(have_digit)begin
+                                    if(field_index==0) value0<=accumulator; else if(field_index==1) value1<=accumulator; else value2<=accumulator;
+                                end
                                 accumulator<=0; have_digit<=0; field_index<=field_index+1'b1; position<=position+1'b1;state<=DECIMAL_READ;
                             end
                         end else if(ch<"0" || ch>"9") result(7);

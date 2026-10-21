@@ -9,7 +9,7 @@ wire signed [15:0] audio_sample,reference_sample;
 wire [31:0] voice_active,reference_active;
 wire [5:0] voice_count,reference_count;
 wire overrun,reference_overrun;
-sensor_poly_audio dut(.*);
+sensor_poly_audio dut(.tuning_ratio(16'd16384),.vibrato_inc(32'd527766),.vibrato_depth(10'd256),.vibrato_delay(16'd0),.vibrato_update(1'b0),.*);
 sensor_poly_audio_reference reference(.clk(clk),.resetn(resetn),.frame_ce(frame_ce),.sensor_ready(sensor_ready),.gesture_valid(gesture_valid),.dir_evaluated(dir_evaluated),.start_dir(start_dir),.end_dir(end_dir),.ir_note_valid(ir_note_valid),.ir_note_index(ir_note_index),.control_timbre(control_timbre),.control_vibrato(control_vibrato),.control_bank(control_bank),.test32(test32),.adsr_config(adsr_config),.audio_sample(reference_sample),.voice_active(reference_active),.voice_count(reference_count),.overrun(reference_overrun));
 integer n,checks=0,pops=0,pairs=0,wraps=0;
 reg [3:0] pair_positions=0;

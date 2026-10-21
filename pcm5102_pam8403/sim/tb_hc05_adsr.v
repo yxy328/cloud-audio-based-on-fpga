@@ -23,7 +23,7 @@ module tb_hc05_adsr;
         .touch_keys(7'd0),.pressure_mode(1'b0),.volume_gain(16'd39321),.pitch_ratio(16'd65535),
         .toggle_play(1'b0),.restart(1'b0));
     midi_note_lut lut(.clk(clk),.resetn(resetn),.note_map(map),.phase_increments(base_steps));
-    fsr_pitch_scaler scaler(.clk(clk),.resetn(resetn),.sample_ce(1'b1),.pitch_ratio(ratio),
+    fsr_pitch_scaler scaler(.bend_min(16'd8192),.bend_max(16'd32768),.bend_slew(16'd4096),.clk(clk),.resetn(resetn),.sample_ce(1'b1),.pitch_ratio(ratio),
         .note_increments(base_steps),.phase_increments(steps));
     initial forever begin
         @(negedge tx);

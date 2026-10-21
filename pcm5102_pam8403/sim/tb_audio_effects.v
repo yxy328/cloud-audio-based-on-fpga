@@ -8,7 +8,7 @@ module tb_audio_effects;
     wire valid;
     always #10 clk=~clk;
     audio_effects #(.ADDRESS_BITS(12)) dut(.clk(clk),.resetn(rst),.sample_valid(ce),.dry(dry),
-        .mode(mode),.wet(wet),.sample(pcm),.valid(valid));
+        .mode(mode),.wet(wet),.echo_tap(2'd0),.sample(pcm),.valid(valid));
     integer memory[0:4095];
     integer pointer=0,filled=0,last_mode=0,lfo=0,i,j,tap,delay_n,expected,feedback,tri_n;
     integer tails=0,saturations=0;

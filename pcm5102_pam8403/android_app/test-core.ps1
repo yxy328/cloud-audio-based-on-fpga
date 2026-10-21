@@ -2,6 +2,10 @@ $ErrorActionPreference = 'Stop'
 Push-Location $PSScriptRoot
 try {
     New-Item -ItemType Directory -Force -Path build\core | Out-Null
+    & javac --release 8 -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\PerformanceParams.java core_test\PerformanceParamsTest.java
+    if ($LASTEXITCODE -ne 0) { throw 'Performance parameters compilation failed' }
+    & java -cp build\core cn.fpga.score.PerformanceParamsTest
+    if ($LASTEXITCODE -ne 0) { throw 'Performance parameters tests failed' }
     & javac --release 8 -Xlint:-options -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\LedState.java app\src\main\java\cn\fpga\score\LedFrame.java core_test\LedProtocolTest.java
     if ($LASTEXITCODE -ne 0) { throw 'LED protocol compilation failed' }
     & java -cp build\core cn.fpga.score.LedProtocolTest
