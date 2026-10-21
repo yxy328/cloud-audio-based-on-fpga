@@ -2,7 +2,7 @@
 // Bit-level UART tests; accelerated divisor, independent TX decoder.
 module tb_hc05_keymap;
     localparam BIT_TICKS=100;
-    localparam [55:0] DEFAULT_MAP={8'd71,8'd69,8'd67,8'd65,8'd64,8'd62,8'd60};
+    localparam [55:0] DEFAULT_MAP={8'd66,8'd65,8'd64,8'd63,8'd62,8'd61,8'd60};
     reg clk=0; always #10 clk=~clk;
     reg resetn=0,rx=1,ready=0,song=0,notes=0,recording=0;
     wire tx;
@@ -76,17 +76,17 @@ module tb_hc05_keymap;
         expected_count=0;
         repeat(5) @(negedge clk);resetn=1;
         transact("PING\n",5,{"PONG",8'd13,"\n"});
-        transact({"MAP?",8'd13,"\n"},6,{"MAP,60,62,64,65,67,69,71",8'd13,"\n"});
+        transact({"MAP?",8'd13,"\n"},6,{"MAP,60,61,62,63,64,65,66",8'd13,"\n"});
         transact("MAP,1,67\n",9,{"ERR,BUSY",8'd13,"\n"});
         ready=1;
         transact({"MAP,1,67",8'd13,"\n"},10,{"OK,MAP,1,67",8'd13,"\n"});
         if(map[7:0]!==67 || steps[31:0]!==34480283) $fatal(1,"G4 edit did not reach DDS step");
-        transact("MAP?\n",5,{"MAP,67,62,64,65,67,69,71",8'd13,"\n"});
+        transact("MAP?\n",5,{"MAP,67,61,62,63,64,65,66",8'd13,"\n"});
         notes=1;transact("MAP,1,60\n",9,{"ERR,BUSY",8'd13,"\n"});
         transact("MAP_RESET\n",10,{"ERR,BUSY",8'd13,"\n"});notes=0;
         song=1;transact("MAP,2,60\n",9,{"ERR,BUSY",8'd13,"\n"});
         transact("PING\n",5,{"PONG",8'd13,"\n"});
-        transact("MAP?\n",5,{"MAP,67,62,64,65,67,69,71",8'd13,"\n"});song=0;
+        transact("MAP?\n",5,{"MAP,67,61,62,63,64,65,66",8'd13,"\n"});song=0;
         recording=1;transact("MAP_RESET\n",10,{"ERR,BUSY",8'd13,"\n"});recording=0;
         if(map[7:0]!==67) $fatal(1,"Busy command changed map");
         transact("MAP,0,60\n",9,{"ERR,KEY",8'd13,"\n"});
@@ -132,7 +132,7 @@ module tb_hc05_keymap;
         transact("PING\n",5,{"PONG",8'd13,"\n"});
         // Back-to-back queries queue while a longer reply is still sending.
         for(k=0;k<8;k=k+1) send("MAP?\n",5);
-        for(k=0;k<8;k=k+1) expect_reply({"MAP,60,62,64,65,67,69,71",8'd13,"\n"});
+        for(k=0;k<8;k=k+1) expect_reply({"MAP,60,61,62,63,64,65,66",8'd13,"\n"});
         send({8'd13,"\n\n"},3);repeat(3000) @(negedge clk);
         if(reply_count!=expected_count) $fatal(1,"CRLF/blank line emitted extra response");
         transact("MAP,1,67\n",9,{"OK,MAP,1,67",8'd13,"\n"});

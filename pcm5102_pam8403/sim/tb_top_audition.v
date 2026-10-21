@@ -140,11 +140,20 @@ module tb_top_audition;
             repeated_offs=repeated_offs+1;
         previous_audition_gate=dut.downloaded_audition && dut.downloaded_gate;
     end
+    task natural_mapping;begin
+        transact("MAP,2,62\n",9,{"OK,MAP,2,62",8'd13,8'd10});
+        transact("MAP,3,64\n",9,{"OK,MAP,3,64",8'd13,8'd10});
+        transact("MAP,4,65\n",9,{"OK,MAP,4,65",8'd13,8'd10});
+        transact("MAP,5,67\n",9,{"OK,MAP,5,67",8'd13,8'd10});
+        transact("MAP,6,69\n",9,{"OK,MAP,6,69",8'd13,8'd10});
+        transact("MAP,7,71\n",9,{"OK,MAP,7,71",8'd13,8'd10});
+    end endtask
     initial begin
         wait(dut.touch_ready);#10000;
         transact("AUDITION\n",9,{"ERR,STATE",8'd13,8'd10});
         if(dut.downloaded_audition) $fatal(1,"Empty audition armed audio");
         // Same chord twice, explicit rest, a melody note, then all seven keys.
+        natural_mapping;
         transact("SONG_BEGIN,5\n",13,{"OK",8'd13,8'd10});
         transact("SONG_CHORD,0,145,5\n",19,{"OK",8'd13,8'd10});
         transact("SONG_CHORD,1,145,5\n",19,{"OK",8'd13,8'd10});

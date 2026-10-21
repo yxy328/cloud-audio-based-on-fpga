@@ -14,6 +14,12 @@ try {
     $jdkBin = Split-Path (Get-Command javac.exe -ErrorAction Stop).Source
     $java = Join-Path $jdkBin 'java.exe'
     New-Item -ItemType Directory -Force -Path build\classes,build\dex,dist | Out-Null
+    $buildRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'build')) + [System.IO.Path]::DirectorySeparatorChar
+    foreach ($outputDirectory in @('classes','dex')) {
+        $outputRoot = (Resolve-Path -LiteralPath (Join-Path $buildRoot $outputDirectory)).Path
+        if (!$outputRoot.StartsWith($buildRoot, [System.StringComparison]::OrdinalIgnoreCase)) { throw 'Build output escaped build directory' }
+        Get-ChildItem -LiteralPath $outputRoot -Recurse -File | ForEach-Object { Remove-Item -LiteralPath $_.FullName }
+    }
     $sources = @(Get-ChildItem -LiteralPath app\src\main\java -Filter '*.java' -Recurse | ForEach-Object FullName)
     & (Join-Path $jdkBin 'javac.exe') --release 8 -Xlint:-options -encoding UTF-8 -classpath $androidJar -d build\classes @sources
     if ($LASTEXITCODE -ne 0) { throw 'javac failed' }

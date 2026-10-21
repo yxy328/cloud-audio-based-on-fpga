@@ -78,7 +78,7 @@ module hc05_keymap #(
     input wire [23:0] take_elapsed,take_duration,
     input wire [10:0] take_count
 );
-    localparam [55:0] DEFAULT_MAP={8'd71,8'd69,8'd67,8'd65,8'd64,8'd62,8'd60};
+    localparam [55:0] DEFAULT_MAP={8'd66,8'd65,8'd64,8'd63,8'd62,8'd61,8'd60};
     localparam COLLECT=0, EXECUTE=1, RESPOND=2, DECIMAL=3, SONG_WAIT=4, DECIMAL_READ=5, ADSR_WAIT=6, DECODE_START=7, DECODE_WAIT=8;
     // BEGIN GENERATED HC05 COMMAND IDS
     localparam [5:0] CMD_UNKNOWN=0;

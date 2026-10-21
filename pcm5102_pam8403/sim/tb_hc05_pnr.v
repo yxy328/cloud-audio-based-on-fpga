@@ -55,7 +55,7 @@ module tb_hc05_pnr;
         send("PING\nMAP?\n",10);
         wait(count>=2);
         if(replies[0]!=={"PONG",8'd13,8'd10} ||
-           replies[1]!=={"MAP,60,62,64,65,67,69,71",8'd13,8'd10})
+           replies[1]!=={"MAP,60,61,62,63,64,65,66",8'd13,8'd10})
             $fatal(1,"PNR UART/FIFO command replies differ from RTL");
         $display("PASS [PNR UART]: 50MHz/9600, empty FIFO first byte, queued query during reply, actual SDPB primitive and read pointer logic");
         $finish;

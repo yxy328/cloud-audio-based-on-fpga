@@ -2,13 +2,17 @@
 
 [仓库首页](../README.md) · [文档索引](../docs/README.md) · [快速上手](../docs/QUICK_START.md) · [完整接线与验收](PIN_FUNCTION_REQUIREMENTS.md)
 
+**2026-10-21 B1半音阶：[接线 / 音高表与验证](CHROMATIC_KEYS.md) · [App v1.16-chromatic / Code17](android_app/dist/FPGA-Music-Unified.apk)。** 按用户确认的扫描顺序，K1～K12默认C4～B4，K13～K16暂作C5/D5/E5/F5；手机琴键和七键图形映射同步。MAP仍只支持前七个扫描键，曲谱 / LED仍为七通道。PnR为Logic20967、CLS11053、BSRAM44、DSP26.5，Fmax52.026MHz；未烧录或做实机测频。
+
+**2026-10-21 App 阶段 A：[v1.15-sidebar / Code16 安装包](android_app/dist/FPGA-Music-Unified.apk)。** 新增六分区侧边栏、触摸 / 红外 / 手势七分组、草稿与设备确认三态、板上事件录制条件说明及一键切换；撤掉停用的 HC-05 PCM 录音与回传入口。操作和测试范围见 [SIDEBAR.md](android_app/SIDEBAR.md)，后续资源与命令号预算问题见 [方案审查](SIDEBAR_REVIEW.md)。本次不改 RTL 或协议，手机与板上联动待实机验收。
+
 **当前工程：[PCM5102_UNIFIED.gprj](PCM5102_UNIFIED.gprj)，顶层 `top_unified`。** 2026-10-21 钢琴踏板版新增 `HOLD,2` 与 `POLY,1/2/4/8/16`，保留正常演奏、曲谱、LED 遥控及事件录制重放；按用户授权关闭 FPGA Flash PCM 原音录制，以释放演奏资源。手机本地录制仍保留，板上事件录制需先设 `HOLD,0/1`、`POLY,16`。配套 [踏板版 APK](android_app/dist/FPGA-Music-Pedal.apk)，当前验证见[验证记录](VERIFICATION.md)。[2026-10-20 交付包](deliveries/UNIFIED_RECORDING_20261020/)是包含 PCM 录制的历史版本，不含新踏板功能；[统一录制说明](android_app/UNIFIED_RECORDING.md)保留其操作说明。合并前工程及专用脚本已[归档](archive/legacy_projects/README.md)。
 
 最新 [HC-05 资源优化](HC05_RESOURCE_OPTIMIZATION.md)：默认综合移除备用 USB 录音电路，现有 53 个命令共享译码，曲谱计时缩位；同条件综合 Logic 减少 7.91%，独立位流 `PCM5102_HC05_ONLY.fs` 完成 50MHz 布局布线，尚未烧录。
 
 新增 [App v1.10 手机 LED 联动与配套主工程位流](LED_REMOTE.md)：四页直接切换、请求/实际显示状态和频谱/幅度预览。需要同时更新 APK 与位流；手机和面板实物联调待验。
 
-当前采用[App v1.11 / Code12](android_app/dist/FPGA-Score-hc05-only.apk)，**手机与FPGA仅通过HC-05通信**。USB高速数字录音[保留备用，暂不启用](AUDIO_RECORDING.md)，无需新增USB模块、RTS或OTG，也不把完整PCM改走现有9600bps链路。曲库、LED联动、演奏控制及8/16键等功能保留；板上事件录制回放的开发状态单列于[说明](RECORD_PLAYBACK.md)。当前位流与验证见[验证记录](VERIFICATION.md)。
+历史[App v1.11 / Code12](android_app/dist/FPGA-Score-hc05-only.apk)已采用**手机与FPGA仅通过HC-05通信**的方式。USB高速数字录音[保留备用，暂不启用](AUDIO_RECORDING.md)，无需新增USB模块、RTS或OTG，也不把完整PCM改走现有9600bps链路。曲库、LED联动、演奏控制及8/16键等功能保留；板上事件录制回放的开发状态单列于[说明](RECORD_PLAYBACK.md)。当前位流与验证见[验证记录](VERIFICATION.md)。
 
 支持[最终混音波形、参考李萨如、混音延时XY、实时FFT频谱与三组音源幅度条](AUDIO_VISUAL.md)。S2长按约1秒按“总览/曲谱→波形→XY→频谱”循环；XY页短按轮换八字、多瓣、圆、椭圆、直线、实际混音，其他页短按重启曲谱。`XY,r,p`可通过蓝牙独立设置频率比和相位；REF与AUD标签区分数学参考与真实混音。上电显示总览，曲谱播放时自动显示七轨指引。构建与实测范围见[验证记录](VERIFICATION.md)。
 

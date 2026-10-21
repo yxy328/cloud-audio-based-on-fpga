@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="cn.fpga.score" android:versionCode="15" android:versionName="1.14-pedal">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="cn.fpga.score" android:versionCode="17" android:versionName="1.16-chromatic">
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="35" />
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
@@ -7,7 +7,7 @@
     <uses-feature android:name="android.hardware.bluetooth" android:required="true" />
     <!-- Reserved for the inactive USB audio backup; HC-05 needs no USB Host. -->
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
-    <application android:label="FPGA 曲谱助手" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:allowBackup="false" android:supportsRtl="true" android:debuggable="true">
+    <application android:label="FPGA 曲谱助手" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:allowBackup="false" android:supportsRtl="true" android:debuggable="true" android:enableOnBackInvokedCallback="false">
         <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

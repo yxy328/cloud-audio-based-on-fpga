@@ -475,7 +475,7 @@ module top #(
         .bck_rise_ce(bck_rise_ce), .bck_fall_ce(bck_fall_ce),
         .frame_ce(frame_ce), .bit_index(bit_index)
     );
-    // OUT1..7 default to C4 D4 E4 F4 G4 A4 B4; HC-05 can remap them.
+    // Serial K1..12 follow the physical chromatic octave; K1..7 retain HC-05 remapping.
     // Fs=48828.125Hz. Pressure pitch changes preserve each DDS phase.
     fsr_pitch_scaler #(.PER_VOICE_BEND(1)) u_fsr_pitch_scaler (
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce), .pitch_ratio(effective_pitch_ratio),

@@ -46,9 +46,14 @@ public final class SongLibraryTest {
         SongCodec.Song row=find("row-row-row-your-boat").song();
         check((row.requiredMask()&4096)!=0,"keep high C5 at its actual pitch");
         check(row.events.get(0).durationMs==1071,"6/8 tempo counts dotted quarter beats");
-        int[] defaults={60,62,64,65,67,69,71};
-        check(Arrays.equals(defaults,SongLibrary.matchingMapping(london,defaults)),"London Bridge needs no remapping from defaults");
-        int[] matched=SongLibrary.matchingMapping(row,defaults);check(matched[5]==72&&matched[6]==71,"replace only first unused key with high C");
+        int[] diatonic={60,62,64,65,67,69,71},defaults={60,61,62,63,64,65,66};
+        check(Arrays.equals(diatonic,SongLibrary.matchingMapping(london,diatonic)),"London Bridge preserves an existing diatonic mapping");
+        int[] matched=SongLibrary.matchingMapping(row,diatonic);check(matched[5]==72&&matched[6]==71,"replace only first unused key with high C");
+        for(SongLibrary.Entry entry:SongLibrary.all()){
+            int[] adapted=SongLibrary.matchingMapping(entry.song(),defaults);entry.song().checkMapping(adapted);
+            check(Arrays.equals(defaults,new int[]{60,61,62,63,64,65,66}),"chromatic defaults are not mutated");
+        }
+        check(!Arrays.equals(defaults,SongLibrary.matchingMapping(london,defaults)),"B1 defaults require matching before London Bridge downloads");
         check(SongCodec.twinkle().events.size()==14,"original short example remains available");
         SongCodec.Song oldFile=SongCodec.csv("local.csv","60+64+67,500\nREST,250\n".getBytes("UTF-8"));
         check(oldFile.events.get(0).mask==145&&oldFile.events.get(1).mask==0,"folder CSV chords and rests still import");

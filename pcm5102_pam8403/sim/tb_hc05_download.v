@@ -63,10 +63,19 @@ module tb_hc05_download;
         input [511:0] expected;
         begin send(text,size);expect_line(expected);end
     endtask
+    task natural_mapping;begin
+        transact("MAP,2,62\n",9,{"OK,MAP,2,62",8'd13,8'd10});
+        transact("MAP,3,64\n",9,{"OK,MAP,3,64",8'd13,8'd10});
+        transact("MAP,4,65\n",9,{"OK,MAP,4,65",8'd13,8'd10});
+        transact("MAP,5,67\n",9,{"OK,MAP,5,67",8'd13,8'd10});
+        transact("MAP,6,69\n",9,{"OK,MAP,6,69",8'd13,8'd10});
+        transact("MAP,7,71\n",9,{"OK,MAP,7,71",8'd13,8'd10});
+    end endtask
     initial begin
         repeat(5) @(negedge clk);resetn=1;
         transact("AUDITION\n",9,{"ERR,STATE",8'd13,8'd10});
         if(audition) $fatal(1,"No-score audition armed audio");
+        natural_mapping;
         transact("SONG_BEGIN,2\n",13,{"OK",8'd13,8'd10});
         transact("SONG_NOTE,1,67,500\n",19,{"OK",8'd13,8'd10});
         transact("SONG_END\n",9,{"ERR,MISSING",8'd13,8'd10});
@@ -96,6 +105,7 @@ module tb_hc05_download;
         if(audition) $fatal(1,"Invalid map armed audition");
         transact("MAP_RESET\n",10,{"OK,MAP_RESET",8'd13,8'd10});
         transact("SONG_NOTE,0,60,65536\n",21,{"ERR,RANGE",8'd13,8'd10});
+        natural_mapping;
         // Pre-recorded sample download/play commands are deliberately absent.
         transact("PCM_BEGIN,16,1024\n",18,{"ERR,CMD",8'd13,8'd10});
         transact("PCM_DATA,0,00000000000000008080808080808080\n",44,{"ERR,CMD",8'd13,8'd10});

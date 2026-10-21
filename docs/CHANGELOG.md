@@ -2,7 +2,17 @@
 
 [首页](../README.md) · [文档索引](README.md) · [完整验证记录](../pcm5102_pam8403/VERIFICATION.md)
 
-按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得；当前安装入口为踏板版 `FPGA-Music-Pedal.apk`，`FPGA-Music-Unified.apk` 与 `FPGA-HC05-Audio-Route2.apk` 作为历史版本仍保留在 `dist/`。
+按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口（内容为最新版本），各版本另存同名版本包；当前为踏板版 `FPGA-Music-Pedal.apk` 与半音阶版 `FPGA-Music-Chromatic.apk`。
+
+## 2026-10-21 · App v1.16-chromatic / Code17，B1 十二键半音阶
+
+按用户确认的 TTP229 扫描接线，K1～K12 默认音高改为 C4～B4 半音阶，K13～K16 四个独立条暂作 C5/D5/E5/F5。只改前七键默认映射与高键常量，命令号、MAP 键号、七通道曲谱与屏幕指引、RAM 几何均不变。手机琴键换成 7 白 + 5 黑的钢琴布局加独立高音条，七键映射可图形点选并保留高级文本；旧手机录音按录制时音高回放，新录音保存音高快照。MAP、独立弯音和曲谱仍只覆盖前七个扫描键；匹配曲库会改变音高，恢复默认半音阶前执行 `MAP_RESET`。
+
+`chromatic_b1_20261021` 冻结快照完成布局布线：Logic 20967（较踏板版 +28）、CLS 11053（−2）、Register 10039、BSRAM 44、DSP 26.5，符合 B1 的 Logic ≤ +60 预算；50 MHz 约束下 Fmax 52.026 MHz，主时钟与 ADC 时钟的 Setup/Hold 违例端点均为 0。位流 UserCode `0x000015CD`，位流 SHA256 `E40B7502ADC87A6A9F1B0435002E0419D07FD6D618E7ABB58789B40F10E74DFC`，APK SHA256 `1675EF87CCC5FEFB9C1DD0658B2B745758438B72C611628ABA8F8FA92635A888`。通过项与实机测频待办见[半音阶与高音条说明](../pcm5102_pam8403/CHROMATIC_KEYS.md)和[验证记录](../pcm5102_pam8403/VERIFICATION.md)顶部。本轮未烧录开发板、未安装手机、未做耳机口对录。
+
+## 2026-10-21 · App v1.15-sidebar / Code16，阶段 A 侧边栏
+
+界面重组为六分区侧边栏，触摸、红外、手势各固定七个分组；参数区分草稿与设备确认三态，板上事件录制给出前置条件说明和「一键切到可录配置」；撤下已停用的 HC-05 PCM 录音与回传入口。不改 RTL、命令字典、回复模板、曲谱格式和弯音数值语义，其中的后续阶段资源数字只是文档预算复核，未重新综合。分区与状态定义见[侧边栏阶段 A 说明](../pcm5102_pam8403/android_app/SIDEBAR.md)，连续实施前需先解决的两项见[方案审查](../pcm5102_pam8403/SIDEBAR_REVIEW.md)。手机与板上联动待实机验收；该版本的安装包与 v1.16 共用 `dist/FPGA-Music-Unified.apk` 文件名，v1.15 原始字节保留在 Gitee 提交记录中。
 
 ## 2026-10-21 · App v1.14-pedal / Code15，钢琴踏板与复音上限
 

@@ -39,7 +39,7 @@ module tb_top_touch;
         real co,si,w,ws,angle;
         begin
             co=0;si=0;ws=0;
-            // 8192 samples resolve the closest notes (E4/F4, ~19.6Hz apart).
+            // 8192 samples resolve the closest notes (C4/C#4, ~15.6Hz apart).
             for(n=0;n<8192;n=n+1) begin
                 w=0.5-0.5*$cos(6.283185307179586*n/8191.0);
                 angle=6.283185307179586*frequency*n/48828.125;
@@ -54,10 +54,7 @@ module tb_top_touch;
             $fatal(1,"Default 11-voice mix clipped");
     end
     initial begin
-        hz[0]=261.6255653005986;hz[1]=293.6647679174076;
-        hz[2]=329.6275569128699;hz[3]=349.2282314330039;
-        hz[4]=391.9954359817493;hz[5]=440.0;
-        hz[6]=493.8833012561241;
+        for(k=0;k<7;k=k+1)hz[k]=440.0*$pow(2.0,(60+k-69)/12.0);
         #2900000;
         if(dut.u_touch_input.ready || dut.touch_keys!=0)
             $fatal(1,"Accepted startup-held keys before calibration wait");

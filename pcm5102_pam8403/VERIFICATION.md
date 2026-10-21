@@ -1,6 +1,20 @@
 # 本地验证记录
 
-## 当前入口：钢琴踏板版（2026-10-21）
+## 当前入口：B1半音阶（2026-10-21）
+
+接线按用户确认：K1～K12依次C4～B4，K13～K16暂作C5/D5/E5/F5。仅改前七键默认映射与高键常量，协议、MAP键号、曲谱通道及RAM几何不变；App为Code17 / 1.16-chromatic，提供钢琴布局与图形映射，并保留旧手机录音原音。
+
+完整表格、边界、对录待办和命令见 [CHROMATIC_KEYS.md](CHROMATIC_KEYS.md)。93份改动前RTL / 约束输入匹配踏板冻结基线；B1冻结快照为 `sim/build/unified/chromatic_b1_20261021/`，最终源文件哈希与该快照一致。
+
+PnR：Logic **20967（+28）**、CLS **11053（−2）**、Register **10039（不变）**、BSRAM **44（不变）**、DSP **26.5（不变）**。符合B1的Logic≤+60、CLS≤+10预算。50MHz约束下Fmax **52.026MHz**，主时钟与ADC时钟Setup / Hold违例端点均0，全量布局布线完成并生成位流，无未布通报错。
+
+`tb_touch_tdm_synth`的16声部×32帧相位步进误差为0；UART新默认映射、弯音、ADSR、竞态、512次差分和下载通过；`verify_ram_geometry.ps1`通过；外部I²S的16音、踏板80ms加速顶层与自动演奏相关回归通过，最坏触摸处理1011/1024时钟。App核心回归通过：ChromaticKeys77、PhoneTake10054、SongLibrary4128、SongCodec31，其他已有测试见构建日志。
+
+标准输出已同步；独立文件为 `impl/pnr/PCM5102_CHROMATIC_B1.fs` 和 `android_app/dist/FPGA-Music-Chromatic.apk`。
+位流UserCode **0x000015CD**，SHA256 **E40B7502ADC87A6A9F1B0435002E0419D07FD6D618E7ABB58789B40F10E74DFC**；APK SHA256 **1675EF87CCC5FEFB9C1DD0658B2B745758438B72C611628ABA8F8FA92635A888**。
+没有烧录、安装手机或做耳机口对录；实机扫描对应、测频和UI验收仍待完成。
+
+## B1前基线：钢琴踏板版（2026-10-21）
 
 主目录工程为 `PCM5102_UNIFIED.gprj` / `top_unified`，默认 `gw_sh tools/build.tcl` 输出 `PCM5102_UNIFIED.fs`。新增 HOLD,2 和 POLY；按用户授权关闭生产配置的 FPGA Flash PCM 原音录制（`ENABLE_FLASH_AUDIO=0`），保留事件录制重放。10秒仅减少录制计数范围，仍需 CRC、Flash 提交及下载通路，故采用关闭方案；旧 PCM 源码、旧交付包和独立目标保留。以下 2026-10-20 及更早的 PCM、资源数据属于历史构建。
 

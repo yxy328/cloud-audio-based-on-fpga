@@ -116,9 +116,9 @@ module touch_tdm_synth #(
     function [31:0] note_step;
         input [3:0] key;
         begin case(key)
-            0:note_step=46025656; 1:note_step=51662052; 2:note_step=57988693;
-            3:note_step=61436880; 4:note_step=68960566; 5:note_step=77405619;
-            6:note_step=86884869; 7:note_step=92051312; default:note_step=103324105;
+            0:note_step=34480283; 1:note_step=36530588; 2:note_step=38702809;
+            3:note_step=41004198; 4:note_step=43442435; 5:note_step=46025656;
+            6:note_step=51662052; 7:note_step=57988693; default:note_step=61436880;
         endcase end
     endfunction
     task segment;

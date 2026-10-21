@@ -12,6 +12,11 @@ import android.graphics.drawable.GradientDrawable;
 final class Theme {
     private Theme() { }
 
+    static final int WHITE = 0xffffffff;
+    static final int CONNECTED = 0xff267b53;
+    static final int DRAWER_SCRIM = 0x990e0618;
+    static final int PIANO_BLACK = 0xff302638;
+
     /** 主墨色：略带紫调的近黑，比纯黑更柔和。 */
     static final int INK = 0xff241a2e;
     /** 次级文字。 */

@@ -9,7 +9,8 @@ module tb_top_touch16;
     tri1 scl,sda;
     integer reply_count=0,bit_index,expected_count,frame=0,i,n,j;
     reg [255:0] replies[0:255];reg [255:0] incoming=0;reg [7:0] decoded;
-    real co,si,angle,amp;
+    real co,si,angle,amp,window,weight;
+    integer midi;
     integer start_sample;
     top #(.HC05_BAUD(500000),.TOUCH_STARTUP_US(100),.TOUCH_DEBOUNCE_MS(1),
         .ADSR_ATTACK_SAMPLES(4),.ADSR_DECAY_SAMPLES(4),.TOUCH_ADSR_RELEASE_SAMPLES(16),.FSR_ENABLE(0)) dut(
@@ -79,20 +80,18 @@ module tb_top_touch16;
         if(dut.fsr_pitch_mode)$fatal(1,"Serial K8 toggled pressure mode");
         transact("TOUCH,8\n",8,{"ERR,BUSY",8'd13,"\n"});
         // End-to-end I2S spectrum: every physical key must contribute its own pitch.
-        start_sample=monitor.pcm_count;wait(monitor.pcm_count>=start_sample+4096);
+        start_sample=monitor.pcm_count;wait(monitor.pcm_count>=start_sample+8192);
         for(j=0;j<16;j=j+1)begin
-            co=0;si=0;
-            for(n=0;n<4096;n=n+1)begin
-                case(j)
-                    0:angle=261.625565;1:angle=293.664768;2:angle=329.627557;3:angle=349.228231;
-                    4:angle=391.995436;5:angle=440;6:angle=493.883301;7:angle=523.251131;
-                    8:angle=587.329536;9:angle=659.255114;10:angle=698.456463;11:angle=783.990872;
-                    12:angle=880;13:angle=987.766603;14:angle=1046.502261;15:angle=1174.659072;
-                endcase
+            co=0;si=0;weight=0;
+            for(n=0;n<8192;n=n+1)begin
+                if(j<12)midi=60+j;
+                else case(j)12:midi=72;13:midi=74;14:midi=76;default:midi=77;endcase
+                angle=440.0*$pow(2.0,(midi-69)/12.0);
+                window=0.5-0.5*$cos(6.283185307179586*n/8191.0);weight=weight+window;
                 angle=6.283185307179586*angle*n/48828.125;
-                co=co+monitor.pcm[start_sample+n]*$cos(angle);si=si+monitor.pcm[start_sample+n]*$sin(angle);
+                co=co+window*monitor.pcm[start_sample+n]*$cos(angle);si=si+window*monitor.pcm[start_sample+n]*$sin(angle);
             end
-            amp=2*$sqrt(co*co+si*si)/4096;
+            amp=2*$sqrt(co*co+si*si)/weight;
             if(amp<(j<7 ? 1000 : 480))$fatal(1,"I2S missing physical key %0d amplitude %f",j+1,amp);
         end
         transact("HOLD,1\n",7,{"OK",8'd13,"\n"});frames(3);

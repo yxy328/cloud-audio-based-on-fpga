@@ -6,7 +6,13 @@ import java.util.*;
 /** Local phone keyboard events. Independent of FPGA Flash and original PCM. */
 public final class PhoneTake {
     public static final int MAX_NOTES=10000;
-    public static final int[] PITCHES={60,62,64,65,67,69,71,72,74,76,77,79,81,83,84,86};
+    private final int[] pitches;
+    public PhoneTake(){this(ChromaticKeys.pitches());}
+    PhoneTake(int[] pitches){
+        if(pitches.length!=16)throw new IllegalArgumentException("手机录制音高表无效");this.pitches=pitches.clone();
+        for(int pitch:pitches)if(pitch<0||pitch>127)throw new IllegalArgumentException("手机录制音高无效");
+    }
+    public int[] pitches(){return pitches.clone();}
     public static final class Event {
         public final int ms,key,velocity;public final boolean on;
         Event(int ms,int key,boolean on,int velocity){this.ms=ms;this.key=key;this.on=on;this.velocity=velocity;}
@@ -28,8 +34,8 @@ public final class PhoneTake {
         for(int key=0;key<16;key++)if((active&(1<<key))!=0)up(key,ms);
         duration=ms;finished=true;
     }
-    static PhoneTake restore(List<Event> source,int duration,int expectedNotes)throws IOException {
-        PhoneTake take=new PhoneTake();
+    static PhoneTake restore(List<Event> source,int duration,int expectedNotes,int[] pitches)throws IOException {
+        PhoneTake take=new PhoneTake(pitches);
         try{for(Event event:source){int before=take.events.size();if(event.on){if(!take.down(event.key,event.velocity,event.ms))throw new IOException("手机录制超过10000个音符");}else take.up(event.key,event.ms);if(take.events.size()!=before+1)throw new IOException("手机录制键态不完整");}
             if(take.active!=0||take.notes!=expectedNotes)throw new IOException("手机录制未完整结束");take.finish(duration);return take;
         }catch(IllegalArgumentException e){throw new IOException("手机录制时间线损坏",e);}
@@ -46,7 +52,7 @@ public final class PhoneTake {
     public byte[] midi()throws IOException {
         if(!finished||notes==0)throw new IOException("请先停止手机录制，并至少录入一个音符");
         ByteArrayOutputStream track=new ByteArrayOutputStream();track.write(new byte[]{0,(byte)255,81,3,7,(byte)161,32,0,(byte)192,0});
-        int previous=0;for(Event event:events){delta(track,event.ms-previous);track.write(event.on?0x90:0x80);track.write(PITCHES[event.key]);track.write(event.velocity);previous=event.ms;}
+        int previous=0;for(Event event:events){delta(track,event.ms-previous);track.write(event.on?0x90:0x80);track.write(pitches[event.key]);track.write(event.velocity);previous=event.ms;}
         delta(track,duration-previous);track.write(new byte[]{(byte)255,47,0});
         ByteArrayOutputStream bytes=new ByteArrayOutputStream();DataOutputStream out=new DataOutputStream(bytes);
         out.writeInt(0x4d546864);out.writeInt(6);out.writeShort(0);out.writeShort(1);out.writeShort(500);out.writeInt(0x4d54726b);out.writeInt(track.size());track.writeTo(out);return bytes.toByteArray();

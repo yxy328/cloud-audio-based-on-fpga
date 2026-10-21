@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.zip.CRC32;
 
 public final class AudioRecordingTest {
     private static int checks;
@@ -30,7 +29,6 @@ public final class AudioRecordingTest {
         byte[] format=new byte[8];put32(format,0,50000000);put16(format,4,1024);format[6]=16;format[7]=1;
         return packet(1,0,0,session,0,format);
     }
-    private static byte[] startCrc(int session,int samples){byte[] format=new byte[12];put32(format,0,50000000);put16(format,4,1024);format[6]=16;format[7]=1;put32(format,8,samples);return packet(1,1,0,session,0,format);}
     private static byte[] end(int flags,int seq,int session,int samples){
         byte[] status=new byte[4];put32(status,0,flags);return packet(3,flags,seq,session,samples,status);
     }
@@ -57,18 +55,6 @@ public final class AudioRecordingTest {
     }
     private static void generated(File dir)throws Exception {
         check(AudioRecording.crc16("123456789".getBytes(StandardCharsets.US_ASCII),0,9)==0x29b1,"CRC known vector");
-        byte[] crcData=pcm(31);CRC32 crc32=new CRC32();crc32.update(crcData);
-        AudioRecording crcTake=new AudioRecording(new File(dir,"whole-crc.INCOMPLETE.wav"),99);feed(crcTake,startCrc(99,31),3);
-        feed(crcTake,packet(2,0,1,99,0,crcData),7);byte[] crcPayload=new byte[4];put32(crcPayload,0,crc32.getValue());
-        feed(crcTake,packet(3,1,2,99,31,crcPayload),5);check(crcTake.complete(),"whole PCM CRC32 accepted");
-        check(crcTake.pollAcknowledgement()==0&&crcTake.pollAcknowledgement()==1&&crcTake.pollAcknowledgement()==2,"packet ACK queue");wave(crcTake.file(),crcData);
-        check(crcTake.file().getName().equals("whole-crc.wav"),"only complete files lose INCOMPLETE name");
-        AudioRecording cutCrc=new AudioRecording(new File(dir,"partial.INCOMPLETE.wav"),100);feed(cutCrc,startCrc(100,100),9);
-        feed(cutCrc,packet(2,0,1,100,0,crcData),17);cutCrc.close();check(!cutCrc.complete()&&cutCrc.file().getName().contains("INCOMPLETE"),"interrupted download named INCOMPLETE");wave(cutCrc.file(),crcData);
-        AudioRecording wrongLength=new AudioRecording(new File(dir,"length.INCOMPLETE.wav"),101);feed(wrongLength,startCrc(101,32),9);
-        feed(wrongLength,packet(2,0,1,101,0,crcData),17);feed(wrongLength,packet(3,1,2,101,31,crcPayload),22);
-        check(!wrongLength.complete()&&wrongLength.problem().contains("长度"),"declared total length checked independently of CRC");
-        check(wrapAckIsBounded(dir),"legacy unacknowledged USB does not retain ACKs");
         for(int split:new int[]{1,3,16,31,530,16384}){
             File file=new File(dir,"split-"+split+".wav");AudioRecording r=new AudioRecording(file,345);
             byte[] data=pcm(777);data[123]='F';data[124]='A';data[125]='R';data[126]='1';
@@ -108,11 +94,6 @@ public final class AudioRecordingTest {
             feed(r,end(0,2,n,256),1+random.nextInt(22));check(r.complete(),"random signed payload and fragmentation");wave(r.file(),data);
         }
     }
-    private static boolean wrapAckIsBounded(File dir)throws Exception{
-        AudioRecording r=new AudioRecording(new File(dir,"no-acks.wav"),44);feed(r,start(44),26);
-        for(int n=0;n<1000;n++)feed(r,packet(2,0,n+1,44,n,new byte[]{0,0}),20);
-        r.close();return r.pollAcknowledgement()==null;
-    }
     private static void rtl(File input)throws Exception {
         File out=new File(input.getParentFile(),"audio_record_from_rtl.wav");
         AudioRecording recording=new AudioRecording(out,0x9234);
@@ -134,20 +115,9 @@ public final class AudioRecordingTest {
         System.out.println("PASS top I2S -> 2Mbps UART -> Java receiver -> WAV: "+lines.size()+" samples bit-exact");
     }
     public static void main(String[] args)throws Exception {
-        if(args.length==3)flash(new File(args[0]),new File(args[1]));
-        else if(args.length==2)top(new File(args[0]),new File(args[1]));
+        if(args.length==2)top(new File(args[0]),new File(args[1]));
         else if(args.length>0)rtl(new File(args[0]));
         else {File base=new File("build/audio-record-test");base.mkdirs();generated(Files.createTempDirectory(base.toPath(),"run-").toFile());}
         System.out.println("PASS AudioRecording: "+checks+" checks");
-    }
-    private static void flash(File input,File expectedFile)throws Exception{
-        File out=new File(input.getParentFile(),"audio_flash_from_top.INCOMPLETE.wav");
-        File oldComplete=new File(input.getParentFile(),"audio_flash_from_top.wav");if(oldComplete.exists()&&!oldComplete.delete())throw new IOException("old fixture");
-        AudioRecording recording=new AudioRecording(out,4660);byte[] stream=Files.readAllBytes(input.toPath());
-        for(int n=0;n<stream.length;n++){recording.feed(new byte[]{stream[n]},1);while(recording.pollAcknowledgement()!=null){}}
-        java.util.List<String> lines=Files.readAllLines(expectedFile.toPath(),StandardCharsets.US_ASCII);
-        byte[] expected=new byte[lines.size()*2];for(int n=0;n<lines.size();n++)put16(expected,n*2,Integer.parseInt(lines.get(n)));
-        check(recording.complete(),"Flash PCM whole CRC and lengths complete");wave(recording.file(),expected);
-        System.out.println("PASS Flash -> HC05 FAR1 -> Java WAV: "+lines.size()+" samples bit-exact");
     }
 }

@@ -2,7 +2,7 @@
 // Bit-level UART tests; accelerated divisor, independent TX decoder.
 module tb_hc05_bend;
     localparam BIT_TICKS=100;
-    localparam [55:0] DEFAULT_MAP={8'd71,8'd69,8'd67,8'd65,8'd64,8'd62,8'd60};
+    localparam [55:0] DEFAULT_MAP={8'd66,8'd65,8'd64,8'd63,8'd62,8'd61,8'd60};
     reg clk=0; always #10 clk=~clk;
     reg resetn=0,rx=1,ready=0,song=0,notes=0,recording=0;
     wire tx,wr,rst;

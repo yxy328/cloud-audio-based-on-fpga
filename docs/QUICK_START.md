@@ -15,15 +15,15 @@ cd cloud-audio-based-on-fpga
 
 - FPGA：已有构建记录使用 Gowin V1.9.11.03 Education，需安装 IDE、Programmer 和开发板下载驱动。
 - RTL 仿真：Icarus Verilog；脚本默认路径为 `C:/iverilog/bin`，可用 `-IverilogDir` 覆盖。
-- 手机：Android 10+，安装[踏板版 APK](../pcm5102_pam8403/android_app/dist/FPGA-Music-Pedal.apk)，使用HC-05经典蓝牙SPP，无需USB或OTG。
+- 手机：Android 10+，安装[当前安装包](../pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk)（内容为 v1.16-chromatic，同内容另存 `dist/FPGA-Music-Chromatic.apk`），使用HC-05经典蓝牙SPP，无需USB或OTG。
 - 修改 App 时再配置 JDK 和 Android SDK，步骤见 [App 文档](../pcm5102_pam8403/android_app/README.md)。现成 APK 可直接安装。
 
-安装当前 **App v1.14-pedal / Code15**，配套 `PCM5102_UNIFIED.fs`（本轮 UserCode `0x0000782D`），手机与FPGA只连接HC-05。接线先查[完整引脚表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)，键盘改接与跳线查[8/16键迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)；踏板 `HOLD,2`、复音上限 `POLY,n` 与 `CTRL2?` 回报见[键位与协议](../pcm5102_pam8403/HC05_KEYMAP.md)，录制与重放操作见[录制说明](../pcm5102_pam8403/android_app/UNIFIED_RECORDING.md)。当前构建已关闭板上 Flash 原音 PCM 录制，手机本地录制和板上事件录制仍可用；事件录制前需设为 `HOLD,0/1`、`POLY,16`。
+安装当前 **App v1.16-chromatic / Code17**，配套 `PCM5102_UNIFIED.fs`（本轮 UserCode `0x000015CD`），手机与FPGA只连接HC-05。接线先查[完整引脚表](../pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md)，键盘改接与跳线查[8/16键迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)；16 键串行的默认音高、K13～K16 高音条与实机测频待办见[B1 半音阶说明](../pcm5102_pam8403/CHROMATIC_KEYS.md)；踏板 `HOLD,2`、复音上限 `POLY,n` 与 `CTRL2?` 回报见[键位与协议](../pcm5102_pam8403/HC05_KEYMAP.md)，界面分区见[侧边栏说明](../pcm5102_pam8403/android_app/SIDEBAR.md)，录制与重放操作见[录制说明](../pcm5102_pam8403/android_app/UNIFIED_RECORDING.md)。当前构建已关闭板上 Flash 原音 PCM 录制，手机本地录制和板上事件录制仍可用；事件录制前需设为 `HOLD,0/1`、`POLY,16`。
 
 | 使用方式 | 接线与操作 |
 | --- | --- |
 | 默认8键直连 | OUT1～OUT8沿用原接线；原SCL接GND时F6不接，上电前600ms不触摸 |
-| 16键串行 | 拆掉全部OUT直连线及SCL固定接地/接3.3V连接；SCL接F6/J3-37，SDO接F7/J3-38；设置模块16键/多键选项，App先应用匹配的串行极性，再切16键 |
+| 16键串行 | 拆掉全部OUT直连线及SCL固定接地/接3.3V连接；SCL接F6/J3-37，SDO接F7/J3-38；设置模块16键/多键选项，App先应用匹配的串行极性，再切16键。自 v1.16 起 K1～K12 默认 C4～B4 半音阶，K13～K16 暂作 C5/D5/E5/F5 |
 | FSR或滑杆 | 同一ADC输入二选一；AO/滑杆中点经22kΩ/4.7kΩ衰减，ADC输入保持0～1V；滑杆需在App读取实际ADC两端并标定 |
 
 16键模式下OUT脚复用为电极，不能保留原直连。App不会改变模块硬件跳线；模块配置后重新上电，校准期间保持松键。详细电气说明见 [主工程说明](../pcm5102_pam8403/README.md) 与 [FSR文档](../pcm5102_pam8403/FSR402.md)。
@@ -45,7 +45,7 @@ $gowinShell = 'C:/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe'
 & $gowinShell ./pcm5102_pam8403/tools/build.tcl
 ```
 
-生成位流：`pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.fs`。当前踏板版的资源、时序、UserCode 和 SHA256 见 [验证记录](../pcm5102_pam8403/VERIFICATION.md) 顶部；[统一版交付包](../pcm5102_pam8403/deliveries/UNIFIED_RECORDING_20261020/) 是包含 PCM 录制但不含踏板的历史位流，两者的功能与指纹不要混用。重新构建后的指纹可能不同。上一版的 RAM 与等价验证保留在 [RAM_GEOMETRY_VERIFICATION.md](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)。
+生成位流：`pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.fs`。当前 B1 半音阶版的资源、时序、UserCode 和 SHA256 见 [验证记录](../pcm5102_pam8403/VERIFICATION.md) 顶部；[统一版交付包](../pcm5102_pam8403/deliveries/UNIFIED_RECORDING_20261020/) 是包含 PCM 录制但不含踏板与半音阶的历史位流，三者的功能与指纹不要混用。重新构建后的指纹可能不同。上一版的 RAM 与等价验证保留在 [RAM_GEOMETRY_VERIFICATION.md](../pcm5102_pam8403/RAM_GEOMETRY_VERIFICATION.md)。
 
 当前默认构建就是统一工程（现为踏板版），无需再分别构建 HC-05、事件录制或 PCM 录音目标。默认脚本仅编译，不自动烧录。
 

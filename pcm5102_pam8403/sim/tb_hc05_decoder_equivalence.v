@@ -2,6 +2,7 @@
 // Differential test against the saved pre-optimization parallel decoder.
 // Compare actual UART replies and committed control values, independently
 // of the new decoder's dictionary, generator and internal timing.
+// B1 changes only the default map, asserted separately below.
 module tb_hc05_decoder_equivalence;
     reg clk=0;always #10 clk=~clk;
     reg resetn=0,rx=1;
@@ -72,6 +73,7 @@ module tb_hc05_decoder_equivalence;
         end
     endtask
     integer checks=0;
+    reg [55:0] expected_new_map={8'd66,8'd65,8'd64,8'd63,8'd62,8'd61,8'd60};
     task transact;
         input [527:0] text;input integer length;
         integer n,target,waited;
@@ -84,8 +86,12 @@ module tb_hc05_decoder_equivalence;
             send_byte(10);waited=0;
             while((count0<target || count1<target) && waited<20000)begin @(negedge clk);waited=waited+1;end
             if(count0!=target || count1!=target)$fatal(1,"reply timeout for '%0s'",text);
-            if(reply0!==reply1)$fatal(1,"reply mismatch for '%0s': '%0s' vs '%0s'",text,reply0,reply1);
-            if(controls[0]!==controls[1])$fatal(1,"committed controls differ for '%0s'",text);
+            if(text=="MAP_RESET")expected_new_map={8'd66,8'd65,8'd64,8'd63,8'd62,8'd61,8'd60};
+            if(text=="MAP,1,72")expected_new_map[7:0]=72;
+            if(text=="MAP?")begin
+                if(reply0!=={"MAP,60,62,64,65,67,69,71",8'd13,8'd10} || reply1!=={"MAP,60,61,62,63,64,65,66",8'd13,8'd10})$fatal(1,"Explicit power-on MAP replies");
+            end else if(reply0!==reply1)$fatal(1,"reply mismatch for '%0s': '%0s' vs '%0s'",text,reply0,reply1);
+            if(controls[0][315:56]!==controls[1][315:56] || controls[1][55:0]!==expected_new_map)$fatal(1,"committed controls differ for '%0s'",text);
             for(n=0;n<8;n=n+1)if(pulse0[n]!=pulse1[n])$fatal(1,"pulse count differs for '%0s'",text);
             checks=checks+1;
         end
@@ -147,7 +153,7 @@ module tb_hc05_decoder_equivalence;
                 45:begin text="TAKE_SAVE";length=9;end
                 46:begin text="SONG_BEGIN,2";length=12;end
                 47:begin text="SONG_NOTE,0,60,12";length=17;end
-                48:begin text="SONG_CHORD,1,145,12";length=19;end
+                48:begin text="SONG_CHORD,1,17,12";length=18;end
                 49:begin text="SONG_END";length=8;end
                 50:begin text="ADSR,TOUCH,1,,3,4";length=17;end
                 51:begin text="VOLUME,65536";length=12;end

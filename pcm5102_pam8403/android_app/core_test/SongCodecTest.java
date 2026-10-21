@@ -37,6 +37,7 @@ public final class SongCodecTest {
         SongCodec.Song h=SongCodec.midi("tempo.mid",midi(0,480,tempoHeld));eq(h.events.size(),1);eq(h.events.get(0).durationMs,750);
         byte[] trailing=bytes(0,144,60,1,0x83,0x60,128,60,0,0x83,0x60,255,47,0);
         SongCodec.Song tail=SongCodec.midi("tail.mid",midi(0,480,trailing));eq(tail.events.size(),2);eq(tail.events.get(1).mask,0);eq(tail.events.get(1).durationMs,500);
+        eq(SongCodec.parseMapping("MAP,60,61,62,63,64,65,66")[6],66);
         eq(SongCodec.parseMapping("MAP,60,62,64,65,67,69,71")[6],71);
         fails(()->SongCodec.parseMapping("MAP,60,62"),"格式");
         System.out.println("PASS SongCodec: "+checks+" assertions");

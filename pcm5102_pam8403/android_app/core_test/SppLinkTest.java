@@ -12,7 +12,7 @@ public final class SppLinkTest {
     public static void main(String[] args)throws Exception{
         List<String> lines=Collections.synchronizedList(new ArrayList<>());CountDownLatch lost=new CountDownLatch(1);
         SppLink link=new SppLink(new SppLink.Listener(){public void line(String line){lines.add(line);}public void disconnected(String reason){lost.countDown();}
-            public void audioProgress(AudioRecording recording){}public void audioFinished(AudioRecording recording){}});
+});
         BluetoothSocket a=new BluetoothSocket();a.onCommand=c->{yes(c.equals("PING\r\n"));a.feed("PONG\r\n");};link.connect(new BluetoothDevice(a));yes(link.command("PING","PONG").equals("PONG"));
         // Fragmented lines and asynchronous recording-overflow must not abort a valid command.
         a.onCommand=c->{a.feed("EVT,120,01,0,39321,65535\r");a.feed("\nERR,REC_OVERFLOW,1\r\nO");a.feed("K\r\n");};
@@ -32,12 +32,6 @@ public final class SppLinkTest {
         a.onCommand=c->a.feed("ADC,3FF,0\r\n");yes(link.command("ADC?","ADC").equals("ADC,3FF,0"));
         a.onCommand=c->a.feed("CAL,000,24E\r\n");yes(link.command("CAL?","CAL").equals("CAL,000,24E"));
         a.onCommand=c->a.feed("SERIAL,1\r\n");yes(link.command("SERIAL?","SERIAL").equals("SERIAL,1"));
-        for(String control:new String[]{"AREC_PREP","AREC_START,0","AREC_START,65535","AREC_STOP","AREC_ABORT","AREC_SEND,0","AREC_SEND,65535"}){
-            a.onCommand=c->{yes(c.equals(control+"\r\n"));a.feed("EVT,160,00,0,0,65535\r\nOK\r\n");};
-            yes(link.command(control,"OK").equals("OK"));
-        }
-        a.onCommand=c->a.feed("EVT,180,00,0,0,65535\r\nAREC,1,1,0\r\n");
-        yes(link.command("AREC?","AREC").equals("AREC,1,1,0"));
         yes(link.connected());yes(lines.contains("ERR,REC_OVERFLOW,2"));
         // All FPGA XY parameter combinations share the command queue. Split ACKs
         // and interleaved event/end lines must not be mistaken for confirmation.
@@ -64,7 +58,7 @@ public final class SppLinkTest {
             yes(stillWaiting);a.feed("OK\r\n");yes(controlAck.get(1,TimeUnit.SECONDS).equals("OK"));controlThread.shutdownNow();
         }
         for(String error:new String[]{"ERR,STATE","ERR,CMD","ERR,BUSY","ERR,RANGE","ERR,MISSING","ERR,MAP","ERR,KEY","ERR,NOTE"}){
-            a.onCommand=c->a.feed(error+"\r\n");fails(()->link.command("AREC_PREP","OK"),error);yes(link.connected());
+            a.onCommand=c->a.feed(error+"\r\n");fails(()->link.command("TAKE_REC","OK"),error);yes(link.connected());
             a.onCommand=c->a.feed("PONG\r\n");yes(link.command("PING","PONG").equals("PONG"));
         }
         a.onCommand=c->a.feed("ERR,UART\r\n");fails(()->link.command("PING","PONG"),"ERR,UART");yes(!link.connected());

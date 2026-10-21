@@ -95,7 +95,7 @@ module tb_top_pedal;
         transact("HOLD,0\n",7,{"OK",8'd13,8'd10});forbid_attack=1;
         transact("HOLD,2\n",7,{"OK",8'd13,8'd10});frames(DAMPER_SAMPLES+8);forbid_attack=0;
         if(dut.touch_active!=2 || dut.u_touch_synth.contexts[19]!=39321)$fatal(1,"Damper affected physically held note");
-        amplitude(293.664768,early_amp);if(early_amp<1000)$fatal(1,"Held note missing after damper");
+        amplitude(277.182631,early_amp);if(early_amp<1000)$fatal(1,"Held note missing after damper");
         keys=0;wait(dut.touch_keys==0);frames(3);
         transact("PANIC\n",6,{"OK",8'd13,8'd10});frames(8);
         if(dut.touch_hold || dut.touch_active || monitor.last_pcm)$fatal(1,"Panic left pedal state");

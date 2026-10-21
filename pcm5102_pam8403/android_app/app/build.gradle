@@ -2,6 +2,6 @@ plugins { id 'com.android.application' }
 android {
     namespace 'cn.fpga.score'
     compileSdk 35
-    defaultConfig { applicationId 'cn.fpga.score'; minSdk 29; targetSdk 35; versionCode 15; versionName '1.14-pedal' }
+    defaultConfig { applicationId 'cn.fpga.score'; minSdk 29; targetSdk 35; versionCode 17; versionName '1.16-chromatic' }
     compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
 }
