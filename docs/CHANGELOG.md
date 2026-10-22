@@ -2,7 +2,33 @@
 
 [首页](../README.md) · [文档索引](README.md) · [完整验证记录](../pcm5102_pam8403/VERIFICATION.md)
 
-按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口（内容为最新版本），上一版另存 `dist/FPGA-Music-Chromatic.apk`，更早版本另存 `dist/FPGA-Music-Pedal.apk`。
+按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口（内容为最新版本），当前另有带版本号的 `dist/FPGA-Music-LinkDiag-Code24.apk`，上一版另存 `dist/FPGA-Music-Chromatic.apk`，更早版本另存 `dist/FPGA-Music-Pedal.apk`。
+
+## 2026-10-22 · FPGA LED 波形弱信号修正版，UserCode `0x00007D67`
+
+实体照片反馈“X4、PK 约 2%、波形仍挤在零线且接近白色”，据此修正显示链路：基础倍率提高八倍，FSR 建议 X8 /X16 /X32（纵轴 ±4K /±2K /±1K，K=1024 个原始 PCM 计数），超范围时自动退到 X4 /X2 /X1；采集极值保留有符号 10 位、量化步长由 256 降为 64；静音才用低亮白，非零峰值改用饱和蓝 → 紫 → 红渐变，红端按音源 /16 衰减后的正常演奏电平标定（约自峰值 1793 起），PK 数值与电平条保持固定满幅刻度。音频样本、音量、FSR 方向、命令字典与协议均未改动。规则、迟滞与标定见 [SCOPE_DISPLAY.md](../pcm5102_pam8403/SCOPE_DISPLAY.md)。
+
+冻结构建 `scope_weak_signal_v11_20261022`，95 份输入与工作区一致。整机 Logic 21394、CLS 11087、Register 10306、BSRAM 47、DSP 26.5（相对上一版 +7 /−58 /0 /+2 /0）；50MHz 约束下 Fmax 51.441MHz，Setup /Hold 违规端点均 0。剩余 1646 Logic /433 CLS /9 BSRAM，其中 Logic 比后续规划要求的 1650 少 4 个，严格后续预留审计未通过，实施下一功能前需回收这 4 个 Logic。为守住预算只在 `hc05_keymap.v`、`take_nor_store.v` 加 `syn_encoding="onehot"` 属性。15 项相关 RTL 测试与外部 RGB5 独立模型通过，真实顶层 Quick 87.164ms；未烧录开发板、未安装 APK、未做实体面板颜色与摄像验收。位流 SHA256 `C54EF13D2975A7C1BF646A314F207C9D68202129A8D206CC362255D9EFD08B6A`，交付包 [LED_SCOPE_WEAK_FIX_20261022](../pcm5102_pam8403/deliveries/LED_SCOPE_WEAK_FIX_20261022/README.md)；标准 `impl/pnr/PCM5102_UNIFIED.fs` 已同步该份，旧默认产物移至 `sim/build/pre_weak_fix_default_20261022/`。
+
+## 2026-10-22 · FPGA LED 波形刻度、FSR 量程与真实电平渐变，UserCode `0x00006DCF`
+
+波形页改为带时间轴（0 /5 /10 MS）与纵轴数字刻度的布局：48 个采集箱完整覆盖 512 个采样、约 10.486ms；FSR 实际音量增益联动 X1 /X2 /X4 建议量程并带迟滞，混音超出建议范围时优先扩大量程；颜色按真实窗口峰值分 16 级从白蓝渐变到红，PK 与电平条仍为 0～100% 固定满幅刻度。XY /FFT 页的三条音源幅度条与 `VIZ?` 包格式保留，未新增 App 命令、DSP 或音频处理级。显示倍率最高 X4，不是 AGC，极弱信号仍可能很小。
+
+冻结构建 `scope_fsr_gradient_v5_20261022`，95 份输入与工作区逐项匹配。整机 Logic 21387、CLS 11145、Register 10306、BSRAM 45、DSP 26.5（相对四档回声基线 +299 /+85 /+67 /+1 /0，为整套显示的净增量）；剩余 1653 /375 /11，仍覆盖 D、B2、E100 与安全垫的 1650 /365 /4 预留。50MHz 约束下 Fmax 50.438MHz，Setup /Hold 违规端点均 0。11 个相关 RTL 测试通过，含 65536 个 PCM 峰值码、768 组坐标、独立光栅模型的 4096 像素 /12288 个 RGB5 通道；最终顶层 Quick 87.164ms（省略六预设整屏抓图）。位流 SHA256 `2A1BCDE333A880DD7ED8743B2ADDEAEC314638D38511AB568A83558713EB09A0`，交付包 [LED_SCOPE_20261022](../pcm5102_pam8403/deliveries/LED_SCOPE_20261022/README.md)，同日已被上一节的弱信号修正版取代，保留为历史记录。
+
+## 2026-10-22 · App v1.23-linkdiag / Code24，安装版本与超时定位
+
+用户在Code23发布后仍反馈通用超时截图，实际安装版本与失败命令尚未确认。发现旧四档回声冻结包仍带有缺陷的Code22 APK，与dist同名；已给旧包添加停用提示，新增带版本号的 [Code24独立APK](../pcm5102_pam8403/android_app/dist/FPGA-Music-LinkDiag-Code24.apk)。设备状态显示Manifest内的实际版本，4秒超时提示具体命令、期望回复、字节数、最近完整行或缺少LF。
+
+回复识别改为等待命令单处匹配，保留异步事件 /录制溢出与设备拒绝的原有语义；命令正文最多64个可打印ASCII字符且只追加LF。传输测试改用真实VIB回包 `VIB,0008,0D96,100,0000`，补齐完整初始化十步、事件 /其他回复交错、逐字节分片、参数解析和三类超时。核心测试全部通过，SppLink255项；APK构建、v3验签和版本核对通过。SHA256为 `8E2C3AF491B68E6D1755BCFFBF31D470DFD4243F777ABE48D866208608B9A7DD`。本次未改RTL、位流、命令字典或回复模板，实机连接是否恢复仍待新提示 /连接结果核对。说明见 [HC05_CONNECTION.md](../pcm5102_pam8403/HC05_CONNECTION.md)。
+
+## 2026-10-22 · App v1.22-handshake / Code23，修复 v1.21 连接握手必然超时
+
+v1.21 在 `MainActivity.connectSelected()` 的连接流程里追加 `readPerformance()`，发送 `PITCH,?` / `VIB,?` / `EFFECT2,?`，但同一次提交没有改动 `SppLink.java`：读线程的回复白名单与 `commandLocked()` 的期望类型分支都只列到 `TAKE,`，三条新回复被当作非回复行丢弃。后果是命令发出、板子正确回答，App 却干等到 4 秒 deadline 抛「等待回复超时；请重新连接并重新下载，原有效曲谱保留」并 `close()` 关闭会话——**与位流新旧无关，Code22 在任何板子上都完不成连接**。第三方 SPP 终端可同时拿到 `PING`→`PONG` 与 `PITCH,?`→`PITCH,2000,8000,1000,4000`，即链路与协议正常、缺陷在 App 侧。
+
+修复为两处白名单各补 `PITCH,` / `VIB,` / `EFFECT2,`，并在 `core_test/SppLinkTest.java` 增加传输层回归：三条查询的完整回复、与 `EVT` 事件行交错的回复、以及分两片到达的 `PITCH` 回复都必须被等待中的命令取回，防止以后新增命令时再次只改调用方。App 纯 Java 核心测试全部通过，`SppLink` 195 项。
+
+Code23 /1.22-handshake APK SHA256 `21DBFEFE48609B97B48B8DE2108D9F664DD2522509F48811598304DD96C53691`，仍配套四档回声优先版位流（UserCode `0x0000589C`）。同时记录：仓库默认路径 `impl/pnr/PCM5102_UNIFIED.fs` 已被 10-22 12:39 的本地重建覆盖为 `0F42C78FC7A1F40AC3F50C5F8078157246CE8D8A13387AEAE9040066A3047390`，与交付包 `E236EB634F02FB24B93E004C9AA5B68229D1E693EE5D678AAD173DE232F97EDE` 不是同一字节（同源码、同 UserCode、资源与时序逐项一致，仅布局布线结果不同）；严格复现交付记录请取 `deliveries/ECHO_PRIORITY_20261022/` 副本。本轮未改动 RTL、位流与协议，实物演奏验收仍待办。
 
 ## 2026-10-22 · App v1.21-echo / Code22，四档回声优先版
 

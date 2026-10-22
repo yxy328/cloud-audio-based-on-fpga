@@ -1,12 +1,14 @@
 `timescale 1ns/1ps
 // A tap on the exact sample latched by i2s_tx, never an audio processing stage.
-// 64 columns x 8 samples = 10.486ms at 50MHz/1024. Each column stores its
-// minimum/maximum screen y, preserving both polarities and brief transients.
+// 48 columns cover all 512 samples (11,11,10 samples repeated 16 times).
+// Signed PCM extrema are retained before range selection, so a large signal
+// can expand the displayed range without reinterpreting a clipped bitmap.
 // Double buffering swaps only at a complete panel RGB5/PWM frame boundary.
 module audio_visualizer (
-    input wire clk, resetn, sample_ce, display_boundary, service_ce,
+    input wire clk, resetn, sample_ce, display_boundary, service_ce,style_ce,
     input wire [1:0] visual_mode,
     input wire [1:0] reference_ratio,reference_phase,
+    input wire [15:0] scope_fsr_gain,
     input wire signed [15:0] mixed_sample, touch0, touch1, sensor_sample, guitar_sample,
     input wire [5:0] pixel_x,
     input wire [4:0] pixel_row,
@@ -16,16 +18,36 @@ module audio_visualizer (
     // One BSRAM: wave banks 0..127, 64x32 XY bitmap banks 128..383.
     // Display reads are prefetched. XY read/modify/write uses row blanking,
     // leaving the existing 133-clock HUB row period and RGB setup unchanged.
-    (* syn_ramstyle="block_ram" *) reg [15:0] picture [0:511];
+    (* syn_ramstyle="block_ram" *) reg [19:0] picture [0:511];
     reg capture_bank, display_bank, capture_ready, display_valid;
     reg clearing,capture_full,wave_pending,xy_pending,rmw_busy;
     reg [6:0] clear_index;
     reg [8:0] wave_address,xy_address,rmw_address;
-    reg [9:0] wave_value;
+    reg [19:0] wave_value;
     reg [3:0] xy_bit,rmw_bit;
     reg [5:0] capture_column;
-    reg [2:0] sample_phase;
-    reg [4:0] minimum_y, maximum_y;
+    reg [3:0] sample_phase;
+    reg [1:0] group_phase;
+    // At maximum x32 gain a pixel is 64 PCM counts: ten signed bits retain
+    // every visible step. Both endpoints share the existing RAM with XY.
+    reg signed [9:0] minimum_sample,maximum_sample,previous_sample;
+    wire signed [9:0] quantized_sample=mixed_sample[15:6];
+    wire signed [9:0] next_minimum=quantized_sample<minimum_sample ? quantized_sample : minimum_sample;
+    wire signed [9:0] next_maximum=quantized_sample>maximum_sample ? quantized_sample : maximum_sample;
+    wire column_done=sample_phase==(group_phase==2 ? 4'd9 : 4'd10);
+    // ceil(abs(PCM)/256), including -32768. Eight-bit peak storage keeps
+    // conservative range protection without a full-width absolute/max chain.
+    wire [7:0] sample_magnitude=mixed_sample[15] ? (~mixed_sample[15:8]+8'd1) :
+        {1'b0,mixed_sample[14:8]}+(|mixed_sample[7:0]);
+    reg [7:0] capture_peak;
+    reg [1:0] capture_range;
+    reg [2:0] shown_range;
+    // Normal instrument output is attenuated before this tap. Start at x8,
+    // then let FSR suggest x16/x32. True peaks always override with a wider
+    // x1..x32 range; both endpoints retain enough precision for every range.
+    wire [2:0] safe_range=capture_peak>64 ? 3'd0 : capture_peak>32 ? 3'd1 :
+        capture_peak>16 ? 3'd2 : capture_range==0 || capture_peak>8 ? 3'd3 :
+        capture_range==1 || capture_peak>4 ? 3'd4 : 3'd5;
     reg [4:0] sample_y;
     reg [5:0] sample_x;
     reg [1:0] capture_ratio,capture_phase,shown_ratio,shown_phase;
@@ -47,8 +69,6 @@ module audio_visualizer (
         else if(mixed_sample < -16'sd7680) sample_x=2;
         else sample_x=scaled_x[5:0];
     end
-    wire [4:0] next_minimum = sample_y < minimum_y ? sample_y : minimum_y;
-    wire [4:0] next_maximum = sample_y > maximum_y ? sample_y : maximum_y;
     // The pointer is stable for 1024 clocks between samples. A synchronous
     // read therefore supplies the same delayed point at sample_ce, while
     // moving the 32-entry history and its large mux into one block RAM.
@@ -71,16 +91,16 @@ module audio_visualizer (
     wire [8:0] clear_address=9'd128+{capture_bank,7'd0}+{2'd0,clear_index};
     wire [8:0] display_address=visual_mode==2 ?
         9'd128+{display_bank,7'd0}+{2'd0,pixel_row,2'd0}+{7'd0,pixel_x[5:4]} :
-        {2'd0,display_bank,pixel_x};
+        {2'd0,display_bank,(pixel_x-6'd16)};
     wire [8:0] read_address=start_xy ? xy_address : display_address;
-    reg [15:0] display_data;
-    wire [9:0] display_range=display_data[9:0];
+    reg [19:0] display_data;
+    wire [19:0] display_range=display_data;
     always @(posedge clk) begin
         display_data<=picture[read_address];
         if(resetn) begin
-            if(rmw_busy) picture[rmw_address]<=display_data | (16'd1<<rmw_bit);
+            if(rmw_busy) picture[rmw_address]<=display_data | (20'd1<<rmw_bit);
             else if(clearing && service_ce) picture[clear_address]<=0;
-            else if(write_wave) picture[wave_address]<={6'd0,wave_value};
+            else if(write_wave) picture[wave_address]<=wave_value;
         end
     end
     always @(posedge clk) begin
@@ -91,7 +111,8 @@ module audio_visualizer (
             wave_pending<=0;xy_pending<=0;rmw_busy<=0;
             wave_address<=0;xy_address<=0;rmw_address<=0;wave_value<=0;xy_bit<=0;rmw_bit<=0;
             capture_column <= 0; sample_phase <= 0;
-            minimum_y <= 16; maximum_y <= 16;
+            minimum_sample<=0;maximum_sample<=0;previous_sample<=0;group_phase<=0;
+            capture_peak<=0;capture_range<=0;shown_range<=0;
             capture_ratio<=0;capture_phase<=0;shown_ratio<=0;shown_phase<=0;
         end else begin
             rmw_busy<=0;
@@ -105,6 +126,18 @@ module audio_visualizer (
             if(write_wave) wave_pending<=0;
             if(capture_full && !wave_pending && !xy_pending && !rmw_busy) capture_ready<=1;
             if (capture_ready && display_boundary) begin
+                shown_range<=safe_range;
+                capture_peak<=0;
+                // Quantize actual applied FSR gain; 1.56% hysteresis on
+                // returning to a wider range prevents boundary chatter.
+                case(capture_range)
+                    0:if(scope_fsr_gain<=32768)capture_range<=scope_fsr_gain<=16384 ? 2'd2 : 2'd1;
+                    1:if(scope_fsr_gain>33792)capture_range<=0;
+                      else if(scope_fsr_gain<=16384)capture_range<=2;
+                    2:if(scope_fsr_gain>33792)capture_range<=0;
+                      else if(scope_fsr_gain>17408)capture_range<=1;
+                    default:capture_range<=0;
+                endcase
                 shown_ratio<=capture_ratio;shown_phase<=capture_phase;
                 capture_ratio<=reference_ratio;capture_phase<=reference_phase;
                 display_bank <= capture_bank;
@@ -114,27 +147,38 @@ module audio_visualizer (
                 capture_full<=0;clearing<=1;clear_index<=0;
             end
             if (sample_ce && !capture_full && !clearing) begin
+                if(sample_magnitude>capture_peak)capture_peak<=sample_magnitude;
                 if(history_count==32) begin
                     xy_address<=9'd128+{capture_bank,7'd0}+{2'd0,xy_y,2'd0}+{7'd0,xy_x[5:4]};
                     xy_bit<=xy_x[3:0];xy_pending<=1;
                 end
-                sample_phase <= sample_phase+1'b1;
+                sample_phase <= column_done ? 4'd0 : sample_phase+1'b1;
                 if (sample_phase == 0) begin
-                    minimum_y <= sample_y;
-                    maximum_y <= sample_y;
+                    minimum_sample<=capture_column!=0 && previous_sample<quantized_sample ? previous_sample : quantized_sample;
+                    maximum_sample<=capture_column!=0 && previous_sample>quantized_sample ? previous_sample : quantized_sample;
                 end else begin
-                    minimum_y <= next_minimum;
-                    maximum_y <= next_maximum;
-                    if (sample_phase == 7) begin
+                    minimum_sample<=next_minimum;
+                    maximum_sample<=next_maximum;
+                    if (column_done) begin
                         wave_address<={2'd0,capture_bank,capture_column};
-                        wave_value<={next_minimum,next_maximum};wave_pending<=1;
-                        capture_column <= capture_column+1'b1;
-                        if (capture_column == 63) capture_full <= 1;
+                        wave_value<={next_maximum,next_minimum};wave_pending<=1;
+                        previous_sample<=quantized_sample;
+                        capture_column<=capture_column==47 ? 6'd0 : capture_column+1'b1;
+                        group_phase<=group_phase==2 ? 2'd0 : group_phase+1'b1;
+                        if (capture_column == 47) capture_full <= 1;
                     end
                 end
             end
         end
     end
+
+    wire [14:0] scope_upper,scope_lower;
+    wire xy_label_on;
+    audio_scope u_scope(.clk(clk),.resetn(resetn),.service_ce(style_ce),
+        .publish(capture_restart),.capture_peak(capture_peak),
+        .shown_range(shown_range),.display_valid(display_valid),.range_word(display_range),
+        .visual_mode(visual_mode),.shown_ratio(shown_ratio),.shown_phase(shown_phase),.xy_label_on(xy_label_on),
+        .pixel_x(pixel_x),.pixel_row(pixel_row),.upper_rgb(scope_upper),.lower_rgb(scope_lower));
 
     wire [79:0] spectrum_levels;
     wire spectrum_valid,spectrum_done;
@@ -197,56 +241,10 @@ module audio_visualizer (
     reg bar_row;
     wire [5:0] bar_x = pixel_x-6'd6;
     wire [4:0] spectrum_height=shown_spectrum[pixel_x[5:2]*5 +: 5];
-    // 3x5 source/parameter label in otherwise unused rows 32..36.
-    // REF is a mathematical reference; AUD is the actual delayed audio mix.
-    reg [7:0] label_char;
-    wire [11:0] phase_digits=shown_phase==0 ? 12'h000 :
-        shown_phase==1 ? 12'h045 : shown_phase==2 ? 12'h090 : 12'h135;
-    always @* begin
-        label_char=" ";
-        case(pixel_x[5:2])
-            1:label_char=shown_ratio==0 ? "A" : "R";
-            2:label_char=shown_ratio==0 ? "U" : "E";
-            3:label_char=shown_ratio==0 ? "D" : "F";
-            5:if(shown_ratio!=0) label_char=shown_ratio==3 ? "2" : "1";
-            6:if(shown_ratio!=0) label_char=":";
-            7:if(shown_ratio!=0) label_char=shown_ratio==2 ? "2" : shown_ratio==3 ? "3" : "1";
-            9:if(shown_ratio!=0) label_char="P";
-            10:if(shown_ratio!=0) label_char="0"+phase_digits[11:8];
-            11:if(shown_ratio!=0) label_char="0"+phase_digits[7:4];
-            12:if(shown_ratio!=0) label_char="0"+phase_digits[3:0];
-            default:label_char=" ";
-        endcase
-    end
-    function [14:0] glyph;
-        input [7:0] ch;
-        begin case(ch)
-            "0":glyph=15'b111_101_101_101_111;
-            "1":glyph=15'b010_110_010_010_111;
-            "2":glyph=15'b110_001_010_100_111;
-            "3":glyph=15'b110_001_010_001_110;
-            "4":glyph=15'b101_101_111_001_001;
-            "5":glyph=15'b111_100_110_001_110;
-            "9":glyph=15'b111_101_111_001_110;
-            ":":glyph=15'b000_010_000_010_000;
-            "A":glyph=15'b010_101_111_101_101;
-            "U":glyph=15'b101_101_101_101_111;
-            "D":glyph=15'b110_101_101_101_110;
-            "R":glyph=15'b110_101_110_101_101;
-            "E":glyph=15'b111_100_110_100_111;
-            "F":glyph=15'b111_100_110_100_100;
-            "P":glyph=15'b110_101_110_100_100;
-            default:glyph=0;
-        endcase end
-    endfunction
-    wire [14:0] label_glyph=glyph(label_char);
-    wire [4:0] glyph_index=5'd14-({pixel_row[2:0],1'b0}+pixel_row[2:0])-pixel_x[1:0];
     always @* begin
         upper_rgb = 0;
         // Quiet baseline and four time-grid columns remain visible in silence.
         if (pixel_row == 16 || pixel_x[3:0] == 0) upper_rgb = {5'd0,5'd1,5'd3};
-        if (display_valid && pixel_row >= display_range[9:5] && pixel_row <= display_range[4:0])
-            upper_rgb = {5'd0,5'd26,5'd31};
         if(visual_mode==2) begin
             upper_rgb=0;
             if(pixel_x==32 || pixel_row==16) upper_rgb={5'd1,5'd1,5'd3};
@@ -276,7 +274,8 @@ module audio_visualizer (
                 if (bar_x < bar_level) lower_rgb = bar_color;
             end
         end
-        if(visual_mode==2 && display_valid && pixel_row<5 && pixel_x[1:0]!=3 && label_glyph[glyph_index])
+        if(xy_label_on)
             lower_rgb={5'd18,5'd18,5'd18};
+        if(visual_mode==1)begin upper_rgb=scope_upper;lower_rgb=scope_lower;end
     end
 endmodule

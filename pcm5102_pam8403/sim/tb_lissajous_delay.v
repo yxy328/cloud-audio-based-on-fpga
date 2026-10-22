@@ -9,7 +9,7 @@ module tb_lissajous_delay;
     wire [14:0] upper,lower;
     integer n;
     audio_visualizer dut (.clk(clk),.resetn(resetn),.sample_ce(ce),.display_boundary(boundary),
-        .service_ce(1'b1),.visual_mode(2'd2),.mixed_sample(sample),
+        .service_ce(1'b1),.style_ce(1'b1),.visual_mode(2'd2),.mixed_sample(sample),
         .reference_ratio(2'd0),.reference_phase(2'd0),
         .touch0(16'sd0),.touch1(16'sd0),.sensor_sample(16'sd0),.guitar_sample(16'sd0),
         .pixel_x(x),.pixel_row(y),.upper_rgb(upper),.lower_rgb(lower));

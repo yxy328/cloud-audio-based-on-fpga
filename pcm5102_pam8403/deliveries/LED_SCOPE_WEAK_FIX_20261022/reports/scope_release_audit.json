@@ -1,0 +1,46 @@
+{
+  "build": "scope_weak_signal_v11_20261022",
+  "resources": {
+    "Logic": 21394,
+    "Register": 10306,
+    "CLS": 11087,
+    "BSRAM": 47,
+    "DSP": 26.5
+  },
+  "baseline": {
+    "Logic": 21088,
+    "Register": 10239,
+    "CLS": 11060,
+    "BSRAM": 44,
+    "DSP": 26.5
+  },
+  "delta": {
+    "Logic": 306,
+    "Register": 67,
+    "CLS": 27,
+    "BSRAM": 3,
+    "DSP": 0.0
+  },
+  "remaining": {
+    "Logic": 1646,
+    "CLS": 433,
+    "BSRAM": 9
+  },
+  "reserved": {
+    "Logic": 1650,
+    "CLS": 365,
+    "BSRAM": 4
+  },
+  "future_reserve_passed": false,
+  "future_reserve_shortfall": {
+    "Logic": 4,
+    "CLS": 0
+  },
+  "clock_mhz": 50,
+  "fmax_mhz": 51.441,
+  "setup_violations": 0,
+  "hold_violations": 0,
+  "matching_working_inputs": 95,
+  "user_code": "0x00007D67",
+  "sha256": "C54EF13D2975A7C1BF646A314F207C9D68202129A8D206CC362255D9EFD08B6A"
+}

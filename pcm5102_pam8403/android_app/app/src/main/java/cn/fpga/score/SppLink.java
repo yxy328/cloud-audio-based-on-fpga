@@ -26,6 +26,8 @@ public final class SppLink implements Closeable {
     private final Object outputLock=new Object();
     private final Object commandLock=new Object();
     private volatile boolean waiting;
+    private volatile long receivedBytes,receivedLines;
+    private volatile String lastLine="";
     public SppLink(Listener listener){this.listener=listener;}
     public boolean connected(){BluetoothSocket s=socket;return s!=null&&s.isConnected();}
     public void connect(BluetoothDevice device)throws IOException {
@@ -39,8 +41,10 @@ public final class SppLink implements Closeable {
     private void read(BluetoothSocket s){
         try{InputStream input=s.getInputStream();ByteArrayOutputStream b=new ByteArrayOutputStream();int ch;
             while((ch=input.read())!=-1){if(socket!=s)return;
+                receivedBytes++;
                 if(ch=='\n'){String line=new String(b.toByteArray(),StandardCharsets.US_ASCII).trim();b.reset();if(line.isEmpty())continue;
-                    listener.line(line);if(waiting&&!line.startsWith("ERR,REC_OVERFLOW,")&&(line.equals("OK")||line.startsWith("OK,")||line.startsWith("ERR,")||line.startsWith("MAP,")||line.startsWith("CTRL,")||line.startsWith("CTRL2,")||line.startsWith("HOLD,")||line.startsWith("POLY,")||line.startsWith("ADC,")||line.startsWith("CAL,")||line.startsWith("SERIAL,")||line.startsWith("VIS,")||line.startsWith("V,")||line.startsWith("TAKE,")||line.equals("PONG")))responses.offer(line);
+                    lastLine=line;receivedLines++;
+                    listener.line(line);if(waiting)responses.offer(line);
                 }else if(ch!='\r'){if(b.size()>=1024)throw new IOException("接收行过长，连接已关闭");b.write(ch);}}
             throw new IOException("设备已断开");
         }catch(IOException e){if(socket==s){socket=null;
@@ -55,18 +59,25 @@ public final class SppLink implements Closeable {
     private String commandLocked(String command,String expected)throws IOException,InterruptedException {
         if(command.startsWith("AREC"))throw new IOException("当前 App 不支持板上 PCM 录音与 HC-05 音频回传");
         BluetoothSocket s=socket;if(s==null||!s.isConnected())throw new IOException("尚未连接 HC-05");
-        if(command.length()>62||command.indexOf('\n')>=0||command.indexOf('\r')>=0)throw new IOException("命令长度/格式无效");
+        if(command.length()>64||command.indexOf('\n')>=0||command.indexOf('\r')>=0||!command.matches("[ -~]+"))throw new IOException("命令必须为 1～64 个可打印 ASCII 字符，不能包含换行");
+        long bytesBefore=receivedBytes,linesBefore=receivedLines;
         responses.clear();waiting=true;
-        try{rawWrite(s,command+"\r\n");
+        try{rawWrite(s,command+"\n");
             long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(4);
-            for(;;){long remaining=deadline-System.nanoTime();if(remaining<=0)throw new IOException("等待回复超时；请重新连接并重新下载，原有效曲谱保留");
+            for(;;){long remaining=deadline-System.nanoTime();if(remaining<=0){
+                    long bytes=receivedBytes-bytesBefore;
+                    String receivedLast=lastLine;
+                    String detail=bytes==0?"本次未收到任何字节":receivedLines==linesBefore?"本次收到 "+bytes+" 字节，未收到完整非空行（LF）":"本次收到 "+bytes+" 字节；最近完整行："+receivedLast.substring(0,Math.min(96,receivedLast.length()));
+                    throw new IOException("命令 "+command+" 等待回复超时（4 秒，期望 "+expected+"）。\n"+detail+"\n连接已关闭，请重连；原有效曲谱保留");
+                }
                 String response=responses.poll(remaining,TimeUnit.NANOSECONDS);if(response==null)continue;
                 if(response.equals("!DISCONNECTED"))throw new IOException("蓝牙已断开；重新连接后可从头重试下载");
+                if(response.startsWith("ERR,REC_OVERFLOW,"))continue;
                 if(response.matches("ERR,(STATE|CMD|BUSY|RANGE|MISSING|MAP|KEY|NOTE)"))
                     throw new CommandRejectedException(command,response);
                 if(response.startsWith("ERR,"))throw new IOException("设备返回 "+response);
                 String type=expected.endsWith(",")?expected.substring(0,expected.length()-1):expected;
-                if((type.equals("MAP")||type.equals("CTRL")||type.equals("CTRL2")||type.equals("HOLD")||type.equals("POLY")||type.equals("ADC")||type.equals("CAL")||type.equals("SERIAL")||type.equals("VIS")||type.equals("V")||type.equals("TAKE"))&&response.startsWith(type+","))return response;
+                if(!type.equals("OK")&&!type.equals("PONG")&&response.startsWith(type+","))return response;
                 if(expected.equals("OK")&&(response.equals("OK")||response.startsWith("OK,")))return response;
                 if(expected.equals("PONG")&&response.equals("PONG"))return response;
             }

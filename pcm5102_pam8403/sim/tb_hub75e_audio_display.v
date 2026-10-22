@@ -6,7 +6,7 @@ module tb_hub75e_audio_display;
     reg [7:0] divider=0;
     integer samples=0;
     wire ce=feed && divider==255 && samples<512;
-    wire signed [15:0] mixed=samples[3] ? 16'sd1024 : -16'sd1024;
+    wire signed [15:0] mixed=samples<11 ? 16'sd1024 : -16'sd1024;
     always @(posedge clk) divider<=divider+1'b1;
     always @(posedge clk) if(resetn && ce) samples<=samples+1;
     wire r1,g1,b1,r2,g2,b2,a,b,c,d,e,ck,st,oe;
@@ -17,7 +17,7 @@ module tb_hub75e_audio_display;
         .playing(playing),.ms_tick(ms_tick),.note_spawn(spawn),
         .spawn_keys(7'd1),.spawn_delay_ms(16'd1500),
         .visual_mode(visual),.sample_ce(ce),.mixed_sample(mixed),
-        .reference_ratio(2'd0),.reference_phase(2'd0),
+        .reference_ratio(2'd0),.reference_phase(2'd0),.scope_fsr_gain(16'hffff),
         .touch0(16'sd1280),.touch1(16'sd0),.sensor_sample(16'sd2560),.guitar_sample(-16'sd3840),
         .hub_R1(r1),.hub_G1(g1),.hub_B1(b1),.hub_R2(r2),.hub_G2(g2),.hub_B2(b2),
         .hub_A(a),.hub_B(b),.hub_C(c),.hub_D(d),.hub_E(e),.hub_CK(ck),.hub_ST(st),.hub_OE(oe));
@@ -26,6 +26,9 @@ module tb_hub75e_audio_display;
     reg [1:0] old_mode=0;
     reg old_boundary=0;
     time last_rgb=0;
+    reg capture_screen=0;
+    integer screen_r[0:4095],screen_g[0:4095],screen_b[0:4095];
+    integer px,ui,li;
     always @(rgb) last_rgb=$time;
     always @(posedge clk) begin
         cycles=cycles+1;
@@ -44,6 +47,11 @@ module tb_hub75e_audio_display;
         if(panel_row!==latches%32) $fatal(1,"HUB row order changed");
         if(last_latch && cycles-last_latch!=133) $fatal(1,"HUB scan period changed");
         columns=0; latches=latches+1; last_latch=cycles;
+        if(capture_screen)for(px=0;px<64;px=px+1)begin
+            ui=panel_row*64+px;li=(panel_row+32)*64+px;
+            screen_r[ui]=screen_r[ui]+pixels[px][5];screen_g[ui]=screen_g[ui]+pixels[px][4];screen_b[ui]=screen_b[ui]+pixels[px][3];
+            screen_r[li]=screen_r[li]+pixels[px][2];screen_g[li]=screen_g[li]+pixels[px][1];screen_b[li]=screen_b[li]+pixels[px][0];
+        end
     end
     task inspect;
         input integer x,y; input [2:0] expected;
@@ -56,6 +64,20 @@ module tb_hub75e_audio_display;
             @(negedge st);
         end
     endtask
+    task save_scope;
+        integer p;
+        begin
+            wait(dut.pwm_phase==31 && panel_row==31 && st);@(negedge st);
+            for(p=0;p<4096;p=p+1)begin screen_r[p]=0;screen_g[p]=0;screen_b[p]=0;end
+            capture_screen=1;
+            wait(dut.pwm_phase==31 && panel_row==31 && st);#2;capture_screen=0;
+            preview=$fopen("sim/build/scope_external_panel.ppm","w");
+            if(!preview)$fatal(1,"Cannot save external scope frame");
+            $fdisplay(preview,"P3\n64 64\n31");
+            for(p=0;p<4096;p=p+1)$fdisplay(preview,"%0d %0d %0d",screen_r[p],screen_g[p],screen_b[p]);
+            $fclose(preview);
+        end
+    endtask
     initial begin
         repeat(4) @(negedge clk); resetn=1;
         repeat(50000) @(negedge clk);feed=1;
@@ -63,16 +85,13 @@ module tb_hub75e_audio_display;
         @(negedge clk); visual=1;
         wait(dut.visual_active);
         wait(dut.audio_visual.u_visualizer.display_valid);
-        inspect(0,18,3'b011);
-        inspect(63,14,3'b011); // First and last synchronous RAM columns.
-        inspect(2,14,3'b000); // Adjacent columns differ: catches stale prefetch.
-        inspect(1,18,3'b000);
-        inspect(7,13,3'b000);
-        inspect(15,40,3'b011); inspect(16,40,3'b111); // Touch = 10 pixels.
-        inspect(25,48,3'b011); inspect(26,48,3'b111); // Sensor = 20 pixels.
-        inspect(35,56,3'b110); inspect(36,56,3'b111); // Guitar = 30 pixels.
+        save_scope;
+        inspect(16,23,3'b101);inspect(16,28,3'b000);
+        inspect(63,31,3'b101);inspect(63,27,3'b011); // Quiet grid node only.
+        inspect(32,59,3'b101);inspect(33,59,3'b000); // Fixed PCM peak meter.
         visual=2;wait(dut.visual_active==2);
-        inspect(36,14,3'b111);inspect(35,14,3'b000);
+        inspect(28,14,3'b111);inspect(29,14,3'b000);
+        inspect(15,40,3'b011);inspect(16,40,3'b111); // Source meters retained in XY.
         visual=3;wait(dut.visual_active==3);
         inspect(16,16,3'b000); // No spectrum before a complete FFT window.
         inspect(16,31,3'b111);

@@ -1,0 +1,21 @@
+{
+  "versionCode": 24,
+  "versionName": "1.23-linkdiag",
+  "apkSha256": "8E2C3AF491B68E6D1755BCFFBF31D470DFD4243F777ABE48D866208608B9A7DD",
+  "sameSigningCertificateAsCode22": true,
+  "coreTests": "passed",
+  "sppLinkAssertions": 255,
+  "phoneConnectionVerified": false,
+  "screenshotFailureCommand": "unknown; needs diagnostic from installed Code24",
+  "rtlChanged": false,
+  "bitstreamChanged": false,
+  "sources": {
+    "android_app/app/build.gradle": "9D19037D88D6935099A684CB0E2D70D5CE6875DD6B966DDA61A4B8EFBBB4E6D5",
+    "android_app/app/src/main/AndroidManifest.xml": "10EB60631038538F41E55EF1D8E38758F1BE22C8432DF49D5D2C4D6C702D1CF8",
+    "android_app/app/src/main/java/cn/fpga/score/SppLink.java": "A03F6FE99DB12FA6F54FBA83F4D0ACE0F1D0D875FAFBE507EF29F3223A8EF2E3",
+    "android_app/app/src/main/java/cn/fpga/score/MainActivity.java": "3A83B9F5E1C0F4D253858AF8022F02D4ADBB1F8C35E459AC6A7D860FC9B69329",
+    "android_app/core_test/SppLinkTest.java": "C6C4B2710C8C4FC99F3C9F7E8635370764AAA88B2CE460AE532897B185355A4D",
+    "android_app/core_test/RecordingSupportTest.java": "9B6FB952338353BA5BAAD0DF3BA0D6693DCDC597299FDF2A66CC2AE8E3918491",
+    "android_app/test-core.ps1": "262096D7859993BE99EB1B33E93111540181B598BDCC97F92A6CF6CE61269A63"
+  }
+}

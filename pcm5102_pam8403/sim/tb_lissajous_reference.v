@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module tb_lissajous_reference;
     reg clk=0;always #10 clk=~clk;
-    reg resetn=0,ce=0,restart=0,boundary=0;
+    reg resetn=0,ce=0,restart=0,boundary=0,service=1;
     reg [1:0] ratio=2,phase=0;
     wire [5:0] rx;
     wire [4:0] ry;
@@ -13,11 +13,11 @@ module tb_lissajous_reference;
     lissajous_reference ref_dut(.clk(clk),.resetn(resetn),.restart(restart),.sample_ce(ce),
         .ratio(ratio),.phase(phase),.x(rx),.y(ry));
     audio_visualizer picture(.clk(clk),.resetn(resetn),.sample_ce(ce),.display_boundary(boundary),
-        .service_ce(1'b1),.visual_mode(2'd2),.reference_ratio(ratio),.reference_phase(phase),
+        .service_ce(service),.style_ce(service),.visual_mode(2'd2),.reference_ratio(ratio),.reference_phase(phase),
         .mixed_sample(16'sd0),.touch0(16'sd0),.touch1(16'sd0),.sensor_sample(16'sd0),.guitar_sample(16'sd0),
         .pixel_x(px),.pixel_row(py),.upper_rgb(upper),.lower_rgb(lower));
     task tick;
-        begin @(negedge clk);ce=1;@(negedge clk);ce=0;repeat(6)@(negedge clk);end
+        begin service=1;@(negedge clk);ce=1;@(negedge clk);ce=0;repeat(6)@(negedge clk);end
     endtask
     task publish;
         begin wait(picture.capture_ready);@(negedge clk);boundary=1;
@@ -25,7 +25,7 @@ module tb_lissajous_reference;
     endtask
     task pixel;
         input integer x,y;
-        begin px=x;py=y;repeat(2)@(negedge clk);end
+        begin service=0;px=x;py=y;repeat(2)@(negedge clk);end
     endtask
     initial begin
         repeat(3)@(negedge clk);resetn=1;

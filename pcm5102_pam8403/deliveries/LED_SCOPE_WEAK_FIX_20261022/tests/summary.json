@@ -1,0 +1,94 @@
+[
+  {
+    "test": "tb_audio_scope",
+    "pass_messages": [
+      "PASS scope: 65536 magnitudes, 2016 signed mappings, 387 peak/FSR selections, real 128/512/1024/2048-count signals, x8/x16/x32 FSR, saturated colors independent of range, six overflow ranges, atomic metadata, hysteresis and six pixel exports"
+    ]
+  },
+  {
+    "test": "tb_audio_visualizer",
+    "pass_messages": [
+      "PASS audio visualizer: 65536 signed PCM coordinates, 48-bin whole-window extrema/buffering, signed peaks/decay, delayed-audio XY bitmap, real FFT bars/gaps/noise floor and pixel colors"
+    ]
+  },
+  {
+    "test": "tb_hub75e_audio_display",
+    "pass_messages": [
+      "PASS HUB audio display: external wave/XY pixels, FFT startup blanking, RAM prefetch, three group bars, unchanged 133-clock scan, whole-PWM four-mode switch, hidden guide descent"
+    ]
+  },
+  {
+    "test": "tb_lissajous_delay",
+    "pass_messages": [
+      "PASS Lissajous: exact 32-sample delayed Y, signed step trajectory, zero signal center and cleared next frame"
+    ]
+  },
+  {
+    "test": "tb_lissajous_reference",
+    "pass_messages": [
+      "PASS reference XY: 12 ratio/phase combinations, 3072 sine points, max error 0.494860 pixels, atomic capture/publish, eight crossing, circle geometry/clear and REF label"
+    ]
+  },
+  {
+    "test": "tb_hub75e_ram_equivalence",
+    "pass_messages": [
+      "PASS circular display: 179908 cycle/pin checks and full 64-row comparisons, dense 128-clock bursts, consecutive scrolls, OR forwarding, STOP/reset races"
+    ]
+  },
+  {
+    "test": "tb_fsr_pipeline",
+    "pass_messages": [
+      "PASS [production FSR pipeline]: three on-chip ADC modeled conversions, force lowers gain, release restores full, bounded 64-LSB steps, idle I2S; 185 stereo pairs"
+    ]
+  },
+  {
+    "test": "tb_display_mode_control",
+    "pass_messages": [
+      "PASS display mode: short release, threshold, one action/hold, long release suppression, guide/wave/XY/spectrum cycle, reset"
+    ]
+  },
+  {
+    "test": "tb_hc05_visual",
+    "pass_messages": [
+      "PASS visual UART: four pages, requested/active state, 32-byte atomic snapshots, strict errors, XY/PING coexistence"
+    ]
+  },
+  {
+    "test": "tb_top_audio_visual_quick",
+    "pass_messages": [
+      "PASS top audio visual quick: exact I2S tap/continuous phase, live touch/IR/guitar, C4 FFT, S2 modes, UART XY while playing, score uninterrupted, external I2S/HUB and guide/wave/XY/FFT/dashboard; six preset captures covered separately",
+      "PASS top dashboard: UART volume/effect/hold/timbre/pressure/analog, real ADC conversion, physical touch/IR, automatic idle status and external RGB5 frame",
+      "PASS top remote visual: four UART pages, whole-frame activation, atomic 32-byte live C4 preview, uninterrupted score/I2S/phase"
+    ]
+  },
+  {
+    "test": "tb_hc05_decoder_equivalence",
+    "pass_messages": [
+      "PASS HC05 decoder differential: 512 UART transactions, exact replies/control values/pulses, mutated commands and random lines"
+    ]
+  },
+  {
+    "test": "tb_command_protocol",
+    "pass_messages": [
+      "PASS performance protocol: 81 wire-level replies, sparse fields, atomic rejection, busy guards, 64/65-byte frames"
+    ]
+  },
+  {
+    "test": "tb_performance_take",
+    "pass_messages": [
+      "PASS tb_performance_take: 25 checks, mock storage only"
+    ]
+  },
+  {
+    "test": "tb_take_nor_store",
+    "pass_messages": [
+      "PASS tb_take_nor_store: 114 checks; behavioral NOR only"
+    ]
+  },
+  {
+    "test": "tb_take_atomic",
+    "pass_messages": [
+      "PASS tb_take_atomic: 5 checks; complete capture and no mixed words at any audio frame"
+    ]
+  }
+]

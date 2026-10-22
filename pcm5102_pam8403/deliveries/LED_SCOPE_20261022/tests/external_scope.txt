@@ -1,0 +1,1 @@
+PASS external scope: 4096 pixels / 12288 RGB5 channels, all 32 PWM phases; static axes/header, dynamic PK digits, first/last capture columns and fixed meter.

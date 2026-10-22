@@ -366,6 +366,7 @@ module top #(
         .ms_tick(guide_ms_tick),.note_spawn(guide_note_spawn),
         .spawn_keys(guide_spawn_keys),.spawn_delay_ms(guide_spawn_delay),
         .visual_mode(visual_mode),.reference_ratio(reference_ratio),.reference_phase(reference_phase),
+        .scope_fsr_gain(perf_replay ? perf_state[432 +: 16] : fsr_gain),
         .visual_snapshot(visual_snapshot),
         .sample_ce(frame_ce),.mixed_sample(audio_sample),
         .touch0(touch_mix0),.touch1(touch_mix1),

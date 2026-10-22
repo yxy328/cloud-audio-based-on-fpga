@@ -41,6 +41,7 @@ module hub75e_rhythm_display #(
     input wire [15:0] spawn_delay_ms,
     input wire [1:0] visual_mode,
     input wire [1:0] reference_ratio,reference_phase,
+    input wire [15:0] scope_fsr_gain,
     input wire sample_ce,
     input wire signed [15:0] mixed_sample, touch0, touch1, sensor_sample, guitar_sample,
     output wire note_ready,
@@ -209,7 +210,9 @@ module hub75e_rhythm_display #(
         audio_visualizer u_visualizer (
             .clk(clk),.resetn(resetn),.sample_ce(sample_ce),.display_boundary(display_boundary),
             .service_ce(state==S_BLANK),.visual_mode(visual_active),
+            .style_ce(state==S_LATCH_HIGH),
             .reference_ratio(reference_ratio),.reference_phase(reference_phase),
+            .scope_fsr_gain(scope_fsr_gain),
             .mixed_sample(mixed_sample),.touch0(touch0),.touch1(touch1),
             .sensor_sample(sensor_sample),.guitar_sample(guitar_sample),
             .pixel_x(visual_read_x),.pixel_row(scan_row),.upper_rgb(visual_upper),.lower_rgb(visual_lower),

@@ -35,17 +35,10 @@ module tb_top_audio_visual;
             sensor_magnitude=$signed(dut.gesture_sample);
             if(sensor_magnitude<0) sensor_magnitude=-sensor_magnitude;
             if(sensor_magnitude>sensor_max) sensor_max=sensor_magnitude;
-            if(expected_sample>7680) expected_y=1;
-            else if(expected_sample < -7680) expected_y=31;
-            else expected_y=16-($signed(expected_sample) >>> 9);
             #1;
             if(dut.u_i2s_tx.frame_sample!==expected_sample) $fatal(1,"Visualization changed I2S frame sample");
-            if(!dut.u_guide_display.audio_visual.u_visualizer.capture_ready &&
-               dut.u_guide_display.audio_visual.u_visualizer.sample_phase==1) begin
-                if(dut.u_guide_display.audio_visual.u_visualizer.minimum_y!==expected_y[4:0])
-                    $fatal(1,"Waveform sample %0d y=%0d expected %0d",expected_sample,
-                        dut.u_guide_display.audio_visual.u_visualizer.minimum_y,expected_y);
-            end
+            if(dut.u_guide_display.audio_visual.u_visualizer.quantized_sample!==expected_sample[15:6])
+                $fatal(1,"Scope is not tapping the exact final I2S sample");
             phase_checks=phase_checks+1;
         end
     end
@@ -189,6 +182,13 @@ module tb_top_audio_visual;
         if(!dut.u_guide_display.audio_visual.u_visualizer.display_valid ||
            dut.u_guide_display.audio_visual.u_visualizer.shown_touch==0)
             $fatal(1,"Live touch did not reach waveform/meter");
+        if(dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[9:5]!==0 ||
+           dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color==0)
+            $fatal(1,"Real instrument output is still shown as white or blank");
+        $display("Real touch scope: x%0d, RGB5=%h, PK BCD=%h",
+            1<<dut.u_guide_display.audio_visual.u_visualizer.shown_range,
+            dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color,
+            dut.u_guide_display.audio_visual.u_visualizer.u_scope.peak_bcd);
         // Real qualified IR and the real guitar engine must reach their group taps.
         beams=254;frames(60);beams=255;frames(100);
         command("GUITAR\n",7);frames(200);
@@ -204,11 +204,13 @@ module tb_top_audio_visual;
         s2=1;frames(80);s2=0;frames(4);
         wait(dut.u_guide_display.visual_active==2);
         save_preview("sim/build/xy_lissajous_panel.ppm");
+`ifndef AUDIO_QUICK_SIM
         xy_preset(3,0,"sim/build/xy_multiloop_panel.ppm");
         xy_preset(1,2,"sim/build/xy_circle_panel.ppm");
         xy_preset(1,1,"sim/build/xy_ellipse_panel.ppm");
         xy_preset(1,0,"sim/build/xy_line_panel.ppm");
         xy_preset(0,0,"sim/build/xy_audio_panel.ppm");
+`endif
         // UART settings take effect while live voices and the score keep running.
         command("XY,1,2\n",7);
         wait(dut.u_guide_display.audio_visual.u_visualizer.shown_ratio==1 &&
@@ -265,7 +267,11 @@ module tb_top_audio_visual;
            dut.u_guide_display.status_panel.u_status.ir_q!=8'h81)
             $fatal(1,"Top dashboard wiring/snapshot failed");
         save_preview("sim/build/status_live_panel.ppm");
+`ifdef AUDIO_QUICK_SIM
+        $display("PASS top audio visual quick: exact I2S tap/continuous phase, live touch/IR/guitar, C4 FFT, S2 modes, UART XY while playing, score uninterrupted, external I2S/HUB and guide/wave/XY/FFT/dashboard; six preset captures covered separately");
+`else
         $display("PASS top audio visual: exact I2S tap/continuous phase, live touch/IR/guitar, C4 FFT, S2 modes and six XY presets, UART XY while playing, score uninterrupted, external I2S/HUB and eight panel captures");
+`endif
         $display("PASS top dashboard: UART volume/effect/hold/timbre/pressure/analog, real ADC conversion, physical touch/IR, automatic idle status and external RGB5 frame");
         $display("PASS top remote visual: four UART pages, whole-frame activation, atomic 32-byte live C4 preview, uninterrupted score/I2S/phase");
         $finish;

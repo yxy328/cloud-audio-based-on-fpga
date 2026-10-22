@@ -22,7 +22,7 @@ for index, (name, label) in enumerate(frames):
     left = 24 + index * 408
     draw.text((left, 70), label, font=font, fill="white")
     canvas.paste(frame.resize((384, 384), Image.Resampling.NEAREST), (left, 112))
-draw.text((24, 520), "下半屏：触摸 / 红外手势 / 吉他幅度。画面由仿真信号重建，尚未实板验收。", font=small, fill="#b9c3d2")
+draw.text((24, 520), "波形页底部为总混音 PK；XY / FFT 为三音源幅度。仿真重建，尚未实板验收。", font=small, fill="#b9c3d2")
 canvas.save(build / "xy_fft_panel_preview.png")
 print(build / "xy_fft_panel_preview.png")
 

@@ -1,14 +1,43 @@
 # 本地验证记录
 
+## 2026-10-22：实体照片反馈后的弱信号修正
+
+交付 [LED_SCOPE_WEAK_FIX_20261022](deliveries/LED_SCOPE_WEAK_FIX_20261022/README.md)。基础 X8、FSR X16 /X32，六档范围保护；10 位极值保留小信号，非零波形使用饱和蓝紫红。15 项相关测试和外部 RGB5 独立模型通过。真实音源顶层 Quick 保持 87.164ms，六预设整屏导出仍由模块覆盖，不记为全量顶层六预设抓图。
+
+冻结 `scope_weak_signal_v11_20261022`，95 份输入与工作区一致。Logic 21394 /CLS 11087 /Register 10306 /BSRAM 47 /DSP 26.5；相对上一版 +7 Logic、-58 CLS、+2 BSRAM、DSP 不变。剩余 1646 /433 /9。原后续规划要求 1650 Logic /365 CLS /4 BSRAM；本版 Logic 余量少 4 个，CLS 和 BSRAM 满足。严格的后续预留审计未通过，硬件容量、50MHz 时序和源码一致性检查通过；后续功能实施前需回收这 4 个 Logic。 50MHz 约束、Fmax 51.441MHz，Setup /Hold 均零，无未布通网络。
+
+UserCode 0x00007D67，SHA256 `C54EF13D2975A7C1BF646A314F207C9D68202129A8D206CC362255D9EFD08B6A`。默认位流已同步新交付，实物烧录及面板颜色验收仍待完成。下面为旧版历史记录，旧的“与工作区一致”指当时构建时点。
+
+## 2026-10-22：LED 波形刻度、FSR 量程与真实电平渐变
+
+已交付 [LED_SCOPE_20261022](deliveries/LED_SCOPE_20261022/README.md)，实现说明见 [SCOPE_DISPLAY.md](SCOPE_DISPLAY.md)。波形完整覆盖512采样约10.486ms，48列带纵轴和时间刻度；FSR建议X1/X2/X4，混音超范围优先扩大量程，真实峰值决定白蓝至红的16级渐变，PK保持固定满幅刻度。XY/FFT三音源条和VIZ格式保留，没有新增App命令、DSP或音频处理级。
+
+冻结构建 `scope_fsr_gradient_v5_20261022` 的95份源码/ROM/约束/工程输入与工作区逐项匹配。完整PnR：Logic **21387**、CLS **11145**、Register **10306**、BSRAM **45**、DSP **26.5**；相对四档回声基线分别为 **+299 /+85 /+67 /+1 /0**。这是整套显示的净增量，不是渐变色单项估算。剩余1653 Logic/375 CLS/11 BSRAM，仍保留D、B2、E100及安全垫要求的1650/365/4，额外只剩3 Logic/10 CLS。
+
+50MHz约束，Fmax **50.438MHz**，Setup/Hold违规端点均0，无未布通网络。UserCode **0x00006DCF**，SHA256 **2A1BCDE333A880DD7ED8743B2ADDEAEC314638D38511AB568A83558713EB09A0**。标准 `impl/pnr/PCM5102_UNIFIED.fs` 及配套综合/PNR报告已同步；旧默认位流和报告保存在 `sim/build/pre_scope_default_20261022/`。
+
+最终11个相关RTL测试通过，含65536个PCM峰值码、768组坐标、完整512采样/48箱、三档FSR/迟滞/范围保护/原子发布、颜色与倍率独立、XY几何/延时/标签、FFT柱、实际ADC转换模型、切页/查询和曲谱逐行逐引脚对照。HUB完整32 PWM相位重建的4096像素/12288个RGB5通道与独立光栅模型逐项相同。最终顶层Quick运行87.164ms，保留真实音频节奏，验证触摸/IR/吉他、外部I²S/HUB、C4 FFT、曲谱与UART切页/快照；Quick省略六预设整屏抓图，另由模块测试覆盖。优化前的196.118ms完整八画面顶层测试也通过，只作历史补充；详细测试边界和日志说明见交付包。
+
+已生成RTL与外部引脚预览，未烧录板卡、安装APK或测量本版实际LED颜色/摄像效果/模拟音量。倍率最高X4，极弱信号不会自动撑满屏；数字百分比不等于声压或感知响度。
+
+
+## App连接定位：Code24 /1.23-linkdiag（2026-10-22）
+
+用户在Code23发布后仍提供通用超时截图，尚未确认手机实际安装版本和失败命令。核对发现滚动dist为Code23，但四档回声冻结交付包仍带同名Code22 APK；已在旧包首页标明停用其APK，并提供带版本号的 [Code24独立安装包](android_app/dist/FPGA-Music-LinkDiag-Code24.apk)。此次不能将现场超时直接归因于安装旧包，也未宣称实机已恢复连接。
+
+Code24设备页从Manifest读取并显示安装版本；超时提示加入命令、期望回复、字节数及最近完整行 /缺少LF信息。回复匹配收敛到等待命令一处，事件行与异步录制溢出仍不确认命令；超时继续关闭旧会话。发送正文为1～64个可打印ASCII字符，只追加LF，符合现有板端行协议。
+
+全套 `android_app/test-core.ps1` 通过，SppLink **255项**，含完整初始化十步、事件 /其他回复交错、逐字节分片、真实PITCH /VIB /EFFECT2解析、64 /65字符边界和三类超时。VIB测试回包由旧简写修正为 `VIB,0008,0D96,100,0000`。`build-apk.ps1` 完整构建、v3验签和Manifest核对通过。APK Code24 /1.23-linkdiag，SHA256 **8E2C3AF491B68E6D1755BCFFBF31D470DFD4243F777ABE48D866208608B9A7DD**。本次未改RTL或位流；现场结果仍需新版失败提示或成功连接记录核对。说明见 [HC05_CONNECTION.md](HC05_CONNECTION.md)。
+
 ## 当前入口：四档回声优先版（2026-10-22）
 
 保留84 /168 /336 /504 ms四档回声，长档仅湿声降采样；C7移调 /A4缩为红外与手势共享，触摸键与吉他保持原音高。合唱维持原固定速率。协议、裁剪项和实物待办见 [PERFORMANCE_PARAMS.md](PERFORMANCE_PARAMS.md)，交付文件见 [ECHO_PRIORITY_20261022](deliveries/ECHO_PRIORITY_20261022/README.md)。
 
 最终冻结构建 `performance_echo_release_20261022` 与当前94份输入逐项匹配。Logic21088、CLS11060、BSRAM44、DSP26.5、Register10239；相对B1的C成本为121 Logic /7 CLS，无BSRAM或DSP增量。剩余1952 Logic /460 CLS /12 BSRAM，满足D、B2、E100与安全垫的1650 /365 /4预留。50MHz下Fmax50.096MHz，setup /hold违例端点均0，无未布通报错。
 
-新增参数的六个相关仿真、默认逐时钟对照、RAM几何检查和App核心测试通过；Code22 /1.21-echo已打包、验签。另有107项RTL全量回归仍在运行，不计为全部通过，实时结果在 `sim/build/regression_20261022/results.json`。没有烧录、安装手机或耳机口对录，实物验收仍待完成。
+新增参数的六个相关仿真、默认逐时钟对照、RAM几何检查和App核心测试通过；Code22 /1.21-echo已打包、验签。Code22 存在握手缺陷：`SppLink` 的回复白名单漏掉本版新增的 `PITCH,` / `VIB,` / `EFFECT2,`，板子返回的正确回复被读线程丢弃，连接流程必然在 4 秒后超时报「等待回复超时；请重新连接并重新下载」并关闭会话，**任何位流都连不上**；已在 Code23 /1.22-handshake 补齐两处白名单，并加 `SppLink` 传输层回归测试（195 项，含分片到达与事件行交错）。另有107项RTL全量回归仍在运行，不计为全部通过，实时结果在 `sim/build/regression_20261022/results.json`。实物已上电并用第三方 SPP 终端实测：`PING`→`PONG`、`PITCH,?`→`PITCH,2000,8000,1000,4000`，证明板上位流含本版三条命令、9600 8N1 与接线正常；本 App 的耳机口对录与现场演奏验收仍待办。
 
-标准输出位流已同步：UserCode **0x0000589C**，SHA256 **E236EB634F02FB24B93E004C9AA5B68229D1E693EE5D678AAD173DE232F97EDE**。APK SHA256 **BEF1A3F01945BF32D283B1EF4988A58D2D27793B797A19D4B6AFA46EB5E4226A**。以下B1及更早数据保留为历史记录。
+交付包位流：UserCode **0x0000589C**，SHA256 **E236EB634F02FB24B93E004C9AA5B68229D1E693EE5D678AAD173DE232F97EDE**。Code23 /1.22-handshake APK SHA256为 **21DBFEFE48609B97B48B8DE2108D9F664DD2522509F48811598304DD96C53691**，当前已由上节Code24取代；Code22 的 `BEF1A3F01945BF32D283B1EF4988A58D2D27793B797A19D4B6AFA46EB5E4226A` 仍保留在历史交付包，不再推荐安装。仓库默认路径 `impl/pnr/PCM5102_UNIFIED.fs` 已在 2026-10-22 12:39 被本地重建覆盖，现为 SHA256 **0F42C78FC7A1F40AC3F50C5F8078157246CE8D8A13387AEAE9040066A3047390**：同一 HEAD 源码、同 UserCode `0x0000589C`、资源逐项相同（Logic21088 /CLS11060 /BSRAM44 /Register10239）、Fmax50.096MHz、Setup /Hold违例端点均0，只是布局布线结果不同，功能等价但字节与本文交付指纹不一致；需要严格复现交付记录时请烧 `deliveries/ECHO_PRIORITY_20261022/PCM5102_UNIFIED.fs` 副本。以下B1及更早数据保留为历史记录。
 
 ## B1半音阶（2026-10-21）
 

@@ -1,0 +1,27 @@
+{
+  "kind": "concept-only",
+  "panel_pixels": [
+    64,
+    64
+  ],
+  "color_bits_per_channel": 5,
+  "styles": [
+    {
+      "id": "A",
+      "title": "薄荷示波器"
+    },
+    {
+      "id": "B",
+      "title": "琥珀仪表"
+    },
+    {
+      "id": "C",
+      "title": "冰蓝音乐"
+    },
+    {
+      "id": "D",
+      "title": "白金极简"
+    }
+  ],
+  "note": "Design studies use illustrative signal shapes, not measured or simulated PCM."
+}

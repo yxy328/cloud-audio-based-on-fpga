@@ -34,7 +34,7 @@ module take_nor_store #(
         WREN_BEGIN=12,WREN_WAIT=13,WEL_WAIT=14,OP_WAIT=15,POLL_BEGIN=16,POLL_WAIT=17,
         BODY_VERIFY_BEGIN=18,BODY_VERIFY_WAIT=19,HEADER_BEGIN=20,HEADER_VERIFY_WAIT=21,
         COMMIT_VERIFY_WAIT=22,FINISH=23,SELECT_HEADER_WAIT=24,SELECT_APPLY=25;
-    reg [4:0] state;
+    (* syn_encoding="onehot" *) reg [4:0] state;
     reg go,authorized,spi_address_valid,writing,abort_spi;
     reg [7:0] opcode,write_data;
     reg [13:0] spi_low;reg spi_region;

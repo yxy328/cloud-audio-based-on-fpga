@@ -2,9 +2,13 @@
 
 [仓库首页](../README.md) · [文档索引](../docs/README.md) · [快速上手](../docs/QUICK_START.md) · [完整接线与验收](PIN_FUNCTION_REQUIREMENTS.md)
 
+**2026-10-22 弱信号修正版：[新版位流与验证](deliveries/LED_SCOPE_WEAK_FIX_20261022/README.md) · [FSR 量程与颜色标定](SCOPE_DISPLAY.md)。** 基础显示倍率提高八倍，FSR X8/X16/X32；非零信号为饱和蓝至红，静音白色。整机 Logic 21394、CLS 11087、BSRAM 47、DSP 26.5，50MHz 时序通过；后续规划的 Logic 预留少4个，报告已标明。尚未烧录。以下数字为历史版本的数据。
+
+**2026-10-22 HC-05连接排查：[Code24独立APK](android_app/dist/FPGA-Music-LinkDiag-Code24.apk) · [安装版本与超时定位](HC05_CONNECTION.md)。** 设备页显示实际安装版本，超时显示具体命令与收发情况。旧四档回声冻结包内的Code22 APK有回复识别缺陷，不再作为安装入口。
+
 **E 预算修订：[100 CLS 范围复核](E_SCOPE.md)。** 保留 B2、D 与安全垫；撤销三源七族全覆盖承诺，按 E0 → E4 → E2 → E3 → E1 逐项测量准入。
 
-**2026-10-22 四档回声优先版：[演奏参数与验证](PERFORMANCE_PARAMS.md) · [App Code22 /1.21-echo](android_app/dist/FPGA-Music-Unified.apk)。** 保留84 /168 /336 /504 ms回声，长档仅湿声降采样；移调 /A4缩为红外与手势共享，触摸键保持原音高。合唱速率维持旧固定值。通过版本PnR为Logic21088、CLS11060、BSRAM44、DSP26.5、Register10239，Fmax50.096 MHz；满足C的400 /100预算，保留D、B2、E100和安全垫。完整107项RTL回归与实机对录状态见该文档。
+**2026-10-22 四档回声优先版：[演奏参数与验证](PERFORMANCE_PARAMS.md) · [当前App Code24 /1.23-linkdiag](android_app/dist/FPGA-Music-Unified.apk)。** 保留84 /168 /336 /504 ms回声，长档仅湿声降采样；移调 /A4缩为红外与手势共享，触摸键保持原音高。合唱速率维持旧固定值。通过版本PnR为Logic21088、CLS11060、BSRAM44、DSP26.5、Register10239，Fmax50.096 MHz；满足C的400 /100预算，保留D、B2、E100和安全垫。完整107项RTL回归与实机对录状态见该文档。
 
 **2026-10-21 B1半音阶：[接线 / 音高表与验证](CHROMATIC_KEYS.md) · [App v1.16-chromatic / Code17](android_app/dist/FPGA-Music-Unified.apk)。** 按用户确认的扫描顺序，K1～K12默认C4～B4，K13～K16暂作C5/D5/E5/F5；手机琴键和七键图形映射同步。MAP仍只支持前七个扫描键，曲谱 / LED仍为七通道。PnR为Logic20967、CLS11053、BSRAM44、DSP26.5，Fmax52.026MHz；未烧录或做实机测频。
 

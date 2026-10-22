@@ -1,0 +1,20 @@
+{
+  "scope_external": "PASS 4096 pixels and 12288 RGB5 channels from actual HUB pins",
+  "scope_rom": "PASS current generated ROM matches generator",
+  "rtl_tests": [
+    "tb_audio_scope",
+    "tb_audio_visualizer",
+    "tb_lissajous_delay",
+    "tb_lissajous_reference",
+    "tb_hub75e_audio_display",
+    "tb_fsr_dynamics",
+    "tb_fsr_pipeline",
+    "tb_display_mode_control",
+    "tb_hc05_visual",
+    "tb_hub75e_ram_equivalence",
+    "tb_top_audio_visual_quick"
+  ],
+  "hardware_programmed": false,
+  "app_changed": false,
+  "full_top_note": "Final quick run skips six preset image captures; all preset geometry and switching covered separately. Intermediate full top run is historical and kept separately."
+}

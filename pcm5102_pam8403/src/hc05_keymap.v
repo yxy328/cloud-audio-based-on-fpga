@@ -151,7 +151,7 @@ module hc05_keymap #(
     localparam [5:0] CMD_EFFECT2_SET=6'd62;
     // END GENERATED HC05 COMMAND IDS
     localparam NO_ERROR=0, LENGTH_ERROR=1, CHAR_ERROR=2, UART_ERROR=3;
-    reg [3:0] state;
+    (* syn_encoding="onehot" *) reg [3:0] state;
     reg [1:0] line_error;
     reg [31:0] line; // Only the last four argument bytes need parallel access.
     reg [6:0] line_length, parse_length, position;

@@ -7,7 +7,7 @@ public final class RecordingSupportTest {
     public static void main(String[] args)throws Exception{
         SppLink link=new SppLink(new SppLink.Listener(){public void line(String line){}public void disconnected(String reason){}});
         for(String response:new String[]{"TAKE,00,0,000000,000,000000","ERR,CMD","ERR,STATE","ERR,BUSY","TAKE,broken"}){
-            BluetoothSocket socket=new BluetoothSocket();socket.onCommand=command->{check(command.equals("TAKE?\r\n"));socket.feed(response+"\r\n");};link.connect(new BluetoothDevice(socket));
+            BluetoothSocket socket=new BluetoothSocket();socket.onCommand=command->{check(command.equals("TAKE?\n"));socket.feed(response+"\r\n");};link.connect(new BluetoothDevice(socket));
             try{TakeStatus take=RecordingSupport.readEvents(link);check(response.startsWith("TAKE,00")&&take.count==0);}
             catch(RecordingSupport.UnsupportedFeatureException expected){check(response.equals("ERR,CMD")||response.equals("ERR,STATE"));check(expected.getMessage().contains("事件录制"));}
             catch(SppLink.CommandRejectedException expected){check(response.equals("ERR,BUSY"));}

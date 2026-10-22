@@ -1,0 +1,41 @@
+{
+  "build": "scope_fsr_gradient_v5_20261022",
+  "resources": {
+    "Logic": 21387,
+    "Register": 10306,
+    "CLS": 11145,
+    "BSRAM": 45,
+    "DSP": 26.5
+  },
+  "baseline": {
+    "Logic": 21088,
+    "Register": 10239,
+    "CLS": 11060,
+    "BSRAM": 44,
+    "DSP": 26.5
+  },
+  "delta": {
+    "Logic": 299,
+    "Register": 67,
+    "CLS": 85,
+    "BSRAM": 1,
+    "DSP": 0.0
+  },
+  "remaining": {
+    "Logic": 1653,
+    "CLS": 375,
+    "BSRAM": 11
+  },
+  "reserved": {
+    "Logic": 1650,
+    "CLS": 365,
+    "BSRAM": 4
+  },
+  "clock_mhz": 50,
+  "fmax_mhz": 50.438,
+  "setup_violations": 0,
+  "hold_violations": 0,
+  "matching_working_inputs": 95,
+  "user_code": "0x00006DCF",
+  "sha256": "2A1BCDE333A880DD7ED8743B2ADDEAEC314638D38511AB568A83558713EB09A0"
+}

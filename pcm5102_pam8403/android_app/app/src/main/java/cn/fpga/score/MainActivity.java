@@ -239,6 +239,8 @@ public final class MainActivity extends Activity {
         LinearLayout statusHead=row(statusBox);statusHead.setGravity(Gravity.CENTER_VERTICAL);
         BeatBarsView statusBars=new BeatBarsView(this);statusBars.setAlpha(0.85f);LinearLayout.LayoutParams sbLp=new LinearLayout.LayoutParams(dp(16),dp(9));sbLp.rightMargin=dp(8);statusHead.addView(statusBars,sbLp);
         TextView statusTag=new TextView(this);statusTag.setText("设备状态");statusTag.setTextSize(12);statusTag.setTextColor(MUTED);statusTag.setLetterSpacing(0.08f);statusHead.addView(statusTag);
+        try{android.content.pm.PackageInfo installed=getPackageManager().getPackageInfo(getPackageName(),0);text(statusBox,"当前安装：v"+installed.versionName+" / Code"+installed.getLongVersionCode(),12,MUTED);}
+        catch(PackageManager.NameNotFoundException e){throw new IllegalStateException(e);}
         status=text(statusBox,"",14,ACCENT);status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         LinearLayout box=card(content,"01","蓝牙连接","先在系统蓝牙设置中配对 HC-05，再选择设备。");devices=new Spinner(this);devices.setContentDescription("已配对蓝牙设备");addSpinner(box,devices);
         LinearLayout connectionRow=row(box);button(connectionRow,"刷新设备",()->ensurePermission(this::refreshDevices),true);button(connectionRow,"连接设备",()->ensurePermission(this::connectSelected),true,1);

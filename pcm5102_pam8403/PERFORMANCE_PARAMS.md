@@ -1,5 +1,9 @@
 # 演奏参数与四档回声
 
+> LED 显示已更新为 [弱信号修正版](deliveries/LED_SCOPE_WEAK_FIX_20261022/README.md)：Logic 21394、CLS 11087、BSRAM 47、DSP 26.5；剩余 1646 Logic /433 CLS /9 BSRAM。原1650 Logic预留少4个，后续功能前需回收；CLS/BSRAM预留满足。本页 C 阶段数字为历史冻结基线。
+
+> 后续App已更新至Code24，安装与现场超时定位以 [HC05_CONNECTION.md](HC05_CONNECTION.md) 为准。下文Code22的APK验证记录属于最初交付，其冻结包内APK已停用，位流记录继续保留。
+
 2026-10-22。器件 GW5A-LV25MG121NC1/I0，工程 `PCM5102_UNIFIED.gprj`，顶层 `top_unified` → `top`。以下音频由 DDS / TDM / Karplus–Strong 现场合成，无预录音频参与参数测试。仿真、布局布线和实物对录分别记录。
 
 ## 当前范围与用户取舍

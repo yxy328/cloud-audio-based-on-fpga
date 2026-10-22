@@ -20,7 +20,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Take status compilation failed' }
     & java -cp build\core cn.fpga.score.TakeStatusTest
     if ($LASTEXITCODE -ne 0) { throw 'Take status tests failed' }
-    & javac --release 8 -Xlint:-options -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\AdsrProfile.java core_test\AdsrProfileTest.java app\src\main\java\cn\fpga\score\SongCodec.java app\src\main\java\cn\fpga\score\AudioRecording.java app\src\main\java\cn\fpga\score\SppLink.java core_test\SongCodecTest.java core_test\SppLinkTest.java core_test\android\bluetooth\BluetoothSocket.java core_test\android\bluetooth\BluetoothDevice.java
+    & javac --release 8 -Xlint:-options -encoding UTF-8 -cp build\core -d build\core app\src\main\java\cn\fpga\score\AdsrProfile.java core_test\AdsrProfileTest.java app\src\main\java\cn\fpga\score\SongCodec.java app\src\main\java\cn\fpga\score\AudioRecording.java app\src\main\java\cn\fpga\score\SppLink.java core_test\SongCodecTest.java core_test\SppLinkTest.java core_test\android\bluetooth\BluetoothSocket.java core_test\android\bluetooth\BluetoothDevice.java
     if ($LASTEXITCODE -ne 0) { throw 'Core test compilation failed' }
     & javac --release 8 -encoding UTF-8 -cp build\core -d build\core app\src\main\java\cn\fpga\score\RecordingSupport.java app\src\main\java\cn\fpga\score\TakeStatus.java app\src\main\java\cn\fpga\score\ChromaticKeys.java app\src\main\java\cn\fpga\score\PhoneTake.java app\src\main\java\cn\fpga\score\PhoneTakeStore.java core_test\RecordingSupportTest.java core_test\PhoneTakeTest.java
     if ($LASTEXITCODE -ne 0) { throw 'Recording support/MIDI compilation failed' }
