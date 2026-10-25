@@ -1,0 +1,14 @@
+{
+  "production_sha256": "bc1f2f0f211d6330f8b443cf5e97c546e60a11cf198d82975e1878e8dab808f8",
+  "candidate_sha256": "f3d3ab1bdff783a6756843074525b322d44683c82dc638e805d5201b19b98173",
+  "changes": {
+    "reg signed [19:0] delta_ud, delta_lr;": "reg signed [17:0] delta_ud, delta_lr;",
+    "wire [19:0] abs_ud = delta_ud[19]": "wire [17:0] abs_ud = delta_ud[17]",
+    "wire [19:0] abs_lr = delta_lr[19]": "wire [17:0] abs_lr = delta_lr[17]",
+    "reg [19:0] scale_ud, scale_lr;": "reg [17:0] scale_ud, scale_lr;",
+    "reg [39:0] ud_strength, lr_strength;": "reg [35:0] ud_strength, lr_strength;",
+    "delta_ud[19] ?": "delta_ud[17] ?",
+    "delta_lr[19] ?": "delta_lr[17] ?"
+  },
+  "candidate17_sha256": "0fb08b9312671274c37b4106a005f4ad3b41ca77cd765f6f034519514df356a0"
+}

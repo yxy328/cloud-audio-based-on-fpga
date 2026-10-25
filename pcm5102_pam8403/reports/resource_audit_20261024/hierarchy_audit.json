@@ -1,0 +1,1221 @@
+{
+  "rows": [
+    {
+      "path": "/top_unified/u_main/take_enabled.u_store",
+      "baseline": {
+        "Lut": 1317,
+        "Alu": 52,
+        "Register": 566,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 1574,
+        "Alu": 52,
+        "Register": 571,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 257
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_ctrl",
+      "baseline": {
+        "Lut": 931,
+        "Alu": 532,
+        "Register": 496,
+        "Bsram": 0,
+        "MULT27X36": 2,
+        "MULTALU27X18": 0,
+        "MULT12X12": 2,
+        "MULTADDALU12X12": 2
+      },
+      "merged": {
+        "Lut": 1039,
+        "Alu": 528,
+        "Register": 496,
+        "Bsram": 0,
+        "MULT27X36": 2,
+        "MULTALU27X18": 0,
+        "MULT12X12": 2,
+        "MULTADDALU12X12": 2
+      },
+      "self_lut_alu_delta": 104
+    },
+    {
+      "path": "/top_unified/u_main/shared_synth.u_arithmetic",
+      "baseline": {},
+      "merged": {
+        "Lut": 99,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 0,
+        "MULT27X36": 1,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 99
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_download",
+      "baseline": {
+        "Lut": 1324,
+        "Alu": 131,
+        "Register": 508,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 1415,
+        "Alu": 127,
+        "Register": 508,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 87
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap",
+      "baseline": {
+        "Lut": 1824,
+        "Alu": 111,
+        "Register": 645,
+        "Bsram": 2,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 1,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 1896,
+        "Alu": 111,
+        "Register": 645,
+        "Bsram": 2,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 1,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 72
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_spectrum",
+      "baseline": {
+        "Lut": 595,
+        "Alu": 346,
+        "Register": 734,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 626,
+        "Alu": 346,
+        "Register": 734,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 31
+    },
+    {
+      "path": "/top_unified/u_main/take_enabled.u_take",
+      "baseline": {
+        "Lut": 1428,
+        "Alu": 97,
+        "Register": 1292,
+        "Bsram": 4,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 1457,
+        "Alu": 96,
+        "Register": 1292,
+        "Bsram": 4,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 28
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer",
+      "baseline": {
+        "Lut": 488,
+        "Alu": 61,
+        "Register": 274,
+        "Bsram": 2,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 515,
+        "Alu": 61,
+        "Register": 274,
+        "Bsram": 2,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 27
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_pitch_dynamics",
+      "baseline": {
+        "Lut": 115,
+        "Alu": 32,
+        "Register": 31,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 130,
+        "Alu": 32,
+        "Register": 31,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 15
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_i2c",
+      "baseline": {
+        "Lut": 125,
+        "Alu": 0,
+        "Register": 51,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 140,
+        "Alu": 0,
+        "Register": 51,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 15
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_uart",
+      "baseline": {
+        "Lut": 154,
+        "Alu": 12,
+        "Register": 90,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 168,
+        "Alu": 12,
+        "Register": 90,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 14
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_audio",
+      "baseline": {
+        "Lut": 241,
+        "Alu": 3,
+        "Register": 114,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 252,
+        "Alu": 3,
+        "Register": 114,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 11
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_serial",
+      "baseline": {
+        "Lut": 169,
+        "Alu": 38,
+        "Register": 119,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 177,
+        "Alu": 38,
+        "Register": 119,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 8
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_scope",
+      "baseline": {
+        "Lut": 192,
+        "Alu": 23,
+        "Register": 33,
+        "Bsram": 2,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 200,
+        "Alu": 23,
+        "Register": 33,
+        "Bsram": 2,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 8
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/status_panel.u_status",
+      "baseline": {
+        "Lut": 301,
+        "Alu": 13,
+        "Register": 209,
+        "Bsram": 2,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 307,
+        "Alu": 13,
+        "Register": 209,
+        "Bsram": 2,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 6
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_input",
+      "baseline": {
+        "Lut": 38,
+        "Alu": 46,
+        "Register": 80,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 44,
+        "Alu": 46,
+        "Register": 80,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 6
+    },
+    {
+      "path": "/top_unified/u_main/take_enabled.u_store/internal_spi.u_spi",
+      "baseline": {
+        "Lut": 157,
+        "Alu": 14,
+        "Register": 77,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 162,
+        "Alu": 14,
+        "Register": 78,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 5
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_adsr_config",
+      "baseline": {
+        "Lut": 406,
+        "Alu": 58,
+        "Register": 485,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 409,
+        "Alu": 58,
+        "Register": 485,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 3
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_live",
+      "baseline": {
+        "Lut": 158,
+        "Alu": 16,
+        "Register": 111,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 160,
+        "Alu": 16,
+        "Register": 111,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 2
+    },
+    {
+      "path": "/top_unified/u_main/u_extra_mix",
+      "baseline": {
+        "Lut": 15,
+        "Alu": 17,
+        "Register": 16,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 16,
+        "Alu": 17,
+        "Register": 16,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_command_decode",
+      "baseline": {
+        "Lut": 85,
+        "Alu": 22,
+        "Register": 45,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 86,
+        "Alu": 22,
+        "Register": 45,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main/u_i2s_tx",
+      "baseline": {
+        "Lut": 34,
+        "Alu": 0,
+        "Register": 33,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 35,
+        "Alu": 0,
+        "Register": 33,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_adc/u_capture",
+      "baseline": {
+        "Lut": 74,
+        "Alu": 15,
+        "Register": 60,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 74,
+        "Alu": 15,
+        "Register": 60,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_s1",
+      "baseline": {
+        "Lut": 8,
+        "Alu": 15,
+        "Register": 20,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 8,
+        "Alu": 15,
+        "Register": 20,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_output_mix",
+      "baseline": {
+        "Lut": 15,
+        "Alu": 17,
+        "Register": 16,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 15,
+        "Alu": 17,
+        "Register": 16,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_synth/u_sine",
+      "baseline": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {},
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main",
+      "baseline": {
+        "Lut": 691,
+        "Alu": 5,
+        "Register": 72,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 691,
+        "Alu": 5,
+        "Register": 72,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_mode",
+      "baseline": {
+        "Lut": 6,
+        "Alu": 0,
+        "Register": 2,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 6,
+        "Alu": 0,
+        "Register": 2,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_clk_div",
+      "baseline": {
+        "Lut": 10,
+        "Alu": 5,
+        "Register": 12,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 10,
+        "Alu": 5,
+        "Register": 12,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_pitch_scaler",
+      "baseline": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_analog_expression",
+      "baseline": {
+        "Lut": 178,
+        "Alu": 71,
+        "Register": 82,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 1,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 178,
+        "Alu": 71,
+        "Register": 82,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 1,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/shared_synth.u_arithmetic/u_sine",
+      "baseline": {},
+      "merged": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_mode_input",
+      "baseline": {
+        "Lut": 34,
+        "Alu": 46,
+        "Register": 72,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 34,
+        "Alu": 46,
+        "Register": 72,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_adc",
+      "baseline": {
+        "Lut": 7,
+        "Alu": 0,
+        "Register": 5,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 7,
+        "Alu": 0,
+        "Register": 5,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture",
+      "baseline": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_effects",
+      "baseline": {
+        "Lut": 241,
+        "Alu": 94,
+        "Register": 147,
+        "Bsram": 4,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 241,
+        "Alu": 94,
+        "Register": 147,
+        "Bsram": 4,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_reference",
+      "baseline": {
+        "Lut": 7,
+        "Alu": 17,
+        "Register": 8,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 7,
+        "Alu": 17,
+        "Register": 8,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/pressure_enabled.u_expression",
+      "baseline": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_display_mode",
+      "baseline": {
+        "Lut": 24,
+        "Alu": 15,
+        "Register": 25,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 24,
+        "Alu": 15,
+        "Register": 25,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_note_lut",
+      "baseline": {
+        "Lut": 51,
+        "Alu": 0,
+        "Register": 189,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 51,
+        "Alu": 0,
+        "Register": 189,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified",
+      "baseline": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 0,
+        "Alu": 0,
+        "Register": 0,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_s2",
+      "baseline": {
+        "Lut": 8,
+        "Alu": 15,
+        "Register": 19,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 8,
+        "Alu": 15,
+        "Register": 19,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": 0
+    },
+    {
+      "path": "/top_unified/u_main/u_ir",
+      "baseline": {
+        "Lut": 102,
+        "Alu": 120,
+        "Register": 175,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 101,
+        "Alu": 120,
+        "Register": 175,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": -1
+    },
+    {
+      "path": "/top_unified/u_main/u_string",
+      "baseline": {
+        "Lut": 168,
+        "Alu": 33,
+        "Register": 86,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 167,
+        "Alu": 33,
+        "Register": 86,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": -1
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_synth/u_poly_slew",
+      "baseline": {
+        "Lut": 86,
+        "Alu": 26,
+        "Register": 13,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 85,
+        "Alu": 26,
+        "Register": 13,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": -1
+    },
+    {
+      "path": "/top_unified/u_main/u_master_volume",
+      "baseline": {
+        "Lut": 78,
+        "Alu": 26,
+        "Register": 13,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 76,
+        "Alu": 26,
+        "Register": 13,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": -2
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display",
+      "baseline": {
+        "Lut": 1062,
+        "Alu": 116,
+        "Register": 219,
+        "Bsram": 7,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 1,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 1055,
+        "Alu": 116,
+        "Register": 219,
+        "Bsram": 7,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 1,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": -7
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_pitch_scaler/individual.u_bend",
+      "baseline": {
+        "Lut": 349,
+        "Alu": 127,
+        "Register": 280,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 336,
+        "Alu": 126,
+        "Register": 280,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": -14
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_dynamics",
+      "baseline": {
+        "Lut": 122,
+        "Alu": 32,
+        "Register": 38,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 106,
+        "Alu": 32,
+        "Register": 38,
+        "Bsram": 0,
+        "MULT27X36": 0,
+        "MULTALU27X18": 1,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": -16
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_synth",
+      "baseline": {
+        "Lut": 1697,
+        "Alu": 244,
+        "Register": 804,
+        "Bsram": 1,
+        "MULT27X36": 1,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 1666,
+        "Alu": 244,
+        "Register": 798,
+        "Bsram": 1,
+        "MULT27X36": 0,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": -31
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_audio/u_synth",
+      "baseline": {
+        "Lut": 2500,
+        "Alu": 888,
+        "Register": 2095,
+        "Bsram": 7,
+        "MULT27X36": 4,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "merged": {
+        "Lut": 2467,
+        "Alu": 889,
+        "Register": 2044,
+        "Bsram": 6,
+        "MULT27X36": 3,
+        "MULTALU27X18": 0,
+        "MULT12X12": 0,
+        "MULTADDALU12X12": 0
+      },
+      "self_lut_alu_delta": -32
+    }
+  ],
+  "unchanged_sources": [
+    {
+      "file": "take_nor_store.v",
+      "baseline_sha256": "ea40b6ddad00421ddd759c9c2a8f89bba754183521201143215652b0adb460c9",
+      "merged_sha256": "ea40b6ddad00421ddd759c9c2a8f89bba754183521201143215652b0adb460c9",
+      "same": true
+    },
+    {
+      "file": "apds9960_ctrl.v",
+      "baseline_sha256": "bc1f2f0f211d6330f8b443cf5e97c546e60a11cf198d82975e1878e8dab808f8",
+      "merged_sha256": "bc1f2f0f211d6330f8b443cf5e97c546e60a11cf198d82975e1878e8dab808f8",
+      "same": true
+    },
+    {
+      "file": "downloadable_song.v",
+      "baseline_sha256": "180f62359c71b062ecf6e77fe096f211267d3756c87ff9daf083f81f96b4c414",
+      "merged_sha256": "180f62359c71b062ecf6e77fe096f211267d3756c87ff9daf083f81f96b4c414",
+      "same": true
+    }
+  ]
+}

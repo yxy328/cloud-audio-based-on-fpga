@@ -1,0 +1,46 @@
+{
+  "build": "scope_hue33_20261023_p3r0",
+  "resources": {
+    "Logic": 21503,
+    "Register": 10326,
+    "CLS": 11202,
+    "BSRAM": 47,
+    "DSP": 26.5
+  },
+  "baseline": {
+    "Logic": 21088,
+    "Register": 10239,
+    "CLS": 11060,
+    "BSRAM": 44,
+    "DSP": 26.5
+  },
+  "delta": {
+    "Logic": 415,
+    "Register": 87,
+    "CLS": 142,
+    "BSRAM": 3,
+    "DSP": 0.0
+  },
+  "remaining": {
+    "Logic": 1537,
+    "CLS": 318,
+    "BSRAM": 9
+  },
+  "reserved": {
+    "Logic": 1650,
+    "CLS": 365,
+    "BSRAM": 4
+  },
+  "future_reserve_passed": false,
+  "future_reserve_shortfall": {
+    "Logic": 113,
+    "CLS": 47
+  },
+  "clock_mhz": 50,
+  "fmax_mhz": 50.499,
+  "setup_violations": 0,
+  "hold_violations": 0,
+  "matching_working_inputs": 95,
+  "user_code": "0x00002176",
+  "sha256": "A5567DB120334D16B9B72071E0F0D2754B64E1AFE44878D22ED1243700A52B35"
+}

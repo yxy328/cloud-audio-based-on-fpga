@@ -7,6 +7,7 @@ set_false_path -from [get_ports {touch_out[*]}] -to [get_pins {u_main/u_touch_in
 set_false_path -from [get_ports {touch_out[7]}] -to [get_pins {u_main/u_touch_mode_input/input_meta*/D}]
 set_false_path -from [get_ports {hc05_rx}] -to [get_pins {u_main/u_keymap/u_uart/rx_meta*/D}]
 set_false_path -from [get_ports {sda}] -to [get_pins {u_main/u_gesture/u_i2c/sda_meta*/D}]
+set_false_path -from [get_ports {slider_sda}] -to [get_pins {u_main/u_slider_adc/u_i2c/sda_meta*/D}]
 set_false_path -from [get_ports {ir_beam[*]}] -to [get_pins {u_main/u_ir/beam_meta*/D}]
 set_false_path -from [get_ports {touch_sdo}] -to [get_pins {u_main/u_touch_serial/sdo_meta*/D}]
 

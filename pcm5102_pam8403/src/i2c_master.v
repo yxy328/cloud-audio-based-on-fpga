@@ -18,7 +18,9 @@ module i2c_master #(
     input  wire [6:0]  cmd_addr,       // 从机地址 7bit
     input  wire [7:0]  cmd_reg,        // 寄存器地址
     input  wire        cmd_rw,         // 0=写 1=读
-    input  wire [7:0]  cmd_wdata,      // 写数据 (cmd_rw=0 时有效)
+    input  wire [7:0]  cmd_wdata,      // 写数据 MSB (cmd_rw=0 时有效)
+    input  wire [7:0]  cmd_wdata1,     // 写数据 LSB (cmd_wlen=1 时有效)
+    input  wire        cmd_wlen,       // 0=写 1 字节 1=写 2 字节 (16bit 寄存器)
     input  wire [7:0]  cmd_rdlen,      // 读字节数 (cmd_rw=1 时有效, 1~255)
     output reg         busy,
     output reg         done,           // 事务完成脉冲
@@ -79,7 +81,7 @@ module i2c_master #(
     reg  [3:0] bit_idx;      // 位计数器 0..7
     reg  [7:0] shift_reg;    // 发送移位寄存器
     reg  [7:0] byte_remain;  // 读模式剩余字节数
-    reg  [1:0] tx_kind;      // 0=地址 1=寄存器 2=写数据 3=读地址后
+    reg  [2:0] tx_kind;      // 0=地址 1=寄存器 2=写数据 3=读地址后 4=第二写字节
 
     wire last_byte = (byte_remain == 8'd1);
 
@@ -103,7 +105,7 @@ module i2c_master #(
             bit_idx     <= 4'd0;
             shift_reg   <= 8'd0;
             byte_remain <= 8'd0;
-            tx_kind     <= 2'd0;
+            tx_kind     <= 3'd0;
             busy        <= 1'b0;
             done        <= 1'b0;
             nack        <= 1'b0;
@@ -123,7 +125,7 @@ module i2c_master #(
                 if (cmd_start) begin
                     busy        <= 1'b1;
                     nack        <= 1'b0;
-                    tx_kind     <= 2'd0;                  // 先发地址字节
+                    tx_kind     <= 3'd0;                  // 先发地址字节
                     byte_remain <= cmd_rw ? cmd_rdlen : 8'd0;
                     state       <= S_START;
                 end
@@ -181,14 +183,14 @@ module i2c_master #(
                         end else begin
                             case (tx_kind)
                             2'd0: begin                       // 地址已发 -> 发寄存器
-                                tx_kind   <= 2'd1;
+                                tx_kind   <= 3'd1;
                                 shift_reg <= cmd_reg;
                                 bit_idx   <= 4'd7;
                                 state     <= S_BYTE;
                             end
                             2'd1: begin
                                 if (cmd_rw == 1'b0) begin     // 写模式 -> 发写数据
-                                    tx_kind   <= 2'd2;
+                                    tx_kind   <= 3'd2;
                                     shift_reg <= cmd_wdata;
                                     bit_idx   <= 4'd7;
                                     state     <= S_BYTE;
@@ -196,7 +198,17 @@ module i2c_master #(
                                     state <= S_RSTART;
                                 end
                             end
-                            2'd2: begin                       // 写数据已发 -> 停止
+                            2'd2: begin                       // 写数据 MSB 已发
+                                if (cmd_wlen) begin       // 16bit 寄存器 -> 再发 LSB
+                                    tx_kind   <= 3'd4;
+                                    shift_reg <= cmd_wdata1;
+                                    bit_idx   <= 4'd7;
+                                    state     <= S_BYTE;
+                                end else begin
+                                    state <= S_STOP;
+                                end
+                            end
+                            3'd4: begin                       // 第二写字节已发 -> 停止
                                 state <= S_STOP;
                             end
                             2'd3: begin                       // 读地址已发 -> 收数据
@@ -221,7 +233,7 @@ module i2c_master #(
                         scl_oe <= 1'b1;
                         shift_reg <= {cmd_addr, 1'b1};   // 读地址
                         bit_idx   <= 4'd7;
-                        tx_kind   <= 2'd3;
+                        tx_kind   <= 3'd3;
                         state     <= S_BYTE;
                     end
                     endcase

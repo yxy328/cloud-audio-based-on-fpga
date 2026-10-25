@@ -1,0 +1,282 @@
+[
+  {
+    "module": "/top_unified/u_main",
+    "Lut": 2,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/take_enabled.u_store",
+    "Lut": 312,
+    "Alu": 0,
+    "Register": 6,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/take_enabled.u_store/internal_spi.u_spi",
+    "Lut": 1,
+    "Alu": 0,
+    "Register": 3,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/take_enabled.u_take",
+    "Lut": 33,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_analog_expression",
+    "Lut": 5,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_effects",
+    "Lut": 1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_fsr_adc/u_capture",
+    "Lut": -1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_fsr_dynamics",
+    "Lut": 6,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_fsr_pitch_dynamics",
+    "Lut": -8,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_fsr_pitch_scaler/individual.u_bend",
+    "Lut": -5,
+    "Alu": 1,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_gesture/u_audio",
+    "Lut": 8,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_gesture/u_audio/u_synth",
+    "Lut": 73,
+    "Alu": 2,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_gesture/u_ctrl",
+    "Lut": 119,
+    "Alu": -5,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_gesture/u_i2c",
+    "Lut": 13,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_guide_display",
+    "Lut": -51,
+    "Alu": -38,
+    "Register": 7,
+    "Bsram": -3,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer",
+    "Lut": 16,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_scope",
+    "Lut": 7,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_spectrum",
+    "Lut": 24,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_guide_display/status_panel.u_status",
+    "Lut": 3,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_i2s_tx",
+    "Lut": 1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_ir",
+    "Lut": -1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap",
+    "Lut": 123,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap/u_adsr_config",
+    "Lut": 2,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap/u_command_decode",
+    "Lut": 3,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap/u_download",
+    "Lut": 109,
+    "Alu": 3,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap/u_live",
+    "Lut": -1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap/u_uart",
+    "Lut": 15,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_master_volume",
+    "Lut": 6,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_slider_adc",
+    "Lut": 1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_slider_adc/u_i2c",
+    "Lut": 10,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_string",
+    "Lut": -2,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_touch_input",
+    "Lut": 6,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_touch_serial",
+    "Lut": 8,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_touch_synth",
+    "Lut": -19,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_touch_synth/u_poly_slew",
+    "Lut": -7,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  }
+]

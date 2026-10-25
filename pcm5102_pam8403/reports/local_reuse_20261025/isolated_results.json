@@ -1,0 +1,66 @@
+{
+  "baseline/probe": {
+    "LUT": 964,
+    "ALU": 547,
+    "FF": 543,
+    "multipliers": {
+      "MULT12X12": 2,
+      "MULT27X36": 2,
+      "MULTADDALU12X12": 2
+    },
+    "resource_xml": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_20261025\\baseline\\probe\\impl\\gwsynthesis\\apds_probe_syn_rsc.xml",
+    "resource_xml_sha256": "B8C7E8D70CE6EEA2A82834971F80834B5A5BC7E43FF48B91041259140F312CEE",
+    "LUT_plus_ALU": 1511,
+    "including_children": {
+      "LUT": 964,
+      "ALU": 547,
+      "FF": 543
+    }
+  },
+  "baseline/flash_probe": {
+    "LUT": 1282,
+    "ALU": 52,
+    "FF": 562,
+    "multipliers": {},
+    "resource_xml": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_20261025\\baseline\\flash_probe\\impl\\gwsynthesis\\flash_probe_syn_rsc.xml",
+    "resource_xml_sha256": "557D293B20DB55F19208FB46F429EBA1BDCB07AC48DC4878CF7268525CF34BCC",
+    "LUT_plus_ALU": 1334,
+    "including_children": {
+      "LUT": 1452,
+      "ALU": 66,
+      "FF": 635
+    }
+  },
+  "apds_serial/probe": {
+    "LUT": 1042,
+    "ALU": 371,
+    "FF": 545,
+    "multipliers": {
+      "MULT12X12": 2,
+      "MULT27X36": 2,
+      "MULTADDALU12X12": 2
+    },
+    "resource_xml": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_20261025\\apds_serial\\probe\\impl\\gwsynthesis\\apds_probe_syn_rsc.xml",
+    "resource_xml_sha256": "6A8A787A4B065C9408E7B3A888B223012E3E444D690957898716EC89BA46106D",
+    "LUT_plus_ALU": 1413,
+    "including_children": {
+      "LUT": 1042,
+      "ALU": 371,
+      "FF": 545
+    }
+  },
+  "flash_rotate/flash_probe": {
+    "LUT": 1116,
+    "ALU": 52,
+    "FF": 568,
+    "multipliers": {},
+    "resource_xml": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_20261025\\flash_rotate\\flash_probe\\impl\\gwsynthesis\\flash_probe_syn_rsc.xml",
+    "resource_xml_sha256": "9B0AC69564EE3B442F4C532B80562F59C2E3ACFC82CA65A0A01408FAE6F46E0B",
+    "LUT_plus_ALU": 1168,
+    "including_children": {
+      "LUT": 1250,
+      "ALU": 66,
+      "FF": 643
+    }
+  }
+}

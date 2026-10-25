@@ -4,7 +4,7 @@
 module sensor_poly_audio #(
     parameter [16:0] NOTE_FRAMES=14648, PIANO_FRAMES=58594,
     FLUTE_FRAMES=24414, UKULELE_FRAMES=34180, DRUM_FRAMES=19531,
-    parameter integer VOLUME_SHIFT=6
+    parameter integer VOLUME_SHIFT=6, SHARED_ARITH=0
 )(
     input wire clk, resetn, frame_ce, sensor_ready,
     input wire gesture_valid, dir_evaluated,
@@ -22,7 +22,13 @@ module sensor_poly_audio #(
     output wire signed [15:0] audio_sample,
     output wire [31:0] voice_active,
     output wire [5:0] voice_count,
-    output wire overrun
+    output wire overrun,
+    output wire shared_mul_request,shared_sine_request,
+    output wire signed [32:0] shared_mul_a,
+    output wire signed [17:0] shared_mul_b,
+    output wire [31:0] shared_sine_phase,
+    input wire signed [50:0] shared_product,
+    input wire signed [15:0] shared_sine
 );
     reg [31:0] gesture_inc, ir_inc;
     function [16:0] frames_for_timbre;
@@ -87,7 +93,7 @@ module sensor_poly_audio #(
         end
     end
     wire [164:0] next_event={configs[config_tags[rd]],pitches[rd]};
-    tdm_synth #(.VOICES(32),.EXTENDED_TIMBRES(1),.RUNTIME_ADSR(1),.VOLUME_SHIFT(VOLUME_SHIFT),
+    tdm_synth #(.VOICES(32),.EXTENDED_TIMBRES(1),.RUNTIME_ADSR(1),.VOLUME_SHIFT(VOLUME_SHIFT),.SHARED_ARITH(SHARED_ARITH),
         .PRESET_FRAMES(1),.NOTE_FRAMES(NOTE_FRAMES),.PIANO_FRAMES(PIANO_FRAMES),
         .FLUTE_FRAMES(FLUTE_FRAMES),.UKULELE_FRAMES(UKULELE_FRAMES),.DRUM_FRAMES(DRUM_FRAMES)) u_synth (
         .clk(clk),.resetn(resetn),.sample_ce(frame_ce),
@@ -96,7 +102,10 @@ module sensor_poly_audio #(
         .chord_valid(1'b0),.test_valid(send_test),.vibrato_enabled(control_vibrato),
         .vibrato_inc(vibrato_inc),.vibrato_depth(vibrato_depth),.vibrato_delay(vibrato_delay),.vibrato_update(vibrato_update),.tuning_ratio(tuning_ratio),
         .voice_active(voice_active),.voice_count(voice_count),.sample(audio_sample),
-        .event_ready(ready),.overrun(engine_overrun),.busy()
+        .event_ready(ready),.overrun(engine_overrun),.busy(),
+        .shared_mul_request(shared_mul_request),.shared_sine_request(shared_sine_request),
+        .shared_mul_a(shared_mul_a),.shared_mul_b(shared_mul_b),.shared_sine_phase(shared_sine_phase),
+        .shared_product(shared_product),.shared_sine(shared_sine)
     );
     assign overrun=queue_overrun || engine_overrun;
 endmodule

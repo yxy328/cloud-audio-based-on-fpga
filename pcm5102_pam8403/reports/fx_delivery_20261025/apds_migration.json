@@ -1,0 +1,10 @@
+{
+  "current_equals_historical_baseline": true,
+  "original_sha256": "BC1F2F0F211D6330F8B443CF5E97C546E60A11CF198D82975E1878E8DAB808F8",
+  "current_sha256": "BC1F2F0F211D6330F8B443CF5E97C546E60A11CF198D82975E1878E8DAB808F8",
+  "candidate_sha256": "4AAA3F1F0E20BFFFB35B49567427ED0054B972D9167F98C5337A3E69FDC77492",
+  "changed_rtl": [
+    "src/apds9960_ctrl.v"
+  ],
+  "i2c_master_and_dual_analog_from_current_tree": true
+}

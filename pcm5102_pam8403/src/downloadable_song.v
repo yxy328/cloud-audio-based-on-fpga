@@ -52,6 +52,10 @@ module downloadable_song #(
     reg [28:0] cur_word, next_word, future_word;
     reg cur_have, next_have, future_have, current_finished, future_finished;
     reg [7:0] cur_index, future_index;
+    // Key/pitch decoding is registered with the word it came from so the two
+    // decoder functions exist once instead of at every call site.
+    reg [6:0] cur_keys, next_keys, future_keys;
+    reg [7:0] cur_pitch, next_pitch;
     reg [TIME_BITS-1:0] cur_start_ms, cur_end_ms, future_start_ms;
     reg read_enable, read_pending;
     reg [7:0] read_address;
@@ -95,6 +99,10 @@ module downloadable_song #(
             if(checked_map[k*8 +: 8]>=60 && checked_map[k*8 +: 8]<=72)
                 covered_mask[checked_map[k*8 +: 8]-60]=1'b1;
     end
+    // Only one copy of each decoder exists: it is evaluated on the byte-wide
+    // fetch result and stored beside the word it belongs to.
+    wire [6:0] fetched_keys=keys_for_mask(fetched[28:16],checked_map);
+    wire [7:0] fetched_pitch=first_pitch(fetched[28:16]);
     // The free-running millisecond pulse is also used by the renderer. Playback
     // starts on its edge, so every duration and the pre-roll use the same clock.
     assign ms_tick=resetn && ms_count==MS_TICKS-1;
@@ -152,6 +160,8 @@ module downloadable_song #(
             current_note<=60; current_mask<=0; guide_keys<=0;
             ms_count<=0; elapsed_ms<=0;
             cur_word<=0; next_word<=0; future_word<=0;
+            cur_keys<=0; next_keys<=0; future_keys<=0;
+            cur_pitch<=60; next_pitch<=60;
             cur_have<=0; next_have<=0; future_have<=0;
             current_finished<=0; future_finished<=1;
             cur_index<=0; future_index<=0;
@@ -170,9 +180,16 @@ module downloadable_song #(
                     1: begin
                         cur_word<=fetched; cur_have<=1;
                         cur_end_ms<=cur_start_ms+fetched[15:0];
+                        cur_keys<=fetched_keys; cur_pitch<=fetched_pitch;
                     end
-                    2: begin next_word<=fetched; next_have<=1; end
-                    3: begin future_word<=fetched; future_have<=1; end
+                    2: begin
+                        next_word<=fetched; next_have<=1;
+                        next_keys<=fetched_keys; next_pitch<=fetched_pitch;
+                    end
+                    3: begin
+                        future_word<=fetched; future_have<=1;
+                        future_keys<=fetched_keys;
+                    end
                     default: begin end
                 endcase
             end
@@ -202,9 +219,9 @@ module downloadable_song #(
                         (future_have || !ENABLE_LOOKAHEAD) && ms_tick) begin
                         elapsed_ms<=0; state<=RUN;
                         if(PRE_ROLL_MS==0) begin
-                            current_note<=first_pitch(cur_word[28:16]);
+                            current_note<=cur_pitch;
                             current_mask<=cur_word[28:16];
-                            guide_keys<=keys_for_mask(cur_word[28:16],checked_map);
+                            guide_keys<=cur_keys;
                         end
                         if(!ENABLE_LOOKAHEAD) begin done<=1; error<=0; end
                     end
@@ -215,7 +232,7 @@ module downloadable_song #(
                         (future_word[28:16]==0 || note_ready)) begin
                         if(future_word[28:16]!=0) begin
                             note_spawn<=1;
-                            spawn_keys<=keys_for_mask(future_word[28:16],checked_map);
+                            spawn_keys<=future_keys;
                             if(future_due_ms>event_elapsed_ms)
                                 spawn_delay_ms<=future_delay_ms[15:0];
                             else spawn_delay_ms<=0;
@@ -237,16 +254,17 @@ module downloadable_song #(
                                 end else if(next_have) begin
                                     cur_index<=cur_index+1'b1;
                                     cur_word<=next_word; next_have<=0;
+                                    cur_keys<=next_keys; cur_pitch<=next_pitch;
                                     cur_start_ms<=cur_end_ms;
                                     cur_end_ms<=cur_end_ms+next_word[15:0];
-                                    current_note<=first_pitch(next_word[28:16]);
+                                    current_note<=next_pitch;
                                     current_mask<=next_word[28:16];
-                                    guide_keys<=keys_for_mask(next_word[28:16],checked_map);
+                                    guide_keys<=next_keys;
                                 end
                             end else if(next_elapsed_ms>=cur_start_ms) begin
-                                current_note<=first_pitch(cur_word[28:16]);
+                                current_note<=cur_pitch;
                                 current_mask<=cur_word[28:16];
-                                guide_keys<=keys_for_mask(cur_word[28:16],checked_map);
+                                guide_keys<=cur_keys;
                             end
                         end
                     end

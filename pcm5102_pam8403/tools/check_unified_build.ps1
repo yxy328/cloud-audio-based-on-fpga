@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$Label,[string[]]$OnehotModules=@(),[string[]]$DefaultEncodingModules=@(),[int]$SynthesisMHz=50,[switch]$SynthesisOnly)
+param([Parameter(Mandatory=$true)][ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$Label,[string[]]$OnehotModules=@(),[string[]]$DefaultEncodingModules=@(),[int]$SynthesisMHz=50,[int]$PlaceOption=-1,[int]$RouteOption=-1,[int]$RouteMaxfan=-1,[string]$ParameterOverride='',[switch]$SynthesisOnly)
 $ErrorActionPreference='Stop'
 $projectDir=Split-Path -Parent $PSScriptRoot
 $snapshot=Join-Path $projectDir "sim/build/unified/$Label"
@@ -9,6 +9,21 @@ Copy-Item -LiteralPath "$projectDir/src" -Destination $target -Recurse
 Copy-Item -LiteralPath "$projectDir/../pmod_hub75e/src" -Destination "$snapshot/pmod_hub75e" -Recurse
 Copy-Item -LiteralPath "$projectDir/PCM5102_UNIFIED.gprj" -Destination $target
 Copy-Item -LiteralPath "$PSScriptRoot/build_unified.tcl" -Destination "$target/tools"
+# Same-source A/B: rewrite one top-level parameter inside the snapshot only, so
+# the two builds differ by that parameter and nothing else. The rewritten file
+# is hashed in sources.json and the override is recorded beside it.
+if($ParameterOverride){
+    $pair=$ParameterOverride -split '=',2
+    if($pair.Count -ne 2 -or !$pair[0] -or $pair[1] -notmatch '^\d+$'){throw 'ParameterOverride must be Name=Number'}
+    $file=Join-Path "$target/src" 'top.v'
+    $source=[System.IO.File]::ReadAllText($file)
+    $pattern='(parameter\s+'+[regex]::Escape($pair[0])+'\s*=\s*)(\d+)'
+    if($source -notmatch $pattern){throw "Top parameter $($pair[0]) not found in src/top.v"}
+    $source=[regex]::Replace($source,$pattern,('${1}'+$pair[1]))
+    [System.IO.File]::WriteAllText($file,$source,[System.Text.UTF8Encoding]::new($false))
+    "ParameterOverride $($pair[0])=$($pair[1]) applied to src/top.v" | Set-Content -LiteralPath "$snapshot/parameter_override.txt" -Encoding ascii
+    Write-Output "Parameter override: $($pair[0])=$($pair[1])"
+}
 if($SynthesisOnly){
     $script=Join-Path "$target/tools" 'build_unified.tcl'
     $source=[System.IO.File]::ReadAllText($script).Replace('run all','run syn').Replace('Audio take bitstream: [file join $project_dir impl pnr PCM5102_UNIFIED.fs]','Synthesis complete: [file join $project_dir impl gwsynthesis PCM5102_UNIFIED_syn.rpt.html]')
@@ -18,6 +33,15 @@ if($SynthesisMHz -ne 50){
     $script=Join-Path "$target/tools" 'build_unified.tcl'
     $source=[System.IO.File]::ReadAllText($script).Replace('-global_freq 50',"-global_freq $SynthesisMHz").Replace('run all',"run syn`n    set_option -global_freq 50`n    run pnr")
     [System.IO.File]::WriteAllText($script,$source,[System.Text.UTF8Encoding]::new($false))
+}
+if($PlaceOption -ge 0 -or $RouteOption -ge 0 -or $RouteMaxfan -ge 0){
+    $script=Join-Path "$target/tools" 'build_unified.tcl'
+    $source=[System.IO.File]::ReadAllText($script)
+    if($PlaceOption -ge 0){$source=[regex]::Replace($source,'(-place_option )\d+',('${1}'+$PlaceOption))}
+    if($RouteOption -ge 0){$source=[regex]::Replace($source,'(-route_option )\d+',('${1}'+$RouteOption))}
+    if($RouteMaxfan -ge 0){$source=[regex]::Replace($source,'(-route_maxfan )\d+',('${1}'+$RouteMaxfan))}
+    [System.IO.File]::WriteAllText($script,$source,[System.Text.UTF8Encoding]::new($false))
+    Write-Output "PnR strategy: place=$PlaceOption route=$RouteOption maxfan=$RouteMaxfan"
 }
 foreach($module in $OnehotModules){
     if($module -notmatch '^[a-z0-9_]+\.v$'){throw 'Invalid module name'}

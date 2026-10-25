@@ -1,0 +1,14 @@
+{
+  "time": "2026-10-25T20:59:58.957277+08:00",
+  "selected": "apds",
+  "checked_current_inputs": 101,
+  "preexisting_source_changes_preserved": true,
+  "changed_production_rtl": [
+    "src/apds9960_ctrl.v"
+  ],
+  "before_sha256": "BC1F2F0F211D6330F8B443CF5E97C546E60A11CF198D82975E1878E8DAB808F8",
+  "after_sha256": "4AAA3F1F0E20BFFFB35B49567427ED0054B972D9167F98C5337A3E69FDC77492",
+  "previous_default_backup": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_delivery_20261025\\previous_default",
+  "gesture_timing_note": "See apds_event_timing.json: guard preserved; poll-boundary classification time can change.",
+  "three_effects_integrated": false
+}

@@ -1,0 +1,5 @@
+puts [info commands *pnr*]
+puts [info commands *run*]
+puts [info commands *net*]
+puts [info commands *flow*]
+puts [info commands *option*]

@@ -40,6 +40,13 @@ module audio_visualizer (
     wire [7:0] sample_magnitude=mixed_sample[15] ? (~mixed_sample[15:8]+8'd1) :
         {1'b0,mixed_sample[14:8]}+(|mixed_sample[7:0]);
     reg [7:0] capture_peak;
+    // A separate PCM/64 axis drives color only. Compensate the negative
+    // arithmetic truncation so both signs use floor(abs(PCM)/64), including
+    // +/-1 -> 0. The 10-bit -512 magnitude is 512 and saturates normally.
+    wire [9:0] magnitude64_full=quantized_sample[9] ?
+        (~quantized_sample+{9'd0,(mixed_sample[5:0]==6'd0)}) : quantized_sample;
+    wire [5:0] magnitude64=magnitude64_full>10'd63 ? 6'd63 : magnitude64_full[5:0];
+    reg [5:0] capture_peak64;
     reg [1:0] capture_range;
     reg [2:0] shown_range;
     // Normal instrument output is attenuated before this tap. Start at x8,
@@ -113,6 +120,7 @@ module audio_visualizer (
             capture_column <= 0; sample_phase <= 0;
             minimum_sample<=0;maximum_sample<=0;previous_sample<=0;group_phase<=0;
             capture_peak<=0;capture_range<=0;shown_range<=0;
+            capture_peak64<=0;
             capture_ratio<=0;capture_phase<=0;shown_ratio<=0;shown_phase<=0;
         end else begin
             rmw_busy<=0;
@@ -128,6 +136,7 @@ module audio_visualizer (
             if (capture_ready && display_boundary) begin
                 shown_range<=safe_range;
                 capture_peak<=0;
+                capture_peak64<=0;
                 // Quantize actual applied FSR gain; 1.56% hysteresis on
                 // returning to a wider range prevents boundary chatter.
                 case(capture_range)
@@ -148,6 +157,7 @@ module audio_visualizer (
             end
             if (sample_ce && !capture_full && !clearing) begin
                 if(sample_magnitude>capture_peak)capture_peak<=sample_magnitude;
+                if(magnitude64>capture_peak64)capture_peak64<=magnitude64;
                 if(history_count==32) begin
                     xy_address<=9'd128+{capture_bank,7'd0}+{2'd0,xy_y,2'd0}+{7'd0,xy_x[5:4]};
                     xy_bit<=xy_x[3:0];xy_pending<=1;
@@ -175,7 +185,7 @@ module audio_visualizer (
     wire [14:0] scope_upper,scope_lower;
     wire xy_label_on;
     audio_scope u_scope(.clk(clk),.resetn(resetn),.service_ce(style_ce),
-        .publish(capture_restart),.capture_peak(capture_peak),
+        .publish(capture_restart),.capture_peak(capture_peak),.capture_peak64(capture_peak64),
         .shown_range(shown_range),.display_valid(display_valid),.range_word(display_range),
         .visual_mode(visual_mode),.shown_ratio(shown_ratio),.shown_phase(shown_phase),.xy_label_on(xy_label_on),
         .pixel_x(pixel_x),.pixel_row(pixel_row),.upper_rgb(scope_upper),.lower_rgb(scope_lower));

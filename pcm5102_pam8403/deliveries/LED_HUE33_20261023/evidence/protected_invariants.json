@@ -1,0 +1,11 @@
+{
+  "quantized_sample": true,
+  "safe_range": true,
+  "picture_geometry": true,
+  "display_address": true,
+  "original_peak_axis": true,
+  "shown_level": true,
+  "percent_rom_address": true,
+  "peak_meter_length": true,
+  "scope_style_rom_bytes": true
+}

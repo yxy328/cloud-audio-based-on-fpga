@@ -72,3 +72,15 @@ auth.json
 /1-2-4-按键控制LED程序/*.uvopt
 /1-2-4-按键控制LED程序/*.uvoptx
 /1-2-4-按键控制LED程序/*.saved_uv4
+
+# Per-run audit folders keep their written reports; the copied synthesis/PnR
+# snapshot trees and starting-state patches inside them are rebuildable local data.
+/pcm5102_pam8403/reports/*/*/
+/pcm5102_pam8403/reports/*/*.patch
+
+# Scratch verification APKs built outside dist/ are not release artifacts.
+/pcm5102_pam8403/android_app/*.apk
+/pcm5102_pam8403/android_app/*.idsig
+
+# Layout renders duplicate the same images inside deliveries/APP_HUE33_20261023/layouts/.
+/pcm5102_pam8403/android_app/design/out/hue33/[0-9]*_[0-9]*.png

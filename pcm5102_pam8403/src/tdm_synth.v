@@ -8,6 +8,7 @@ module tdm_synth #(
     parameter integer RUNTIME_ADSR=0,
     parameter integer VOLUME_SHIFT=4,
     parameter integer EXTENDED_TIMBRES=0,
+    parameter integer SHARED_ARITH=0,
     // Sensor producers choose duration solely from the latched timbre.
     // In that integration, queue the timbre and reconstruct its duration,
     // avoiding 17 redundant bits in every FIFO entry. Generic users retain
@@ -34,7 +35,13 @@ module tdm_synth #(
     output reg signed [15:0] sample,
     output reg overrun,
     output wire busy,
-    output wire event_ready
+    output wire event_ready,
+    output wire shared_mul_request, shared_sine_request,
+    output wire signed [32:0] shared_mul_a,
+    output wire signed [17:0] shared_mul_b,
+    output wire [31:0] shared_sine_phase,
+    input wire signed [50:0] shared_product,
+    input wire signed [15:0] shared_sine
 );
     // Sixteen 36-bit words per voice use the full depth of one 18K RAM.
     // Port A prefetches a voice while the previous voice is calculated;
@@ -197,7 +204,8 @@ module tdm_synth #(
     // mapping the exact legacy 256-point table into one block ROM.
     (* syn_romstyle="block_rom" *) reg [15:0] sine_table[0:255];
     initial $readmemh("src/tdm_sine256.hex",sine_table);
-    reg signed [15:0] lookup_sample;
+    reg signed [15:0] local_lookup_sample;
+    wire signed [15:0] lookup_sample=SHARED_ARITH ? shared_sine : local_lookup_sample;
     reg [31:0] lookup_request;
     always @*begin
         case(state)
@@ -211,18 +219,30 @@ module tdm_synth #(
             default:lookup_request=0;
         endcase
     end
-    always @(posedge clk)lookup_sample<=sine_table[lookup_request[31:24]];
+    always @(posedge clk)local_lookup_sample<=sine_table[lookup_request[31:24]];
+    assign shared_sine_phase={lookup_request[31:24],24'd0};
+    assign shared_sine_request=SHARED_ARITH && resetn &&
+        ((state==IDLE && sample_ce) || (state>=LOOK_BASE && state<=LOOK_AUX2));
     reg signed [17:0] base,h2,h3,h4,aux,aux2;
     reg signed [32:0] mul_a;
     reg signed [17:0] mul_b;
-    reg signed [50:0] mul_product;
+    reg signed [50:0] local_mul_product;
+    wire signed [50:0] mul_product=SHARED_ARITH ? shared_product : local_mul_product;
+    assign shared_mul_a=mul_a;
+    assign shared_mul_b=mul_b;
+    // LOOK_AUX2 reserves the tuning result until PITCH_MUL consumes it.
+    // All other products are consumed on the immediately following edge.
+    assign shared_mul_request=SHARED_ARITH && resetn &&
+        (state==LFO2 || state==LOOK_H2 || state==PITCH_WAIT ||
+         state==BODY_WAIT || state==BRIGHT_WAIT || state==GAIN_WAIT ||
+         (frame_tuning!=16384 && (state==LOOK_AUX || state==LOOK_AUX2)));
     wire signed [50:0] pitch_delta=mul_product>>>21;
     wire signed [50:0] adjusted_pitch=$signed({{18{mul_a[32]}},mul_a})+pitch_delta;
     // The only variable multiplication in this module. Every timbre, voice,
     // envelope and vibrato operation uses this registered arithmetic path.
     always @(posedge clk) begin
-        if(!resetn) mul_product<=0;
-        else mul_product<=mul_a*mul_b;
+        if(!resetn) local_mul_product<=0;
+        else local_mul_product<=mul_a*mul_b;
     end
     reg signed [34:0] body_product;
     wire signed [35:0] combined =

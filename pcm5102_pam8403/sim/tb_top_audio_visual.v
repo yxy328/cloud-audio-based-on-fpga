@@ -19,7 +19,7 @@ module tb_top_audio_visual;
         .hub_A(ha),.hub_B(hb),.hub_C(hc),.hub_D(hd),.hub_E(he));
     defparam dut.u_gesture.AUDIO_NOTE_FRAMES=1000;
     i2s_pcm_monitor #(.PCM_MIN(-32768),.PCM_MAX(32767)) monitor (.bck(bck),.lrck(lrck),.din(din));
-    integer frame_count=0,restarts=0,resets=0,latches=0,phase_checks=0,k;
+    integer frame_count=0,restarts=0,resets=0,latches=0,phase_checks=0,k,lo5,hi5;
     integer ir_events=0,sensor_max=0,sensor_magnitude;
     reg [31:0] expected_phase;
     reg signed [15:0] expected_sample;
@@ -182,9 +182,20 @@ module tb_top_audio_visual;
         if(!dut.u_guide_display.audio_visual.u_visualizer.display_valid ||
            dut.u_guide_display.audio_visual.u_visualizer.shown_touch==0)
             $fatal(1,"Live touch did not reach waveform/meter");
-        if(dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[9:5]!==0 ||
-           dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color==0)
-            $fatal(1,"Real instrument output is still shown as white or blank");
+        // Every color-wheel step is fully saturated: one RGB5 channel at 31 and
+        // one at the fixed 3 floor, so no live signal can wash out to white.
+        lo5=dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[14:10];
+        hi5=lo5;
+        if(dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[9:5]<lo5)
+            lo5=dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[9:5];
+        if(dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[4:0]<lo5)
+            lo5=dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[4:0];
+        if(dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[9:5]>hi5)
+            hi5=dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[9:5];
+        if(dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[4:0]>hi5)
+            hi5=dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color[4:0];
+        if(lo5!==3 || hi5!==31)
+            $fatal(1,"Real instrument output is not a saturated wheel color");
         $display("Real touch scope: x%0d, RGB5=%h, PK BCD=%h",
             1<<dut.u_guide_display.audio_visual.u_visualizer.shown_range,
             dut.u_guide_display.audio_visual.u_visualizer.u_scope.shown_color,

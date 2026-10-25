@@ -1,8 +1,8 @@
 # LED 波形：FSR 量程与真实电平渐变
 
-2026-10-22。波形页使用带时间刻度、正负幅度刻度的布局。S2 长按、App 的 `VIS,1` 切页方式沿用原协议。
+2026-10-23。波形页使用带时间刻度、正负幅度刻度的布局；本次仅把音量色环从 8 档改为 33 档。S2 长按、App 的 `VIS,1` 切页方式沿用原协议。
 
-![RTL 仿真输出](design/led_scope_20261022/verified/scope_verified_comparison.png)
+![33 档色环实际 RTL 输出](design/led_scope_20261023/hue33/hue33_verified.png)
 
 ## 读图
 
@@ -10,7 +10,8 @@
 - 纵轴改为原始有符号 PCM 幅度，`K=1024` 个数字计数：±32K /16K /8K /4K /2K /1K 分别对应 X1 /2 /4 /8 /16 /32。零位在 y=27。满幅以 32768 为基准，不代表声压或实际压力。
 - 横轴 `MS` 及 0、5、10 表示毫秒，完整窗口仍为 512 / 48828.125 ≈ 10.486ms。主图位于 x=16～63、y=8～45；时间刻度位于 x=16、39、62，按面板像素近似显示。
 - 底部 `PK` 是当前显示窗口的最终混音绝对峰值百分比。峰值先向上量化到约 0.78% 满幅的幅度箱，再以箱中心换算并四舍五入为整数（误差不超过约 1 个百分点）；电平条始终为 0～100% 固定刻度，32 格、向上取整，零值不点亮。
-- 静音才显示低亮白色。非零信号从饱和蓝经过紫色变红，绿色通道为零，避免浅色在实体面板和相机上看起来全白。每 256 个峰值计数改变一级，峰值码 1～7 使用七种蓝紫红过渡色，码 8 及以上为红色。红端约从 1793 个计数（5.5% 数字满幅）开始，参考正常音源 /16 衰减后的电平；不代表数字削波。颜色与显示倍率无关。
+- 静音才显示低亮白色。非零窗口峰值采用独立的 PCM/64 色相轴：每 64 个计数一级，0～2048 共 33 个色相点，180° 青 → 蓝 → 紫 → 品红 → 玫红 → 360° 红，每档 5.625°；2048 及以上钳为 `(31,3,3)`。RGB5 最低通道固定为 3、最高通道为 31，对应约 0.903 饱和度和满明度，不经过绿、黄或橙。2048 是音源 /16 衰减后的响度参考，不代表削波或声压。颜色与显示倍率无关。
+- 一帧内波形及总电平条共用一种颜色，窗口在完整 PWM 帧边界同步发布；渐强或回落时颜色逐档移动，不是沿曲线位置着色。量程保护、PK 百分比和电平条长度继续使用原来的 `ceil(abs(PCM)/256)` 轴。非零但不足 64 个计数（包括 ±1）显示 `(3,31,31)`，只有原轴为零才显示灰色 `(8,8,8)`。
 
 因此，FSR 使声音变小时，曲线可以保持相近高度，但纵轴范围会改变，PK 数值和固定电平条会变小，颜色也随真实峰值改变。
 
@@ -36,7 +37,7 @@
 
 波形页底部改为总混音 PK 电平，三组触摸 /红外手势 /吉他幅度条继续保留在 XY 和 FFT 页，`VIZ?` 原有三组数据和包格式不变。REF /AUD 标签也复用新的字库。参考曲线、延时历史、FFT 数值和曲谱时序沿用原实现。
 
-波形与 XY 共用 picture RAM（每字 20 位）；`scope_style.hex` 是 2048×16 只读表，保存六套静态刻度、字形和百分比换算常量。扫描移位期间预取图形，行锁存高电平阶段复用读口做百分比换算，并在随后的发布边沿锁存结果，每行仍为 133 个主时钟。颜色表为组合逻辑，音频通路没有新增处理级。
+波形与 XY 共用 picture RAM（每字 20 位）；`scope_style.hex` 是原有 2048×16 只读表，六套静态刻度、字形和百分比换算的内容未改。扫描移位期间预取图形，行锁存高电平阶段复用读口做百分比换算，每行仍为 133 个主时钟。33 档色环采用限幅、移位、加减与取位，不新增 ROM 表项、BSRAM、DSP 或硬件乘除单元；音频通路没有新增处理级。
 
 本图由 `tb_audio_scope` 合成 PCM 驱动 RTL 后逐像素导出，不是实板照片。实际面板色差、环境可见度与 FSR 实物响应仍需烧录后核对。构建资源、50MHz 时序和位流指纹以交付包及 [VERIFICATION.md](VERIFICATION.md) 本轮记录为准。
 
@@ -44,11 +45,13 @@
 
 ```powershell
 python tools/generate_scope_style.py --check
-& ./tools/run_sim.ps1 -Tests tb_audio_scope,tb_audio_visualizer,tb_lissajous_delay,tb_lissajous_reference,tb_hub75e_audio_display
+& ./tools/run_sim.ps1 -Tests tb_audio_scope
+& ./tools/run_sim.ps1 -Tests tb_audio_visualizer
+& ./tools/run_sim.ps1 -Tests tb_hub75e_audio_display
+& ./tools/run_sim.ps1 -Tests tb_top_audio_visual
+& ./tools/run_sim.ps1 -Tests tb_display_mode_control
 python tools/check_scope_external.py
-python tools/render_scope_verification.py
-& ./tools/run_sim.ps1 -Quick -Tests tb_top_audio_visual
-& ./tools/run_sim.ps1 -Tests tb_fsr_pipeline,tb_display_mode_control,tb_hc05_visual
+python tools/render_scope_hue_ramp.py
 ```
 
 板上验收：按住同一音符并改变 FSR 压力，核对 X8 /X16 /X32 与纵轴、PK 和颜色；加入红外 /吉他音源检查范围保护；松键检查白色零线与 PK 归零，再切 XY /FFT 核对标签、音源条与声音连续。

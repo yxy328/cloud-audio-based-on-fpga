@@ -1,14 +1,18 @@
 `timescale 1ns/1ps
-// One ADC input, selected in the App: legacy FSR, slider master-volume,
-// slider pitch (0.5..1x), ~6Hz vibrato depth, or effect wet amount.
-// A slider replaces the FSR on bus0; these are not two concurrent channels.
+// Two independent analog channels:
+//   pressure (on-chip ADC) -> touch volume or pitch, always available;
+//   slider   (ADS1115 AIN1) -> master volume, touch pitch, vibrato depth or
+//           effect wet amount, selected by the App.
+// MODE selects only what the slider does. MODE=0 means "slider idle" while the
+// pressure channel keeps working. Pressure pitch is the base ratio for every
+// slider mode; slider pitch overrides it when MODE=2 is active.
 module analog_expression(
     input wire clk,resetn,frame_ce,
     input wire [2:0] mode,
     input wire [9:0] adc_sample,
     input wire [9:0] adc_min,adc_max,
     input wire adc_valid,adc_timeout,
-    input wire [15:0] fsr_ratio,
+    input wire [15:0] pressure_pitch,
     input wire [4:0] volume,
     input wire [3:0] wet,
     output wire [15:0] pitch_ratio,
@@ -34,14 +38,17 @@ module analog_expression(
     wire [9:0] triangle=lfo[12] ? ~lfo[11:2] : lfo[11:2];
     wire valid=seen && age<4883 && !adc_timeout;
     assign position=code;
-    assign available=valid;
+    assign available=valid && mode!=0;
     wire [12:0] manual_gain={volume,8'd0};
     wire [12:0] slider_gain=code==1023 ? 13'd4096 : {1'b0,code,2'd0};
     wire [15:0] slider_pitch=code==1023 ? 16'hffff : 16'd32768+{1'b0,code,5'd0};
-    wire [15:0] vibrato_pitch=16'hffff-{5'd0,depth_product[19:9]};
+    // One-sided downward vibrato around the current pressure pitch base.
+    wire [15:0] vibrato_delta={5'd0,depth_product[19:9]};
+    wire [15:0] vibrato_pitch=(pressure_pitch>vibrato_delta) ? pressure_pitch-vibrato_delta : 16'd32768;
     assign master_gain=(mode==1 && valid && slider_gain<manual_gain) ? slider_gain : manual_gain;
-    assign pitch_ratio=mode==0 ? fsr_ratio : !valid ? 16'hffff :
-        mode==2 ? slider_pitch : mode==3 ? vibrato_pitch : 16'hffff;
+    assign pitch_ratio=mode==2 ? (valid ? slider_pitch : pressure_pitch) :
+                       mode==3 ? (valid ? vibrato_pitch : pressure_pitch) :
+                       pressure_pitch;
     assign effect_wet=(mode==4 && valid) ? (code==1023 ? 4'd8 : {1'b0,code[9:7]}) : wet;
     always @(posedge clk)begin
         if(!resetn)begin code<=0;age<=4883;lfo<=0;seen<=0;depth_product<=0;converting<=0;divide_left<=0;quotient<=0;remainder<=0;divisor<=1;end

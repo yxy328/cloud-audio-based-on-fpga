@@ -1,0 +1,218 @@
+[
+  {
+    "module": "/top_unified/u_main",
+    "Lut": 1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/take_enabled.u_store",
+    "Lut": -1,
+    "Alu": 0,
+    "Register": 3,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/take_enabled.u_store/internal_spi.u_spi",
+    "Lut": -2,
+    "Alu": 0,
+    "Register": 3,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/take_enabled.u_take",
+    "Lut": 1,
+    "Alu": 0,
+    "Register": -2,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_analog_expression",
+    "Lut": 1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_effects",
+    "Lut": 534,
+    "Alu": 162,
+    "Register": 234,
+    "Bsram": 6,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_extra_mix",
+    "Lut": -1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_fsr_dynamics",
+    "Lut": 3,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_fsr_pitch_scaler/individual.u_bend",
+    "Lut": -10,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_gesture/u_audio",
+    "Lut": 1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_gesture/u_audio/u_synth",
+    "Lut": 11,
+    "Alu": 1,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_gesture/u_ctrl",
+    "Lut": 60,
+    "Alu": -176,
+    "Register": 2,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_gesture/u_i2c",
+    "Lut": 3,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_guide_display",
+    "Lut": -1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_scope",
+    "Lut": 2,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_spectrum",
+    "Lut": -8,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_guide_display/status_panel.u_status",
+    "Lut": 3,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap",
+    "Lut": -50,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap/u_command_decode",
+    "Lut": 1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap/u_download",
+    "Lut": 24,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap/u_live",
+    "Lut": 2,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_keymap/u_uart",
+    "Lut": 2,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_master_volume",
+    "Lut": 2,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_string",
+    "Lut": -1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_touch_serial",
+    "Lut": -1,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_touch_synth",
+    "Lut": 2,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  },
+  {
+    "module": "/top_unified/u_main/u_touch_synth/u_poly_slew",
+    "Lut": 2,
+    "Alu": 0,
+    "Register": 0,
+    "Bsram": 0,
+    "Ssram": 0
+  }
+]

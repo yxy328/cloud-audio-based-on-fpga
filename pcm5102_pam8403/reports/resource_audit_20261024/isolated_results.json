@@ -1,0 +1,473 @@
+{
+  "baseline": {
+    "resources": {
+      "name": "downloadable_song",
+      "Register": "526",
+      "Alu": "128",
+      "Lut": "1334",
+      "Bsram": "1",
+      "T_Register": "526(526)",
+      "T_Alu": "128(128)",
+      "T_Lut": "1334(1334)",
+      "T_Bsram": "1(1)"
+    },
+    "summary_rows": [
+      [
+        "Resource",
+        "Usage"
+      ],
+      [
+        "I/O Port",
+        "176"
+      ],
+      [
+        "I/O Buf",
+        "176"
+      ],
+      [
+        "IBUF",
+        "114"
+      ],
+      [
+        "OBUF",
+        "62"
+      ],
+      [
+        "Register",
+        "526"
+      ],
+      [
+        "DFFSE",
+        "12"
+      ],
+      [
+        "DFFRE",
+        "514"
+      ],
+      [
+        "LUT",
+        "1329"
+      ],
+      [
+        "LUT2",
+        "105"
+      ],
+      [
+        "LUT3",
+        "521"
+      ],
+      [
+        "LUT4",
+        "703"
+      ],
+      [
+        "ALU",
+        "128"
+      ],
+      [
+        "ALU",
+        "128"
+      ],
+      [
+        "INV",
+        "5"
+      ],
+      [
+        "INV",
+        "5"
+      ],
+      [
+        "BSRAM",
+        "1"
+      ],
+      [
+        "SDPB",
+        "1"
+      ]
+    ]
+  },
+  "candidate": {
+    "resources": {
+      "name": "downloadable_song",
+      "Register": "526",
+      "Alu": "128",
+      "Lut": "1362",
+      "Bsram": "1",
+      "T_Register": "526(526)",
+      "T_Alu": "128(128)",
+      "T_Lut": "1362(1362)",
+      "T_Bsram": "1(1)"
+    },
+    "summary_rows": [
+      [
+        "Resource",
+        "Usage"
+      ],
+      [
+        "I/O Port",
+        "176"
+      ],
+      [
+        "I/O Buf",
+        "176"
+      ],
+      [
+        "IBUF",
+        "114"
+      ],
+      [
+        "OBUF",
+        "62"
+      ],
+      [
+        "Register",
+        "526"
+      ],
+      [
+        "DFFSE",
+        "12"
+      ],
+      [
+        "DFFRE",
+        "514"
+      ],
+      [
+        "LUT",
+        "1357"
+      ],
+      [
+        "LUT2",
+        "144"
+      ],
+      [
+        "LUT3",
+        "485"
+      ],
+      [
+        "LUT4",
+        "728"
+      ],
+      [
+        "ALU",
+        "128"
+      ],
+      [
+        "ALU",
+        "128"
+      ],
+      [
+        "INV",
+        "5"
+      ],
+      [
+        "INV",
+        "5"
+      ],
+      [
+        "BSRAM",
+        "1"
+      ],
+      [
+        "SDPB",
+        "1"
+      ]
+    ]
+  },
+  "apds_baseline": {
+    "resources": {
+      "name": "apds9960_ctrl",
+      "Register": "543",
+      "Alu": "547",
+      "Lut": "964",
+      "MULT12X12": "2",
+      "MULT27X36": "2",
+      "MULTADDALU12X12": "2",
+      "T_Register": "543(543)",
+      "T_Alu": "547(547)",
+      "T_Lut": "964(964)",
+      "T_MULT12X12": "2(2)",
+      "T_MULT27X36": "2(2)",
+      "T_MULTADDALU12X12": "2(2)"
+    },
+    "summary_rows": [
+      [
+        "Resource",
+        "Usage"
+      ],
+      [
+        "I/O Port",
+        "176"
+      ],
+      [
+        "I/O Buf",
+        "176"
+      ],
+      [
+        "IBUF",
+        "14"
+      ],
+      [
+        "OBUF",
+        "162"
+      ],
+      [
+        "Register",
+        "543"
+      ],
+      [
+        "DFFPE",
+        "3"
+      ],
+      [
+        "DFFCE",
+        "540"
+      ],
+      [
+        "LUT",
+        "960"
+      ],
+      [
+        "LUT2",
+        "128"
+      ],
+      [
+        "LUT3",
+        "207"
+      ],
+      [
+        "LUT4",
+        "625"
+      ],
+      [
+        "ALU",
+        "547"
+      ],
+      [
+        "ALU",
+        "547"
+      ],
+      [
+        "INV",
+        "4"
+      ],
+      [
+        "INV",
+        "4"
+      ],
+      [
+        "DSP",
+        ""
+      ],
+      [
+        "MULT12X12",
+        "2"
+      ],
+      [
+        "MULT27X36",
+        "2"
+      ],
+      [
+        "MULTADDALU12X12",
+        "2"
+      ]
+    ]
+  },
+  "apds_candidate": {
+    "resources": {
+      "name": "apds9960_ctrl",
+      "Register": "539",
+      "Alu": "544",
+      "Lut": "968",
+      "MULT12X12": "2",
+      "MULT27X36": "2",
+      "MULTADDALU12X12": "2",
+      "T_Register": "539(539)",
+      "T_Alu": "544(544)",
+      "T_Lut": "968(968)",
+      "T_MULT12X12": "2(2)",
+      "T_MULT27X36": "2(2)",
+      "T_MULTADDALU12X12": "2(2)"
+    },
+    "summary_rows": [
+      [
+        "Resource",
+        "Usage"
+      ],
+      [
+        "I/O Port",
+        "176"
+      ],
+      [
+        "I/O Buf",
+        "176"
+      ],
+      [
+        "IBUF",
+        "14"
+      ],
+      [
+        "OBUF",
+        "162"
+      ],
+      [
+        "Register",
+        "539"
+      ],
+      [
+        "DFFPE",
+        "3"
+      ],
+      [
+        "DFFCE",
+        "536"
+      ],
+      [
+        "LUT",
+        "964"
+      ],
+      [
+        "LUT2",
+        "127"
+      ],
+      [
+        "LUT3",
+        "219"
+      ],
+      [
+        "LUT4",
+        "618"
+      ],
+      [
+        "ALU",
+        "544"
+      ],
+      [
+        "ALU",
+        "544"
+      ],
+      [
+        "INV",
+        "4"
+      ],
+      [
+        "INV",
+        "4"
+      ],
+      [
+        "DSP",
+        ""
+      ],
+      [
+        "MULT12X12",
+        "2"
+      ],
+      [
+        "MULT27X36",
+        "2"
+      ],
+      [
+        "MULTADDALU12X12",
+        "2"
+      ]
+    ]
+  },
+  "apds_candidate17": {
+    "resources": {
+      "name": "apds9960_ctrl",
+      "Register": "539",
+      "Alu": "543",
+      "Lut": "976",
+      "MULTALU27X18": "2",
+      "MULT12X12": "2",
+      "MULTADDALU12X12": "2",
+      "T_Register": "539(539)",
+      "T_Alu": "543(543)",
+      "T_Lut": "976(976)",
+      "T_MULTALU27X18": "2(2)",
+      "T_MULT12X12": "2(2)",
+      "T_MULTADDALU12X12": "2(2)"
+    },
+    "summary_rows": [
+      [
+        "Resource",
+        "Usage"
+      ],
+      [
+        "I/O Port",
+        "176"
+      ],
+      [
+        "I/O Buf",
+        "176"
+      ],
+      [
+        "IBUF",
+        "14"
+      ],
+      [
+        "OBUF",
+        "162"
+      ],
+      [
+        "Register",
+        "539"
+      ],
+      [
+        "DFFPE",
+        "3"
+      ],
+      [
+        "DFFCE",
+        "536"
+      ],
+      [
+        "LUT",
+        "972"
+      ],
+      [
+        "LUT2",
+        "121"
+      ],
+      [
+        "LUT3",
+        "220"
+      ],
+      [
+        "LUT4",
+        "631"
+      ],
+      [
+        "ALU",
+        "543"
+      ],
+      [
+        "ALU",
+        "543"
+      ],
+      [
+        "INV",
+        "4"
+      ],
+      [
+        "INV",
+        "4"
+      ],
+      [
+        "DSP",
+        ""
+      ],
+      [
+        "MULTALU27X18",
+        "2"
+      ],
+      [
+        "MULT12X12",
+        "2"
+      ],
+      [
+        "MULTADDALU12X12",
+        "2"
+      ]
+    ]
+  }
+}

@@ -12,7 +12,8 @@ module gesture_top #(
     parameter [19:0] AUDIO_KEY_DEBOUNCE_CYCLES = 20'd1000000,
     parameter [25:0] AUDIO_LONG_PRESS_CYCLES = 26'd40000000,
     parameter EXTERNAL_CONTROL = 0,
-    parameter ENABLE_REPLAY = 0
+    parameter ENABLE_REPLAY = 0,
+    parameter SHARED_ARITH = 0
 ) (
     input wire clk, resetn, frame_ce,
     input wire key_s1, key_s2,
@@ -34,18 +35,25 @@ module gesture_top #(
     output wire [5:0] voice_count,
     output wire overrun,
     input wire replay_mode,replay_gesture_valid,audio_clear,
-    input wire [2:0] replay_start,replay_end
+    input wire [2:0] replay_start,replay_end,
+    output wire shared_mul_request,shared_sine_request,
+    output wire signed [32:0] shared_mul_a,
+    output wire signed [17:0] shared_mul_b,
+    output wire [31:0] shared_sine_phase,
+    input wire signed [50:0] shared_product,
+    input wire signed [15:0] shared_sine
 );
     wire i2c_start, i2c_rw, i2c_busy, i2c_done, i2c_nack, i2c_rvalid;
     wire [6:0] i2c_addr;
     wire [7:0] i2c_reg, i2c_wdata, i2c_rdlen, i2c_rdata;
     wire use_replay=ENABLE_REPLAY && replay_mode;
 
-    // Only the sensor owns this bus in the requested sensor/audio variant.
+    // The gesture sensor owns this bus; the slider uses its own SCL/SDA pins.
     i2c_master #(.CLK_FREQ(50_000_000), .I2C_FREQ(100_000)) u_i2c (
         .clk(clk), .rst_n(resetn),
         .cmd_start(i2c_start), .cmd_addr(i2c_addr), .cmd_reg(i2c_reg),
-        .cmd_rw(i2c_rw), .cmd_wdata(i2c_wdata), .cmd_rdlen(i2c_rdlen),
+        .cmd_rw(i2c_rw), .cmd_wdata(i2c_wdata), .cmd_wdata1(8'h00), .cmd_wlen(1'b0),
+        .cmd_rdlen(i2c_rdlen),
         .busy(i2c_busy), .done(i2c_done), .nack(i2c_nack),
         .rdata(i2c_rdata), .rvalid(i2c_rvalid), .scl(scl), .sda(sda)
     );
@@ -67,7 +75,7 @@ module gesture_top #(
         .NOTE_FRAMES(AUDIO_NOTE_FRAMES),
         .PIANO_FRAMES(AUDIO_PIANO_FRAMES), .FLUTE_FRAMES(AUDIO_FLUTE_FRAMES),
         .UKULELE_FRAMES(AUDIO_UKULELE_FRAMES), .DRUM_FRAMES(AUDIO_DRUM_FRAMES),
-        .VOLUME_SHIFT(AUDIO_VOLUME_SHIFT)
+        .VOLUME_SHIFT(AUDIO_VOLUME_SHIFT),.SHARED_ARITH(SHARED_ARITH)
     ) u_audio (
         .clk(clk), .resetn(resetn && !(ENABLE_REPLAY && audio_clear)), .frame_ce(frame_ce),
         .sensor_ready(use_replay ? 1'b1 : init_done), .gesture_valid(use_replay ? replay_gesture_valid : gesture_valid),
@@ -78,6 +86,9 @@ module gesture_top #(
         .vibrato_inc(vibrato_inc),.vibrato_depth(vibrato_depth),.vibrato_delay(vibrato_delay),.vibrato_update(vibrato_update),.tuning_ratio(tuning_ratio),
         .control_bank(control_bank),.adsr_config(adsr_config),
         .voice_active(voice_active),.voice_count(voice_count),.overrun(overrun),
-        .audio_sample(audio_sample)
+        .audio_sample(audio_sample),
+        .shared_mul_request(shared_mul_request),.shared_sine_request(shared_sine_request),
+        .shared_mul_a(shared_mul_a),.shared_mul_b(shared_mul_b),.shared_sine_phase(shared_sine_phase),
+        .shared_product(shared_product),.shared_sine(shared_sine)
     );
 endmodule

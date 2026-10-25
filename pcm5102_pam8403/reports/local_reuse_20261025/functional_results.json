@@ -1,0 +1,90 @@
+{
+  "scenarios": {
+    "equal_trace_records": 1108,
+    "baseline_pass": [
+      "PASS scenarios polls=230 direction_reports=10 max_average=256 commands=780"
+    ],
+    "candidate_pass": [
+      "PASS scenarios polls=230 direction_reports=10 max_average=1024 commands=780"
+    ],
+    "baseline_guard_cycles": [
+      "GUARD 36 566",
+      "GUARD 52 566",
+      "GUARD 68 566",
+      "GUARD 84 566",
+      "GUARD 100 566",
+      "GUARD 116 636",
+      "GUARD 133 641",
+      "GUARD 164 586",
+      "GUARD 188 566",
+      "GUARD 229 641"
+    ],
+    "candidate_guard_cycles": [
+      "GUARD 36 739",
+      "GUARD 52 739",
+      "GUARD 68 739",
+      "GUARD 84 739",
+      "GUARD 100 869",
+      "GUARD 116 1389",
+      "GUARD 133 1409",
+      "GUARD 164 824",
+      "GUARD 188 739",
+      "GUARD 229 772"
+    ]
+  },
+  "guard": {
+    "equal_trace_records": 305,
+    "baseline_pass": [
+      "PASS scenarios polls=54 direction_reports=1 max_average=181 commands=214"
+    ],
+    "candidate_pass": [
+      "PASS scenarios polls=54 direction_reports=1 max_average=354 commands=214"
+    ],
+    "baseline_guard_cycles": [
+      "GUARD 41 800396"
+    ],
+    "candidate_guard_cycles": [
+      "GUARD 41 800569"
+    ]
+  },
+  "baseline-nack": {
+    "pass_lines": [
+      "PASS: absent APDS retries initialization, records NACK and emits no false gesture"
+    ],
+    "fatal_lines": [],
+    "sha256": "3133B0689C8ABF2605B7B99A3EAA3548A4C5F6C988E16B7E739B0EAB2C88499B"
+  },
+  "apds_serial-nack": {
+    "pass_lines": [
+      "PASS: absent APDS retries initialization, records NACK and emits no false gesture"
+    ],
+    "fatal_lines": [],
+    "sha256": "3133B0689C8ABF2605B7B99A3EAA3548A4C5F6C988E16B7E739B0EAB2C88499B"
+  },
+  "bus": {
+    "pass_lines": [
+      "PASS: pin-level I2C write ACK, repeated-start two-byte read, master ACK/NACK, absent-slave NACK and bus release"
+    ],
+    "fatal_lines": [],
+    "sha256": "C280B3C07D2960F56F114EEA52480AB79B4002FE57530FCB1DA14EB11887BE90"
+  },
+  "baseline-flash": {
+    "pass_lines": [
+      "PASS tb_take_nor_store: 114 checks; behavioral NOR only"
+    ],
+    "fatal_lines": [],
+    "sha256": "705286C8DB1E811FCDD238C55EAFE3585792295798565192C8C5FE065BF2EB51"
+  },
+  "flash_rotate-flash": {
+    "pass_lines": [
+      "PASS tb_take_nor_store: 114 checks; behavioral NOR only"
+    ],
+    "fatal_lines": [],
+    "sha256": "2FD156525CEA5D2D4700F459A22854098DA260B9DD79D2FBE38402D0A7D29E23"
+  },
+  "flash_saved_image": {
+    "baseline_sha256": "E77400F1572D08748FC3AEE807963A16123A6325BE262BE58CDAFEF055CFC901",
+    "candidate_sha256": "E77400F1572D08748FC3AEE807963A16123A6325BE262BE58CDAFEF055CFC901",
+    "byte_identical": true
+  }
+}

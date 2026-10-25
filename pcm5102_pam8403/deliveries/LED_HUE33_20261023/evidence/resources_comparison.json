@@ -1,0 +1,28 @@
+{
+  "baseline_build": "scope_hue8_baseline_20261023",
+  "hue33_build": "scope_hue33_20261023_p3r0",
+  "baseline8": {
+    "Logic": 21590.0,
+    "CLS": 11080.0,
+    "Register": 10321.0,
+    "BSRAM": 47.0,
+    "DSP": 26.5,
+    "WNS_ns": 0.233
+  },
+  "hue33": {
+    "Logic": 21503.0,
+    "CLS": 11202.0,
+    "Register": 10326.0,
+    "BSRAM": 47.0,
+    "DSP": 26.5,
+    "WNS_ns": 0.198
+  },
+  "delta": {
+    "Logic": -87.0,
+    "CLS": 122.0,
+    "Register": 5.0,
+    "BSRAM": 0.0,
+    "DSP": 0.0,
+    "WNS_ns": -0.035
+  }
+}

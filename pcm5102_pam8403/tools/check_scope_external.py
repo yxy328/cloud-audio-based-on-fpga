@@ -7,7 +7,7 @@ assert tokens[:4]==['P3','64','64','31']
 actual=list(map(int,tokens[4:]))
 rom=[int(x,16) for x in (root/'src/scope_style.hex').read_text().split()]
 expected=[]
-color=(16,0,31)
+color=(17,3,31)
 for y in range(64):
     row=y%32
     for x in range(64):

@@ -1,0 +1,115 @@
+--- base/hub75e_rhythm_display.v
++++ display_pair/hub75e_rhythm_display.v
+@@ -79,10 +79,11 @@
+     // Per-row valid bits clear the wrapped row without a second RAM write.
+     reg [5:0] head_top;
+     reg [63:0] head_valid;
+-    (* syn_ramstyle="block_ram" *) reg [6:0] head_memory[0:63];
+-    reg [6:0] head_read_q,write_previous;
++    (* syn_ramstyle="block_ram" *) reg [13:0] head_memory[0:31];
++    reg [13:0] head_read_q,write_previous;
+     reg head_read_forward;
+-    wire [6:0] head_read_value=head_read_forward ? write_previous : head_read_q;
++    wire [13:0] head_read_pair=head_read_forward ? write_previous : head_read_q;
++    wire [6:0] head_read_value=head_write_address[5] ? head_read_pair[13:7] : head_read_pair[6:0];
+     reg [PHASE_BITS-1:0] motion_phase;
+     wire [31:0] advanced_phase = motion_phase+TRAVEL;
+     wire [31:0] wrapped_phase = advanced_phase-LEAD_MS;
+@@ -245,11 +246,10 @@
+         end
+     end
+ 
+-    // The first RAM is the insertion read/modify/write port. Six identical
+-    // copies supply the upper/lower three-row glyph reads in parallel.
+-    // This trades seven spare BSRAMs for the parallel shift and wide muxes.
+-    // Prefetch addresses include the next scroll and next scan row, keeping
+-    // ROW_PREP and the external 133-clock scan exactly cycle-equivalent.
++    // Physical rows a and a+32 share one 14-bit word. Three display
++    // reads each return one upper/lower pair. Together with the insertion
++    // RMW memory this is four 32x14 RAMs instead of seven 64x7 RAMs.
++    // Both halves retain their own valid bit. External scan timing is unchanged.
+     wire head_write=resetn && playing && valid_s2 && insert_y<64;
+     wire [5:0] head_write_address=head_top+insert_y_s2+scroll_s2;
+     wire [5:0] wrapped_head=head_top-6'd1;
+@@ -260,7 +260,9 @@
+     // The two occurrences of this cycle's scroll cancel in circular space.
+     wire [5:0] head_request=head_top+HIT_Y[5:0]-
+         {quotient_hi_s1,lower_quotient}+scroll_s1;
+-    wire head_collision=head_write && head_request==head_write_address;
++    wire head_collision=head_write && head_request[4:0]==head_write_address[4:0];
++    wire [13:0] head_write_pair=head_write_address[5] ?
++        {head_write_data,head_read_pair[6:0]} : {head_read_pair[13:7],head_write_data};
+     wire [5:0] next_head_top=(!resetn || !playing) ? 6'd0 :
+         (scroll ? wrapped_head : head_top);
+     wire [4:0] next_scan_row=!resetn ? 5'd0 :
+@@ -271,33 +273,42 @@
+             if(scroll)begin head_top<=wrapped_head;head_valid[wrapped_head]<=0;end
+             if(head_write)head_valid[head_write_address]<=1;
+         end
+-        if(head_write)head_memory[head_write_address]<=head_write_data;
++        if(head_write)head_memory[head_write_address[4:0]]<=head_write_pair;
+         // Disable physical reads on a simultaneous same-address write.
+         // The explicitly forwarded value also handles consecutive OR merges.
+-        if(!head_collision)head_read_q<=head_memory[head_request];
++        if(!head_collision)head_read_q<=head_memory[head_request[4:0]];
+         head_read_forward<=head_collision;
+-        write_previous<=head_write_data;
++        write_previous<=head_write_pair;
+     end
+     wire [6:0] panel_heads[0:5];
+     genvar head_port;
+-    generate for(head_port=0;head_port<6;head_port=head_port+1)begin: panel_memories
+-        localparam integer OFFSET=(head_port<3 ? 0 : 32);
+-        localparam integer DY=head_port%3;
+-        (* syn_ramstyle="block_ram" *) reg [6:0] memory[0:63];
+-        reg [6:0] q;
+-        reg valid_q,forward_q;
+-        wire [6:0] requested_y={2'd0,next_scan_row}+OFFSET;
+-        wire [5:0] address=next_head_top+requested_y[5:0]-DY;
+-        wire collision=head_write && address==head_write_address;
+-        wire row_survives=head_valid[address] && !(scroll && address==wrapped_head);
++    generate for(head_port=0;head_port<3;head_port=head_port+1)begin: panel_memories
++        localparam integer DY=head_port;
++        (* syn_ramstyle="block_ram" *) reg [13:0] memory[0:31];
++        reg [13:0] q;
++        reg upper_valid_q,lower_valid_q,forward_q,upper_half_q;
++        wire [6:0] upper_requested_y={2'd0,next_scan_row};
++        wire [6:0] lower_requested_y=upper_requested_y+7'd32;
++        wire [5:0] upper_address=next_head_top+upper_requested_y[5:0]-DY;
++        wire [5:0] lower_address={~upper_address[5],upper_address[4:0]};
++        wire collision=head_write && upper_address[4:0]==head_write_address[4:0];
++        wire upper_collision=head_write && upper_address==head_write_address;
++        wire lower_collision=head_write && lower_address==head_write_address;
++        wire upper_survives=head_valid[upper_address] && !(scroll && upper_address==wrapped_head);
++        wire lower_survives=head_valid[lower_address] && !(scroll && lower_address==wrapped_head);
++        wire [13:0] pair_value=forward_q ? write_previous : q;
+         always @(posedge clk)begin
+-            if(head_write)memory[head_write_address]<=head_write_data;
+-            if(!collision)q<=memory[address];
++            if(head_write)memory[head_write_address[4:0]]<=head_write_pair;
++            if(!collision)q<=memory[upper_address[4:0]];
+             forward_q<=collision;
+-            valid_q<=resetn && playing && requested_y>=DY && requested_y<=HIT_Y+DY &&
+-                (collision || row_survives);
+-        end
+-        assign panel_heads[head_port]=valid_q ? (forward_q ? write_previous : q) : 7'd0;
++            upper_half_q<=upper_address[5];
++            upper_valid_q<=resetn && playing && upper_requested_y>=DY && upper_requested_y<=HIT_Y+DY &&
++                (upper_collision || upper_survives);
++            lower_valid_q<=resetn && playing && lower_requested_y>=DY && lower_requested_y<=HIT_Y+DY &&
++                (lower_collision || lower_survives);
++        end
++        assign panel_heads[head_port]=upper_valid_q ? (upper_half_q ? pair_value[13:7] : pair_value[6:0]) : 7'd0;
++        assign panel_heads[head_port+3]=lower_valid_q ? (upper_half_q ? pair_value[6:0] : pair_value[13:7]) : 7'd0;
+     end endgenerate
+     wire [6:0] upper_glyph=panel_heads[0] | panel_heads[1] | panel_heads[2];
+     wire [6:0] lower_glyph=panel_heads[3] | panel_heads[4] | panel_heads[5];
+@@ -307,7 +318,7 @@
+     genvar debug_row;
+     generate for(debug_row=0;debug_row<64;debug_row=debug_row+1)begin: debug_heads
+         wire [5:0] address=head_top+debug_row;
+-        assign note_rows[debug_row]=head_valid[address] ? head_memory[address] : 7'd0;
++        assign note_rows[debug_row]=head_valid[address] ? (address[5] ? head_memory[address[4:0]][13:7] : head_memory[address[4:0]][6:0]) : 7'd0;
+     end endgenerate
+ `endif
+ 

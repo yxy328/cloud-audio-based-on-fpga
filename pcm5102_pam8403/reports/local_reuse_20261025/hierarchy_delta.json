@@ -1,0 +1,748 @@
+{
+  "apds_serial": [
+    {
+      "path": "/top_unified/u_main/u_gesture/u_ctrl",
+      "baseline": {
+        "Lut": 931,
+        "Alu": 532,
+        "Register": 496
+      },
+      "candidate": {
+        "Lut": 983,
+        "Alu": 356,
+        "Register": 498
+      },
+      "self_lut_alu_delta": -124
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap",
+      "baseline": {
+        "Lut": 1824,
+        "Alu": 111,
+        "Register": 645
+      },
+      "candidate": {
+        "Lut": 1766,
+        "Alu": 111,
+        "Register": 645
+      },
+      "self_lut_alu_delta": -58
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_pitch_scaler/individual.u_bend",
+      "baseline": {
+        "Lut": 349,
+        "Alu": 127,
+        "Register": 280
+      },
+      "candidate": {
+        "Lut": 398,
+        "Alu": 126,
+        "Register": 280
+      },
+      "self_lut_alu_delta": 48
+    },
+    {
+      "path": "/top_unified/u_main/take_enabled.u_store",
+      "baseline": {
+        "Lut": 1317,
+        "Alu": 52,
+        "Register": 566
+      },
+      "candidate": {
+        "Lut": 1281,
+        "Alu": 52,
+        "Register": 568
+      },
+      "self_lut_alu_delta": -36
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_dynamics",
+      "baseline": {
+        "Lut": 122,
+        "Alu": 32,
+        "Register": 38
+      },
+      "candidate": {
+        "Lut": 105,
+        "Alu": 32,
+        "Register": 38
+      },
+      "self_lut_alu_delta": -17
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_download",
+      "baseline": {
+        "Lut": 1324,
+        "Alu": 131,
+        "Register": 508
+      },
+      "candidate": {
+        "Lut": 1316,
+        "Alu": 128,
+        "Register": 508
+      },
+      "self_lut_alu_delta": -11
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_scope",
+      "baseline": {
+        "Lut": 192,
+        "Alu": 23,
+        "Register": 33
+      },
+      "candidate": {
+        "Lut": 201,
+        "Alu": 23,
+        "Register": 33
+      },
+      "self_lut_alu_delta": 9
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_synth",
+      "baseline": {
+        "Lut": 1697,
+        "Alu": 244,
+        "Register": 804
+      },
+      "candidate": {
+        "Lut": 1705,
+        "Alu": 244,
+        "Register": 804
+      },
+      "self_lut_alu_delta": 8
+    },
+    {
+      "path": "/top_unified/u_main/take_enabled.u_take",
+      "baseline": {
+        "Lut": 1428,
+        "Alu": 97,
+        "Register": 1292
+      },
+      "candidate": {
+        "Lut": 1435,
+        "Alu": 97,
+        "Register": 1292
+      },
+      "self_lut_alu_delta": 7
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_synth/u_poly_slew",
+      "baseline": {
+        "Lut": 86,
+        "Alu": 26,
+        "Register": 13
+      },
+      "candidate": {
+        "Lut": 81,
+        "Alu": 26,
+        "Register": 13
+      },
+      "self_lut_alu_delta": -5
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_uart",
+      "baseline": {
+        "Lut": 154,
+        "Alu": 12,
+        "Register": 90
+      },
+      "candidate": {
+        "Lut": 149,
+        "Alu": 12,
+        "Register": 90
+      },
+      "self_lut_alu_delta": -5
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/status_panel.u_status",
+      "baseline": {
+        "Lut": 301,
+        "Alu": 13,
+        "Register": 209
+      },
+      "candidate": {
+        "Lut": 306,
+        "Alu": 13,
+        "Register": 209
+      },
+      "self_lut_alu_delta": 5
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_serial",
+      "baseline": {
+        "Lut": 169,
+        "Alu": 38,
+        "Register": 119
+      },
+      "candidate": {
+        "Lut": 166,
+        "Alu": 38,
+        "Register": 119
+      },
+      "self_lut_alu_delta": -3
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_audio/u_synth",
+      "baseline": {
+        "Lut": 2500,
+        "Alu": 888,
+        "Register": 2095
+      },
+      "candidate": {
+        "Lut": 2502,
+        "Alu": 889,
+        "Register": 2095
+      },
+      "self_lut_alu_delta": 3
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_pitch_dynamics",
+      "baseline": {
+        "Lut": 115,
+        "Alu": 32,
+        "Register": 31
+      },
+      "candidate": {
+        "Lut": 118,
+        "Alu": 32,
+        "Register": 31
+      },
+      "self_lut_alu_delta": 3
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer",
+      "baseline": {
+        "Lut": 488,
+        "Alu": 61,
+        "Register": 274
+      },
+      "candidate": {
+        "Lut": 491,
+        "Alu": 61,
+        "Register": 274
+      },
+      "self_lut_alu_delta": 3
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display",
+      "baseline": {
+        "Lut": 1062,
+        "Alu": 116,
+        "Register": 219
+      },
+      "candidate": {
+        "Lut": 1065,
+        "Alu": 116,
+        "Register": 219
+      },
+      "self_lut_alu_delta": 3
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_command_decode",
+      "baseline": {
+        "Lut": 85,
+        "Alu": 22,
+        "Register": 45
+      },
+      "candidate": {
+        "Lut": 87,
+        "Alu": 22,
+        "Register": 45
+      },
+      "self_lut_alu_delta": 2
+    },
+    {
+      "path": "/top_unified/u_main/take_enabled.u_store/internal_spi.u_spi",
+      "baseline": {
+        "Lut": 157,
+        "Alu": 14,
+        "Register": 77
+      },
+      "candidate": {
+        "Lut": 159,
+        "Alu": 14,
+        "Register": 78
+      },
+      "self_lut_alu_delta": 2
+    },
+    {
+      "path": "/top_unified/u_main/u_master_volume",
+      "baseline": {
+        "Lut": 78,
+        "Alu": 26,
+        "Register": 13
+      },
+      "candidate": {
+        "Lut": 76,
+        "Alu": 26,
+        "Register": 13
+      },
+      "self_lut_alu_delta": -2
+    },
+    {
+      "path": "/top_unified/u_main/u_effects",
+      "baseline": {
+        "Lut": 241,
+        "Alu": 94,
+        "Register": 147
+      },
+      "candidate": {
+        "Lut": 240,
+        "Alu": 94,
+        "Register": 147
+      },
+      "self_lut_alu_delta": -1
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_i2c",
+      "baseline": {
+        "Lut": 125,
+        "Alu": 0,
+        "Register": 51
+      },
+      "candidate": {
+        "Lut": 126,
+        "Alu": 0,
+        "Register": 51
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_audio",
+      "baseline": {
+        "Lut": 241,
+        "Alu": 3,
+        "Register": 114
+      },
+      "candidate": {
+        "Lut": 242,
+        "Alu": 3,
+        "Register": 114
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main/u_extra_mix",
+      "baseline": {
+        "Lut": 15,
+        "Alu": 17,
+        "Register": 16
+      },
+      "candidate": {
+        "Lut": 16,
+        "Alu": 17,
+        "Register": 16
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main/u_analog_expression",
+      "baseline": {
+        "Lut": 178,
+        "Alu": 71,
+        "Register": 82
+      },
+      "candidate": {
+        "Lut": 177,
+        "Alu": 71,
+        "Register": 82
+      },
+      "self_lut_alu_delta": -1
+    },
+    {
+      "path": "/top_unified/u_main/u_string",
+      "baseline": {
+        "Lut": 168,
+        "Alu": 33,
+        "Register": 86
+      },
+      "candidate": {
+        "Lut": 169,
+        "Alu": 33,
+        "Register": 86
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_spectrum",
+      "baseline": {
+        "Lut": 595,
+        "Alu": 346,
+        "Register": 734
+      },
+      "candidate": {
+        "Lut": 594,
+        "Alu": 346,
+        "Register": 734
+      },
+      "self_lut_alu_delta": -1
+    }
+  ],
+  "flash_rotate": [
+    {
+      "path": "/top_unified/u_main/u_keymap/u_download",
+      "baseline": {
+        "Lut": 1324,
+        "Alu": 131,
+        "Register": 508
+      },
+      "candidate": {
+        "Lut": 1408,
+        "Alu": 128,
+        "Register": 508
+      },
+      "self_lut_alu_delta": 81
+    },
+    {
+      "path": "/top_unified/u_main/take_enabled.u_store",
+      "baseline": {
+        "Lut": 1317,
+        "Alu": 52,
+        "Register": 566
+      },
+      "candidate": {
+        "Lut": 1366,
+        "Alu": 52,
+        "Register": 571
+      },
+      "self_lut_alu_delta": 49
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap",
+      "baseline": {
+        "Lut": 1824,
+        "Alu": 111,
+        "Register": 645
+      },
+      "candidate": {
+        "Lut": 1775,
+        "Alu": 111,
+        "Register": 645
+      },
+      "self_lut_alu_delta": -49
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_ctrl",
+      "baseline": {
+        "Lut": 931,
+        "Alu": 532,
+        "Register": 496
+      },
+      "candidate": {
+        "Lut": 910,
+        "Alu": 532,
+        "Register": 496
+      },
+      "self_lut_alu_delta": -21
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_dynamics",
+      "baseline": {
+        "Lut": 122,
+        "Alu": 32,
+        "Register": 38
+      },
+      "candidate": {
+        "Lut": 107,
+        "Alu": 32,
+        "Register": 38
+      },
+      "self_lut_alu_delta": -15
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer/u_scope",
+      "baseline": {
+        "Lut": 192,
+        "Alu": 23,
+        "Register": 33
+      },
+      "candidate": {
+        "Lut": 206,
+        "Alu": 23,
+        "Register": 33
+      },
+      "self_lut_alu_delta": 14
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_pitch_dynamics",
+      "baseline": {
+        "Lut": 115,
+        "Alu": 32,
+        "Register": 31
+      },
+      "candidate": {
+        "Lut": 124,
+        "Alu": 32,
+        "Register": 31
+      },
+      "self_lut_alu_delta": 9
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/audio_visual.u_visualizer",
+      "baseline": {
+        "Lut": 488,
+        "Alu": 61,
+        "Register": 274
+      },
+      "candidate": {
+        "Lut": 497,
+        "Alu": 61,
+        "Register": 274
+      },
+      "self_lut_alu_delta": 9
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_audio/u_synth",
+      "baseline": {
+        "Lut": 2500,
+        "Alu": 888,
+        "Register": 2095
+      },
+      "candidate": {
+        "Lut": 2492,
+        "Alu": 888,
+        "Register": 2095
+      },
+      "self_lut_alu_delta": -8
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_synth",
+      "baseline": {
+        "Lut": 1697,
+        "Alu": 244,
+        "Register": 804
+      },
+      "candidate": {
+        "Lut": 1705,
+        "Alu": 244,
+        "Register": 804
+      },
+      "self_lut_alu_delta": 8
+    },
+    {
+      "path": "/top_unified/u_main/u_fsr_pitch_scaler/individual.u_bend",
+      "baseline": {
+        "Lut": 349,
+        "Alu": 127,
+        "Register": 280
+      },
+      "candidate": {
+        "Lut": 341,
+        "Alu": 127,
+        "Register": 280
+      },
+      "self_lut_alu_delta": -8
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_serial",
+      "baseline": {
+        "Lut": 169,
+        "Alu": 38,
+        "Register": 119
+      },
+      "candidate": {
+        "Lut": 162,
+        "Alu": 38,
+        "Register": 119
+      },
+      "self_lut_alu_delta": -7
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_uart",
+      "baseline": {
+        "Lut": 154,
+        "Alu": 12,
+        "Register": 90
+      },
+      "candidate": {
+        "Lut": 149,
+        "Alu": 12,
+        "Register": 90
+      },
+      "self_lut_alu_delta": -5
+    },
+    {
+      "path": "/top_unified/u_main/take_enabled.u_store/internal_spi.u_spi",
+      "baseline": {
+        "Lut": 157,
+        "Alu": 14,
+        "Register": 77
+      },
+      "candidate": {
+        "Lut": 160,
+        "Alu": 14,
+        "Register": 78
+      },
+      "self_lut_alu_delta": 3
+    },
+    {
+      "path": "/top_unified/u_main/u_analog_expression",
+      "baseline": {
+        "Lut": 178,
+        "Alu": 71,
+        "Register": 82
+      },
+      "candidate": {
+        "Lut": 175,
+        "Alu": 71,
+        "Register": 82
+      },
+      "self_lut_alu_delta": -3
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display",
+      "baseline": {
+        "Lut": 1062,
+        "Alu": 116,
+        "Register": 219
+      },
+      "candidate": {
+        "Lut": 1065,
+        "Alu": 116,
+        "Register": 219
+      },
+      "self_lut_alu_delta": 3
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_live",
+      "baseline": {
+        "Lut": 158,
+        "Alu": 16,
+        "Register": 111
+      },
+      "candidate": {
+        "Lut": 160,
+        "Alu": 16,
+        "Register": 111
+      },
+      "self_lut_alu_delta": 2
+    },
+    {
+      "path": "/top_unified/u_main/u_touch_synth/u_poly_slew",
+      "baseline": {
+        "Lut": 86,
+        "Alu": 26,
+        "Register": 13
+      },
+      "candidate": {
+        "Lut": 84,
+        "Alu": 26,
+        "Register": 13
+      },
+      "self_lut_alu_delta": -2
+    },
+    {
+      "path": "/top_unified/u_main/take_enabled.u_take",
+      "baseline": {
+        "Lut": 1428,
+        "Alu": 97,
+        "Register": 1292
+      },
+      "candidate": {
+        "Lut": 1426,
+        "Alu": 97,
+        "Register": 1292
+      },
+      "self_lut_alu_delta": -2
+    },
+    {
+      "path": "/top_unified/u_main/u_guide_display/status_panel.u_status",
+      "baseline": {
+        "Lut": 301,
+        "Alu": 13,
+        "Register": 209
+      },
+      "candidate": {
+        "Lut": 303,
+        "Alu": 13,
+        "Register": 209
+      },
+      "self_lut_alu_delta": 2
+    },
+    {
+      "path": "/top_unified/u_main/u_keymap/u_command_decode",
+      "baseline": {
+        "Lut": 85,
+        "Alu": 22,
+        "Register": 45
+      },
+      "candidate": {
+        "Lut": 84,
+        "Alu": 22,
+        "Register": 45
+      },
+      "self_lut_alu_delta": -1
+    },
+    {
+      "path": "/top_unified/u_main/u_master_volume",
+      "baseline": {
+        "Lut": 78,
+        "Alu": 26,
+        "Register": 13
+      },
+      "candidate": {
+        "Lut": 79,
+        "Alu": 26,
+        "Register": 13
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main",
+      "baseline": {
+        "Lut": 691,
+        "Alu": 5,
+        "Register": 72
+      },
+      "candidate": {
+        "Lut": 690,
+        "Alu": 5,
+        "Register": 72
+      },
+      "self_lut_alu_delta": -1
+    },
+    {
+      "path": "/top_unified/u_main/u_gesture/u_audio",
+      "baseline": {
+        "Lut": 241,
+        "Alu": 3,
+        "Register": 114
+      },
+      "candidate": {
+        "Lut": 242,
+        "Alu": 3,
+        "Register": 114
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main/u_extra_mix",
+      "baseline": {
+        "Lut": 15,
+        "Alu": 17,
+        "Register": 16
+      },
+      "candidate": {
+        "Lut": 16,
+        "Alu": 17,
+        "Register": 16
+      },
+      "self_lut_alu_delta": 1
+    },
+    {
+      "path": "/top_unified/u_main/u_string",
+      "baseline": {
+        "Lut": 168,
+        "Alu": 33,
+        "Register": 86
+      },
+      "candidate": {
+        "Lut": 167,
+        "Alu": 33,
+        "Register": 86
+      },
+      "self_lut_alu_delta": -1
+    }
+  ]
+}

@@ -2,7 +2,51 @@
 
 [首页](../README.md) · [文档索引](README.md) · [完整验证记录](../pcm5102_pam8403/VERIFICATION.md)
 
-按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口（内容为最新版本），当前另有带版本号的 `dist/FPGA-Music-LinkDiag-Code24.apk`，上一版另存 `dist/FPGA-Music-Chromatic.apk`，更早版本另存 `dist/FPGA-Music-Pedal.apk`。
+按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口（内容为 v1.24-hue / Code25 的 2026-10-25 重新构建，含板键联动），带版本号的 `dist/FPGA-Music-Hue33-Code25.apk` 是 2026-10-23 的首个 Code25 构建、不含板键联动，两者 `versionName` 相同但 SHA256 不同；上一版连接诊断另存 `dist/FPGA-Music-LinkDiag-Code24.apk`，更早为 `dist/FPGA-Music-Chromatic.apk` 与 `dist/FPGA-Music-Pedal.apk`。
+
+## 2026-10-25 · 当前默认位流：APDS 运算复用与效果器前置核验，未烧录
+
+`apds9960_ctrl` 的局部累加 / 均值运算复用与两套音源的共享算术（`synth_shared_arith`）合入生产树，相对当日冻结基线净回收 **211 Logic / 134 CLS**。完整 PnR（Gowin V1.9.11.03 Education，place2 / route0 / maxfan23）：Logic **21649**、CLS **11183**、Register 10579、BSRAM 47、DSP 26.5，未布通 0、setup / hold 违例端点 0/0，WNS +0.030 / +0.170 ns。位流 SHA256 `840AE4C47D7BB57048481ACA3ECB6BEEC59E430E66AF0BD32429FDE99E84AD15`，本轮未记录 UserCode；101 项源码 / ROM / 约束 / 工程输入逐项匹配已验证快照。
+
+同轮只做核验、不改生产 RTL：`tb_fx_frame_budget` 在真实 50MHz / 1024 拍帧内实测含接收沿触摸 1012、弯音 43、效果器 5 拍可并行，超限 / overrun / 合成混音 clipped 均为 0；隔离的混响 / 延迟 / 合唱原型保持 2048 / 4096 / 4096 独立存储与 4 comb + 2 allpass，259200 帧与独立模型逐样本相同。**三效果器的正式 RTL、兼容协议 / `TAKE`、三张参数卡片与新版 App 尚未交付**，原型边界不代表联合验收。
+
+升级注意：本份位流同时含压力 / 滑杆双通道、`KLIVE` 板键联动与 33 档色环显示，无需按功能换烧。APDS 均值复用最坏 256→1024 拍，15ms 释放保护仍满足但边界参数可跨到相邻轮询，不能称完整事件逐拍等价；生产 100000 拍活动轮询下分类相对最后有效样本延后 173 拍。未烧录、未安装 APK、未做实体光学与模拟音频验收。逐笔资源账见[验证记录](../pcm5102_pam8403/VERIFICATION.md)顶部、[FX 前置核验](../pcm5102_pam8403/FX_PREFLIGHT_20261024.md)与 `pcm5102_pam8403/reports/fx_delivery_20261025/README.md`（该目录只入库报告正文，PnR 快照树留在本机）。
+
+## 2026-10-25 · 压力与滑杆双通道（ADS1115 + 片内 ADC），完整 PnR 通过、未烧录
+
+压力传感器继续用 GW5A 片内 ADC（J8/K8、22kΩ/4.7kΩ、0～1V），滑杆改接 **ADS1115 AIN1**（3.3V 供电、ADDR 接 GND、地址 0x48），
+并使用**独立的 I²C 引脚**：SCL=K10（J3 第31脚）、SDA=L10（J3 第32脚），不再与 APDS-9960 的 H4/G4 共用，因此没有总线仲裁。
+新增 `ads1115_ctrl`（自带 `i2c_master`：AIN1 单端、±4.096V、连续 128SPS、10ms 轮询、100ms 超时回退），
+`i2c_master` 支持 16 位寄存器两字节写；`top`/`top_unified` 增加 `slider_scl/slider_sda`。
+`i2c_arbiter.v` 保留但**不参与构建**（共享总线方案的历史件）。
+压力表达不再由 `analog_mode` 门控；`ANALOG,0` 表示滑杆关闭，1～4 仍为音量/音高/颤音/湿度，`CAL` 标定滑杆，
+`ANALOG,0` 时手机 ADC 读数显示压力通道。滑杆通道按 `raw[14:5]` 映射到 10 位（3.3V 满行程约 825）。
+
+验证：`tb_ads1115_bus`（配置 0xD283、16→10 位映射、双客户端轮换、超时保持与恢复）、`tb_analog_expression`（压力音高为基准、
+滑杆音量/音高/湿度、弯音下颤音、故障与陈旧回退）、`tb_top_dual_analog`（压力增益/压音与滑杆音量同时生效、滑杆故障不影响压力）、
+`tb_i2c_master_bus`、`tb_top_idle`、`tb_apds_nack`、`tb_hc05_extensions`、`tb_command_protocol` 通过；26 个顶层测试重新编译通过（以[验证记录](../pcm5102_pam8403/VERIFICATION.md)本轮记录为准）。
+
+完整 PnR（Gowin V1.9.11.03 Education，`build_unified.tcl`，route 0 / fanout 23）：独立总线下 **place_option 2** 布通——
+Logic **21860/23040（95%）**、CLS **11317/11520（99%）**、Register 10571、BSRAM 47、DSP 26.5、ADC 1/1、
+未布通 **0**、setup/hold 违例端点 **0/0**、Fmax **50.119MHz**，已生成 `.fs`。place 1 虽布通但有 4 个 setup 违例（Fmax 49.813MHz），
+place 0 有 200 条以上未布通；换策略必须重测。综合新增一条 `EX3045`（`ads1115_ctrl.v` 的浮空总线保护在综合时恒真），属有意的仿真保护。
+**未烧录、未上板测量**。接线与标定见[迁移说明](../pcm5102_pam8403/REFERENCE_MIGRATION.md)。
+
+## 2026-10-23 · App v1.24-hue / Code25，手机 33 档色环频谱
+
+“显示”分区顶部新增手机实时预览卡片，原生绘制 33 档青→蓝→紫→品红→红色环、深色频谱与渐变三源幅度条，色值与 RTL 逐档一致；继续使用原 `VIZ?` 的 0～31 频谱与 0～56 音源幅度并各自归一化，不冒充面板 PCM 峰值或 PK，停止 / 断线 / 过期仍清空数据。蓝牙协议、轮询节奏与 FPGA 均未改动。
+
+全套 `test-core.ps1` 通过（含 SppLink 255 项、新增 `LedHue` 431 项与 64 个色码逐项对比）；36 张桌面排版图覆盖六种宽度 × 六种状态，无文字或绘图越界。Java / D8、APK 对齐、v3 验签与 Manifest 核对通过：`versionCode 25` / `versionName 1.24-hue`，独立包 SHA256 `70059516F69EB2DBF792F22A973A13CF6257EA006D5AE8C9BFF961528D833B2F`。说明见 [HUE33.md](../pcm5102_pam8403/android_app/HUE33.md)，原始日志与源码差异见 [APP_HUE33_20261023](../pcm5102_pam8403/deliveries/APP_HUE33_20261023/README.md)。
+
+升级注意：本独立包**不含板键联动**；`KLIVE_ON` / `KLIVE_OFF` 在 2026-10-25 的滚动入口构建中加入，两者 `versionName` 都是 1.24-hue，需要联动功能请安装 `dist/FPGA-Music-Unified.apk`。排版图为桌面预览不是手机截图，本次未安装实体手机，实机显示与 HC-05 联动仍待验。
+
+## 2026-10-23 · FPGA LED 波形 33 档整帧音量色环，UserCode `0x00002176`
+
+波形颜色改用独立的 PCM/64 色相轴：每 64 个计数一级，0～2048 共 33 个色相点、每档 5.625°，180° 青经蓝、紫、品红到 360° 红，2048 及以上钳为 `(31,3,3)`；一帧内波形与总电平条共用一种颜色，非零但不足 64 计数（含 ±1）仍显示 `(3,31,31)`，只有原轴为零才显示灰色 `(8,8,8)`。量程保护、PK 百分比与电平条长度继续使用 `ceil(abs(PCM)/256)` 原轴，`scope_style.hex` 内容不变，实现只用限幅、移位、加减与取位，**不新增 ROM 表项、BSRAM、DSP 或硬件乘除单元**。
+
+冻结构建 `scope_hue33_20261023_p3r0`（place3 / route0 / maxfan23）：Logic **21503**、CLS **11202**、Register 10326、BSRAM 47、DSP 26.5，相对 8 档基线 `scope_hue8_baseline_20261023`（21590 / 11080 / 10321 / 47 / 26.5）为 **−87 Logic / +122 CLS / +5 Register / 0 / 0**；WNS +0.198 ns、Fmax 50.499MHz、setup / hold 违例端点均 0，位流 SHA256 `A5567DB120334D16B9B72071E0F0D2754B64E1AFE44878D22ED1243700A52B35`。五个 testbench 按顺序单个 `-Tests` 运行至完整顶层 196.117712ms，颜色全 64 码、65536 个有符号 PCM 幅度、33 档渐强回落与跨窗口清零、±1 边界及独立 HSV 模型误差 ≤1LSB 通过。交付包 [LED_HUE33_20261023](../pcm5102_pam8403/deliveries/LED_HUE33_20261023/README.md)。
+
+升级注意：本版满足器件容量与 50MHz 时序，但**后续功能预留未通过**——剩余 1537 Logic / 318 CLS / 9 BSRAM，距 1650 / 365 / 4 的规划分别差 113 Logic / 47 CLS，实施下一功能前需先回收。初次 place2 / route0 时序未过、place2 / route2 留 141 条未布通网络，均未交付。该份已被 2026-10-25 构建取代为默认输出，未烧录，实物面板颜色仍待核对。
 
 ## 2026-10-22 · FPGA LED 波形弱信号修正版，UserCode `0x00007D67`
 

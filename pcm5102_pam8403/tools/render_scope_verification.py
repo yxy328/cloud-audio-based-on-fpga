@@ -8,11 +8,11 @@ build=root/'sim/build'
 out=root/'design/led_scope_20261022/verified'
 out.mkdir(parents=True,exist_ok=True)
 frames=[
-    ('scope_fsr100','FSR 100% / 峰值 2048','×8 · ±4K · 红色'),
-    ('scope_fsr50','FSR 50% / 峰值 1024','×16 · ±2K · 紫色'),
-    ('scope_fsr25','FSR 25% / 峰值 512','×32 · ±1K · 饱和蓝'),
+    ('scope_fsr100','FSR 100% / 峰值 2048','×8 · ±4K · 红 360°'),
+    ('scope_fsr50','FSR 50% / 峰值 1024','×16 · ±2K · 蓝 240°'),
+    ('scope_fsr25','FSR 25% / 峰值 512','×32 · ±1K · 青 180°'),
     ('scope_overrange','FSR 25% / 混音峰值 100%','优先扩大到 ×1 / ±100%'),
-    ('scope_weak128','FSR 25% / 峰值 128','×32 · 低于 1% 的信号也显示蓝色'),
+    ('scope_weak128','FSR 25% / 峰值 128','×32 · 低于 1% 的信号也是青，色环低端钳位'),
     ('scope_silence','静音 / 峰值 0%','低亮白零线 · 电平条归零'),
 ]
 canvas=Image.new('RGB',(1512,1300),'#0b141b')

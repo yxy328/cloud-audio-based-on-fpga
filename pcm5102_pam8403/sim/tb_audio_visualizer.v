@@ -73,9 +73,9 @@ module tb_audio_visualizer;
             if(dut.display_range!=={expected_max[9:0],expected_min[9:0]})
                 $fatal(1,"Column %0d lost extrema: %h",col,dut.display_range);
         end
-        pixel(17,12,{5'd31,5'd0,5'd0},0);
+        pixel(17,12,{5'd31,5'd3,5'd3},0);
         pixel(16,26,0,{5'd11,5'd15,5'd14});
-        pixel(16,27,{5'd31,5'd0,5'd0},{5'd11,5'd15,5'd14});
+        pixel(16,27,{5'd31,5'd3,5'd3},{5'd11,5'd15,5'd14});
         mode=2;
         pixel(36,1,{5'd24,5'd4,5'd31},0);
         pixel(35,1,0,0);
@@ -84,7 +84,7 @@ module tb_audio_visualizer;
         // Back bank acquisition cannot alter the current front bank.
         touch0=0; touch1=0; sensor=0; guitar=0;
         for(n=0;n<512;n=n+1) sample(0);
-        pixel(17,12,{5'd31,5'd0,5'd0},0);
+        pixel(17,12,{5'd31,5'd3,5'd3},0);
         swap;
         pixel(17,12,0,0);
         pixel(17,27,{5'd8,5'd8,5'd8},0);

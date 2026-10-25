@@ -5,6 +5,7 @@
 module audio_scope(
     input wire clk,resetn,service_ce,publish,display_valid,
     input wire [7:0] capture_peak,
+    input wire [5:0] capture_peak64,
     input wire [19:0] range_word,
     input wire [2:0] shown_range,
     input wire [1:0] visual_mode,shown_ratio,shown_phase,
@@ -33,19 +34,29 @@ module audio_scope(
     always @(posedge clk)style_q<=style_rom[rom_address];
 
     function [14:0] palette;
-        input [7:0] peak;
+        input [5:0] peak;
+        reg [5:0] limited;
+        reg [7:0] q;
+        reg [5:0] u;
+        reg [8:0] seven_u;
+        reg [4:0] d,r,g,b;
         begin
-            if(peak==0)palette={5'd8,5'd8,5'd8};
-            // Saturated colors stay visibly colored on the physical panel.
+            // PCM/64, 33 hue points: 180deg cyan -> 360deg red, clamped
+            // at 2048 PCM counts. All constant products use shifts/adds.
             // 2048 counts is the nominal loud reference after /16 source
             // attenuation, not a claim of digital clipping or acoustic SPL.
-            else if(peak>=8)palette={5'd31,5'd0,5'd0};
-            else case(peak[2:0])
-                1:palette={5'd0,5'd0,5'd24};2:palette={5'd0,5'd0,5'd31};
-                3:palette={5'd8,5'd0,5'd31};4:palette={5'd16,5'd0,5'd31};
-                5:palette={5'd24,5'd0,5'd24};6:palette={5'd31,5'd0,5'd16};
-                default:palette={5'd31,5'd0,5'd8};
+            limited=peak>6'd32 ? 6'd32 : peak;
+            q=({2'd0,limited}<<2)+({2'd0,limited}<<1);
+            u=q[5:0];
+            seven_u=({3'd0,u}<<3)-{3'd0,u};
+            d=seven_u[8:4];
+            case(q[7:6])
+                0:begin r=5'd3;g=5'd31-d;b=5'd31;end
+                1:begin r=5'd3+d;g=5'd3;b=5'd31;end
+                2:begin r=5'd31;g=5'd3;b=5'd31-d;end
+                default:begin r=5'd31;g=5'd3;b=5'd3;end
             endcase
+            palette={r,g,b};
         end
     endfunction
     always @(posedge clk)begin
@@ -56,7 +67,9 @@ module audio_scope(
             if(publish)begin
                 // S_LATCH_HIGH fetched the percentage on the preceding edge.
                 peak_bcd<=style_q[11:0];
-                shown_color<=palette(capture_peak);
+                // Only the original conservative axis decides silence.
+                // A nonzero sub-64-count window uses palette(0), cyan.
+                shown_color<=capture_peak==0 ? {5'd8,5'd8,5'd8} : palette(capture_peak64);
                 shown_level<=capture_peak[7:2]+(|capture_peak[1:0]);
             end
         end

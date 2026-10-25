@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-24",
+  "stage": "baseline_only",
+  "production_rtl_changed_by_this_task": false,
+  "merged_engine_tested": false,
+  "tests": [
+    "tb_engine_merge_baseline",
+    "tb_tdm_queue",
+    "tb_runtime_adsr",
+    "tb_touch_tdm_synth"
+  ],
+  "exit_code": 0,
+  "recorded_input_count": 19,
+  "recorded_inputs_unchanged": true,
+  "sensor_cycles": {
+    "empty": 535,
+    "test32": 889,
+    "independent_events32": 951
+  },
+  "touch_cycles": {
+    "no_divisions": 756,
+    "divisions16": 1012
+  },
+  "measured_frames": 28,
+  "all16_division_frames": 3,
+  "rom_correspondence_points": 256,
+  "pnr_run": false,
+  "hardware_verified": false
+}

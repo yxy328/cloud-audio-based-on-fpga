@@ -1,0 +1,19 @@
+{
+  "created_at": "2026-10-25T20:05:38.747473+08:00",
+  "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403",
+  "baseline": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_delivery_20261025\\base",
+  "includes_uncommitted_files": true,
+  "gowin_executable": "E:\\130_FPGA_Verilog\\Gowin\\Gowin_V1.9.11.03_Education_x64\\IDE\\bin\\gw_sh.exe",
+  "gowin_sha256": "4C172D4C0D2A4C7EF5C764D091A315CBCDE2127573554BFD7D09AC6F2E5EA535",
+  "strategy": {
+    "place": 2,
+    "route": 0,
+    "maxfan": 23,
+    "global_freq": 50,
+    "resource_sharing": 1,
+    "retiming": 1
+  },
+  "previous_default_fs_sha256": "78F736C19F3F99B41C2B7F82FADC2DE50BAB02C99C45C8FCE666F020AC43F7BE",
+  "previous_apk_sha256": "40B92B8201DA38F29140129346E8F02579B532AF443C1BCAA8060B847A015AB6",
+  "hardware_tested": false
+}

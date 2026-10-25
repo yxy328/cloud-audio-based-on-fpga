@@ -1,0 +1,76 @@
+--- a/pcm5102_pam8403/src/take_nor_store.v
++++ b/pcm5102_pam8403/src/take_nor_store.v
+@@ -33,7 +33,7 @@
+         LOAD_META=6,LOAD_BEGIN=7,LOAD_WAIT=8,IDLE=9,META=10,META_DONE=11,
+         WREN_BEGIN=12,WREN_WAIT=13,WEL_WAIT=14,OP_WAIT=15,POLL_BEGIN=16,POLL_WAIT=17,
+         BODY_VERIFY_BEGIN=18,BODY_VERIFY_WAIT=19,HEADER_BEGIN=20,HEADER_VERIFY_WAIT=21,
+-        COMMIT_VERIFY_WAIT=22,FINISH=23,SELECT_HEADER_WAIT=24,SELECT_APPLY=25;
++        COMMIT_VERIFY_WAIT=22,FINISH=23,SELECT_HEADER_WAIT=24,SELECT_APPLY=25,HEADER_RESTORE=26;
+     (* syn_encoding="onehot" *) reg [4:0] state;
+     reg go,authorized,spi_address_valid,writing,abort_spi;
+     reg [7:0] opcode,write_data;
+@@ -75,6 +75,8 @@
+     reg all_blank,padding_blank;
+     reg [13:0] offset;
+     reg [127:0] header;
++    reg [2:0] restore_left;
++    reg restore_load;
+     reg [15:0] generation0;
+     reg [31:0] crc,meta_crc;
+     reg verify_error;
+@@ -103,8 +105,12 @@
+     wire header_valid=header_shape && checksum_ok && header[127:120]==0;
+     wire [15:0] generation_difference=header[47:32]-generation0;
+     wire choose1=candidate[1] && (!candidate[0] || !generation_difference[15]);
+-    wire [3:0] selected_header_index=(state==META || state==LOAD_META) ? meta_index : header_index;
+-    wire [7:0] selected_header_byte=header[selected_header_index*8 +: 8];
++    wire [7:0] selected_header_byte=header[7:0];
++    // Visit bytes through a fixed lane. Sixteen rotations restore every bit.
++    wire rotate_header=((state==META || state==LOAD_META) && crc_bits==1) ||
++        (state==HEADER_RESTORE) ||
++        (write_ready && write_valid && operation==2) ||
++        (read_valid && (state==HEADER_VERIFY_WAIT || state==COMMIT_VERIFY_WAIT));
+     wire [7:0] header_byte=operation==3 && header_index==15 ? 8'd0 : selected_header_byte;
+     function [23:0] base;
+         input slot;
+@@ -176,12 +182,13 @@
+             go<=0;authorized<=0;spi_address_valid<=0;writing<=0;abort_spi<=0;
+             opcode<=0;spi_low<=0;spi_region<=0;length<=0;jedec<=0;status_byte<=0;scan_slot<=0;active_slot<=0;
+             target_slot<=0;active_present<=0;owned<=0;candidate<=0;all_blank<=1;padding_blank<=1;offset<=0;
+-            header<=0;generation0<=0;crc<=32'hffffffff;meta_crc<=0;crc_bits<=0;
++            header<=0;restore_left<=0;restore_load<=0;generation0<=0;crc<=32'hffffffff;meta_crc<=0;crc_bits<=0;
+             verify_error<=0;generation<=0;take_count<=0;meta_index<=0;
+             header_index<=0;byte_index<=0;word_shift<=0;remaining<=0;page_size<=0;
+             operation<=0;fetch_delay<=0;erase_second<=0;save_active<=0;operation_offset<=0;watchdog<=0;
+         end else begin
+             go<=0;abort_spi<=0;boot_done<=0;done<=0;ram_we<=0;
++            if(rotate_header)header<={header[7:0],header[127:8]};
+             if(crc_start)begin crc<=crc ^ {24'd0,crc_input};crc_bits<=8;end
+             else if(crc_bits!=0)begin
+                 crc<=crc[0] ? (crc>>1)^32'hedb88320 : crc>>1;
+@@ -270,7 +277,9 @@
+                     end
+                 end
+                 LOAD_META:if(crc_bits==1)begin
+-                    if(meta_index==10)state<=LOAD_BEGIN;else meta_index<=meta_index+1'b1;
++                    if(meta_index==10)begin
++                        restore_left<=5;restore_load<=1;state<=HEADER_RESTORE;
++                    end else meta_index<=meta_index+1'b1;
+                 end
+                 LOAD_BEGIN:begin
+                     if(take_count==0)begin
+@@ -304,7 +313,13 @@
+                     end
+                 end
+                 META:if(crc_bits==1)begin
+-                    if(meta_index==10)state<=META_DONE;else meta_index<=meta_index+1'b1;
++                    if(meta_index==10)begin
++                        restore_left<=5;restore_load<=0;state<=HEADER_RESTORE;
++                    end else meta_index<=meta_index+1'b1;
++                end
++                HEADER_RESTORE:begin
++                    if(restore_left==1)state<=restore_load ? LOAD_BEGIN : META_DONE;
++                    else restore_left<=restore_left-1'b1;
+                 end
+                 META_DONE:begin
+                     meta_crc<=crc;operation<=0;erase_second<=0;

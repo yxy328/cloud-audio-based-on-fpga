@@ -1,0 +1,7 @@
+file,peak64,peak,r,g,b
+sim/build/scope_fsr100.ppm,32,8,31,3,3
+sim/build/scope_fsr50.ppm,16,4,17,3,31
+sim/build/scope_fsr25.ppm,8,2,3,10,31
+sim/build/scope_weak128.ppm,2,1,3,26,31
+sim/build/scope_overrange.ppm,63,128,31,3,3
+sim/build/scope_silence.ppm,0,0,8,8,8

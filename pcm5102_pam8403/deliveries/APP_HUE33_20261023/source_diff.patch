@@ -1,0 +1,462 @@
+--- Code24/app/build.gradle
++++ Code25/app/build.gradle
+@@ -2,6 +2,6 @@
+ android {
+     namespace 'cn.fpga.score'
+     compileSdk 35
+-    defaultConfig { applicationId 'cn.fpga.score'; minSdk 29; targetSdk 35; versionCode 24; versionName '1.23-linkdiag' }
++    defaultConfig { applicationId 'cn.fpga.score'; minSdk 29; targetSdk 35; versionCode 25; versionName '1.24-hue' }
+     compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
+ }
+--- Code24/app/src/main/AndroidManifest.xml
++++ Code25/app/src/main/AndroidManifest.xml
+@@ -1,5 +1,5 @@
+ <?xml version="1.0" encoding="utf-8"?>
+-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="cn.fpga.score" android:versionCode="24" android:versionName="1.23-linkdiag">
++<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="cn.fpga.score" android:versionCode="25" android:versionName="1.24-hue">
+     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="35" />
+     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+--- Code24/app/src/main/java/cn/fpga/score/LedHue.java
++++ Code25/app/src/main/java/cn/fpga/score/LedHue.java
+@@ -0,0 +1,30 @@
++package cn.fpga.score;
++
++/** Same 33 RGB5 hue anchors as the panel; App inputs use their own amplitude scale. */
++public final class LedHue {
++    private LedHue() { }
++    public static final int SILENT=0xff424d60;
++    public static int rgb5(int peak64){
++        int q=Math.max(0,Math.min(32,peak64))*6;
++        int d=((q&63)*7)>>4;
++        if(q>=192)return (31<<10)|(3<<5)|3;
++        if(q<64)return (3<<10)|((31-d)<<5)|31;
++        if(q<128)return ((3+d)<<10)|(3<<5)|31;
++        return (31<<10)|(3<<5)|(31-d);
++    }
++    public static int color(int step){
++        int c=rgb5(step);
++        return 0xff000000|((((c>>10)&31)*255+15)/31<<16)
++            |((((c>>5)&31)*255+15)/31<<8)|((c&31)*255+15)/31;
++    }
++    public static int[] colors(){
++        int[] result=new int[33];
++        for(int p=0;p<result.length;p++)result[p]=color(p);
++        return result;
++    }
++    public static int amplitudeColor(int value,int fullScale){
++        if(value<=0 || fullScale<=0)return SILENT;
++        int bounded=Math.min(value,fullScale);
++        return color((bounded*32+fullScale/2)/fullScale);
++    }
++}
+--- Code24/app/src/main/java/cn/fpga/score/MainActivity.java
++++ Code25/app/src/main/java/cn/fpga/score/MainActivity.java
+@@ -505,6 +505,8 @@
+     }
+     @Override protected void onResume(){super.onResume();resumed=true;if(uiReady)scheduleDisplayPoll();}
+     private void buildLedControls(LinearLayout content){
++        LinearLayout preview=card(content,"LIVE","手机实时预览","青蓝紫红随演奏幅度变化。");
++        buildLedPreview(preview);
+         LinearLayout box=card(content,"LED","显示控制与实时预览","需配套新版 FPGA 位流。手机可直接切页，板上 S2 仍可使用。");
+         LinearLayout pageGroup=segmentGroup(box);String[] pageNames={"总览 / 曲谱","波形","XY 轨迹","频谱"};
+         for(int n=0;n<4;n+=2){LinearLayout pages=row(pageGroup);for(int k=n;k<n+2;k++){final int mode=k;pageButtons[k]=segment(pages,pageNames[k],()->selectLedPage(mode),true);}}
+@@ -533,14 +535,16 @@
+         xyInfo.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+         text(box,"REF 是 FPGA 生成的参考图形；AUD 随实际演奏变化。收到设备 OK 后才显示发送确认；板上 S2 选图或复位后，请重新应用。",12,MUTED);
+         text(box,"S2 长按循环切换总览/曲谱、波形、XY、频谱；XY 页短按选图，其他页短按会重启有效曲谱。",12,MUTED);
+-        text(box,"手机实时预览 · FPGA 数据",18,INK);
+-        text(box,"16 段频谱约 0～3.05kHz，下方为三组音源幅度。最多每秒查询 5 次，下载、事件录制或其他命令期间暂停。",12,MUTED);
+-        ledPreview=new SpectrumPreviewView(this);box.addView(ledPreview,new LinearLayout.LayoutParams(-1,dp(220)));
++        updateXyControls();
++    }
++    private void buildLedPreview(LinearLayout box){
++        text(box,"沿用面板的青蓝紫红色环，为频谱与音源幅度配色。下方百分比为各音源相对幅度，与面板总混音 PK 分开显示。",12,MUTED);
++        ledPreview=new SpectrumPreviewView(this);box.addView(ledPreview,new LinearLayout.LayoutParams(-1,dp(356)));
++        text(box,"数据来自 FPGA，最多每秒更新 5 次；下载、事件录制或其他命令期间暂停。",12,MUTED);
+         ledPreviewInfo=text(box,"预览未开启；画面来自 FPGA 回传，不是手机麦克风。",12,MUTED);
+         LinearLayout previewButtons=row(box);
+         button(previewButtons,"开启实时预览",this::startLedPreview,true);
+         button(previewButtons,"停止预览",()->stopLedPreview("预览已停止。"),false);
+-        updateXyControls();
+     }
+     private void selectLedPage(int mode){
+         controlState.edit("page",4,""+mode);refreshControlUi();
+--- Code24/app/src/main/java/cn/fpga/score/SpectrumPreviewView.java
++++ Code25/app/src/main/java/cn/fpga/score/SpectrumPreviewView.java
+@@ -2,40 +2,109 @@
+ 
+ import android.content.Context;
+ import android.graphics.Canvas;
++import android.graphics.LinearGradient;
+ import android.graphics.Paint;
++import android.graphics.Shader;
++import android.graphics.Typeface;
+ import android.view.View;
+ 
+-/** Draws only the FPGA's returned values, with the panel's 16-band grouping. */
++/** Native Canvas instrument: decorative hue legend, real returned amplitudes only. */
+ final class SpectrumPreviewView extends View {
++    private static final int INK=0xffedf3ff,MUTED=0xff98a8c1,GRID=0xff253044,TRACK=0xff1b2537;
+     private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
++    private final Typeface regular=Typeface.create("sans-serif",Typeface.NORMAL);
++    private final Typeface bold=Typeface.create("sans-serif-medium",Typeface.NORMAL);
+     private LedFrame frame;
+-    SpectrumPreviewView(Context context){super(context);setContentDescription("FPGA 实时频谱及触摸、红外手势、吉他幅度预览");}
+-    void setFrame(LedFrame value){frame=value;invalidate();}
++    private LinearGradient hue,meterHue;
++    SpectrumPreviewView(Context context){
++        super(context);
++        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
++        setFrame(null);
++    }
++    void setFrame(LedFrame value){
++        frame=value;
++        setContentDescription(value==null?"音量色环：青、蓝、紫、品红、红。等待 FPGA 实时数据。":
++            "FPGA 实时幅度。触摸 "+percent(value.touch,56)+"%，红外手势 "+percent(value.sensor,56)
++            +"%，吉他 "+percent(value.guitar,56)+"%。"+(value.spectrumValid()?"频谱已就绪。":"频谱采集中。"));
++        invalidate();
++    }
+     private float dp(float value){return value*getResources().getDisplayMetrics().density;}
+-    @Override protected void onDraw(Canvas canvas){
+-        super.onDraw(canvas);
+-        float w=getWidth(),h=getHeight(),pad=dp(8),meterTop=h-dp(80),bottom=meterTop-dp(12);
+-        paint.setColor(Theme.SURFACE_ALT);canvas.drawRoundRect(0,0,w,h,dp(12),dp(12),paint);
+-        if(frame==null){paint.setColor(Theme.MUTED);paint.setTextSize(dp(13));canvas.drawText("开启预览后显示 FPGA 数据",pad,dp(30),paint);return;}
+-        float slot=(w-2*pad)/16;
+-        for(int i=0;i<16;i++){
+-            float left=pad+i*slot,barWidth=Math.max(dp(1),slot-dp(3));
+-            paint.setColor(0xffded7e7);canvas.drawRect(left,dp(12),left+barWidth,bottom,paint);
+-            if(frame.spectrumValid()){
+-                paint.setColor(i<5?0xff299c6b:i<11?0xff159eb0:0xffdc8b28);
+-                float height=(bottom-dp(12))*frame.level(i)/31f;
+-                canvas.drawRect(left,bottom-height,left+barWidth,bottom,paint);
++    private static int percent(int value,int scale){return (value*100+scale/2)/scale;}
++    @Override protected void onSizeChanged(int w,int h,int oldw,int oldh){
++        super.onSizeChanged(w,h,oldw,oldh);
++        hue=new LinearGradient(dp(18),0,w-dp(18),0,LedHue.colors(),null,Shader.TileMode.CLAMP);
++        meterHue=new LinearGradient(dp(86),0,w-dp(55),0,LedHue.colors(),null,Shader.TileMode.CLAMP);
++    }
++    private void text(Canvas c,String s,float x,float y,int color,float size,boolean strong,Paint.Align align){
++        paint.setShader(null);paint.setColor(color);paint.setTextSize(dp(size));
++        paint.setTypeface(strong?bold:regular);paint.setTextAlign(align);
++        c.drawText(s,x,dp(y),paint);
++    }
++    @Override protected void onDraw(Canvas c){
++        super.onDraw(c);
++        float w=getWidth(),h=getHeight(),pad=dp(18),right=w-pad;
++        paint.setShader(null);paint.setColor(0xff0c1322);
++        c.drawRoundRect(0,0,w,h,dp(18),dp(18),paint);
++        text(c,"音量色环",pad,31,INK,19,true,Paint.Align.LEFT);
++        text(c,"青 → 蓝 → 紫 → 品红 → 红",pad,51,MUTED,11,false,Paint.Align.LEFT);
++        String status=frame==null?"等待数据":frame.spectrumValid()?"LIVE":"采集中";
++        int statusColor=frame==null?MUTED:LedHue.color(0);
++        paint.setColor(frame==null?0xff1f2a3d:0xff12363e);
++        c.drawRoundRect(right-dp(66),dp(16),right,dp(38),dp(11),dp(11),paint);
++        text(c,status,right-dp(33),31,statusColor,10,true,Paint.Align.CENTER);
++        paint.setShader(hue);
++        c.drawRoundRect(pad,dp(68),right,dp(76),dp(4),dp(4),paint);
++        paint.setShader(null);
++        text(c,"低幅度",pad,94,MUTED,10,false,Paint.Align.LEFT);
++        text(c,"高幅度",right,94,MUTED,10,false,Paint.Align.RIGHT);
++        text(c,"实时频谱",pad,124,INK,12,true,Paint.Align.LEFT);
++        text(c,"16 BANDS",right,124,MUTED,9,false,Paint.Align.RIGHT);
++        float top=dp(140),bottom=dp(222),plotHeight=bottom-top;
++        paint.setStrokeWidth(dp(1));paint.setColor(GRID);
++        for(int i=0;i<3;i++){
++            float y=top+plotHeight*i/2;
++            c.drawLine(pad,y,right,y,paint);
++        }
++        if(frame!=null && frame.spectrumValid()){
++            float slot=(right-pad)/16,barWidth=slot-dp(4);
++            for(int i=0;i<16;i++){
++                int level=frame.level(i);
++                float left=pad+i*slot+dp(2),height=plotHeight*level/31f;
++                if(level==0){
++                    paint.setColor(LedHue.SILENT);
++                    c.drawRoundRect(left,bottom-dp(2),left+barWidth,bottom,dp(1),dp(1),paint);
++                }else{
++                    int color=LedHue.amplitudeColor(level,31);
++                    paint.setColor((color&0x00ffffff)|0x22000000);
++                    c.drawRoundRect(left-dp(1),bottom-height-dp(2),left+barWidth+dp(1),bottom,dp(4),dp(4),paint);
++                    paint.setColor(color);
++                    c.drawRoundRect(left,bottom-Math.max(dp(3),height),left+barWidth,bottom,dp(3),dp(3),paint);
++                }
+             }
++        }else{
++            text(c,frame==null?"开启预览，查看实时频谱":"等待首个完整频谱",w/2,184,MUTED,12,false,Paint.Align.CENTER);
+         }
+-        int[] values={frame.touch,frame.sensor,frame.guitar};
+-        int[] colors={0xff299c6b,0xff159eb0,0xffdc8b28};
++        text(c,"0",pad,240,MUTED,9,false,Paint.Align.LEFT);
++        text(c,"1.5",w/2,240,MUTED,9,false,Paint.Align.CENTER);
++        text(c,"3.05 kHz",right,240,MUTED,9,false,Paint.Align.RIGHT);
++        paint.setColor(GRID);c.drawLine(pad,dp(254),right,dp(254),paint);
+         String[] labels={"触摸","红外/手势","吉他"};
+-        paint.setTextSize(dp(12));
++        int[] values=frame==null?null:new int[]{frame.touch,frame.sensor,frame.guitar};
++        float meterLeft=pad+dp(68),meterRight=right-dp(37);
+         for(int i=0;i<3;i++){
+-            float y=meterTop+i*dp(24),left=dp(74),right=w-pad;
+-            paint.setColor(Theme.MUTED);canvas.drawText(labels[i],pad,y+dp(12),paint);
+-            paint.setColor(0xffded7e7);canvas.drawRoundRect(left,y+dp(2),right,y+dp(14),dp(4),dp(4),paint);
+-            paint.setColor(colors[i]);canvas.drawRoundRect(left,y+dp(2),left+(right-left)*values[i]/56f,y+dp(14),dp(4),dp(4),paint);
++            float y=277+i*29;
++            text(c,labels[i],pad,y,MUTED,11,false,Paint.Align.LEFT);
++            text(c,values==null?"—":percent(values[i],56)+"%",right,y,INK,10,true,Paint.Align.RIGHT);
++            paint.setColor(TRACK);
++            c.drawRoundRect(meterLeft,dp(y-8),meterRight,dp(y-1),dp(3.5f),dp(3.5f),paint);
++            if(values!=null && values[i]>0){
++                // Reveal the real level on a fixed, full-range hue scale.
++                c.save();
++                c.clipRect(meterLeft,dp(y-8),meterLeft+(meterRight-meterLeft)*values[i]/56f,dp(y-1));
++                paint.setShader(meterHue);
++                c.drawRoundRect(meterLeft,dp(y-8),meterRight,dp(y-1),dp(3.5f),dp(3.5f),paint);
++                c.restore();paint.setShader(null);
++            }
+         }
+     }
+ }
+--- Code24/core_test/LedHueTest.java
++++ Code25/core_test/LedHueTest.java
+@@ -0,0 +1,46 @@
++package cn.fpga.score;
++
++import java.awt.Color;
++import java.nio.file.Files;
++import java.nio.file.Paths;
++
++public final class LedHueTest {
++    private static int checks;
++    private static void yes(boolean condition){checks++;if(!condition)throw new AssertionError("Hue check "+checks);}
++    public static void main(String[] args)throws Exception{
++        int[][] anchors={{0,3,31,31},{2,3,26,31},{8,3,10,31},{16,17,3,31},{24,31,3,24},{32,31,3,3}};
++        for(int[] a:anchors)yes(LedHue.rgb5(a[0])==((a[1]<<10)|(a[2]<<5)|a[3]));
++        int previous=LedHue.rgb5(0);
++        for(int p=0;p<64;p++){
++            int c=LedHue.rgb5(p),r=c>>10,g=(c>>5)&31,b=c&31;
++            yes(r>=(previous>>10)&&g<=((previous>>5)&31)&&b<=(previous&31));
++            yes(Math.max(r,Math.max(g,b))==31 && Math.min(r,Math.min(g,b))==3);
++            int hsv=Color.HSBtoRGB((180+Math.min(p,32)*5.625f)/360f,.903f,1);
++            yes(Math.abs(r-Math.round(((hsv>>16)&255)*31f/255))<=1);
++            yes(Math.abs(g-Math.round(((hsv>>8)&255)*31f/255))<=1);
++            yes(Math.abs(b-Math.round((hsv&255)*31f/255))<=1);
++            if(p>=32)yes(c==LedHue.rgb5(32));
++            previous=c;
++        }
++        yes(LedHue.amplitudeColor(0,31)==LedHue.SILENT);
++        yes(LedHue.amplitudeColor(0,56)==LedHue.SILENT);
++        yes(LedHue.amplitudeColor(31,31)==LedHue.color(32));
++        yes(LedHue.amplitudeColor(56,56)==LedHue.color(32));
++        yes(LedHue.amplitudeColor(100,56)==LedHue.color(32));
++        yes(LedHue.amplitudeColor(1,56)==LedHue.color(1));
++        yes(LedHue.amplitudeColor(10,0)==LedHue.SILENT);
++        yes(LedHue.color(-1)==LedHue.color(0));
++        if(args.length>0){
++            int rows=0;
++            for(String row:Files.readAllLines(Paths.get(args[0]))){
++                if(row.startsWith("p,"))continue;
++                String[] f=row.split(",");int p=Integer.parseInt(f[0]);
++                yes(LedHue.rgb5(p)==((Integer.parseInt(f[1])<<10)|(Integer.parseInt(f[2])<<5)|Integer.parseInt(f[3])));
++                rows++;
++            }
++            yes(rows==64);
++            System.out.println("PASS RTL RGB5 palette -> App: all 64 hardware codes match");
++        }
++        System.out.println("PASS LedHue: "+checks+" checks, 33 anchors/HSV, silence, saturation and independent App scales");
++    }
++}
+--- Code24/design/render_hue_preview.py
++++ Code25/design/render_hue_preview.py
+@@ -0,0 +1,131 @@
++"""Render the actual Android View drawing code through a desktop Canvas adapter.
++
++This is a layout preview, not a device screenshot. The adapter lives only in
++build/hue_preview and is never compiled into the APK. Live values are fixtures.
++"""
++from pathlib import Path
++import subprocess
++from PIL import Image, ImageDraw, ImageFont
++
++ROOT=Path(__file__).resolve().parents[1]
++BUILD=ROOT/'build/hue_preview'
++OUT=ROOT/'design/out/hue33'
++STUBS={
++'android/util/DisplayMetrics.java':'''package android.util;
++public class DisplayMetrics { public float density=2; }''',
++'android/content/res/Resources.java':'''package android.content.res;
++public class Resources { public android.util.DisplayMetrics getDisplayMetrics(){return new android.util.DisplayMetrics();} }''',
++'android/content/Context.java':'''package android.content;
++public class Context { public android.content.res.Resources getResources(){return new android.content.res.Resources();} }''',
++'android/view/View.java':'''package android.view;
++public class View {
++ public static final int IMPORTANT_FOR_ACCESSIBILITY_YES=1;
++ private android.content.Context context;private int w,h;
++ public View(android.content.Context c){context=c;}
++ public void setImportantForAccessibility(int i){} public void setContentDescription(String s){} public void invalidate(){}
++ public android.content.res.Resources getResources(){return context.getResources();}
++ public int getWidth(){return w;} public int getHeight(){return h;}
++ protected void onSizeChanged(int w,int h,int oldw,int oldh){} protected void onDraw(android.graphics.Canvas c){}
++ public void layout(int width,int height){w=width;h=height;onSizeChanged(w,h,0,0);}
++ public void draw(android.graphics.Canvas c){onDraw(c);}
++}''',
++'android/graphics/Typeface.java':'''package android.graphics;
++public class Typeface {public static final int NORMAL=0;boolean bold;
++ public static Typeface create(String name,int style){Typeface t=new Typeface();t.bold=name.contains("medium");return t;}}
++''',
++'android/graphics/Shader.java':'''package android.graphics;
++public class Shader {public enum TileMode { CLAMP } }''',
++'android/graphics/LinearGradient.java':'''package android.graphics;
++public class LinearGradient extends Shader {
++ java.awt.LinearGradientPaint value;
++ public LinearGradient(float x,float y,float xx,float yy,int[] colors,float[] positions,TileMode mode){
++  java.awt.Color[] c=new java.awt.Color[colors.length];float[] p=new float[c.length];
++  for(int i=0;i<c.length;i++){c[i]=new java.awt.Color(colors[i],true);p[i]=positions==null?i/(c.length-1f):positions[i];}
++  value=new java.awt.LinearGradientPaint(x,y,xx,yy,p,c);
++ }
++}''',
++'android/graphics/Paint.java':'''package android.graphics;
++public class Paint {
++ public static final int ANTI_ALIAS_FLAG=1;public enum Align { LEFT,CENTER,RIGHT }
++ int color;float size,width;Typeface type=Typeface.create("sans-serif",0);Align align=Align.LEFT;Shader shader;
++ public Paint(int flags){} public void setColor(int c){color=c;} public void setShader(Shader s){shader=s;}
++ public void setTextSize(float s){size=s;} public void setTypeface(Typeface t){type=t;}
++ public void setTextAlign(Align a){align=a;} public void setStrokeWidth(float w){width=w;}
++}''',
++'android/graphics/Canvas.java':'''package android.graphics;
++public class Canvas {
++ private java.awt.Graphics2D g;private int w,h;
++ private java.util.Stack<java.awt.Graphics2D> saved=new java.util.Stack<>();
++ public Canvas(java.awt.image.BufferedImage image){g=image.createGraphics();w=image.getWidth();h=image.getHeight();
++  g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
++  g.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
++ }
++ private void apply(Paint p){g.setPaint(p.shader==null?new java.awt.Color(p.color,true):((LinearGradient)p.shader).value);}
++ private void bounds(float x,float y,float xx,float yy){if(x<0||y<0||xx>w+.1f||yy>h+.1f||xx<x||yy<y)throw new AssertionError("View overflow: "+x+","+y+","+xx+","+yy);}
++ public void drawRoundRect(float x,float y,float xx,float yy,float rx,float ry,Paint p){bounds(x,y,xx,yy);apply(p);g.fill(new java.awt.geom.RoundRectangle2D.Float(x,y,xx-x,yy-y,2*rx,2*ry));}
++ public void drawLine(float x,float y,float xx,float yy,Paint p){bounds(x,y,xx,yy);apply(p);g.setStroke(new java.awt.BasicStroke(p.width));g.draw(new java.awt.geom.Line2D.Float(x,y,xx,yy));}
++ public void drawText(String s,float x,float y,Paint p){
++  apply(p);g.setFont(new java.awt.Font("Microsoft YaHei",p.type.bold?java.awt.Font.BOLD:java.awt.Font.PLAIN,1).deriveFont(p.size));
++  java.awt.FontMetrics f=g.getFontMetrics();float width=f.stringWidth(s);
++  if(p.align==Paint.Align.CENTER)x-=width/2;else if(p.align==Paint.Align.RIGHT)x-=width;
++  bounds(x,y-f.getAscent(),x+width,y+f.getDescent());g.drawString(s,x,y);
++ }
++ public int save(){saved.push(g);g=(java.awt.Graphics2D)g.create();return saved.size();}
++ public boolean clipRect(float x,float y,float xx,float yy){g.clip(new java.awt.geom.Rectangle2D.Float(x,y,xx-x,yy-y));return true;}
++ public void restore(){g.dispose();g=saved.pop();}
++}''',
++'cn/fpga/score/HuePreview.java':'''package cn.fpga.score;
++import java.awt.image.BufferedImage;import java.io.File;import java.math.BigInteger;import javax.imageio.ImageIO;
++public class HuePreview {
++ static LedFrame fixture(int kind)throws Exception{
++  BigInteger n=BigInteger.ONE.shiftLeft(108);
++  if(kind!=2)n=n.or(BigInteger.ONE.shiftLeft(104));
++  int[] levels={2,5,12,24,31,27,20,16,12,9,6,4,3,2,1,0};
++  for(int i=0;i<16;i++)n=n.or(BigInteger.valueOf(kind==1?0:kind==3?31:levels[i]).shiftLeft(i*5));
++  n=n.or(BigInteger.valueOf(kind==1?0:42).shiftLeft(92)).or(BigInteger.valueOf(kind==1?0:20).shiftLeft(86)).or(BigInteger.valueOf(kind==1?0:56).shiftLeft(80));
++  return LedFrame.parse("V,"+String.format("%028X",n));
++ }
++ public static void main(String[] args)throws Exception{
++  File out=new File(args[0]);out.mkdirs();int count=0;
++  for(int width:new int[]{240,252,280,320,360,412})for(int state=0;state<6;state++){
++   SpectrumPreviewView v=new SpectrumPreviewView(new android.content.Context());v.layout(width*2,356*2);
++   if(state>0)v.setFrame(fixture(state-1));
++   if(state==5)v.setFrame(null);
++   BufferedImage image=new BufferedImage(width*2,712,BufferedImage.TYPE_INT_ARGB);
++   v.draw(new android.graphics.Canvas(image));
++   ImageIO.write(image,"png",new File(out,width+"_"+state+".png"));count++;
++  }
++  System.out.println("PASS native View desktop layout: "+count+" captures, 240/252/280/320/360/412dp, waiting/live/zero/loading/full/stale; no drawing or text overflow");
++ }
++}'''
++}
++
++def main():
++    for name,code in STUBS.items():
++        path=BUILD/'src'/name
++        path.parent.mkdir(parents=True,exist_ok=True)
++        path.write_text(code,encoding='utf-8')
++    classes=BUILD/'classes';classes.mkdir(parents=True,exist_ok=True)
++    main=ROOT/'app/src/main/java/cn/fpga/score'
++    sources=list((BUILD/'src').rglob('*.java'))+[main/name for name in ('SpectrumPreviewView.java','LedHue.java','LedFrame.java','LedState.java')]
++    subprocess.run(['javac','--release','8','-Xlint:-options','-encoding','UTF-8','-d',str(classes),*map(str,sources)],check=True)
++    subprocess.run(['java','-Djava.awt.headless=true','-cp',str(classes),'cn.fpga.score.HuePreview',str(OUT)],check=True)
++    for w in (240,252,280,320,360,412):
++        assert (OUT/f'{w}_0.png').read_bytes()==(OUT/f'{w}_5.png').read_bytes(), 'stale frame must clear'
++    font=lambda size,bold=False:ImageFont.truetype('C:/Windows/Fonts/msyh'+('bd' if bold else '')+'.ttc',size)
++    page=Image.new('RGB',(1240,970),'#f6f0f9');d=ImageDraw.Draw(page)
++    d.text((48,30),'APP · 音量色环',font=font(38,True),fill='#241a2e')
++    d.text((48,92),'沿用 33 档青蓝紫红配色，融入 LED 频谱与音源幅度。',font=font(23),fill='#75657f')
++    for i,(state,title) in enumerate(((0,'等待设备数据'),(1,'实时预览 · 示例数据'))):
++        x=48+i*590
++        d.rounded_rectangle((x-12,150,x+552,844),radius=26,fill='#fffbff')
++        d.text((x+10,172),title,font=font(24,True),fill='#241a2e')
++        im=Image.open(OUT/f'360_{state}.png').resize((540,534),Image.Resampling.LANCZOS)
++        page.paste(im,(x,224),im)
++        d.text((x+10,784),'开启实时预览             停止预览',font=font(22),fill='#9343b0')
++    d.text((48,882),'原生 View 绘图代码的桌面排版预览；右侧为协议夹具，非手机实机截图。',font=font(19),fill='#75657f')
++    d.text((48,922),'断线 / 数据过期会清空读数；色环标尺保留。无需新增 FPGA 资源。',font=font(19),fill='#75657f')
++    page.save(OUT/'app_hue33_preview.png')
++    print('OK App hue preview and stale-state equality ->',OUT/'app_hue33_preview.png')
++
++if __name__=='__main__':main()
+--- Code24/HUE33.md
++++ Code25/HUE33.md
+@@ -0,0 +1,30 @@
++# App 音量色环 · Code25 / 1.24-hue
++
++2026-10-23。将面板的 33 档青→蓝→紫→品红→红配色用于手机，在“显示”分区顶部提供深色仪表面板：连续色环标尺、16 段实时频谱和三组渐变幅度条。
++
++[安装 Code25 APK](dist/FPGA-Music-Hue33-Code25.apk) · [滚动安装入口](dist/FPGA-Music-Unified.apk)
++
++打开侧边栏 → 显示，即可看到色环面板。连接 HC-05 后点击“开启实时预览”，再演奏查看频谱和幅度变化；停止、断线或数据过期时清空读数，装饰性色环标尺保留。没有数据时不绘制模拟频谱。读屏描述包含三组实时幅度和频谱就绪状态。
++
++手机和面板共用相同的 33 个 RGB5 色值锚点。手机标尺使用插值，电平条逐步揭示该渐变；频谱柱按本柱幅度选色。手机输入仍来自现有 `VIZ?`：频谱 0～31，触摸/红外手势/吉他幅度 0～56，各自按满刻度归一化。三组百分比表示各音源相对幅度，不是面板总混音 PK，也不是 PCM 峰值或声压。没有为手机传输新增板端 PCM/64 峰值。
++
++本次只改 App；兼容原有支持 VIS/VIZ 的位流，不需要重新综合 FPGA，没有新增 FPGA 资源、命令或轮询请求。连接诊断、回复匹配与超时关闭连接逻辑沿用 Code24；最多每秒查询五次，其他命令和事件录制期间仍暂停预览。
++
++![App 色环排版预览](design/out/hue33/app_hue33_preview.png)
++
++上图执行实际 `SpectrumPreviewView` 绘图代码，经桌面 Canvas 适配器输出。右侧数据是协议夹具，图片不是手机实机截图；适配器只在 build 目录运行，不打包进 APK。
++
++## 验证
++
++- `test-core.ps1` 全套通过，包括 SppLink 255 项及既有 LED/UART、录制、曲库和演奏控制回归。
++- 新增 LedHue 431 项检查：33 个锚点/HSV 单通道误差≤1LSB、饱和与零幅度、手机两种归一化刻度；读取本轮 RTL CSV，64 个调色输入码全部一致。
++- 桌面原生绘图代码排版检查：240/252/280/320/360/412dp 六种宽度、等待/实时/零幅度/FFT未就绪/满幅/数据过期六种状态，共36张图，无绘图或文字越界；数据过期与初始空白画面逐字节一致。
++- Java/D8 编译、APK 对齐、v3 签名及 Manifest 版本核对通过。版本 Code25 /1.24-hue，包名 `cn.fpga.score`，使用原调试签名，可覆盖同签名旧版；未安装或连接实体手机验证。
++
++构建记录、SHA256 与原始日志见 [本轮交付](../deliveries/APP_HUE33_20261023/README.md)。
++
++```powershell
++.\test-core.ps1
++python design/render_hue_preview.py
++.\build-apk.ps1 -OutputApk 'dist\FPGA-Music-Hue33-Code25.apk'
++```
+--- Code24/README.md
++++ Code25/README.md
+@@ -1,6 +1,8 @@
+ # 安卓 HC-05 曲谱助手
+ 
+-**当前版本为 [v1.23-linkdiag / Code24独立APK](dist/FPGA-Music-LinkDiag-Code24.apk)，滚动入口为 [FPGA-Music-Unified.apk](dist/FPGA-Music-Unified.apk)。** 设备状态下显示实际安装版本；超时会显示失败命令、期望回复及收发情况。修正回复分发为单处匹配、补测完整初始化，命令正文最多64字符且只追加LF。旧四档回声冻结包仍保留有缺陷的Code22 APK，勿从该包安装；现场超时尚待新版提示定位，不能将本次核心测试通过记作实机连接已恢复。详见 [连接说明](../HC05_CONNECTION.md)。
++**当前版本为 [v1.24-hue / Code25独立APK](dist/FPGA-Music-Hue33-Code25.apk)，滚动入口为 [FPGA-Music-Unified.apk](dist/FPGA-Music-Unified.apk)。** 显示分区顶部新增33档青蓝紫红色环、深色频谱和渐变音源幅度条；色值与RTL逐项一致，无新增FPGA资源。界面、数据口径与验证见 [HUE33.md](HUE33.md)。
++
++**连接诊断沿用 Code24，保留 [Code24独立APK](dist/FPGA-Music-LinkDiag-Code24.apk)。** 设备状态下显示实际安装版本；超时会显示失败命令、期望回复及收发情况。修正回复分发为单处匹配、补测完整初始化，命令正文最多64字符且只追加LF。旧四档回声冻结包仍保留有缺陷的Code22 APK，勿从该包安装；现场超时尚待新版提示定位，不能将本次核心测试通过记作实机连接已恢复。详见 [连接说明](../HC05_CONNECTION.md)。
+ 
+ 需配套四档回声优先版 `PCM5102_UNIFIED.fs`。保留弯音范围、滑音时间、红外 /手势共享颤音与起振等待、共享移调 /A4，以及84 /168 /336 /504 ms四档回声。长档仅湿声降采样，最长档湿声采样上限约4.07 kHz；干声和原84 ms档保持原样。移调 /A4只作用红外与手势，16触摸键与吉他保持原音高。合唱速率仍为原固定值；律制、震音未启用。协议、预算、测试和实机边界见 [演奏参数与四档回声](../PERFORMANCE_PARAMS.md)。
+ 
+--- Code24/test-core.ps1
++++ Code25/test-core.ps1
+@@ -2,6 +2,12 @@
+ Push-Location $PSScriptRoot
+ try {
+     New-Item -ItemType Directory -Force -Path build\core | Out-Null
++    & javac --release 8 -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\LedHue.java core_test\LedHueTest.java
++    if ($LASTEXITCODE -ne 0) { throw 'LED hue compilation failed' }
++    $hueFixtures=@()
++    if(Test-Path -LiteralPath ../sim/build/scope_hue33_palette.csv){$hueFixtures+= '../sim/build/scope_hue33_palette.csv'}
++    & java -cp build\core cn.fpga.score.LedHueTest @hueFixtures
++    if ($LASTEXITCODE -ne 0) { throw 'LED hue tests failed' }
+     & javac --release 8 -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\PerformanceParams.java core_test\PerformanceParamsTest.java
+     if ($LASTEXITCODE -ne 0) { throw 'Performance parameters compilation failed' }
+     & java -cp build\core cn.fpga.score.PerformanceParamsTest

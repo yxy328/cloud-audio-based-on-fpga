@@ -12,6 +12,7 @@ module tb_i2c_master_bus;
     i2c_master dut (
         .clk(clk), .rst_n(resetn), .cmd_start(cmd_start), .cmd_addr(7'h39),
         .cmd_reg(cmd_reg), .cmd_rw(cmd_rw), .cmd_wdata(cmd_wdata),
+        .cmd_wdata1(8'h00), .cmd_wlen(1'b0),
         .cmd_rdlen(cmd_rdlen), .busy(busy), .done(done), .nack(nack),
         .rdata(rdata), .rvalid(rvalid), .scl(scl), .sda(sda)
     );

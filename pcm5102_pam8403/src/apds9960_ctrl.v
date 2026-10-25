@@ -106,6 +106,27 @@ module apds9960_ctrl #(
     reg [1:0]  byte_phase;
     reg [7:0]  dataset_cnt;    // 当前数据集序号 (0 起)
     reg [15:0] acc_u, acc_d, acc_l, acc_r;
+    // A single local add/subtract path serves FIFO accumulation and all means.
+    // No arbitration with either audio engine. Register bank writes stay local.
+    reg [1:0] average_channel;
+    wire accumulating = state == S_WAIT_FIFO;
+    wire [1:0] arithmetic_channel = accumulating ? byte_phase : average_channel;
+    reg [15:0] selected_acc;
+    reg [7:0] selected_raw;
+    always @* begin
+        case (arithmetic_channel)
+        0: begin selected_acc=acc_u; selected_raw=raw_u; end
+        1: begin selected_acc=acc_d; selected_raw=raw_d; end
+        2: begin selected_acc=acc_l; selected_raw=raw_l; end
+        default: begin selected_acc=acc_r; selected_raw=raw_r; end
+        endcase
+    end
+    wire [15:0] arithmetic_b = accumulating ? {8'd0,i2c_rdata} : ~{8'd0,gflvl_reg};
+    // Carry=1 means no borrow for subtraction; replaces four compare paths.
+    wire [16:0] arithmetic_result = {1'b0,selected_acc} +
+        {1'b0,arithmetic_b} + {16'd0,!accumulating};
+    wire [7:0] next_raw = selected_raw + 1'b1;
+
     reg [7:0] sample_u, sample_d, sample_l;
     reg read_seen, batch_signal, batch_overflow;
     wire [7:0] read_value = i2c_rvalid ? i2c_rdata :
@@ -207,7 +228,7 @@ module apds9960_ctrl #(
             i2c_start <= 1'b0; i2c_addr <= DEV_ADDR;
             i2c_reg <= 8'd0; i2c_rw <= 1'b0; i2c_wdata <= 8'd0; i2c_rdlen <= 8'd1;
             delay_cnt <= 24'd0; gstatus_reg <= 8'd0; gflvl_reg <= 8'd0;
-            byte_phase <= 2'd0; dataset_cnt <= 8'd0;
+            byte_phase <= 2'd0; dataset_cnt <= 8'd0; average_channel <= 0;
             gesture_valid <= 1'b0;
             raw_u <= 8'd0; raw_d <= 8'd0; raw_l <= 8'd0; raw_r <= 8'd0;
             start_dir <= 3'd0; end_dir <= 3'd0;
@@ -434,11 +455,11 @@ module apds9960_ctrl #(
                 if (i2c_rvalid) begin
                     if (i2c_rdata > batch_peak) batch_peak <= i2c_rdata;
                     case (byte_phase)
-                    2'd0: begin acc_u <= acc_u + i2c_rdata; sample_u <= i2c_rdata; end
-                    2'd1: begin acc_d <= acc_d + i2c_rdata; sample_d <= i2c_rdata; end
-                    2'd2: begin acc_l <= acc_l + i2c_rdata; sample_l <= i2c_rdata; end
+                    2'd0: begin acc_u <= arithmetic_result[15:0]; sample_u <= i2c_rdata; end
+                    2'd1: begin acc_d <= arithmetic_result[15:0]; sample_d <= i2c_rdata; end
+                    2'd2: begin acc_l <= arithmetic_result[15:0]; sample_l <= i2c_rdata; end
                     2'd3: begin
-                        acc_r <= acc_r + i2c_rdata;
+                        acc_r <= arithmetic_result[15:0];
                         if (sample_present) begin
                             batch_signal <= 1;
                             if (!batch_overflow) begin
@@ -480,7 +501,7 @@ module apds9960_ctrl #(
             S_REPORT: begin
                 if (dataset_cnt == gflvl_reg && byte_phase == 0) begin
                     raw_u <= 0; raw_d <= 0; raw_l <= 0; raw_r <= 0;
-                    state <= S_AVERAGE;
+                    average_channel <= 0; state <= S_AVERAGE;
                 end else begin
                     dbg_error <= dbg_error | ERR_SHORT;
                     event_bad <= 1; event_active <= 0; event_samples <= 0;
@@ -489,21 +510,18 @@ module apds9960_ctrl #(
             end
 
             S_AVERAGE: begin
-                // At most 255 subtractions (5.1 us), avoiding a long divider.
-                if (acc_u >= {8'd0, gflvl_reg}) begin
-                    acc_u <= acc_u - {8'd0, gflvl_reg}; raw_u <= raw_u + 1'b1;
-                end
-                if (acc_d >= {8'd0, gflvl_reg}) begin
-                    acc_d <= acc_d - {8'd0, gflvl_reg}; raw_d <= raw_d + 1'b1;
-                end
-                if (acc_l >= {8'd0, gflvl_reg}) begin
-                    acc_l <= acc_l - {8'd0, gflvl_reg}; raw_l <= raw_l + 1'b1;
-                end
-                if (acc_r >= {8'd0, gflvl_reg}) begin
-                    acc_r <= acc_r - {8'd0, gflvl_reg}; raw_r <= raw_r + 1'b1;
-                end
-                if (acc_u < {8'd0, gflvl_reg} && acc_d < {8'd0, gflvl_reg} &&
-                    acc_l < {8'd0, gflvl_reg} && acc_r < {8'd0, gflvl_reg}) begin
+                // Four serial quotients; at most 4*(255+1)=1024 clocks.
+                // Versus the parallel loop, at most 768 additional clocks.
+                if (arithmetic_result[16]) begin
+                    case (average_channel)
+                    0: begin acc_u<=arithmetic_result[15:0]; raw_u<=next_raw; end
+                    1: begin acc_d<=arithmetic_result[15:0]; raw_d<=next_raw; end
+                    2: begin acc_l<=arithmetic_result[15:0]; raw_l<=next_raw; end
+                    3: begin acc_r<=arithmetic_result[15:0]; raw_r<=next_raw; end
+                    endcase
+                end else if (average_channel != 3) begin
+                    average_channel <= average_channel + 1'b1;
+                end else begin
                     start_dir <= 0; end_dir <= 0; dir_evaluated <= 1'b0;
                     dbg_peak <= batch_peak;
                     // Publish only batches above the calibrated presence gate.

@@ -1,0 +1,16 @@
+{
+  "checked_inputs": 286,
+  "changed_since_start": [
+    {
+      "Path": "pcm5102_pam8403/src/ads1115_ctrl.v",
+      "before": "199DC5D6BD6F54156ED854645C4C05009FE950EDF9B5C66C8DEA51599A889EEB",
+      "after": "D567AF4F5D0FE6075F281FF6346AC4AD342E5C02B4ADD06DA24F78EC46533FC8"
+    },
+    {
+      "Path": "pcm5102_pam8403/sim/tb_ads1115_bus.v",
+      "before": "5845C9C6FB0A33E26571EFAF5BDD499BD078565DF498609188644604E9693B82",
+      "after": "A127F56D8AC6D5988B2EE87E807FFD577D81F654483F96932B535384AF769F81"
+    }
+  ],
+  "note": "Other tools may change production concurrently. This experiment writes only inside its own report directory."
+}

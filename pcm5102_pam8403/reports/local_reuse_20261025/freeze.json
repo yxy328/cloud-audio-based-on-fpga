@@ -1,0 +1,41 @@
+{
+  "baseline": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\engine_share_base_20261024",
+  "manifest_sha256": "3BD7BD1BEEDEC9D46CE5AFA87E26E16020EC53FBEB2A384772CF0956B2A61745",
+  "verified_inputs": 98,
+  "tool_hashes": {
+    "C:\\iverilog\\bin\\iverilog.exe": "F8BAD18D279F8C63AB041BD292606F21FC0E8B9CC0EDB37A311158F756C35EB0",
+    "C:\\iverilog\\bin\\vvp.exe": "C3B28A3A088851FC3396A30A7C781C4B126C61DBBB7CEAD7C00644CC7AFAA4D4",
+    "E:\\130_FPGA_Verilog\\Gowin\\Gowin_V1.9.11.03_Education_x64\\IDE\\bin\\gw_sh.exe": "4C172D4C0D2A4C7EF5C764D091A315CBCDE2127573554BFD7D09AC6F2E5EA535"
+  },
+  "fixtures": {
+    "apds_reference.v": "BEC0EE5D9B070D8FB5FD2E8EB5FE19A94E2F58B97E57C8F08C5E8593D19B49F9",
+    "take_nor_model.v": "6F6E0836360A8C7BE04383AFB404B114036C2D349DFAC46B20D08BD0A9BE9C8A",
+    "tb_apds_nack.v": "9080CC659E5702201193E4DBE51DFD6DC42073E55965B1465B9DE76B8FC8D825",
+    "tb_i2c_master_bus.v": "447EE7125626980F18DD9BE86A7D89DAA921685C254ED1FD295F159AE390900B",
+    "tb_performance_take.v": "F621B6DB2F2FBD0B99A836D70585C83C0FEAFFF6C592F66BFC7BD4485EA9F5C7",
+    "tb_take_atomic.v": "03D8464491BED0C3D1D03BC699A5FDB9E79BE61C83C2A45512FDC977663D8340",
+    "tb_take_nor_store.v": "F639943E590C6E49535B4A5270431578104AAE91D59371DE0DB3F0AE22387A21"
+  },
+  "strategy": {
+    "resource_sharing": 1,
+    "retiming": 1,
+    "global_freq": 50,
+    "place_option": 0,
+    "route_option": 0,
+    "route_maxfan": 23
+  },
+  "workspace_vs_baseline": [
+    "pcm5102_pam8403\\PCM5102_UNIFIED.gprj",
+    "pcm5102_pam8403\\src\\analog_expression.v",
+    "pcm5102_pam8403\\src\\gesture_top.v",
+    "pcm5102_pam8403\\src\\i2c_master.v",
+    "pcm5102_pam8403\\src\\PCM5102_AUDIO_TAKE.sdc",
+    "pcm5102_pam8403\\src\\PCM5102_EVENT_TAKE.sdc",
+    "pcm5102_pam8403\\src\\PCM5102_PAM8403.sdc",
+    "pcm5102_pam8403\\src\\PCM5102_UNIFIED.sdc",
+    "pcm5102_pam8403\\src\\sensor_poly_audio.v",
+    "pcm5102_pam8403\\src\\tdm_synth.v",
+    "pcm5102_pam8403\\src\\top.v",
+    "pcm5102_pam8403\\src\\touch_tdm_synth.v"
+  ]
+}

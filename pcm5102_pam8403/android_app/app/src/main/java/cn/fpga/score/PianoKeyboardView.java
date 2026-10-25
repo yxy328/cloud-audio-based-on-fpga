@@ -59,5 +59,7 @@ final class PianoKeyboardView extends FrameLayout {
             keys[key].layout(x,y,x+keys[key].getMeasuredWidth(),y+keys[key].getMeasuredHeight());}
     }
     void highlight(int note){for(int key=0;key<16;key++)keys[key].setSelected(ChromaticKeys.note(key)==note);}
+    void liveHighlight(int key,boolean on){if(key<0||key>=16)return;keys[key].setSelected(on);}
+    void clearLive(){for(int key=0;key<16;key++)keys[key].setSelected(false);}
     @Override public void setEnabled(boolean enabled){super.setEnabled(enabled);if(keys!=null)for(int key=0;key<16;key++)if(keys[key]!=null)keys[key].setEnabled(enabled&&ChromaticKeys.note(key)<=highestNote);}
 }

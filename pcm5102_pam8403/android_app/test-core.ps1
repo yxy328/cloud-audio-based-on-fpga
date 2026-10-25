@@ -2,6 +2,12 @@ $ErrorActionPreference = 'Stop'
 Push-Location $PSScriptRoot
 try {
     New-Item -ItemType Directory -Force -Path build\core | Out-Null
+    & javac --release 8 -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\LedHue.java core_test\LedHueTest.java
+    if ($LASTEXITCODE -ne 0) { throw 'LED hue compilation failed' }
+    $hueFixtures=@()
+    if(Test-Path -LiteralPath ../sim/build/scope_hue33_palette.csv){$hueFixtures+= '../sim/build/scope_hue33_palette.csv'}
+    & java -cp build\core cn.fpga.score.LedHueTest @hueFixtures
+    if ($LASTEXITCODE -ne 0) { throw 'LED hue tests failed' }
     & javac --release 8 -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\PerformanceParams.java core_test\PerformanceParamsTest.java
     if ($LASTEXITCODE -ne 0) { throw 'Performance parameters compilation failed' }
     & java -cp build\core cn.fpga.score.PerformanceParamsTest

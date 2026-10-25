@@ -1,0 +1,148 @@
+{
+  "checked_at": "2026-10-24T18:08:59.330937+08:00",
+  "baseline": "engine_share_base_20261024",
+  "workspace_changed_inputs_vs_baseline": [
+    "pcm5102_pam8403/PCM5102_UNIFIED.gprj",
+    "pcm5102_pam8403/src/gesture_top.v",
+    "pcm5102_pam8403/src/sensor_poly_audio.v",
+    "pcm5102_pam8403/src/tdm_synth.v",
+    "pcm5102_pam8403/src/top.v",
+    "pcm5102_pam8403/src/touch_tdm_synth.v"
+  ],
+  "builds": [
+    {
+      "label": "engine_share_base_20261024",
+      "status": "validated",
+      "strategy": {
+        "place_option": 0,
+        "route_option": 0,
+        "route_maxfan": 23
+      },
+      "metrics": {
+        "Logic": {
+          "used": 21603.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11326.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10461.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 47.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {},
+      "unrouted_nets": 0,
+      "bitstream_present": true,
+      "bitstream_sha256": "7205235913B38F3F4589968C2AD11BFAFD2064957E028F6B16747FEB76C7A0D2",
+      "timing": {
+        "setup_violated_endpoints": 0,
+        "setup_worst_path": {
+          "slack_ns": 0.083,
+          "from": "u_main/power_count_5_s0/Q",
+          "to": "u_main/take_enabled.u_take/replay_words[25].value_3_s0/CE"
+        },
+        "setup_reported_violating_paths": [],
+        "hold_violated_endpoints": 0,
+        "hold_worst_path": {
+          "slack_ns": 0.152,
+          "from": "u_main/u_keymap/u_uart/rd_ptr_6_s0/Q",
+          "to": "u_main/u_keymap/u_uart/fifo_fifo_0_0_s/ADB[9]"
+        },
+        "hold_reported_violating_paths": [],
+        "setup_raw_worst_path": {
+          "slack_ns": 0.083,
+          "from_cell": "u_main/power_count_5_s0",
+          "to_cell": "u_main/take_enabled.u_take/replay_words[25].value_3_s0"
+        },
+        "setup_raw_violating_paths": [],
+        "hold_raw_worst_path": {
+          "slack_ns": 0.152,
+          "from_cell": "u_main/u_keymap/u_uart/rd_ptr_6_s0",
+          "to_cell": "u_main/u_keymap/u_uart/fifo_fifo_0_0_s"
+        },
+        "hold_raw_violating_paths": []
+      },
+      "changed_inputs_vs_baseline": [],
+      "changed_input_hashes": {},
+      "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\engine_share_base_20261024\\sources.json",
+      "source_manifest_sha256": "3BD7BD1BEEDEC9D46CE5AFA87E26E16020EC53FBEB2A384772CF0956B2A61745",
+      "downloadable_song_sha256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414",
+      "snapshot_corrupt_inputs": [],
+      "errors": [],
+      "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\engine_share_base_20261024\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+      "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\engine_share_base_20261024\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+      "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\engine_share_base_20261024\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html"
+    },
+    {
+      "label": "resource_apds_width17_20261024",
+      "status": "routing_failed",
+      "strategy": {
+        "place_option": 0,
+        "route_option": 0,
+        "route_maxfan": 23
+      },
+      "metrics": {
+        "Logic": {
+          "used": 21452.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11264.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10459.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 47.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 24.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": -151.0,
+        "CLS": -62.0,
+        "Register": -2.0,
+        "BSRAM": 0.0,
+        "DSP": -2.0
+      },
+      "unrouted_nets": 460,
+      "bitstream_present": false,
+      "bitstream_sha256": null,
+      "timing": null,
+      "changed_inputs_vs_baseline": [
+        "pcm5102_pam8403/src/apds9960_ctrl.v"
+      ],
+      "changed_input_hashes": {
+        "pcm5102_pam8403/src/apds9960_ctrl.v": {
+          "baseline": "BC1F2F0F211D6330F8B443CF5E97C546E60A11CF198D82975E1878E8DAB808F8",
+          "candidate": "0FB08B9312671274C37B4106A005F4AD3B41CA77CD765F6F034519514DF356A0"
+        }
+      },
+      "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\resource_apds_width17_20261024\\sources.json",
+      "source_manifest_sha256": "57357B924BE958C395F27039245A8E32719A45C102562E61EDFB5A775E987FB1",
+      "downloadable_song_sha256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414",
+      "snapshot_corrupt_inputs": [],
+      "errors": [
+        "ERROR  (PR0004) : There are total 460 unrouted nets\r"
+      ],
+      "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\resource_apds_width17_20261024\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+      "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\resource_apds_width17_20261024\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+      "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\resource_apds_width17_20261024\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html"
+    }
+  ]
+}

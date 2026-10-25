@@ -1,0 +1,575 @@
+--- 8-step/AUDIO_VISUAL.md
++++ 33-step/AUDIO_VISUAL.md
+@@ -20,7 +20,7 @@
+ 
+ **波形页已修正为适合实际音源电平的 FSR 联动量程。** 最终混音取样仍与 `i2s_tx` 相同。48 个横向采集箱覆盖 512 个样本、约 10.486ms，保留有符号 10 位极值并连接相邻箱。FSR 建议 X8 /X16 /X32，纵轴分别为原始 PCM ±4K /±2K /±1K（K=1024）；混音超出建议范围时可扩大至 X4 /X2 /X1。倍率、刻度、颜色和 PK 与波形在完整 PWM 帧边界一起发布。
+ 
+-静音显示低亮白色，非零窗口峰值沿色环下半圈从青经蓝、紫、品红渐变到红；红端按音源 /16 衰减后的正常演奏范围标定，不是数字削波指示。PK 数字和电平条保持固定满幅刻度。没有将所有输入拉到相同高度的 AGC；同一档位下的弱信号仍更矮。标定、量化、迟滞、范围保护与实测电平仿真图见 [LED 波形说明](SCOPE_DISPLAY.md)。波形页底部是总混音 PK，三音源条保留在 XY /FFT 页及原 VIZ 快照中。
++静音显示低亮白色。非零窗口峰值使用独立的 PCM/64 颜色轴，0～2048 为 33 档，色相每档 5.625°，从青经蓝、紫、品红渐变到红；2048 及以上钳红，这是正常演奏电平参考，不是削波或声压。每帧共用一种颜色，缓慢渐强和回落时逐档变化；非零但不足64计数仍显示青色，零信号才是灰色。量程保护、PK 数字和电平条长度继续使用原轴，保持固定满幅刻度。没有跟随信号拉满屏的 AGC，同一档位下的弱信号仍更矮。标定和实际 RTL 对照图见 [LED 波形说明](SCOPE_DISPLAY.md)。波形页底部是总混音 PK，三音源条保留在 XY /FFT 页及原 VIZ 快照中。
+ 
+ **参考李萨如画面**由两路相干正弦DDS驱动，支持X:Y频率比1:1、1:2、2:3，以及Y相对X的0°、45°、90°、135°相位偏移。`lissajous_reference.v`采用8位公共相位计数、整数倍频和小型四分之一正弦查表，直接输出像素坐标，不使用DSP或额外BSRAM。基础相位每256个采样使能转一周；每次512点采集包含两个完整基础周期。为使圆在方形LED像素上呈圆形，X/Y幅度均为14像素，中心(32,16)，范围X=18～46、Y=2～30。查表保留全部256个相位位置，数值仿真测得相对理想正弦的最大坐标误差约0.495像素。
+ 
+--- 8-step/impl/PCM5102_UNIFIED_process_config.json
++++ 33-step/impl/PCM5102_UNIFIED_process_config.json
+@@ -57,7 +57,7 @@
+  "PlaceInRegToIob" : true,
+  "PlaceIoRegToIob" : true,
+  "PlaceOutRegToIob" : true,
+- "Place_Option" : "2",
++ "Place_Option" : "3",
+  "Process_Configuration_Verion" : "1.0",
+  "Promote_Physical_Constraint_Warning_to_Error" : true,
+  "READY" : false,
+--- 8-step/README.md
++++ 33-step/README.md
+@@ -1,4 +1,6 @@
+ # Tang Primer 25K：触摸 / 压力 / 红外 / 手势 / 吉他 / 蓝牙 / 64×64 LED
++
++**2026-10-23 33 档音量色环：[已验证位流、完整 PASS 与资源对比](deliveries/LED_HUE33_20261023/README.md) · [显示说明](SCOPE_DISPLAY.md)。** 每 64 PCM 计数一级，青→蓝→紫→品红→红；±1 青色、零信号灰色。五项仿真逐个通过（含完整顶层），无新增 BSRAM/DSP；50MHz、WNS +0.198ns。整机 Logic21503 /CLS11202 /BSRAM47 /DSP26.5；相对本任务前 8 档为 -87 Logic、+122 CLS。默认位流已同步，尚未烧录；后续规划预留差113 Logic /47 CLS，详见报告。以下为历史记录。
+ 
+ [仓库首页](../README.md) · [文档索引](../docs/README.md) · [快速上手](../docs/QUICK_START.md) · [完整接线与验收](PIN_FUNCTION_REQUIREMENTS.md)
+ 
+--- 8-step/SCOPE_DISPLAY.md
++++ 33-step/SCOPE_DISPLAY.md
+@@ -1,8 +1,8 @@
+ # LED 波形：FSR 量程与真实电平渐变
+ 
+-2026-10-22。波形页使用带时间刻度、正负幅度刻度的布局。S2 长按、App 的 `VIS,1` 切页方式沿用原协议。
++2026-10-23。波形页使用带时间刻度、正负幅度刻度的布局；本次仅把音量色环从 8 档改为 33 档。S2 长按、App 的 `VIS,1` 切页方式沿用原协议。
+ 
+-![RTL 仿真输出](design/led_scope_20261022/verified/scope_verified_comparison.png)
++![33 档色环实际 RTL 输出](design/led_scope_20261023/hue33/hue33_verified.png)
+ 
+ ## 读图
+ 
+@@ -10,7 +10,8 @@
+ - 纵轴改为原始有符号 PCM 幅度，`K=1024` 个数字计数：±32K /16K /8K /4K /2K /1K 分别对应 X1 /2 /4 /8 /16 /32。零位在 y=27。满幅以 32768 为基准，不代表声压或实际压力。
+ - 横轴 `MS` 及 0、5、10 表示毫秒，完整窗口仍为 512 / 48828.125 ≈ 10.486ms。主图位于 x=16～63、y=8～45；时间刻度位于 x=16、39、62，按面板像素近似显示。
+ - 底部 `PK` 是当前显示窗口的最终混音绝对峰值百分比。峰值先向上量化到约 0.78% 满幅的幅度箱，再以箱中心换算并四舍五入为整数（误差不超过约 1 个百分点）；电平条始终为 0～100% 固定刻度，32 格、向上取整，零值不点亮。
+-- 静音才显示低亮白色。非零信号沿色环下半圈变化：青 → 蓝 → 紫 → 品红 → 玫红 → 红，色相 180°～360°，饱和度固定 0.903、明度满幅，不经过绿和黄。每 256 个峰值计数改变一级，峰值码 1 与 2 同为青（低端钳位），码 3～7 每档 +30°，码 8 及以上为红色 `(31,3,3)`。红端仍从 1793 个计数（5.5% 数字满幅）开始，参考正常音源 /16 衰减后的电平；不代表数字削波。青色按定义必须开绿通道，210° 档的绿也较高，其余档绿通道不超过 3，仍然避免浅色在实体面板和相机上看起来全白。颜色与显示倍率无关。
++- 静音才显示低亮白色。非零窗口峰值采用独立的 PCM/64 色相轴：每 64 个计数一级，0～2048 共 33 个色相点，180° 青 → 蓝 → 紫 → 品红 → 玫红 → 360° 红，每档 5.625°；2048 及以上钳为 `(31,3,3)`。RGB5 最低通道固定为 3、最高通道为 31，对应约 0.903 饱和度和满明度，不经过绿、黄或橙。2048 是音源 /16 衰减后的响度参考，不代表削波或声压。颜色与显示倍率无关。
++- 一帧内波形及总电平条共用一种颜色，窗口在完整 PWM 帧边界同步发布；渐强或回落时颜色逐档移动，不是沿曲线位置着色。量程保护、PK 百分比和电平条长度继续使用原来的 `ceil(abs(PCM)/256)` 轴。非零但不足 64 个计数（包括 ±1）显示 `(3,31,31)`，只有原轴为零才显示灰色 `(8,8,8)`。
+ 
+ 因此，FSR 使声音变小时，曲线可以保持相近高度，但纵轴范围会改变，PK 数值和固定电平条会变小，颜色也随真实峰值改变。
+ 
+@@ -36,7 +37,7 @@
+ 
+ 波形页底部改为总混音 PK 电平，三组触摸 /红外手势 /吉他幅度条继续保留在 XY 和 FFT 页，`VIZ?` 原有三组数据和包格式不变。REF /AUD 标签也复用新的字库。参考曲线、延时历史、FFT 数值和曲谱时序沿用原实现。
+ 
+-波形与 XY 共用 picture RAM（每字 20 位）；`scope_style.hex` 是 2048×16 只读表，保存六套静态刻度、字形和百分比换算常量。扫描移位期间预取图形，行锁存高电平阶段复用读口做百分比换算，并在随后的发布边沿锁存结果，每行仍为 133 个主时钟。颜色表为组合逻辑，音频通路没有新增处理级。
++波形与 XY 共用 picture RAM（每字 20 位）；`scope_style.hex` 是原有 2048×16 只读表，六套静态刻度、字形和百分比换算的内容未改。扫描移位期间预取图形，行锁存高电平阶段复用读口做百分比换算，每行仍为 133 个主时钟。33 档色环采用限幅、移位、加减与取位，不新增 ROM 表项、BSRAM、DSP 或硬件乘除单元；音频通路没有新增处理级。
+ 
+ 本图由 `tb_audio_scope` 合成 PCM 驱动 RTL 后逐像素导出，不是实板照片。实际面板色差、环境可见度与 FSR 实物响应仍需烧录后核对。构建资源、50MHz 时序和位流指纹以交付包及 [VERIFICATION.md](VERIFICATION.md) 本轮记录为准。
+ 
+@@ -44,11 +45,13 @@
+ 
+ ```powershell
+ python tools/generate_scope_style.py --check
+-& ./tools/run_sim.ps1 -Tests tb_audio_scope,tb_audio_visualizer,tb_lissajous_delay,tb_lissajous_reference,tb_hub75e_audio_display
++& ./tools/run_sim.ps1 -Tests tb_audio_scope
++& ./tools/run_sim.ps1 -Tests tb_audio_visualizer
++& ./tools/run_sim.ps1 -Tests tb_hub75e_audio_display
++& ./tools/run_sim.ps1 -Tests tb_top_audio_visual
++& ./tools/run_sim.ps1 -Tests tb_display_mode_control
+ python tools/check_scope_external.py
+-python tools/render_scope_verification.py
+-& ./tools/run_sim.ps1 -Quick -Tests tb_top_audio_visual
+-& ./tools/run_sim.ps1 -Tests tb_fsr_pipeline,tb_display_mode_control,tb_hc05_visual
++python tools/render_scope_hue_ramp.py
+ ```
+ 
+ 板上验收：按住同一音符并改变 FSR 压力，核对 X8 /X16 /X32 与纵轴、PK 和颜色；加入红外 /吉他音源检查范围保护；松键检查白色零线与 PK 归零，再切 XY /FFT 核对标签、音源条与声音连续。
+--- 8-step/sim/tb_audio_scope.v
++++ 33-step/sim/tb_audio_scope.v
+@@ -6,16 +6,27 @@
+     reg [15:0] fsr=65535;
+     reg [5:0] x=0;reg [4:0] y=0;
+     wire [14:0] upper,lower;
+-    integer n,g,expected,preview,py,p,samples=0;
++    integer n,g,expected,preview,py,p,samples=0,palette_csv,frames_csv;
++    reg [14:0] hue,previous_hue;
++    reg [5:0] published_peak64=0;
++    reg [7:0] published_peak=0;
+     reg [14:0] pixels[0:4095];
+     audio_visualizer dut(.clk(clk),.resetn(resetn),.sample_ce(ce),.display_boundary(boundary),
+         .service_ce(service),.style_ce(service),.visual_mode(2'd1),.scope_fsr_gain(fsr),
+         .reference_ratio(2'd2),.reference_phase(2'd0),.mixed_sample(pcm),
+         .touch0(pcm),.touch1(16'sd0),.sensor_sample(16'sd0),.guitar_sample(16'sd0),
+         .pixel_x(x),.pixel_row(y),.upper_rgb(upper),.lower_rgb(lower));
++    always @(posedge clk)if(resetn && dut.capture_restart)begin
++        published_peak64<=dut.capture_peak64;
++        published_peak<=dut.capture_peak;
++    end
+     task sample;
+         input signed [15:0] value;
+         begin @(negedge clk);pcm=value;ce=1;@(negedge clk);ce=0;repeat(14)@(negedge clk);end
++    endtask
++    task dc_window;
++        input signed [15:0] value;
++        begin for(n=0;n<512;n=n+1)sample(value);publish;end
+     endtask
+     task publish;
+         begin
+@@ -46,6 +57,9 @@
+             $fdisplay(preview,"P3\n64 64\n31");
+             for(p=0;p<4096;p=p+1)$fdisplay(preview,"%0d %0d %0d",pixels[p][14:10],pixels[p][9:5],pixels[p][4:0]);
+             $fclose(preview);
++            $fdisplay(frames_csv,"%0s,%0d,%0d,%0d,%0d,%0d",filename,
++                published_peak64,published_peak,dut.u_scope.shown_color[14:10],
++                dut.u_scope.shown_color[9:5],dut.u_scope.shown_color[4:0]);
+         end
+     endtask
+     initial begin
+@@ -73,9 +87,40 @@
+             end
+         end
+         release dut.capture_range;release dut.capture_peak;
++        palette_csv=$fopen("sim/build/scope_hue33_palette.csv","w");
++        frames_csv=$fopen("sim/build/scope_hue33_frames.csv","w");
++        if(!palette_csv || !frames_csv)$fatal(1,"Cannot create hue verification CSV");
++        $fdisplay(palette_csv,"p,r,g,b");
++        $fdisplay(frames_csv,"file,peak64,peak,r,g,b");
++        previous_hue=0;
++        for(p=0;p<=63;p=p+1)begin
++            hue=dut.u_scope.palette(p[5:0]);
++            if(p>0 && (hue[14:10]<previous_hue[14:10] ||
++               hue[9:5]>previous_hue[9:5] || hue[4:0]>previous_hue[4:0]))
++                $fatal(1,"Non-monotonic hue at p=%0d",p);
++            if((hue[14:10]!=31 && hue[9:5]!=31 && hue[4:0]!=31) ||
++               (hue[14:10]!=3 && hue[9:5]!=3 && hue[4:0]!=3) ||
++               hue[14:10]<3 || hue[9:5]<3 || hue[4:0]<3)
++                $fatal(1,"Hue is not strictly saturated at p=%0d",p);
++            if(p==0 && hue!={5'd3,5'd31,5'd31})$fatal(1,"Zero hue must be cyan");
++            if(p>=32 && hue!={5'd31,5'd3,5'd3})$fatal(1,"Hue clamp failed");
++            case(p)
++                2:if(hue!={5'd3,5'd26,5'd31})$fatal(1,"128-count anchor");
++                8:if(hue!={5'd3,5'd10,5'd31})$fatal(1,"512-count anchor");
++                16:if(hue!={5'd17,5'd3,5'd31})$fatal(1,"1024-count anchor");
++                24:if(hue!={5'd31,5'd3,5'd24})$fatal(1,"1536-count anchor");
++            endcase
++            $fdisplay(palette_csv,"%0d,%0d,%0d,%0d",p,hue[14:10],hue[9:5],hue[4:0]);
++            previous_hue=hue;
++        end
++        $fclose(palette_csv);
+         for(n=-32768;n<32768;n=n+1)begin
+             pcm=n;#1;expected=((n<0 ? -n : n)+255)/256;
+             if(dut.sample_magnitude!==expected[7:0])$fatal(1,"Conservative peak code PCM=%0d",n);
++            expected=(n<0 ? -n : n)/64;
++            if(dut.magnitude64_full!==expected[9:0])$fatal(1,"Signed PCM/64 magnitude PCM=%0d",n);
++            if(expected>63)expected=63;
++            if(dut.magnitude64!==expected[5:0])$fatal(1,"Saturated PCM/64 magnitude PCM=%0d",n);
+         end
+         pcm=0;
+         repeat(4)@(negedge clk);resetn=1;wait(!dut.clearing);
+@@ -87,18 +132,18 @@
+         fsr=32768;window(1024);window(1024);
+         if(dut.shown_range!=4 || dut.u_scope.peak_bcd!=12'h003)
+             $fatal(1,"FSR half-scale failed");
+-        if(dut.u_scope.shown_color!={5'd3,5'd3,5'd31})$fatal(1,"Nominal medium palette");
++        if(dut.u_scope.shown_color!={5'd17,5'd3,5'd31})$fatal(1,"Nominal medium palette");
+         save("sim/build/scope_fsr50.ppm");
+         fsr=16384;window(512);window(512);
+         if(dut.shown_range!=5 || dut.u_scope.peak_bcd!=12'h001)
+             $fatal(1,"FSR quarter-scale failed");
+-        if(dut.u_scope.shown_color!={5'd3,5'd31,5'd31})$fatal(1,"Quarter-scale signal must be wheel cyan");
++        if(dut.u_scope.shown_color!={5'd3,5'd10,5'd31})$fatal(1,"Quarter-scale hue anchor");
+         save("sim/build/scope_fsr25.ppm");
+         // The photographed ~2% signal now occupies 16 vertical intervals
+         // at x32 instead of one interval, with the raw PK still at 2%.
+-        if(pixels[19*64+20]!=={5'd3,5'd31,5'd31})$fatal(1,"512-count wave is still too small");
++        if(pixels[19*64+20]!=={5'd3,5'd10,5'd31})$fatal(1,"512-count wave is still too small");
+         window(128);save("sim/build/scope_weak128.ppm");
+-        if(dut.u_scope.shown_color!={5'd3,5'd31,5'd31})$fatal(1,"Sub-percent signal is white");
++        if(dut.u_scope.shown_color!={5'd3,5'd26,5'd31})$fatal(1,"Sub-percent hue anchor");
+         // FSR gain is unchanged while an unrelated source becomes loud.
+         // Range widens at publication using the captured raw extrema.
+         for(n=0;n<511;n=n+1)sample(-32768);
+@@ -118,7 +163,7 @@
+         fsr=18000;window(512);window(512);
+         if(dut.shown_range!=4)$fatal(1,"FSR hysteresis never releases");
+         fsr=65535;window(512);window(512);
+-        if(dut.shown_range!=3 || dut.u_scope.shown_color!={5'd3,5'd31,5'd31} || dut.u_scope.peak_bcd!=12'h001)
++        if(dut.shown_range!=3 || dut.u_scope.shown_color!={5'd3,5'd10,5'd31} || dut.u_scope.peak_bcd!=12'h001)
+             $fatal(1,"Same PCM changed color/peak when the FSR range changed");
+         // Cover each widening threshold without clipping or changing FSR.
+         fsr=16384;window(512);window(512);
+@@ -126,8 +171,40 @@
+             window(32768>>g);
+             if(dut.shown_range!=g)$fatal(1,"Automatic range protection failed at %0d",g);
+         end
+-        $display("PASS scope: 65536 magnitudes, 2016 signed mappings, 387 peak/FSR selections, real 128/512/1024/2048-count signals, x8/x16/x32 FSR, saturated colors independent of range, six overflow ranges, atomic metadata, hysteresis and six pixel exports");
++        // The original ceil axis distinguishes tiny live sound from silence;
++        // the fine axis is zero for both signs below 64 PCM counts.
++        dc_window(1);
++        if(published_peak!=1 || published_peak64!=0 || dut.u_scope.shown_color!={5'd3,5'd31,5'd31})
++            $fatal(1,"+1 PCM was mistaken for silence");
++        dc_window(-1);
++        if(published_peak!=1 || published_peak64!=0 || dut.u_scope.shown_color!={5'd3,5'd31,5'd31})
++            $fatal(1,"-1 PCM was mistaken for silence");
++        dc_window(0);
++        if(published_peak!=0 || published_peak64!=0 || dut.u_scope.shown_color!={5'd8,5'd8,5'd8})
++            $fatal(1,"Zero PCM must remain gray");
++        // Walk every hue up and back down through real 512-sample windows.
++        // A missing reset at publication would stick at the previous maximum.
++        for(g=0;g<=32;g=g+1)begin
++            dc_window(g*64);
++            if(published_peak64!=g || dut.capture_peak64!=0 ||
++               dut.u_scope.shown_color!==(g==0 ? {5'd8,5'd8,5'd8} : dut.u_scope.palette(g)))
++                $fatal(1,"Rising color window p=%0d",g);
++        end
++        for(g=32;g>=0;g=g-1)begin
++            dc_window(-g*64);
++            if(published_peak64!=g || dut.capture_peak64!=0 ||
++               dut.u_scope.shown_color!==(g==0 ? {5'd8,5'd8,5'd8} : dut.u_scope.palette(g)))
++                $fatal(1,"Falling color window stuck at p=%0d",g);
++        end
++        dc_window(-32768);
++        if(published_peak64!=63 || dut.u_scope.shown_color!={5'd31,5'd3,5'd3})
++            $fatal(1,"-32768 fine peak saturation");
++        dc_window(1);
++        if(published_peak64!=0 || dut.u_scope.shown_color!={5'd3,5'd31,5'd31})
++            $fatal(1,"Color did not release after full scale");
++        $fclose(frames_csv);
++        $display("PASS scope hue33: 65536 signed magnitudes, 2016 coordinates, 387 range selections, 64 monotonic saturated palette codes, +/-1 cyan/zero gray, 33 rising/falling window snapshots, no stale peak, six RTL PPM exports");
+         $finish;
+     end
+-    initial begin #10000000;$fatal(1,"Scope timeout");end
++    initial begin #30000000;$fatal(1,"Scope timeout");end
+ endmodule
+--- 8-step/src/audio_scope.v
++++ 33-step/src/audio_scope.v
+@@ -5,6 +5,7 @@
+ module audio_scope(
+     input wire clk,resetn,service_ce,publish,display_valid,
+     input wire [7:0] capture_peak,
++    input wire [5:0] capture_peak64,
+     input wire [19:0] range_word,
+     input wire [2:0] shown_range,
+     input wire [1:0] visual_mode,shown_ratio,shown_phase,
+@@ -33,20 +34,29 @@
+     always @(posedge clk)style_q<=style_rom[rom_address];
+ 
+     function [14:0] palette;
+-        input [7:0] peak;
++        input [5:0] peak;
++        reg [5:0] limited;
++        reg [7:0] q;
++        reg [5:0] u;
++        reg [8:0] seven_u;
++        reg [4:0] d,r,g,b;
+         begin
+-            if(peak==0)palette={5'd8,5'd8,5'd8};
+-            // Lower half of the color wheel at fixed saturation and full value:
+-            // hue 180deg (cyan) at capture_peak 2 up to 360deg (red) at 8.
++            // PCM/64, 33 hue points: 180deg cyan -> 360deg red, clamped
++            // at 2048 PCM counts. All constant products use shifts/adds.
+             // 2048 counts is the nominal loud reference after /16 source
+             // attenuation, not a claim of digital clipping or acoustic SPL.
+-            else if(peak>=8)palette={5'd31,5'd3,5'd3};
+-            else case(peak[2:0])
+-                1,2:palette={5'd3,5'd31,5'd31};
+-                3:palette={5'd3,5'd17,5'd31};4:palette={5'd3,5'd3,5'd31};
+-                5:palette={5'd17,5'd3,5'd31};6:palette={5'd31,5'd3,5'd31};
+-                default:palette={5'd31,5'd3,5'd17};
++            limited=peak>6'd32 ? 6'd32 : peak;
++            q=({2'd0,limited}<<2)+({2'd0,limited}<<1);
++            u=q[5:0];
++            seven_u=({3'd0,u}<<3)-{3'd0,u};
++            d=seven_u[8:4];
++            case(q[7:6])
++                0:begin r=5'd3;g=5'd31-d;b=5'd31;end
++                1:begin r=5'd3+d;g=5'd3;b=5'd31;end
++                2:begin r=5'd31;g=5'd3;b=5'd31-d;end
++                default:begin r=5'd31;g=5'd3;b=5'd3;end
+             endcase
++            palette={r,g,b};
+         end
+     endfunction
+     always @(posedge clk)begin
+@@ -57,7 +67,9 @@
+             if(publish)begin
+                 // S_LATCH_HIGH fetched the percentage on the preceding edge.
+                 peak_bcd<=style_q[11:0];
+-                shown_color<=palette(capture_peak);
++                // Only the original conservative axis decides silence.
++                // A nonzero sub-64-count window uses palette(0), cyan.
++                shown_color<=capture_peak==0 ? {5'd8,5'd8,5'd8} : palette(capture_peak64);
+                 shown_level<=capture_peak[7:2]+(|capture_peak[1:0]);
+             end
+         end
+--- 8-step/src/audio_visualizer.v
++++ 33-step/src/audio_visualizer.v
+@@ -40,6 +40,13 @@
+     wire [7:0] sample_magnitude=mixed_sample[15] ? (~mixed_sample[15:8]+8'd1) :
+         {1'b0,mixed_sample[14:8]}+(|mixed_sample[7:0]);
+     reg [7:0] capture_peak;
++    // A separate PCM/64 axis drives color only. Compensate the negative
++    // arithmetic truncation so both signs use floor(abs(PCM)/64), including
++    // +/-1 -> 0. The 10-bit -512 magnitude is 512 and saturates normally.
++    wire [9:0] magnitude64_full=quantized_sample[9] ?
++        (~quantized_sample+{9'd0,(mixed_sample[5:0]==6'd0)}) : quantized_sample;
++    wire [5:0] magnitude64=magnitude64_full>10'd63 ? 6'd63 : magnitude64_full[5:0];
++    reg [5:0] capture_peak64;
+     reg [1:0] capture_range;
+     reg [2:0] shown_range;
+     // Normal instrument output is attenuated before this tap. Start at x8,
+@@ -113,6 +120,7 @@
+             capture_column <= 0; sample_phase <= 0;
+             minimum_sample<=0;maximum_sample<=0;previous_sample<=0;group_phase<=0;
+             capture_peak<=0;capture_range<=0;shown_range<=0;
++            capture_peak64<=0;
+             capture_ratio<=0;capture_phase<=0;shown_ratio<=0;shown_phase<=0;
+         end else begin
+             rmw_busy<=0;
+@@ -128,6 +136,7 @@
+             if (capture_ready && display_boundary) begin
+                 shown_range<=safe_range;
+                 capture_peak<=0;
++                capture_peak64<=0;
+                 // Quantize actual applied FSR gain; 1.56% hysteresis on
+                 // returning to a wider range prevents boundary chatter.
+                 case(capture_range)
+@@ -148,6 +157,7 @@
+             end
+             if (sample_ce && !capture_full && !clearing) begin
+                 if(sample_magnitude>capture_peak)capture_peak<=sample_magnitude;
++                if(magnitude64>capture_peak64)capture_peak64<=magnitude64;
+                 if(history_count==32) begin
+                     xy_address<=9'd128+{capture_bank,7'd0}+{2'd0,xy_y,2'd0}+{7'd0,xy_x[5:4]};
+                     xy_bit<=xy_x[3:0];xy_pending<=1;
+@@ -175,7 +185,7 @@
+     wire [14:0] scope_upper,scope_lower;
+     wire xy_label_on;
+     audio_scope u_scope(.clk(clk),.resetn(resetn),.service_ce(style_ce),
+-        .publish(capture_restart),.capture_peak(capture_peak),
++        .publish(capture_restart),.capture_peak(capture_peak),.capture_peak64(capture_peak64),
+         .shown_range(shown_range),.display_valid(display_valid),.range_word(display_range),
+         .visual_mode(visual_mode),.shown_ratio(shown_ratio),.shown_phase(shown_phase),.xy_label_on(xy_label_on),
+         .pixel_x(pixel_x),.pixel_row(pixel_row),.upper_rgb(scope_upper),.lower_rgb(scope_lower));
+--- 8-step/tools/build_unified.tcl
++++ 33-step/tools/build_unified.tcl
+@@ -10,7 +10,7 @@
+     open_project [file join $project_dir PCM5102_UNIFIED.gprj]
+     set_option -top_module top_unified -use_cpu_as_gpio 1 -use_sspi_as_gpio 1 -use_mspi_as_gpio 1 -use_jtag_as_gpio 0 -output_base_name PCM5102_UNIFIED -gen_verilog_sim_netlist 1 -show_init_in_vo 1
+     set_option -resource_sharing 1 -retiming 1 -global_freq 50 -enable_dsrm 1
+-    set_option -place_option 2 -route_option 0 -route_maxfan 23
++    set_option -place_option 3 -route_option 0 -route_maxfan 23
+     run all
+     puts "Audio take bitstream: [file join $project_dir impl pnr PCM5102_UNIFIED.fs]"
+ } message options]} {
+--- 8-step/tools/check_scope_external.py
++++ 33-step/tools/check_scope_external.py
+@@ -7,7 +7,7 @@
+ actual=list(map(int,tokens[4:]))
+ rom=[int(x,16) for x in (root/'src/scope_style.hex').read_text().split()]
+ expected=[]
+-color=(3,3,31)
++color=(17,3,31)
+ for y in range(64):
+     row=y%32
+     for x in range(64):
+--- 8-step/tools/render_scope_hue_ramp.py
++++ 33-step/tools/render_scope_hue_ramp.py
+@@ -1,115 +1,87 @@
+-"""Volume -> color-wheel ramp study, checked against the real RTL PPM frames."""
++"""Check all RTL hue codes against integer/HSV models and render real PPMs."""
+ from pathlib import Path
+ import colorsys
++import csv
+ from collections import Counter
+ from PIL import Image, ImageDraw
+ from render_scope_concepts import rgb, font, led_view
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+-OUT = ROOT / "design" / "led_scope_20261022" / "hue_ramp"
+-BUILD = ROOT / "sim" / "build"
+-
+-# Fixed saturation, full value, hue walking the lower half of the wheel.
+-SAT, VAL, H0, HSTEP, HMAX = 0.903, 1.0, 180.0, 30.0, 360.0
+-PICKS = ["#12b9ba", "#1258ba", "#1f12ba", "#8812ba", "#ba1297", "#ba1247", "#ba1812"]
++OUT = ROOT / 'design/led_scope_20261023/hue33'
++BUILD = ROOT / 'sim/build'
++SAT = 0.903
++FRAMES = [('scope_weak128', 2, 128), ('scope_fsr25', 8, 512),
++          ('scope_fsr50', 16, 1024), ('scope_fsr100', 32, 2048)]
+ 
+ 
+-def ramp_hue(n):
+-    return min(H0 + max(0, n - 2) * HSTEP, HMAX)
+-
+-
+-def hsv5(hue):
+-    r, g, b = colorsys.hsv_to_rgb((hue % 360.0) / 360.0, SAT, VAL)
+-    return tuple(round(v * 31) for v in (r, g, b))
+-
+-
+-def expected(bucket):
+-    return hsv5(ramp_hue(bucket))
+-
+-
+-OLD = {  # previous palette() constants, kept only to draw the before/after chips
+-    0: (8, 8, 8), 1: (0, 0, 24), 2: (0, 0, 31), 3: (8, 0, 31), 4: (16, 0, 31),
+-    5: (24, 0, 24), 6: (31, 0, 16), 7: (31, 0, 8), 8: (31, 0, 0),
+-}
+-FRAMES = [  # name, capture_peak bucket, PCM peak shown in the panel
+-    ("scope_weak128", 1, "128"),
+-    ("scope_fsr25", 2, "512"),
+-    ("scope_fsr50", 4, "1024"),
+-    ("scope_fsr100", 8, "2048"),
+-]
+-
+-
+-def strip(width, height):
+-    im = Image.new("RGB", (width, height))
+-    d = ImageDraw.Draw(im)
+-    for x in range(width):
+-        hue = H0 + (HMAX - H0) * x / (width - 1)
+-        c = tuple(round(v * 255) for v in colorsys.hsv_to_rgb((hue % 360) / 360, SAT, VAL))
+-        d.line((x, 0, x, height - 1), fill=c)
+-    return im
+-
+-
+-def dominant(path):
+-    im = Image.open(path).convert("RGB")
+-    sat = [(c, n) for c, n in Counter(im.getdata()).items() if max(c) - min(c) > 40]
+-    return im, (max(sat, key=lambda entry: entry[1])[0] if sat else None)
++def expected(p):
++    q = min(p, 32) * 6
++    if q == 192:
++        return (31, 3, 3)
++    d = ((q % 64) * 7) // 16
++    return [(3, 31-d, 31), (3+d, 3, 31), (31, 3, 31-d)][q // 64]
+ 
+ 
+ def main():
++    rows = list(csv.DictReader((BUILD/'scope_hue33_palette.csv').open(encoding='ascii')))
++    assert len(rows) == 64
++    colors = []
++    for p, row in enumerate(rows):
++        assert int(row['p']) == p
++        c = tuple(int(row[k]) for k in ('r', 'g', 'b'))
++        assert c == expected(p), (p, c, expected(p))
++        ideal = tuple(round(v*31) for v in colorsys.hsv_to_rgb(
++            ((180+min(p, 32)*5.625) % 360)/360, SAT, 1.0))
++        assert max(abs(a-b) for a,b in zip(c, ideal)) <= 1, (p, c, ideal)
++        assert min(c) == 3 and max(c) == 31
++        if colors:
++            a = colors[-1]
++            assert c[0] >= a[0] and c[1] <= a[1] and c[2] <= a[2]
++        if p >= 32:
++            assert c == (31, 3, 3)
++        colors.append(c)
++    assert len(set(colors[:33])) == 33
++    metadata = {Path(r['file']).stem: r for r in csv.DictReader(
++        (BUILD/'scope_hue33_frames.csv').open(encoding='ascii'))}
+     OUT.mkdir(parents=True, exist_ok=True)
+-    W = 1512
+-    canvas = Image.new("RGB", (W, 1120), "#0b141b")
++    canvas = Image.new('RGB', (1512, 990), '#0b141b')
+     d = ImageDraw.Draw(canvas)
+-    d.text((28, 20), "LED 波形颜色 · 已按音量沿色环改动（RTL 实测帧）", font=font(32), fill="#e5f0ef")
+-    d.text((28, 70), "色相 180°(青)→360°(红) 固定 S=0.903 / V=1.00；第 2 档起每档 +30°，第 1 档与第 2 档同为青。",
+-           font=font(20), fill="#9fb4c0")
+-
+-    for i, hexv in enumerate(PICKS):
+-        x = 28 + i * 208
+-        d.rectangle((x, 112, x + 190, 150), fill=hexv)
+-        d.text((x + 4, 154), hexv, font=font(17), fill="#a8c2ce")
+-
+-    canvas.paste(strip(W - 56, 46), (28, 190))
+-    d.text((28, 240), "连续色环（设计参考，面板只能出 32 级/通道）", font=font(17), fill="#8ea6b2")
+-
+-    d.text((28, 288), "实际写进 palette() 的 8 档 RGB5（左→右 = capture_peak 1→8，≥8 钉在红）",
+-           font=font(19), fill="#cbded7")
+-    for n in range(1, 9):
+-        x = 28 + (n - 1) * 182
+-        c = expected(n)
+-        d.rectangle((x, 320, x + 174, 364), fill=rgb(c))
+-        d.text((x + 2, 370), f"{n} · RGB5 {c[0]},{c[1]},{c[2]} · {round(ramp_hue(n))}°",
+-               font=font(16), fill="#a8c2ce")
+-        d.text((x + 2, 392), f"旧 {OLD[n][0]},{OLD[n][1]},{OLD[n][2]}", font=font(15), fill="#6d8492")
+-
+-    d.text((28, 428), "真实 RTL 帧（sim/build/*.ppm 由 tb_audio_scope 直接输出，未做任何后期换色）",
+-           font=font(24), fill="#cbded7")
+-    bad = []
+-    for i, (name, bucket, peak) in enumerate(FRAMES):
+-        im, color = dominant(BUILD / f"{name}.ppm")
+-        want = rgb(expected(bucket))
+-        if color != want:
+-            bad.append(f"{name}: RTL {color} != spec {want}")
+-        x0 = 28 + i * 372
+-        d.text((x0, 468), f"峰值 {peak} · 第 {bucket} 档 · {'一致' if color == want else '不一致'}",
+-               font=font(20), fill="#b6d3c4" if color == want else "#ff8f8f")
+-        canvas.paste(led_view(im, 5), (x0, 502))
+-        d.rectangle((x0, 830, x0 + 34, 856), fill=rgb(OLD[bucket]))
+-        d.text((x0 + 42, 832), "旧", font=font(18), fill="#a8c2ce")
+-        d.rectangle((x0 + 84, 830, x0 + 118, 856), fill=want)
+-        d.text((x0 + 126, 832), "新 = RTL 实测", font=font(18), fill="#a8c2ce")
+-
+-    d.text((28, 886), "档位边界没动：1=128 2=512 4=1024 8=2048，safe_range / PK 百分比 / 电平条长度全部不变。",
+-           font=font(19), fill="#a1b5c0")
+-    d.text((28, 920), "静音仍是低亮白零线 (8,8,8)；底部 PK 电平条与波形同色，一起沿色环走。",
+-           font=font(19), fill="#a1b5c0")
+-    d.text((28, 954), "注意：正常演奏时 capture_peak 落在 2..8，所以青色只出现在最轻的 1~2 档，"
+-                      "第 1、2 档同色是低端钳位的结果。", font=font(19), fill="#a1b5c0")
+-    canvas.save(OUT / "hue_ramp_mapping.png")
+-    if bad:
+-        raise SystemExit("RTL palette does not match the spec:\n  " + "\n  ".join(bad))
+-    print("OK 4 RTL frames match the wheel spec ->", OUT / "hue_ramp_mapping.png")
++    d.text((28, 18), 'LED 音量色环 · 33 档实际 RTL 输出', font=font(32), fill='#e5f0ef')
++    d.text((28, 70), 'PCM 每 64 计数一级；色相 180° 青 → 360° 红；一帧一种颜色，渐强时逐档移动。',
++           font=font(20), fill='#9fb4c0')
++    for p, c in enumerate(colors[:33]):
++        x = 28+p*44
++        d.rectangle((x, 120, x+43, 170), fill=rgb(c))
++        if p % 4 == 0:
++            d.text((x, 178), str(p), font=font(17), fill='#a8c2ce')
++    d.text((28, 222), '以下为 testbench 直接导出的 PPM，未后期换色；capture_peak64 与发布帧同步。',
++           font=font(21), fill='#cbded7')
++    for i, (name, p, amplitude) in enumerate(FRAMES):
++        row = metadata[name]
++        assert int(row['peak64']) == p, (name, row)
++        c = tuple(int(row[k]) for k in ('r', 'g', 'b'))
++        assert c == colors[p]
++        im = Image.open(BUILD/f'{name}.ppm').convert('RGB')
++        pixels = im.get_flattened_data() if hasattr(im, 'get_flattened_data') else im.getdata()
++        saturated = [(c, n) for c,n in Counter(pixels).items() if max(c)-min(c)>40]
++        dominant = max(saturated, key=lambda e:e[1])[0]
++        assert dominant == rgb(colors[p]), (name, dominant, rgb(colors[p]))
++        x = 28+i*372
++        d.text((x, 270), f'峰值 {amplitude} · p={p}', font=font(22), fill='#cbded7')
++        canvas.paste(led_view(im, 5), (x, 316))
++        d.rectangle((x, 654, x+52, 684), fill=rgb(c))
++        d.text((x+62, 656), f'RGB5 {c}', font=font(19), fill='#adc2cc')
++    d.text((28, 728), '静音判据仍为 capture_peak==0；非零但不足 64 计数显示青色，零信号显示灰色。',
++           font=font(20), fill='#a1b5c0')
++    d.text((28, 776), '原有量程保护、PK 百分比、电平条长度和显示 RAM 几何保持不变。',
++           font=font(20), fill='#a1b5c0')
++    d.text((28, 824), '64 个输入码已与整数模型逐项比对；33 个色相点与 HSV 的通道误差均不超过 1 LSB。',
++           font=font(19), fill='#a1b5c0')
++    d.text((28, 872), '这是数字仿真结果，尚未进行本版实体面板验收。', font=font(19), fill='#8ea6b2')
++    canvas.save(OUT/'hue33_verified.png')
++    print(f'OK 64 RTL palette codes, 33 unique hues, HSV error <=1 LSB, monotonic saturation, 4 real RTL frames -> {OUT / "hue33_verified.png"}')
+ 
+ 
+-if __name__ == "__main__":
++if __name__ == '__main__':
+     main()
++
+--- 8-step/VERIFICATION.md
++++ 33-step/VERIFICATION.md
+@@ -1,4 +1,14 @@
+ # 本地验证记录
++
++## 2026-10-23：33 档整帧音量色环
++
++交付 [LED_HUE33_20261023](deliveries/LED_HUE33_20261023/README.md)，内含完整 diff/行号、五项 testbench 的 PASS 原文、外部 RGB5 模型、实际 PPM 对照图及前后综合/PnR报告。本轮起点是用户已完成的 8 档工作区。新增 PCM/64 六位饱和峰值，整帧锁存颜色；按用户确认，先对原始 PCM 取绝对值再除以64，±1 为0档青色，仅零信号灰色。safe_range、PK、条长、波形步长、显示 RAM 几何和 ROM 内容均已核对不变。
++
++五个测试按顺序、每次单个 -Tests 名称执行，无 Quick；完整顶层运行至196.117712ms，六个 XY 预设和八幅整屏导出通过。颜色全64码、65536个有符号 PCM 幅度、33档正负渐强/回落、跨窗口清零、±1边界以及独立HSV误差≤1LSB均通过；外部模型4096像素/12288通道/32 PWM相位通过，renderer打印OK。
++
++8档冻结基线 scope_hue8_baseline_20261023：Logic21590 /CLS11080 /Register10321 /BSRAM47 /DSP26.5，WNS +0.233ns。33档冻结 scope_hue33_20261023_p3r0（place3/route0/maxfan23）：Logic21503 /CLS11202 /Register10326 /BSRAM47 /DSP26.5，变化 -87 /+122 /+5 /0 /0；WNS +0.198ns，Fmax50.499MHz，Setup/Hold违例端点均0。95份 RTL/ROM/约束/工程输入匹配当前工作区，构建脚本与IDE放置选项已对齐。初次place2/route0时序未过，另试place2/route2留141条未布通网络，均未交付。
++
++本版满足器件容量和50MHz时序，但后续功能预留未通过：剩余1537 Logic /318 CLS /9 BSRAM，距原1650 /365 /4规划分别差113 Logic /47 CLS。未增加BSRAM或DSP。UserCode 0x00002176，SHA256 `A5567DB120334D16B9B72071E0F0D2754B64E1AFE44878D22ED1243700A52B35`；默认位流及综合/PnR输出已同步，旧默认保存在 sim/build/pre_hue33_default_20261023/。本次未烧录，实物面板颜色仍待核对。
+ 
+ ## 2026-10-22：实体照片反馈后的弱信号修正
+ 

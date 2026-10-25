@@ -1,0 +1,428 @@
+{
+  "baseline_place0": {
+    "label": "engine_share_base_20261024",
+    "status": "validated",
+    "strategy": {
+      "place_option": 0,
+      "route_option": 0,
+      "route_maxfan": 23
+    },
+    "metrics": {
+      "Logic": {
+        "used": 21603.0,
+        "capacity": 23040.0
+      },
+      "CLS": {
+        "used": 11326.0,
+        "capacity": 11520.0
+      },
+      "Register": {
+        "used": 10461.0,
+        "capacity": 23280.0
+      },
+      "BSRAM": {
+        "used": 47.0,
+        "capacity": 56.0
+      },
+      "DSP": {
+        "used": 26.5,
+        "capacity": 28.0
+      }
+    },
+    "delta_vs_baseline": {},
+    "unrouted_nets": 0,
+    "bitstream_present": true,
+    "bitstream_sha256": "7205235913B38F3F4589968C2AD11BFAFD2064957E028F6B16747FEB76C7A0D2",
+    "timing": {
+      "setup_violated_endpoints": 0,
+      "setup_worst_path": {
+        "slack_ns": 0.083,
+        "from": "u_main/power_count_5_s0/Q",
+        "to": "u_main/take_enabled.u_take/replay_words[25].value_3_s0/CE"
+      },
+      "setup_reported_violating_paths": [],
+      "hold_violated_endpoints": 0,
+      "hold_worst_path": {
+        "slack_ns": 0.152,
+        "from": "u_main/u_keymap/u_uart/rd_ptr_6_s0/Q",
+        "to": "u_main/u_keymap/u_uart/fifo_fifo_0_0_s/ADB[9]"
+      },
+      "hold_reported_violating_paths": [],
+      "setup_raw_worst_path": {
+        "slack_ns": 0.083,
+        "from_cell": "u_main/power_count_5_s0",
+        "to_cell": "u_main/take_enabled.u_take/replay_words[25].value_3_s0"
+      },
+      "setup_raw_violating_paths": [],
+      "hold_raw_worst_path": {
+        "slack_ns": 0.152,
+        "from_cell": "u_main/u_keymap/u_uart/rd_ptr_6_s0",
+        "to_cell": "u_main/u_keymap/u_uart/fifo_fifo_0_0_s"
+      },
+      "hold_raw_violating_paths": []
+    },
+    "changed_inputs_vs_baseline": [],
+    "changed_input_hashes": {},
+    "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\engine_share_base_20261024\\sources.json",
+    "source_manifest_sha256": "3BD7BD1BEEDEC9D46CE5AFA87E26E16020EC53FBEB2A384772CF0956B2A61745",
+    "downloadable_song_sha256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414",
+    "snapshot_corrupt_inputs": [],
+    "errors": [],
+    "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\engine_share_base_20261024\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+    "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\engine_share_base_20261024\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+    "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\unified\\engine_share_base_20261024\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html"
+  },
+  "baseline_place1_status": "validated",
+  "builds": [
+    {
+      "label": "baseline_place1",
+      "status": "validated",
+      "strategy": {
+        "place_option": 1,
+        "route_option": 0,
+        "route_maxfan": 23
+      },
+      "metrics": {
+        "Logic": {
+          "used": 21603.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11310.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10461.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 47.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": 0.0,
+        "CLS": 0.0,
+        "Register": 0.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 0,
+      "bitstream_present": true,
+      "bitstream_sha256": "11073C63D80C3239D56B8793002E20DF20DFA104725D8A9F76B6C840FAF22E6A",
+      "timing": {
+        "setup_violated_endpoints": 0,
+        "setup_worst_path": {
+          "slack_ns": 0.01,
+          "from": "u_main/u_gesture/u_audio/u_synth/n3875_s1/DOUT[2]",
+          "to": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s/DI[15]"
+        },
+        "setup_reported_violating_paths": [],
+        "hold_violated_endpoints": 0,
+        "hold_worst_path": {
+          "slack_ns": 0.156,
+          "from": "u_main/take_enabled.u_take/field_5_s0/Q",
+          "to": "u_main/take_enabled.u_take/history_history_0_0_s/ADB[9]"
+        },
+        "hold_reported_violating_paths": [],
+        "setup_raw_worst_path": {
+          "slack_ns": 0.01,
+          "from_cell": "u_main/u_gesture/u_audio/u_synth/n3875_s1",
+          "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+        },
+        "setup_raw_violating_paths": [],
+        "hold_raw_worst_path": {
+          "slack_ns": 0.156,
+          "from_cell": "u_main/take_enabled.u_take/field_5_s0",
+          "to_cell": "u_main/take_enabled.u_take/history_history_0_0_s"
+        },
+        "hold_raw_violating_paths": []
+      },
+      "changed_inputs_vs_baseline": [],
+      "changed_input_hashes": {},
+      "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\baseline_place1\\sources.json",
+      "source_manifest_sha256": "90B4A6B78BA703D2BDB8AA27DAC859EB259D9B62BC34C8D4812F9F817768AACE",
+      "downloadable_song_sha256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414",
+      "snapshot_corrupt_inputs": [],
+      "errors": [],
+      "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\baseline_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+      "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\baseline_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+      "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\baseline_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html",
+      "delta_vs_place0_same_rtl": {
+        "Logic": 0.0,
+        "CLS": -16.0,
+        "Register": 0.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "delta_vs_verified_place0_baseline": {
+        "Logic": 0.0,
+        "CLS": -16.0,
+        "Register": 0.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "production_integrated": false,
+      "configuration_checks": {
+        "impl/gwsynthesis/PCM5102_UNIFIED.prj": {
+          "matches_except_paths_and_tested_place_option": true,
+          "prior_sha256": "A9C04A1314F01A8CF68E7D28023A06F28A33E7F9297620C1E1150B7B93EB8EEB",
+          "new_sha256": "0B9FD74C463C4606155F577A66A5CE5C4C717B4B7A9959A7CDD8EC0E4D386C51"
+        },
+        "impl/pnr/cmd.do": {
+          "matches_except_paths_and_tested_place_option": true,
+          "prior_sha256": "AE1207E2DE9CBF3E9648CC2A92E44E9DDEFC93E9056178F1EBBA7374CA9A5648",
+          "new_sha256": "85F199CA35937CF81A1EAB4AD69F508C7AECA9BAF2E6D190FC168C1592A3BE4E"
+        },
+        "impl/pnr/device.cfg": {
+          "matches_except_paths_and_tested_place_option": true,
+          "prior_sha256": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A",
+          "new_sha256": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A"
+        }
+      },
+      "synthesis": {
+        "auto_reran": true,
+        "prior_netlist_sha256": "0BF0B382D4FA623EF690E79C47ECBB8B318C1277AB531FCA62323045AA302F61",
+        "new_netlist_sha256": "AEB002DCF2624588AC2E29AF5377D19F6DFE7E193CBD0A1ADEDFEC0032F26A7E",
+        "same_netlist_bytes": false,
+        "same_hierarchical_resource_xml": true,
+        "note": "The .vg is encrypted. Identical source and synthesis options plus equal resource XML do not prove byte-identical or formally equivalent netlists."
+      },
+      "meets_500_cls_target_vs_place1_baseline": false
+    },
+    {
+      "label": "apds_serial_place1",
+      "status": "validated",
+      "strategy": {
+        "place_option": 1,
+        "route_option": 0,
+        "route_maxfan": 23
+      },
+      "metrics": {
+        "Logic": {
+          "used": 21424.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11215.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10466.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 47.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": -179.0,
+        "CLS": -95.0,
+        "Register": 5.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 0,
+      "bitstream_present": true,
+      "bitstream_sha256": "A9589D98AEBF4BA1087A589C2032847C08C3FA0B020060000C65805817ACE629",
+      "timing": {
+        "setup_violated_endpoints": 0,
+        "setup_worst_path": {
+          "slack_ns": 0.161,
+          "from": "u_main/u_fsr_pitch_scaler/individual.u_bend/currents_currents_0_0_s/DO[0]",
+          "to": "u_main/u_fsr_pitch_scaler/individual.u_bend/currents_currents_0_0_s/DI[12]"
+        },
+        "setup_reported_violating_paths": [],
+        "hold_violated_endpoints": 0,
+        "hold_worst_path": {
+          "slack_ns": 0.197,
+          "from": "u_main/u_gesture/u_audio/config_wr_0_s2/Q",
+          "to": "u_main/u_gesture/u_audio/configs_configs_0_29_s/WAD[0]"
+        },
+        "hold_reported_violating_paths": [],
+        "setup_raw_worst_path": {
+          "slack_ns": 0.161,
+          "from_cell": "u_main/u_fsr_pitch_scaler/individual.u_bend/currents_currents_0_0_s",
+          "to_cell": "u_main/u_fsr_pitch_scaler/individual.u_bend/currents_currents_0_0_s"
+        },
+        "setup_raw_violating_paths": [],
+        "hold_raw_worst_path": {
+          "slack_ns": 0.197,
+          "from_cell": "u_main/u_gesture/u_audio/config_wr_0_s2",
+          "to_cell": "u_main/u_gesture/u_audio/configs_configs_0_29_s"
+        },
+        "hold_raw_violating_paths": []
+      },
+      "changed_inputs_vs_baseline": [
+        "pcm5102_pam8403/src/apds9960_ctrl.v"
+      ],
+      "changed_input_hashes": {
+        "pcm5102_pam8403/src/apds9960_ctrl.v": {
+          "baseline": "BC1F2F0F211D6330F8B443CF5E97C546E60A11CF198D82975E1878E8DAB808F8",
+          "candidate": "4AAA3F1F0E20BFFFB35B49567427ED0054B972D9167F98C5337A3E69FDC77492"
+        }
+      },
+      "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\apds_serial_place1\\sources.json",
+      "source_manifest_sha256": "BFED07FB44CEC0A50376F0A366C81FB1ED39B81829A31B78EA5F121C51188694",
+      "downloadable_song_sha256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414",
+      "snapshot_corrupt_inputs": [],
+      "errors": [],
+      "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\apds_serial_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+      "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\apds_serial_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+      "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\apds_serial_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html",
+      "delta_vs_place0_same_rtl": {
+        "Logic": 0.0,
+        "CLS": -49.0,
+        "Register": 0.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "delta_vs_verified_place0_baseline": {
+        "Logic": -179.0,
+        "CLS": -111.0,
+        "Register": 5.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "production_integrated": false,
+      "configuration_checks": {
+        "impl/gwsynthesis/PCM5102_UNIFIED.prj": {
+          "matches_except_paths_and_tested_place_option": true,
+          "prior_sha256": "065C89DA499FD3304819C0A38AD94EB624390A17A1C35F0C8510AB871CF0DAD6",
+          "new_sha256": "2A829F8295609FA5CCE26AB213698D38124B8F3364F9966F346A15C2F1D31853"
+        },
+        "impl/pnr/cmd.do": {
+          "matches_except_paths_and_tested_place_option": true,
+          "prior_sha256": "4C32E59E321886AC4E51EB819BDC60B724221A27AC4CE1F8D1666E4F415FC30D",
+          "new_sha256": "F5DECE1E3EFAE38B25D4C2599B14CA295174B0F333AF1CD82DD876DEC104A2BA"
+        },
+        "impl/pnr/device.cfg": {
+          "matches_except_paths_and_tested_place_option": true,
+          "prior_sha256": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A",
+          "new_sha256": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A"
+        }
+      },
+      "synthesis": {
+        "auto_reran": true,
+        "prior_netlist_sha256": "81EE38CBB6A7F05366AAE1A6284181B926B1700788F2FFB52CA70950FDE48F24",
+        "new_netlist_sha256": "335FA2952DBB732BF3032C79533668CF9A282149B86070E9F909EE0EDE168DFB",
+        "same_netlist_bytes": false,
+        "same_hierarchical_resource_xml": true,
+        "note": "The .vg is encrypted. Identical source and synthesis options plus equal resource XML do not prove byte-identical or formally equivalent netlists."
+      },
+      "meets_500_cls_target_vs_place1_baseline": false
+    },
+    {
+      "label": "flash_rotate_place1",
+      "status": "routing_failed",
+      "strategy": {
+        "place_option": 1,
+        "route_option": 0,
+        "route_maxfan": 23
+      },
+      "metrics": {
+        "Logic": {
+          "used": 21666.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11234.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10467.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 47.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": 63.0,
+        "CLS": -76.0,
+        "Register": 6.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 233,
+      "bitstream_present": false,
+      "bitstream_sha256": null,
+      "timing": null,
+      "changed_inputs_vs_baseline": [
+        "pcm5102_pam8403/src/take_nor_store.v"
+      ],
+      "changed_input_hashes": {
+        "pcm5102_pam8403/src/take_nor_store.v": {
+          "baseline": "EA40B6DDAD00421DDD759C9C2A8F89BBA754183521201143215652B0ADB460C9",
+          "candidate": "9594517C7A864D618367C3728BD6BAA4339A8D9FBEDD24A326A38DB56405B965"
+        }
+      },
+      "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\flash_rotate_place1\\sources.json",
+      "source_manifest_sha256": "39DDA7758372249127F696173914CAA1FDF63C924EC2458A60B55AE94093F949",
+      "downloadable_song_sha256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414",
+      "snapshot_corrupt_inputs": [],
+      "errors": [
+        "ERROR  (PR0004) : There are total 233 unrouted nets\r"
+      ],
+      "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\flash_rotate_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+      "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\flash_rotate_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+      "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\local_reuse_place1_20261025\\flash_rotate_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html",
+      "delta_vs_place0_same_rtl": {
+        "Logic": 0.0,
+        "CLS": -8.0,
+        "Register": 0.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "delta_vs_verified_place0_baseline": {
+        "Logic": 63.0,
+        "CLS": -92.0,
+        "Register": 6.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "production_integrated": false,
+      "configuration_checks": {
+        "impl/gwsynthesis/PCM5102_UNIFIED.prj": {
+          "matches_except_paths_and_tested_place_option": true,
+          "prior_sha256": "6B895E4A91C1D5424975EB0C5D54A2863E79D26FA5EB9A517A4163D22D1709DB",
+          "new_sha256": "B6D272EAB62AD8D77CFCF17A87B2E24704C24DDDD5FCC9603B65A45A0F606BA0"
+        },
+        "impl/pnr/cmd.do": {
+          "matches_except_paths_and_tested_place_option": true,
+          "prior_sha256": "E25B70DE74D91D300D0D159E40AA4DAF1F48C256A1C86EA5E0B76B7543698943",
+          "new_sha256": "3EE2D141BE887CF4AAE5938EF7FC86C01AE49FAC7D00C096630C8DCBD82C772D"
+        },
+        "impl/pnr/device.cfg": {
+          "matches_except_paths_and_tested_place_option": true,
+          "prior_sha256": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A",
+          "new_sha256": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A"
+        }
+      },
+      "synthesis": {
+        "auto_reran": true,
+        "prior_netlist_sha256": "C72E89663DB230780FF099AA3619733738ADA18194EA8D58CD79193E88C23E0E",
+        "new_netlist_sha256": "20D0A81D91211A2048278B6A8A7CC01111EDDF7456885803679DBEE52FAD3E2A",
+        "same_netlist_bytes": false,
+        "same_hierarchical_resource_xml": true,
+        "note": "The .vg is encrypted. Identical source and synthesis options plus equal resource XML do not prove byte-identical or formally equivalent netlists."
+      },
+      "meets_500_cls_target_vs_place1_baseline": false
+    }
+  ],
+  "production_drift": []
+}

@@ -1,5 +1,9 @@
 # Tang Primer 25K：触摸 / 压力 / 红外 / 手势 / 吉他 / 蓝牙 / 64×64 LED
 
+**2026-10-23 App 色环版：[Code25 /1.24-hue APK](android_app/dist/FPGA-Music-Hue33-Code25.apk) · [界面效果与说明](android_app/HUE33.md)。** “显示”分区顶部加入青蓝紫红色环、深色频谱与渐变幅度条；本次只改手机端，无新增 FPGA 资源。核心测试、排版检查和签名构建通过，手机实机联调待验。
+
+**2026-10-23 33 档音量色环：[已验证位流、完整 PASS 与资源对比](deliveries/LED_HUE33_20261023/README.md) · [显示说明](SCOPE_DISPLAY.md)。** 每 64 PCM 计数一级，青→蓝→紫→品红→红；±1 青色、零信号灰色。五项仿真逐个通过（含完整顶层），无新增 BSRAM/DSP；50MHz、WNS +0.198ns。整机 Logic21503 /CLS11202 /BSRAM47 /DSP26.5；相对本任务前 8 档为 -87 Logic、+122 CLS。默认位流已同步，尚未烧录；后续规划预留差113 Logic /47 CLS，详见报告。以下为历史记录。
+
 [仓库首页](../README.md) · [文档索引](../docs/README.md) · [快速上手](../docs/QUICK_START.md) · [完整接线与验收](PIN_FUNCTION_REQUIREMENTS.md)
 
 **2026-10-22 弱信号修正版：[新版位流与验证](deliveries/LED_SCOPE_WEAK_FIX_20261022/README.md) · [FSR 量程与颜色标定](SCOPE_DISPLAY.md)。** 基础显示倍率提高八倍，FSR X8/X16/X32；非零信号为饱和蓝至红，静音白色。整机 Logic 21394、CLS 11087、BSRAM 47、DSP 26.5，50MHz 时序通过；后续规划的 Logic 预留少4个，报告已标明。尚未烧录。以下数字为历史版本的数据。
@@ -40,7 +44,8 @@ PCM5102 可以保留，它只把 FPGA 实时合成的 I²S 采样转换为模拟
 
 ```text
 TTP229 8键直连 / 16键串行 → 同步/防抖 → 16路独立 DDS / ADSR 上下文 → 实时混音
-FSR402 / 滑杆 → 分压 → GW5A 片内 ADC → 表情/全局音量/音高/颤音/湿度
+FSR402 → 22k/4.7k 分压 → GW5A 片内 ADC → 压力音量/压音
+滑杆中点 → ADS1115 AIN1 → I²C（与 APDS 共用）→ 全局音量/音高/颤音/湿度
 实时混音 → 原声/回声/合唱 → 平滑总音量 → I²S → PCM5102 → PAM8403
 HC-05 → 键位配置 / 音符曲谱暂存 / 演奏事件日志
 红外8路 + APDS-9960 → 32复音TDM / 八音色 / 颤音 ───────────────→ 实时混音
@@ -112,6 +117,8 @@ OUT1 已从屏幕工程 K1/J3 第2脚迁到 K4/J3 第5脚，避免与 LRCK 冲�
 
 FSR402 使用一路转换模块 AO 经 **22kΩ / 4.7kΩ 分压**接 GW5A 片内 ADC，正端 J8/J3 第36脚，负端 K8/J3 第35脚接 GND。
 **ADC 仅接受 0～1V，不可直连模块 AO 的 3.3V/5V。** 量程和标定见 [FSR402.md](FSR402.md)。
+滑杆不再占用这对引脚：其中点直连 ADS1115 AIN1（3.3V 供电、地址 0x48），模块 SCL/SDA 接 **K10/L10（J3 第31/32脚）** 这组独立 I²C，
+与 APDS-9960 的 H4/G4（J3 第23/24脚）完全分开，两路采样互相独立、可同时工作；接线与 `CAL` 标定见 [迁移说明](REFERENCE_MIGRATION.md)。
 
 PCM5102 按模块标注供电，数字信号为 3.3V；芯片 SCK 保持低电平，使用内部 BCK PLL，无外部 MCLK。
 模块无 SCK 下拉时接 GND。FMT=LOW（I²S）、XSMT=HIGH（3.3V 解除静音）、DEMP=LOW、FLT=LOW。

@@ -86,9 +86,9 @@ module tb_hub75e_audio_display;
         wait(dut.visual_active);
         wait(dut.audio_visual.u_visualizer.display_valid);
         save_scope;
-        inspect(16,23,3'b101);inspect(16,28,3'b000);
-        inspect(63,31,3'b101);inspect(63,27,3'b011); // Quiet grid node only.
-        inspect(32,59,3'b101);inspect(33,59,3'b000); // Fixed PCM peak meter.
+        inspect(16,23,3'b111);inspect(16,28,3'b000);
+        inspect(63,31,3'b111);inspect(63,27,3'b011); // Quiet grid node only.
+        inspect(32,59,3'b111);inspect(33,59,3'b000); // Fixed PCM peak meter.
         visual=2;wait(dut.visual_active==2);
         inspect(28,14,3'b111);inspect(29,14,3'b000);
         inspect(15,40,3'b011);inspect(16,40,3'b111); // Source meters retained in XY.

@@ -10,7 +10,9 @@ set_false_path -from [get_ports {touch_out[7]}] -to [get_pins {u_main/u_touch_mo
 # UART is asynchronous: exclude only its first synchronizer, keep stage 2 timed.
 set_false_path -from [get_ports {hc05_rx}] -to [get_pins {u_main/u_keymap/u_uart/rx_meta*/D}]
 # I2C SDA is asynchronous; only the first of two synchronization FFs is excluded.
+# The gesture sensor and the slider converter use separate buses.
 set_false_path -from [get_ports {sda}] -to [get_pins {u_main/u_gesture/u_i2c/sda_meta*/D}]
+set_false_path -from [get_ports {slider_sda}] -to [get_pins {u_main/u_slider_adc/u_i2c/sda_meta*/D}]
 set_false_path -from [get_ports {ir_beam[*]}] -to [get_pins {u_main/u_ir/beam_meta*/D}]
 # ADC ready is synchronized and its stable result bus is captured only after
 # ready goes low then high. ADC/fabric clock paths remain normally constrained.

@@ -20,6 +20,7 @@ module hc05_keymap #(
     input wire keys_ready, song_busy, notes_busy, recording,
     output reg [55:0] note_map,
     input wire [6:0] touch_keys,
+    input wire [15:0] scan_keys,
     input wire pressure_mode,
     input wire [15:0] volume_gain, pitch_ratio,
     input wire toggle_play, restart,
@@ -149,6 +150,8 @@ module hc05_keymap #(
     localparam [5:0] CMD_PITCH_SET=6'd59;
     localparam [5:0] CMD_VIB_SET=6'd60;
     localparam [5:0] CMD_EFFECT2_SET=6'd62;
+    localparam [5:0] CMD_KLIVE_ON=6'd61;
+    localparam [5:0] CMD_KLIVE_OFF=6'd63;
     // END GENERATED HC05 COMMAND IDS
     localparam NO_ERROR=0, LENGTH_ERROR=1, CHAR_ERROR=2, UART_ERROR=3;
     (* syn_encoding="onehot" *) reg [3:0] state;
@@ -174,6 +177,11 @@ module hc05_keymap #(
     wire select_stream=ENABLE_FLASH_AUDIO && (stream_owned || (state!=RESPOND && audio_stream_valid));
     wire block_log=ENABLE_FLASH_AUDIO && audio_stream_busy;
     wire select_log=!select_stream && !block_log && (log_owned || (state!=RESPOND && log_valid));
+    reg live_owned;
+    reg klive_enable;
+    wire [7:0] live_data;
+    wire live_valid, live_last, live_ready;
+    wire select_live=!select_stream && !select_log && (live_owned || (state!=RESPOND && live_valid));
     wire [7:0] requested_note={4'd0,line[11:8]}*8'd10+{4'd0,line[3:0]};
     wire download_busy;
     wire edit_allowed=keys_ready && !song_busy && !download_busy && !notes_busy && !recording && !rec_busy;
@@ -219,11 +227,16 @@ module hc05_keymap #(
         .done(adsr_done),.touch_config(touch_adsr),.sensor_config(sensor_adsr));
     assign log_ready=select_log && tx_ready;
     assign audio_stream_ready=select_stream && tx_ready;
+    assign live_ready=select_live && tx_ready;
     uart_8n1 #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) u_uart (
         .clk(clk),.resetn(resetn),.rx(rx),.tx(tx),
         .rx_data(received),.rx_valid(received_valid),.rx_ready(state==COLLECT),
-        .rx_fault(rx_fault),.tx_data(select_stream ? audio_stream_data : select_log ? log_data : reply_byte),
-        .tx_valid(select_stream ? audio_stream_valid : select_log ? log_valid : state==RESPOND && reply_char_ready),.tx_ready(tx_ready)
+        .rx_fault(rx_fault),.tx_data(select_stream ? audio_stream_data : select_log ? log_data : select_live ? live_data : reply_byte),
+        .tx_valid(select_stream ? audio_stream_valid : select_log ? log_valid : select_live ? live_valid : state==RESPOND && reply_char_ready),.tx_ready(tx_ready)
+    );
+    key_live_stream u_live (
+        .clk(clk),.resetn(resetn),.enable(klive_enable),.scan_keys(scan_keys),
+        .tx_data(live_data),.tx_valid(live_valid),.tx_last(live_last),.tx_ready(live_ready)
     );
     downloadable_song #(.CLK_HZ(CLK_HZ),.ENABLE_LOOKAHEAD(ENABLE_LOOKAHEAD),
         .LOOKAHEAD_MS(LOOKAHEAD_MS)) u_download (
@@ -304,6 +317,7 @@ module hc05_keymap #(
         if(!resetn) begin
             note_map<=DEFAULT_MAP; state<=COLLECT; line_error<=NO_ERROR;
             line<=0; line_length<=0; reply<=0; reply_remaining<=0;reply_format<=0;reply_char_ready<=0;log_owned<=0;
+            live_owned<=0; klive_enable<=0;
             song_request<=0; rec_start<=0; rec_stop<=0;
             downloaded_audition<=0; audition_pending<=0;
             song_operation<=0; song_arg0<=0; song_arg1<=0; song_arg2<=0;
@@ -338,13 +352,14 @@ module hc05_keymap #(
             if(!downloaded_playing) downloaded_audition<=0;
             if(select_log && log_valid && tx_ready) log_owned<=!log_last;
             if(select_stream && audio_stream_valid && tx_ready)stream_owned<=!audio_stream_last;
+            if(select_live && live_valid && tx_ready) live_owned<=!live_last;
             if(rx_fault) begin
                 line_error<=UART_ERROR;
                 if(state==COLLECT || state==EXECUTE || decoding) begin line<=0; line_length<=0; state<=COLLECT; end
             end
             if(state==RESPOND) begin
                 if(!reply_char_ready)reply_char_ready<=1;
-                else if(!select_log && !select_stream && tx_ready) begin
+                else if(!select_log && !select_stream && !select_live && tx_ready) begin
                     if(reply_template==8'hff)reply<={reply[107:0],4'd0};
                     reply_char_ready<=0;
                     reply_remaining<=reply_remaining-1'b1;
@@ -573,6 +588,8 @@ module hc05_keymap #(
                             else if(!keys_ready || rec_busy || recording || touch_mode16 || touch_hold || analog_mode!=0) result(1);
                             else begin rec_start<=1; result(0); end
                         end else if(decoded_command==CMD_REC_STOP) begin rec_stop<=1; result(0); end
+                        else if(decoded_command==CMD_KLIVE_ON) begin klive_enable<=1; result(0); end
+                        else if(decoded_command==CMD_KLIVE_OFF) begin klive_enable<=0; result(0); end
                         else result(7);
                     end
                     DECIMAL_READ:state<=DECIMAL;

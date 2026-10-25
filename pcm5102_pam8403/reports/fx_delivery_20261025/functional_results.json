@@ -1,0 +1,147 @@
+{
+  "base": {
+    "scenarios": {
+      "exit_code": 0,
+      "pass": [
+        "PASS scenarios polls=230 direction_reports=10 max_average=256 commands=780"
+      ],
+      "guard": [
+        "GUARD 36 566",
+        "GUARD 52 566",
+        "GUARD 68 566",
+        "GUARD 84 566",
+        "GUARD 100 566",
+        "GUARD 116 636",
+        "GUARD 133 641",
+        "GUARD 164 586",
+        "GUARD 188 566",
+        "GUARD 229 641"
+      ]
+    },
+    "guard": {
+      "exit_code": 0,
+      "pass": [
+        "PASS scenarios polls=54 direction_reports=1 max_average=181 commands=214"
+      ],
+      "guard": [
+        "GUARD 41 800396"
+      ]
+    },
+    "integration": {
+      "exit_code": 0,
+      "tests": [
+        "tb_top_dual_analog",
+        "tb_ads1115_bus",
+        "tb_analog_expression",
+        "tb_apds_nack",
+        "tb_i2c_master_bus",
+        "tb_top_idle"
+      ]
+    },
+    "pass_lines": [
+      "PASS [dual analog]: pressure gain/pitch and slider master volume are independent, both active together, slider fault falls back without muting pressure",
+      "PASS [ADS1115 bus]: config D283 written, 16->10-bit mapping, continuous updates, timeout hold and recovery; 4 conversions",
+      "PASS analog expression: pressure pitch as base, slider volume cap/endpoints, slider pitch, all wet codes, full vibrato period with bent base, fault and stale fallback",
+      "PASS: absent APDS retries initialization, records NACK and emits no false gesture",
+      "PASS: pin-level I2C write ACK, repeated-start two-byte read, master ACK/NACK, absent-slave NACK and bus release",
+      "PASS [live idle]: production parameters; S1/S2 produce no audio without touch, 136 stereo pairs"
+    ]
+  },
+  "apds": {
+    "scenarios": {
+      "exit_code": 0,
+      "pass": [
+        "PASS scenarios polls=230 direction_reports=10 max_average=1024 commands=780"
+      ],
+      "guard": [
+        "GUARD 36 739",
+        "GUARD 52 739",
+        "GUARD 68 739",
+        "GUARD 84 739",
+        "GUARD 100 869",
+        "GUARD 116 1389",
+        "GUARD 133 1409",
+        "GUARD 164 824",
+        "GUARD 188 739",
+        "GUARD 229 772"
+      ]
+    },
+    "guard": {
+      "exit_code": 0,
+      "pass": [
+        "PASS scenarios polls=54 direction_reports=1 max_average=354 commands=214"
+      ],
+      "guard": [
+        "GUARD 41 800569"
+      ]
+    },
+    "integration": {
+      "exit_code": 0,
+      "tests": [
+        "tb_top_dual_analog",
+        "tb_ads1115_bus",
+        "tb_analog_expression",
+        "tb_apds_nack",
+        "tb_i2c_master_bus",
+        "tb_top_idle"
+      ]
+    },
+    "pass_lines": [
+      "PASS [dual analog]: pressure gain/pitch and slider master volume are independent, both active together, slider fault falls back without muting pressure",
+      "PASS [ADS1115 bus]: config D283 written, 16->10-bit mapping, continuous updates, timeout hold and recovery; 4 conversions",
+      "PASS analog expression: pressure pitch as base, slider volume cap/endpoints, slider pitch, all wet codes, full vibrato period with bent base, fault and stale fallback",
+      "PASS: absent APDS retries initialization, records NACK and emits no false gesture",
+      "PASS: pin-level I2C write ACK, repeated-start two-byte read, master ACK/NACK, absent-slave NACK and bus release",
+      "PASS [live idle]: production parameters; S1/S2 produce no audio without touch, 136 stereo pairs"
+    ]
+  },
+  "display_differential": {
+    "exit_code": 0,
+    "pass": [
+      "PASS paired display checks=599985 writes=446264 collisions=25802 opposite_half=1719 scroll_writes=222976 rowprep_writes=3324 stop_inflight=45 resets=15"
+    ],
+    "fixture_sha256": "7F5298E8021808AF2B7016A5DA3DB168C866E182A5259591F69D5055E51DF258",
+    "frozen_reference_sha256": "0549811C338300E952D57AEFC54D04BEAB6B5AA737A969E0CF73252661A1BC6A"
+  },
+  "fx_sample_model": {
+    "frames": 259200,
+    "expected_frames": 259200,
+    "error_count": 0,
+    "first_errors": [],
+    "max_latency_inclusive": 37,
+    "vector_sha256": "84D1FA247A493E956B3D0C50678F1C82383450DE2C156FD4206045585A0EC9C0",
+    "samples_sha256": "6A582A9F918886B7317B057877ED8A7E87E8A4A8EF740C13B06A2EF831F32394",
+    "covers_masks": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "covers_delay_and_reverb_presets": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "includes_reset_wet_clamp_extremes_and_configuration_changes": true,
+    "not_legacy_effect_equivalence": true,
+    "not_interpolated_chorus": true
+  },
+  "fx_frame_guarded": {
+    "exit_code": 0,
+    "summary": [
+      "FRAME_BUDGET frames=1416 touch=1012 pitch=43 fx=37 sensor=535 sum=1092 union=1012 overlap=43 fx_idle=987 union_idle=12",
+      "FRAME_DEADLINES touch_latency=1012 pitch_latency=43 fx_latency=37 stress_frames=338 stress_onsets=4 divide_cycles=256 overflow_frames=0 clipped_cycles=0",
+      "PASS frame budget: real UART/TTP229, 16 voices, four slewing bends, playing score, isolated C+D+R prototype, independent deadlines and overlap"
+    ]
+  },
+  "flash": [
+    "PASS tb_take_atomic: 5 checks; complete capture and no mixed words at any audio frame",
+    "PASS tb_take_nor_store: 114 checks; behavioral NOR only",
+    "PASS tb_performance_take: 25 checks, mock storage only"
+  ]
+}

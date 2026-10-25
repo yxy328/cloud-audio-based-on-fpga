@@ -1,0 +1,89 @@
+{
+  "complete_frames": 1411,
+  "stress_frames": 319,
+  "stress_onsets": 4,
+  "periods": [
+    1024
+  ],
+  "maxima": {
+    "touch": 1012,
+    "pitch": 43,
+    "fx": 5,
+    "sensor": 535,
+    "sum": 1060,
+    "union": 1012,
+    "overlap": 43,
+    "touch_latency": 1012,
+    "pitch_latency": 43,
+    "fx_latency": 5,
+    "divide_cycles": 256
+  },
+  "minimum_fx_idle": 1019,
+  "effects": [
+    0,
+    1,
+    2
+  ],
+  "tests": [
+    "tb_fx_frame_budget",
+    "tb_downloadable_song",
+    "tb_hc05_download",
+    "tb_song_time_bound",
+    "tb_top_idle",
+    "tb_top_audio_record",
+    "tb_audio_effects",
+    "tb_echo_params"
+  ],
+  "evidence": [
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\tb_fx_frame_budget.log",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\tb_fx_frame_budget.log",
+      "sha256": "5D2B970FB669B3DFB384DB18FB6B67D86E4051EB7697B5B0A0F2FB6E455E20A5"
+    },
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\tb_downloadable_song.log",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\tb_downloadable_song.log",
+      "sha256": "056FEC56A87D9EA4A82F8667C2C1A5FE0644CCAF34C2AC8B54148B885F2CC446"
+    },
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\tb_hc05_download.log",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\tb_hc05_download.log",
+      "sha256": "778F96905981C1A6D01BD8DAE8704918FF7EA8FEAF2117562B16C6B697CC2E6B"
+    },
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\tb_song_time_bound.log",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\tb_song_time_bound.log",
+      "sha256": "377E7BED7EF31D76CAB913731C5BCBBE7D96FCEB04136EC0DEA4AD2C2910D195"
+    },
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\tb_top_idle.log",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\tb_top_idle.log",
+      "sha256": "EBC4EC86667F3406B33CFC4027FA77C286062068C6F7249C7AC765D809D4771B"
+    },
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\tb_top_audio_record.log",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\tb_top_audio_record.log",
+      "sha256": "DA28477573AF853A17ABD1B7FB6D18DC51EDBC59F784F7C6D0E112DE77F0694E"
+    },
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\tb_audio_effects.log",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\tb_audio_effects.log",
+      "sha256": "AA7BDBC361A7CC078F35ECDAA375AD31D456C165E2295D80D83AB1D309FA0A6E"
+    },
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\tb_echo_params.log",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\tb_echo_params.log",
+      "sha256": "0A951A9365249848CCF3644A6EF794D010C79D789E4194E287696BD72B60A6DB"
+    },
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\build\\fx_frame_budget.csv",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\fx_frame_budget.csv",
+      "sha256": "1FB0E27B6DF628B0F9A47E93BC3AE80FB1596109F1D7067C760CE448CFE06491"
+    },
+    {
+      "source": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\sim\\tb_fx_frame_budget.v",
+      "copy": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_preflight_20261024\\tb_fx_frame_budget.v",
+      "sha256": "6005D215DFA17CBA9E89FA069982BBF623E135B21E7E6FD10A130826B542BDD5"
+    }
+  ]
+}

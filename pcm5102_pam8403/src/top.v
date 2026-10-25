@@ -16,6 +16,11 @@ module top #(
     // is opt-in and consumes no FIFO/UART logic in the default build.
     parameter ENABLE_USB_AUDIO_RECORD = 0,
     parameter VOLUME_SHIFT = 4,
+    // The shared sensor/touch arithmetic core is a verified prototype that does
+    // not pay for itself on GW5A-25: full PnR measured +709 Logic and +66 CLS
+    // with 217 unrouted nets, so the dual engine stays the default build.
+    // See reports/engine_merge_impl_20261024/README.md.
+    parameter SHARED_SYNTH = 0,
     parameter KEY_CONFIRM_CYCLES = 50_000,
     parameter TOUCH_STARTUP_US = 600000,
     parameter TOUCH_DEBOUNCE_MS = 2, // Note keys 1..7: short press/release confirmation.
@@ -37,6 +42,10 @@ module top #(
     parameter SONG_TAIL_SAMPLES = 17100,
     parameter FSR_ENABLE = 1,
     parameter FSR_SAMPLE_HZ = 1000,
+    // ADS1115 slider polling. Production keeps a 25ms converter power-up wait
+    // and a 10ms read period; tests override them to shorten the simulation.
+    parameter integer SLIDER_STARTUP_MS = 25,
+    parameter integer SLIDER_POLL_MS = 10,
     parameter FSR_ADC_INVERT = 0, // Supplied one-channel module AO rises with force.
     parameter FSR_GAIN_REVERSE = 1, // Light touch loud, heavy touch quiet.
     parameter [9:0] FSR_ADC_ZERO = 10'd32,
@@ -67,6 +76,9 @@ module top #(
     output wire i2s_din,
     output wire touch_scl,
     inout wire scl, sda,
+    // Dedicated ADS1115 slider bus (K10/L10 = J3 pins 31/32), separate from
+    // the APDS-9960 bus on H4/G4.
+    inout wire slider_scl, slider_sda,
     output wire hub_R1, hub_G1, hub_B1,
     output wire hub_R2, hub_G2, hub_B2,
     output wire hub_A, hub_B, hub_C, hub_D, hub_E,
@@ -185,6 +197,14 @@ module top #(
     wire fsr_adc_valid;
     wire [13:0] fsr_adc_raw;
     wire fsr_adc_timeout;
+    // Slider channel: ADS1115 on its own I2C bus.
+    wire [15:0] slider_raw;
+    wire [9:0] slider_adc_sample;
+    wire slider_adc_valid, slider_adc_timeout;
+    // App ADC read/calibration follows the channel selected by ANALOG:
+    // mode 0 reports the pressure channel, slider modes report the slider.
+    wire [9:0] status_adc_sample=(analog_mode==0) ? fsr_adc_sample : slider_adc_sample;
+    wire status_adc_timeout=(analog_mode==0) ? fsr_adc_timeout : slider_adc_timeout;
     wire [9:0] fsr_pressure_code;
     wire [15:0] fsr_target_gain;
     wire [15:0] fsr_gain;
@@ -258,7 +278,7 @@ module top #(
         .song_busy(song_playing || (|song_active) || s1_pressed || s2_action),
         .notes_busy((|(touch_mode16 ? touch_keys_raw : {9'd0,touch_keys_raw[6:0]})) || (|physical_notes) || (|touch_active[6:0]) || (|extended_active)),
         .recording(perf_playing),.note_map(touch_note_map),
-        .touch_keys(touch_keys[6:0]),.pressure_mode(fsr_pitch_mode),
+        .touch_keys(touch_keys[6:0]),.scan_keys(touch_keys),.pressure_mode(fsr_pitch_mode),
         .volume_gain(fsr_gain),.pitch_ratio(fsr_pitch_ratio),
         .toggle_play(s1_pressed),.restart(s2_action),.rec_busy(recording_busy),
         .downloaded_valid(downloaded_valid),.downloaded_playing(downloaded_playing),
@@ -284,7 +304,7 @@ module top #(
         .pedal_clear(perf_kill || previous_touch_mode!=touch_mode16),.take_recording(perf_recording),
         .effect_mode(effect_mode),.effect_wet(effect_wet),.master_volume(master_volume),
         .analog_mode(analog_mode),.pressure_write(pressure_write),.pressure_value(pressure_value),
-        .analog_min(analog_min),.analog_max(analog_max),.adc_sample(fsr_adc_sample),.adc_timeout(fsr_adc_timeout),
+        .analog_min(analog_min),.analog_max(analog_max),.adc_sample(status_adc_sample),.adc_timeout(status_adc_timeout),
         .audio_rec_busy(audio_rec_busy),.audio_rec_ready(audio_rec_ready),.audio_rec_overflow(audio_rec_overflow),.audio_rec_valid(audio_rec_valid),
         .audio_rec_status(audio_rec_status),.audio_rec_error(audio_rec_error),
         .audio_rec_stored_samples(audio_rec_stored_samples),.audio_rec_generation(audio_rec_generation),
@@ -324,7 +344,29 @@ module top #(
     assign perf_live_state={live_note_gates,{11'd0,gesture_bank,gesture_vibrato,gesture_timbre},
         {10'd0,effect_mode,effective_wet},{3'd0,master_target},effective_pitch_ratio,fsr_gain,
         {14'd0,sensor_adsr},touch_adsr,touch_phase_increments[223:0]};
-    gesture_top #(.AUDIO_VOLUME_SHIFT(SENSOR_VOLUME_SHIFT),.EXTERNAL_CONTROL(1),.ENABLE_REPLAY(ENABLE_EVENT_TAKE)) u_gesture (
+    wire synth_sensor_mul,synth_touch_mul,synth_sensor_rom,synth_touch_rom;
+    wire synth_touch_mul_grant,synth_touch_rom_grant;
+    wire signed [32:0] synth_sensor_a,synth_touch_a;
+    wire signed [17:0] synth_sensor_b,synth_touch_b;
+    wire [31:0] synth_sensor_phase,synth_touch_phase;
+    wire signed [50:0] synth_product;
+    wire signed [15:0] synth_sine;
+    generate if(SHARED_SYNTH)begin: shared_synth
+        synth_shared_arith u_arithmetic(.clk(clk),
+            .sensor_mul_request(synth_sensor_mul),.touch_mul_request(synth_touch_mul),
+            .sensor_mul_a(synth_sensor_a),.touch_mul_a(synth_touch_a),
+            .sensor_mul_b(synth_sensor_b),.touch_mul_b(synth_touch_b),
+            .touch_mul_grant(synth_touch_mul_grant),.product(synth_product),
+            .sensor_sine_request(synth_sensor_rom),.touch_sine_request(synth_touch_rom),
+            .sensor_sine_phase(synth_sensor_phase),.touch_sine_phase(synth_touch_phase),
+            .touch_sine_grant(synth_touch_rom_grant),.sine(synth_sine));
+    end else begin: separate_synth
+        assign synth_product=51'sd0;
+        assign synth_sine=16'sd0;
+        assign synth_touch_mul_grant=1'b0;
+        assign synth_touch_rom_grant=1'b0;
+    end endgenerate
+    gesture_top #(.AUDIO_VOLUME_SHIFT(SENSOR_VOLUME_SHIFT),.EXTERNAL_CONTROL(1),.ENABLE_REPLAY(ENABLE_EVENT_TAKE),.SHARED_ARITH(SHARED_SYNTH)) u_gesture (
         .clk(clk),.resetn(resetn && !(panic && !ENABLE_EVENT_TAKE)),.frame_ce(frame_ce),
         .key_s1(1'b0),.key_s2(1'b0),.scl(scl),.sda(sda),
         .control_timbre(perf_replay ? perf_state[496 +: 3] : gesture_timbre),
@@ -338,8 +380,21 @@ module top #(
         .replay_mode(perf_playing),.replay_gesture_valid(replay_gesture_valid),.audio_clear(perf_kill || panic),
         .replay_start(replay_start),.replay_end(replay_end),
         .voice_active(sensor_voice_active),.voice_count(sensor_voice_count),.overrun(sensor_overrun),
+        .shared_mul_request(synth_sensor_mul),.shared_sine_request(synth_sensor_rom),
+        .shared_mul_a(synth_sensor_a),.shared_mul_b(synth_sensor_b),.shared_sine_phase(synth_sensor_phase),
+        .shared_product(synth_product),.shared_sine(synth_sine),
         .init_done(gesture_ready),.gesture_valid(gesture_valid),
         .dir_evaluated(dir_evaluated),.start_dir(start_dir),.end_dir(end_dir)
+    );
+    // Slider converter owns K10/L10 (J3 pins 31/32); the gesture sensor keeps
+    // H4/G4, so the two buses never interact.
+    ads1115_ctrl #(
+        .STARTUP_MS(SLIDER_STARTUP_MS),.POLL_MS(SLIDER_POLL_MS)
+    ) u_slider_adc (
+        .clk(clk),.resetn(resetn),
+        .scl(slider_scl),.sda(slider_sda),
+        .raw(slider_raw),.sample(slider_adc_sample),
+        .sample_valid(slider_adc_valid),.timeout(slider_adc_timeout)
     );
     geita #(.STRING_LENGTH(GUITAR_STRING_LENGTH),.EXTERNAL_TRIGGER(1)) u_string (
         .clk(clk),.resetn(resetn && !panic && !perf_kill),.sample_ce(frame_ce),.key_s1(1'b0),
@@ -396,7 +451,7 @@ module top #(
         .SLEW_STEP(FSR_SLEW_STEP)
     ) u_fsr_dynamics (
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce),
-        .expression_enable(FSR_ENABLE && analog_mode==0 && !fsr_pitch_mode),
+        .expression_enable(FSR_ENABLE && !fsr_pitch_mode),
         .adc_valid(fsr_adc_valid), .adc_sample(fsr_adc_sample),
         .pressure_code(fsr_pressure_code), .target_gain(fsr_target_gain), .gain(fsr_gain)
     );
@@ -406,7 +461,7 @@ module top #(
         .MIN_GAIN(FSR_PITCH_MIN_RATIO), .SLEW_STEP(FSR_PITCH_SLEW_STEP)
     ) u_fsr_pitch_dynamics (
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce),
-        .expression_enable(FSR_ENABLE && analog_mode==0 && fsr_pitch_mode),
+        .expression_enable(FSR_ENABLE && fsr_pitch_mode),
         .adc_valid(fsr_adc_valid), .adc_sample(fsr_adc_sample),
         .pressure_code(), .target_gain(fsr_target_pitch_ratio), .gain(fsr_pitch_ratio)
     );
@@ -495,7 +550,7 @@ module top #(
         .bend_write(bend_write),.bend_reset(bend_reset),.bend_index(bend_index),.bend_ratio(bend_ratio),
         .phase_increments(touch_phase_increments)
     );
-    touch_tdm_synth #(.VOLUME_SHIFT(VOLUME_SHIFT),.EXTENDED_CONTROL(1),
+    touch_tdm_synth #(.VOLUME_SHIFT(VOLUME_SHIFT),.EXTENDED_CONTROL(1),.SHARED_ARITH(SHARED_SYNTH),.FAST_READ(SHARED_SYNTH),
         .PEDAL_TAIL_MS(PEDAL_TAIL_MS),.DAMPER_MS(DAMPER_MS)) u_touch_synth (
         .clk(clk),.resetn(resetn && !panic && !perf_kill && previous_touch_mode==touch_mode16),.sample_ce(frame_ce),
         .gates(touch_note_gates),.low_steps(perf_replay ? perf_state[223:0] : touch_phase_increments[223:0]),
@@ -505,7 +560,11 @@ module top #(
         .voice_count(touch_voice_count),
         .adsr_config(perf_replay ? perf_state[224 +: 64] : touch_adsr),
         .pitch_ratio(perf_replay ? perf_state[448 +: 16] : effective_pitch_ratio),
-        .sample(touch_sample),.active(touch_active),.clipped(),.overrun());
+        .sample(touch_sample),.active(touch_active),.clipped(),.overrun(),
+        .shared_mul_request(synth_touch_mul),.shared_sine_request(synth_touch_rom),
+        .shared_mul_a(synth_touch_a),.shared_mul_b(synth_touch_b),.shared_sine_phase(synth_touch_phase),
+        .shared_mul_grant(synth_touch_mul_grant),.shared_sine_grant(synth_touch_rom_grant),
+        .shared_product(synth_product),.shared_sine(synth_sine));
     generate
         if (FSR_ENABLE) begin: pressure_enabled
             envelope_gain #(.VOLUME_SHIFT(0)) u_expression (
@@ -529,8 +588,8 @@ module top #(
     );
     analog_expression u_analog_expression (
         .clk(clk),.resetn(resetn),.frame_ce(frame_ce),.mode(analog_mode),
-        .adc_sample(fsr_adc_sample),.adc_min(analog_min),.adc_max(analog_max),.adc_valid(fsr_adc_valid),.adc_timeout(fsr_adc_timeout),
-        .fsr_ratio(fsr_pitch_ratio),.volume(master_volume),.wet(effect_wet),
+        .adc_sample(slider_adc_sample),.adc_min(analog_min),.adc_max(analog_max),.adc_valid(slider_adc_valid),.adc_timeout(slider_adc_timeout),
+        .pressure_pitch(fsr_pitch_ratio),.volume(master_volume),.wet(effect_wet),
         .pitch_ratio(effective_pitch_ratio),.master_gain(master_target),.effect_wet(effective_wet),
         .position(analog_position),.available(analog_available));
     // Dry bypass retains the original frame timing. Wet modes add the

@@ -9,6 +9,8 @@ module top_unified #(
     input wire touch_sdo,hc05_rx,audio_rec_cts_n,
     output wire hc05_tx,audio_rec_tx,i2s_bck,i2s_lrck,i2s_din,touch_scl,
     inout wire scl,sda,
+    // Dedicated ADS1115 slider bus (K10/L10 = J3 pins 31/32).
+    inout wire slider_scl,slider_sda,
     output wire hub_R1,hub_G1,hub_B1,hub_R2,hub_G2,hub_B2,
     output wire hub_A,hub_B,hub_C,hub_D,hub_E,hub_CK,hub_ST,hub_OE,
     output wire flash_cs_n,flash_sck,flash_mosi,flash_wp_n,flash_hold_n,
@@ -20,6 +22,7 @@ module top_unified #(
         .clk(clk),.key_s1(key_s1),.key_s2(key_s2),.touch_out(touch_out),.ir_beam(ir_beam),
         .touch_sdo(touch_sdo),.hc05_rx(hc05_rx),.hc05_tx(hc05_tx),.audio_rec_cts_n(audio_rec_cts_n),.audio_rec_tx(audio_rec_tx),
         .i2s_bck(i2s_bck),.i2s_lrck(i2s_lrck),.i2s_din(i2s_din),.touch_scl(touch_scl),.scl(scl),.sda(sda),
+        .slider_scl(slider_scl),.slider_sda(slider_sda),
         .hub_R1(hub_R1),.hub_G1(hub_G1),.hub_B1(hub_B1),.hub_R2(hub_R2),.hub_G2(hub_G2),.hub_B2(hub_B2),
         .hub_A(hub_A),.hub_B(hub_B),.hub_C(hub_C),.hub_D(hub_D),.hub_E(hub_E),.hub_CK(hub_CK),.hub_ST(hub_ST),.hub_OE(hub_OE),
         .flash_cs_n(flash_cs_n),.flash_sck(flash_sck),.flash_mosi(flash_mosi),.flash_miso(flash_miso),

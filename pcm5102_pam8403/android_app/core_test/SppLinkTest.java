@@ -55,6 +55,11 @@ public final class SppLinkTest {
         a.onCommand=c->a.feed("EFFECT2,0\r\n");yes(link.command("EFFECT2,?","EFFECT2").equals("EFFECT2,0"));
         a.onCommand=c->{a.feed("P");a.feed("ITCH,2000,8000,1000,4000\r\n");};
         yes(link.command("PITCH,?","PITCH").equals("PITCH,2000,8000,1000,4000"));
+        // Live key uplink: unsolicited K lines must reach the listener without swallowing the ACK.
+        a.onCommand=c->{yes(c.equals("KLIVE_ON\n"));a.feed("K,01,1\r\nK,03,1\r\nOK\r\nK,01,0\r\n");};
+        yes(link.command("KLIVE_ON","OK").equals("OK"));yes(lines.contains("K,01,1"));yes(lines.contains("K,01,0"));
+        a.onCommand=c->{yes(c.equals("KLIVE_OFF\n"));a.feed("K,03,0\r\nOK\r\n");};
+        yes(link.command("KLIVE_OFF","OK").equals("OK"));
         String[][] initialization={
             {"PING","PONG","PONG"},
             {"MAP?","MAP","MAP,60,61,62,63,64,65,66"},

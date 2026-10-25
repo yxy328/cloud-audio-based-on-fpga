@@ -4,6 +4,7 @@
 // complete within the 1024-clock stereo frame. First seven retain remap/bend.
 module touch_tdm_synth #(
     parameter integer VOLUME_SHIFT=4, EXTENDED_CONTROL=0,
+    parameter integer SHARED_ARITH=0, FAST_READ=0,
     parameter integer PEDAL_TAIL_MS=1200, DAMPER_MS=10
 )(
     input wire clk,resetn,sample_ce,
@@ -18,7 +19,14 @@ module touch_tdm_synth #(
     output reg [15:0] active,
     output reg [4:0] voice_count,
     output reg clipped,
-    output reg overrun
+    output reg overrun,
+    output wire shared_mul_request, shared_sine_request,
+    output wire signed [32:0] shared_mul_a,
+    output wire signed [17:0] shared_mul_b,
+    output wire [31:0] shared_sine_phase,
+    input wire shared_mul_grant, shared_sine_grant,
+    input wire signed [50:0] shared_product,
+    input wire signed [15:0] shared_sine
 );
     // Thirteen 16-bit words per voice fit one 18Kbit synchronous RAM.
     // Serial context reads/writes avoid a wide shallow RAM and LUT mux bank.
@@ -76,9 +84,17 @@ module touch_tdm_synth #(
     reg [4:0] divide_left;
     reg signed [32:0] mul_a;
     reg signed [17:0] mul_b;
-    reg signed [50:0] product;
+    reg signed [50:0] local_product;
+    wire signed [50:0] product=SHARED_ARITH ? shared_product : local_product;
     reg [31:0] lookup_phase;
-    wire signed [15:0] sine;
+    wire signed [15:0] local_sine;
+    wire signed [15:0] sine=SHARED_ARITH ? shared_sine : local_sine;
+    assign shared_mul_a=mul_a;
+    assign shared_mul_b=mul_b;
+    assign shared_sine_phase=lookup_phase;
+    assign shared_mul_request=SHARED_ARITH && resetn &&
+        (state==PITCH_WAIT || state==GAIN_WAIT || (state==PUBLISH && publish_part==1));
+    assign shared_sine_request=SHARED_ARITH && resetn && state==WAVE_WAIT;
     reg signed [23:0] sum;
     reg [15:0] context_write;
     always @*begin
@@ -111,8 +127,8 @@ module touch_tdm_synth #(
     wire subtract=shifted>={1'b0,length};
     wire [16:0] rem_next=subtract ? shifted-{1'b0,length} : shifted;
     wire [15:0] q_next={quotient[14:0],subtract};
-    touch_sine_rom u_sine(.clk(clk),.phase(lookup_phase),.sample(sine));
-    always @(posedge clk) product<=mul_a*mul_b;
+    touch_sine_rom u_sine(.clk(clk),.phase(lookup_phase),.sample(local_sine));
+    always @(posedge clk) local_product<=mul_a*mul_b;
     function [31:0] note_step;
         input [3:0] key;
         begin case(key)
@@ -159,7 +175,10 @@ module touch_tdm_synth #(
                     index<=0;sum<=0;state<=LOAD;
                 end
                 LOAD:begin field<=0;address<={index,4'd0};state<=READ_WAIT;end
-                READ_WAIT:state<=READ_WORD;
+                READ_WAIT:begin
+                    if(FAST_READ)address<=address+1'b1;
+                    state<=READ_WORD;
+                end
                 READ_WORD:begin
                     case(field)
                         0:phase[15:0]<=context_q;1:phase[31:16]<=context_q;
@@ -169,7 +188,7 @@ module touch_tdm_synth #(
                         11:sustain<=context_q;12:release_time<=context_q;
                     endcase
                     if(field==12)begin address<={index,4'd13};state<=ENV;end
-                    else begin field<=field+1'b1;address<=address+1'b1;state<=READ_WAIT;end
+                    else begin field<=field+1'b1;address<=address+1'b1;state<=FAST_READ ? READ_WORD : READ_WAIT;end
                 end
                 ENV:begin
                     seen<=frame_gates[index];state<=PITCH;
@@ -214,7 +233,7 @@ module touch_tdm_synth #(
                     else divide_left<=divide_left-1'b1;
                 end
                 PITCH:begin mul_a<=$signed({1'b0,note_step(index-4'd7)});mul_b<=$signed({2'b0,ratio_snapshot});state<=PITCH_WAIT;end
-                PITCH_WAIT:state<=WAVE;
+                PITCH_WAIT:if(!SHARED_ARITH || shared_mul_grant)state<=WAVE;
                 WAVE:begin
                     age<=stage!=0 && !frame_physical[index] ? next_age : 0;
                     if(stage!=0 && stage!=6 && !frame_physical[index] && (!oldest_valid || next_age>oldest_age))begin
@@ -225,9 +244,9 @@ module touch_tdm_synth #(
                         (ratio_snapshot==65535) ? note_step(index-4'd7) : product[47:16]);
                     state<=WAVE_WAIT;
                 end
-                WAVE_WAIT:begin field<=13;state<=GAIN;end
+                WAVE_WAIT:if(!SHARED_ARITH || shared_sine_grant)begin field<=13;state<=GAIN;end
                 GAIN:begin field<=14;mul_a<=$signed(sine);mul_b<=$signed({2'b0,gain});state<=GAIN_WAIT;end
-                GAIN_WAIT:begin field<=0;state<=STORE;end
+                GAIN_WAIT:if(!SHARED_ARITH || shared_mul_grant)begin field<=0;state<=STORE;end
                 STORE:begin
                     if(field==0)begin
                         sum<=sum+$signed(scaled_product[23:0]);active[index]<=stage!=0;
@@ -240,7 +259,8 @@ module touch_tdm_synth #(
                     end else field<=field+1'b1;
                 end
                 PUBLISH:begin
-                    publish_part<=publish_part+1'b1;
+                    if(publish_part!=1 || !SHARED_ARITH || shared_mul_grant)
+                        publish_part<=publish_part+1'b1;
                     if(publish_part==0)begin
                         voice_count<=count_work;victim<=oldest;
                         victim_valid<=oldest_valid && count_work-pending_work>protected_limit;

@@ -1,0 +1,10 @@
+{
+  "scenarios": {
+    "semantic_records": 1108,
+    "equal": true
+  },
+  "guard": {
+    "semantic_records": 305,
+    "equal": true
+  }
+}

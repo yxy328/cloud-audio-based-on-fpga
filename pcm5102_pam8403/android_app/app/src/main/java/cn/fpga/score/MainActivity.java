@@ -93,6 +93,9 @@ public final class MainActivity extends Activity {
     private boolean recordingOverflow;
     private boolean recordingCompleted;
     private PhonePiano phonePiano;
+    private PianoKeyboardView phoneKeyboard;
+    private Button kliveButton;
+    private boolean kliveOn;
     private PhoneTake phoneDraft;
     private PhoneTakeStore phoneStore;
     private TextView phoneInfo;
@@ -132,7 +135,7 @@ public final class MainActivity extends Activity {
         if(state!=null){String id=state.getString("exportingScore");for(SongLibrary.Entry entry:SongLibrary.all())if(entry.id.equals(id)){exportingScore=entry;break;}}
         link=new SppLink(new SppLink.Listener(){
             public void line(String line){main.post(()->receive(line));}
-            public void disconnected(String reason){main.post(()->{forgetBendConnection();mapping=null;recordingInterrupted();forgetControls();mapInfo.setText("键位未知，请重新连接");setStatus("蓝牙断开："+reason);});}
+            public void disconnected(String reason){main.post(()->{forgetBendConnection();mapping=null;recordingInterrupted();forgetControls();mapInfo.setText("键位未知，请重新连接");kliveOn=false;updateKliveLabel();if(phoneKeyboard!=null)phoneKeyboard.clearLive();setStatus("蓝牙断开："+reason);});}
         });
         BluetoothManager manager=(BluetoothManager)getSystemService(BLUETOOTH_SERVICE);adapter=manager==null?null:manager.getAdapter();
         buildUi();showSong();setStatus("先在系统蓝牙设置配对 HC-05，再刷新设备");
@@ -505,6 +508,8 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onResume(){super.onResume();resumed=true;if(uiReady)scheduleDisplayPoll();}
     private void buildLedControls(LinearLayout content){
+        LinearLayout preview=card(content,"LIVE","手机实时预览","青蓝紫红随演奏幅度变化。");
+        buildLedPreview(preview);
         LinearLayout box=card(content,"LED","显示控制与实时预览","需配套新版 FPGA 位流。手机可直接切页，板上 S2 仍可使用。");
         LinearLayout pageGroup=segmentGroup(box);String[] pageNames={"总览 / 曲谱","波形","XY 轨迹","频谱"};
         for(int n=0;n<4;n+=2){LinearLayout pages=row(pageGroup);for(int k=n;k<n+2;k++){final int mode=k;pageButtons[k]=segment(pages,pageNames[k],()->selectLedPage(mode),true);}}
@@ -533,14 +538,16 @@ public final class MainActivity extends Activity {
         xyInfo.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         text(box,"REF 是 FPGA 生成的参考图形；AUD 随实际演奏变化。收到设备 OK 后才显示发送确认；板上 S2 选图或复位后，请重新应用。",12,MUTED);
         text(box,"S2 长按循环切换总览/曲谱、波形、XY、频谱；XY 页短按选图，其他页短按会重启有效曲谱。",12,MUTED);
-        text(box,"手机实时预览 · FPGA 数据",18,INK);
-        text(box,"16 段频谱约 0～3.05kHz，下方为三组音源幅度。最多每秒查询 5 次，下载、事件录制或其他命令期间暂停。",12,MUTED);
-        ledPreview=new SpectrumPreviewView(this);box.addView(ledPreview,new LinearLayout.LayoutParams(-1,dp(220)));
+        updateXyControls();
+    }
+    private void buildLedPreview(LinearLayout box){
+        text(box,"沿用面板的青蓝紫红色环，为频谱与音源幅度配色。下方百分比为各音源相对幅度，与面板总混音 PK 分开显示。",12,MUTED);
+        ledPreview=new SpectrumPreviewView(this);box.addView(ledPreview,new LinearLayout.LayoutParams(-1,dp(356)));
+        text(box,"数据来自 FPGA，最多每秒更新 5 次；下载、事件录制或其他命令期间暂停。",12,MUTED);
         ledPreviewInfo=text(box,"预览未开启；画面来自 FPGA 回传，不是手机麦克风。",12,MUTED);
         LinearLayout previewButtons=row(box);
         button(previewButtons,"开启实时预览",this::startLedPreview,true);
         button(previewButtons,"停止预览",()->stopLedPreview("预览已停止。"),false);
-        updateXyControls();
     }
     private void selectLedPage(int mode){
         controlState.edit("page",4,""+mode);refreshControlUi();
@@ -713,11 +720,14 @@ public final class MainActivity extends Activity {
         LinearLayout box=card(content,"PHONE","手机音符录制 · 本地保存 · 导出 MIDI","页面琴键在手机本地发声。保存的是音符事件，不是 WAV 音频；无需连接蓝牙，可在“我的录音”回放、改名、删除和导出。");
         phoneInfo=text(box,"开始手机录制 → 弹奏下方琴键 → 停止 → 回放 → 命名保存。录制前先松开琴键。",13,MUTED);
         text(box,"7白键 + 5黑键为 C4～B4；右侧4个独立踏板条暂作 C5 / D5 / E5 / F5。键号与板上串行扫描顺序一致。",12,MUTED);
-        box.addView(new PianoKeyboardView(this,127,this::phoneKey),new LinearLayout.LayoutParams(-1,dp(180)));
+        phoneKeyboard=new PianoKeyboardView(this,127,this::phoneKey);
+        box.addView(phoneKeyboard,new LinearLayout.LayoutParams(-1,dp(180)));
         button(box,"开始手机录制",this::startPhoneRecording,false,1);LinearLayout controls=row(box);
         button(controls,"停止录制 / 回放",this::stopPhoneRecording,false);button(controls,"回放当前录制",()->{if(phoneRecording){alert("请先停止手机录制");return;}playPhoneTake(phoneDraft,"当前手机录制");},false,1);
         button(box,"命名并保存录制",()->savePhoneRecording(null),false);button(box,"我的录音 · 回放 / 改名 / 删除",this::showPhoneLibrary,false);
         button(box,"导出当前手机 MIDI",()->exportPhoneTake(phoneDraft,"手机演奏"),false);
+        kliveButton=button(box,"板键联动 · 开启",this::toggleKlive,true,1);
+        text(box,"开启后板子触摸键实时上报键号：对应屏幕键点亮，录制中同时写入当前手机录制（演奏时手机不发声，声音仍走板上喇叭）。需蓝牙连接，断开自动复位。",12,MUTED);
         text(box,"每次保存新增一份，数量由手机可用空间决定；每份最多10000个音符。记录音符、节奏、按键时长和力度，回放由手机合成。保存后关闭重开仍可在“我的录音”找到。",12,MUTED);
     }
     private PhonePiano phonePiano(){if(phonePiano==null)phonePiano=new PhonePiano();return phonePiano;}
@@ -726,6 +736,19 @@ public final class MainActivity extends Activity {
         try{if(on){phonePiano().liveKey(key,true);}else if(phonePiano!=null)phonePiano.liveKey(key,false);
             if(phoneRecording){int ms=phoneTime();if(on){if(!phoneDraft.down(key,100,ms)){stopPhoneRecording();alert("已达到10000个音符，本次手机录制已停止，可回放或保存");}else phoneDirty=true;}else phoneDraft.up(key,ms);}}
         catch(Exception e){alert("手机琴键未完成："+e.getMessage());}
+    }
+    private void toggleKlive(){
+        final boolean on=!kliveOn;
+        task(()->{try{link.command(on?"KLIVE_ON":"KLIVE_OFF","OK");
+            main.post(()->{kliveOn=on;updateKliveLabel();if(!on&&phoneKeyboard!=null)phoneKeyboard.clearLive();
+                phoneInfo.setText(on?"板键联动已开启：板键将点亮屏幕键并写入录制":"板键联动已关闭");});}
+            catch(Exception e){main.post(this::forgetBendConnection);throw e;}}
+            ,on?"板键联动已开启":"板键联动已关闭");
+    }
+    private void updateKliveLabel(){if(kliveButton!=null)kliveButton.setText(kliveOn?"板键联动 · 关闭":"板键联动 · 开启");}
+    private void boardKey(int key,boolean on){
+        if(phoneKeyboard!=null)phoneKeyboard.liveHighlight(key,on);
+        if(phoneRecording){int ms=phoneTime();if(on){if(!phoneDraft.down(key,100,ms)){stopPhoneRecording();alert("已达到10000个音符，本次手机录制已停止，可回放或保存");}else phoneDirty=true;}else phoneDraft.up(key,ms);}
     }
     private void startPhoneRecording(){
         if(phoneBusy){alert("手机录制文件正在处理，请稍候");return;}if(phoneRecording)return;
@@ -1000,7 +1023,7 @@ public final class MainActivity extends Activity {
         button(box,"应用串行极性",()->{if(recording||recordDraining){alert("请先结束事件录制");return;}applyControl("SERIAL,"+serialPolarity.getSelectedItemPosition(),"串行极性已确认；进入串行时重新等待校准");},true);
         box=sourceGroups[0][4];
         text(box,"触摸颤音仍使用 ANALOG,3 电位器档，保留原单向下摆。前七扫描键的弯音范围和滑音时间可在“音高与弯音”分组调整；红外 / 手势颤音参数在对应页签。",12,MUTED);
-        pressureChoice=choices(box,"FSR 压力用途（16 键时由手机切换）",new String[]{"控制触摸音量","控制触摸音高"});
+        pressureChoice=choices(box,"FSR 压力用途（独立于滑杆，始终生效；16 键时由手机切换）",new String[]{"控制触摸音量","控制触摸音高"});
         button(box,"应用压力用途",()->applyControl("PRESSURE,"+pressureChoice.getSelectedItemPosition(),"压力用途已确认"),true);
         box=sourceGroups[0][5];
         holdChoice=choices(box,"延音 / 踏板",new String[]{"关闭：松键进入释音","无限锁存：关闭时释放","钢琴踏板：松键尾音约 1.2 秒，抬起时制音"});
@@ -1019,16 +1042,16 @@ public final class MainActivity extends Activity {
         volumeLabel=text(box,"总音量 · 16 / 16",13,INK);volumeBar=new SeekBar(this);volumeBar.setMax(16);volumeBar.setProgress(16);box.addView(volumeBar);
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int n,boolean user){volumeLabel.setText("总音量 · "+n+" / 16");refreshControlUi();}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});
         button(box,"应用总音量",()->applyControl("VOLUME,"+volumeBar.getProgress(),"总音量已确认；0 为静音"),true);
-        box=card(sections[2],"ADC","模拟输入与标定","作用于：全局混音。模拟音高仅调制触摸；一条 ADC 在各用途之间复用。");
-        analogChoice=choices(box,"模拟输入用途",new String[]{"0 · 原 FSR 压力（保持原标定）","1 · 滑动变阻器：总音量","2 · 滑动变阻器：触摸音高 0.5～1 倍","3 · 滑动变阻器：触摸颤音深度","4 · 滑动变阻器：音效湿度"});
+        box=card(sections[2],"ADC","滑杆输入与标定","作用于：全局混音。压力（片内 ADC）与滑杆（ADS1115）是两路独立输入，这里只选滑杆；压力用途在「表情」页单独选择，两者同时生效。");
+        analogChoice=choices(box,"滑杆用途（ANALOG，独立于压力）",new String[]{"0 · 关闭滑杆（压力仍有效）","1 · 滑动变阻器：总音量","2 · 滑动变阻器：触摸音高 0.5～1 倍","3 · 滑动变阻器：触摸颤音深度","4 · 滑动变阻器：音效湿度"});
         button(box,"应用模拟输入用途",()->{
             if(recording||recordDraining){alert("请先结束事件录制");return;}
             if(analogChoice.getSelectedItemPosition()==2&&confirmedPitch!=null&&confirmedPitch[3]!=16384){adcInfo.setText("当前移调 / 标准音基准不是原音，不能切到电位器音高；请先恢复 0 半音 / A4=440。");return;}
             applyControl("ANALOG,"+analogChoice.getSelectedItemPosition(),"模拟输入用途已确认");
         },true);
-        text(box,"滑动变阻器复用原 ADC 模拟输入，替换 FSR，不是同时采两路。滑杆音量受手机总音量上限约束；ADC 必须经过分压保持在 0～1V。湿度控制需先开启回声或合唱。",12,MUTED);
-        text(box,"滑杆端点标定：先读 ADC，把最小 / 最大端点的十进制值填入（0～1023，跨度至少 32）。",12,MUTED);
-        calibrationInput=new EditText(this);calibrationInput.setSingleLine(true);calibrationInput.setText("0,1023");calibrationInput.setTextColor(INK);calibrationInput.setTextSize(15);calibrationInput.setHint("最小值,最大值，例如 0,590");calibrationInput.setContentDescription("滑杆 ADC 最小值和最大值，十进制逗号分隔");box.addView(calibrationInput);
+        text(box,"滑杆经 ADS1115 AIN1 直连 0～3.3V，不再需要 22k/4.7k 分压；3.3V 满行程约 825。压力片仍走片内 ADC，选任何滑杆用途时都继续生效。滑杆音量受手机总音量上限约束；湿度控制需先开启回声或合唱。",12,MUTED);
+        text(box,"滑杆端点标定：先读 ADC（滑杆用途 1～4 时才读滑杆），把两端实际值填入，跨度至少 32。",12,MUTED);
+        calibrationInput=new EditText(this);calibrationInput.setSingleLine(true);calibrationInput.setText("0,1023");calibrationInput.setTextColor(INK);calibrationInput.setTextSize(15);calibrationInput.setHint("最小值,最大值，例如 8,818");calibrationInput.setContentDescription("滑杆 ADC 最小值和最大值，十进制逗号分隔");box.addView(calibrationInput);
         button(box,"应用滑杆端点标定",()->{
             if(recording||recordDraining){alert("请先结束事件录制");return;}
             String[] parts=calibrationInput.getText().toString().trim().split(",",-1);int lo,hi;
@@ -1037,7 +1060,7 @@ public final class MainActivity extends Activity {
             applyControl("CAL,"+lo+","+hi,"滑杆标定已确认；不修改原 FSR 标定");
         },true);
         box=card(sections[0],"STATE","设备状态与安全静音","作用于：全局混音。");
-        adcInfo=text(box,"ADC 尚未读取",13,MUTED);
+        adcInfo=text(box,"ADC 尚未读取（模式 0 读压力，1～4 读滑杆）",13,MUTED);
         button(box,"读取实际模式 / ADC",()->task(()->{readControls();String raw=link.command("ADC?","ADC");String[] fields=raw.split(",",-1);if(fields.length!=3||!fields[1].matches("[0-3][0-9A-F]{2}")||!fields[2].matches("[01]"))throw new IOException("ADC 回报无效");int code=Integer.parseInt(fields[1],16);main.post(()->adcInfo.setText("ADC："+code+" / 1023（0x"+fields[1]+"） · "+(fields[2].equals("0")?"正常":"超时")));},"设备状态与 ADC 已读取"),true);
         button(box,"PANIC · 释放全部声音与延音",()->applyControl("PANIC","声音已释放，曲谱停止，延音关闭；按住的键需松开重按"),true,2);
         text(box,"曲谱下载、屏幕七列指引与逐声部弯音仍针对前七个扫描键；K8～K16 使用固定音高。默认七键只覆盖 C4～F#4，曲库可匹配改键后下载。事件日志仅支持原8键 / FSR模式。",12,MUTED);
@@ -1106,7 +1129,12 @@ public final class MainActivity extends Activity {
         // Mark before the command: the FPGA may send MAP/EVT immediately after OK.
         recording=true;task(()->{try{link.command("REC_START","OK");}catch(Exception e){recording=false;recordingOverflow=true;if(e instanceof SppLink.CommandRejectedException&&((SppLink.CommandRejectedException)e).response.equals("ERR,MISSING"))throw new IOException("当前固件未启用事件日志（ERR,MISSING）；请使用板上事件录制或手机音符录制",e);throw e;}},"正在记录演奏事件；保持 App 前台");}
     private void stopRecording(){if(!recording){alert("当前没有正在进行的事件录制");return;}recordDraining=true;task(()->link.command("REC_STOP","OK"),"停止命令已确认；接收窗口 REC_END 为日志结束标记");}
-    private void receive(String line){if(line.startsWith("V,"))return;logText.append(line).append('\n');if(logText.length()>12000)logText.delete(0,logText.length()-10000);logs.setText(logText.toString());
+    private void receive(String line){if(line.startsWith("V,"))return;
+        if(kliveOn&&line.startsWith("K,")){String[] parts=line.split(",");
+            if(parts.length==3){try{int key=Integer.parseInt(parts[1])-1,state=Integer.parseInt(parts[2]);
+                if(key>=0&&key<16&&(state==0||state==1)){boardKey(key,state==1);return;}}
+                catch(NumberFormatException ignored){}}}
+        logText.append(line).append('\n');if(logText.length()>12000)logText.delete(0,logText.length()-10000);logs.setText(logText.toString());
         if(recording||recordDraining){if(recordingText.length()+line.length()+1<=2*1024*1024)recordingText.append(line).append('\n');else{recordingOverflow=true;setStatus("App 日志达到 2MB 上限，请停止并导出；此次日志不完整");}if(line.contains("OVF")||line.contains("OVERFLOW")){recordingOverflow=true;setStatus("FIFO 溢出：此次事件日志不完整");}
             if(line.startsWith("REC_END,")){recording=false;recordDraining=false;if(!line.equals("REC_END,0"))recordingOverflow=true;recordingCompleted=line.equals("REC_END,0")&&!recordingOverflow;refreshControlUi();setStatus(recordingOverflow?"录制结束，检测到溢出，日志不完整":"录制结束，事件日志可导出");}}
     }

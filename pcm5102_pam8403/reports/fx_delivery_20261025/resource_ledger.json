@@ -1,0 +1,63 @@
+{
+  "capacity": {
+    "Logic": 23040.0,
+    "CLS": 11520.0,
+    "Register": 23280.0,
+    "BSRAM": 56.0,
+    "DSP": 28.0
+  },
+  "future_reserve": {
+    "Logic": 1650,
+    "CLS": 365,
+    "BSRAM": 4
+  },
+  "future_register_dsp_reserve": "not individually quantified; not assumed zero",
+  "final_production": {
+    "Logic": 21649.0,
+    "CLS": 11183.0,
+    "Register": 10579.0,
+    "BSRAM": 47.0,
+    "DSP": 26.5
+  },
+  "final_remaining": {
+    "Logic": 1391.0,
+    "CLS": 337.0,
+    "Register": 12701.0,
+    "BSRAM": 9.0,
+    "DSP": 1.5
+  },
+  "final_gap_to_reserve_without_new_fx": {
+    "Logic": 259.0,
+    "CLS": 28.0,
+    "BSRAM": 0
+  },
+  "prototype_after_apds": {
+    "Logic": 22418.0,
+    "CLS": 11415.0,
+    "Register": 10811.0,
+    "BSRAM": 53.0,
+    "DSP": 26.5
+  },
+  "prototype_increment_vs_apds": {
+    "Logic": 769.0,
+    "CLS": 232.0,
+    "Register": 232.0,
+    "BSRAM": 6.0,
+    "DSP": 0.0
+  },
+  "prototype_gap_to_future_reserve": {
+    "Logic": 1028.0,
+    "CLS": 260.0,
+    "BSRAM": 1.0
+  },
+  "delivered_recovery": {
+    "Logic": 211.0,
+    "CLS": 134.0,
+    "Register": -8.0,
+    "BSRAM": 0.0,
+    "DSP": 0.0
+  },
+  "full_three_effect_delivery_complete": false,
+  "do_not_add_apds_savings_to_prototype_a_second_time": true,
+  "full_E_280_CLS_instead_of_E100_adds_to_CLS_gap": 180
+}
