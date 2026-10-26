@@ -54,7 +54,7 @@ B1的16键可同时演奏；前七个扫描键映射和独立弯音保留，K8�
 
 ## 安装和第一次使用
 
-1. 将 `dist/FPGA-Score-debug.apk` 复制到安卓手机并安装。支持 Android 10+；这是本地调试签名安装包。
+1. 安装 `dist/FPGA-Music-Unified.apk`（滚动入口，当前内容即 v1.38-scorebend / Code39，与 `dist/FPGA-Music-ScoreBend-Code39.apk` 字节相同）。支持 Android 10+；仍是本地调试签名安装包。下文提到的 `FPGA-Score-debug.apk`、`FPGA-Score-library.apk`、`FPGA-Score-led*.apk`、`FPGA-Score-hc05-only.apk` 等早期独立安装包已随 `dist/` 只保留最新包的策略下架，只在 git 历史里。
 2. 先在手机系统蓝牙设置中配对 HC-05，PIN 以模块实际配置为准，常见为 `1234` 或 `0000`。
 3. 打开“FPGA 曲谱助手”，Android 12+ 允许“附近的设备”权限。App 只读取已配对设备，不扫描附近设备，不需要定位权限。
 4. 点击“刷新已配对设备”，选中 HC-05，然后“连接所选设备”。连接完成会先 `PING`，再读取实际七键映射。
