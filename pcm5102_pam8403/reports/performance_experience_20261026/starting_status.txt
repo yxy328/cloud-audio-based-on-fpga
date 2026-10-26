@@ -1,0 +1,55 @@
+ M pcm5102_pam8403/CHROMATIC_KEYS.md
+ M pcm5102_pam8403/HC05_KEYMAP.md
+ M pcm5102_pam8403/PCM5102_UNIFIED.gprj
+ M pcm5102_pam8403/REFERENCE_MIGRATION.md
+ M pcm5102_pam8403/VERIFICATION.md
+ M pcm5102_pam8403/android_app/README.md
+ M pcm5102_pam8403/android_app/app/build.gradle
+ M pcm5102_pam8403/android_app/app/src/main/AndroidManifest.xml
+ M pcm5102_pam8403/android_app/app/src/main/assets/hero.png
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/DeviceControls.java
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/MainActivity.java
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/TakeWorkflow.java
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/Theme.java
+ M pcm5102_pam8403/android_app/build-apk.ps1
+ M pcm5102_pam8403/android_app/core_test/DeviceControlsTest.java
+ M pcm5102_pam8403/android_app/core_test/SppLinkTest.java
+ M pcm5102_pam8403/android_app/core_test/TakeWorkflowTest.java
+ M pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk
+ M pcm5102_pam8403/android_app/test-core.ps1
+ M pcm5102_pam8403/sim/tb_hc05_extensions.v
+ M pcm5102_pam8403/sim/tb_top_touch16.v
+ M pcm5102_pam8403/src/PCM5102_UNIFIED.sdc
+ M pcm5102_pam8403/src/hc05_keymap.v
+ M pcm5102_pam8403/src/hc05_reply.hex
+ M pcm5102_pam8403/src/top.v
+ M pcm5102_pam8403/tools/generate_hc05_replies.py
+ M pcm5102_pam8403/tools/run_sim.ps1
+?? pcm5102_pam8403/FX3.md
+?? pcm5102_pam8403/TOUCH16.md
+?? pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/FxState.java
+?? pcm5102_pam8403/android_app/app/src/main/res/
+?? pcm5102_pam8403/android_app/core_test/FxStateTest.java
+?? pcm5102_pam8403/android_app/dist/FPGA-Music-FX3-Code27.apk
+?? pcm5102_pam8403/android_app/dist/FPGA-Music-Frost-Code30.apk
+?? pcm5102_pam8403/android_app/dist/FPGA-Music-Glass-Code29.apk
+?? pcm5102_pam8403/android_app/dist/FPGA-Music-Icon-Code28.apk
+?? pcm5102_pam8403/android_app/dist/FPGA-Music-IconBack-Code32.apk
+?? pcm5102_pam8403/android_app/dist/FPGA-Music-Starry-Code31.apk
+?? pcm5102_pam8403/android_app/dist/FPGA-Music-Touch16-Code26.apk
+?? pcm5102_pam8403/android_app/extract-art.ps1
+?? pcm5102_pam8403/android_app/make-launcher-icons.ps1
+?? pcm5102_pam8403/android_app/make-portrait-icons.ps1
+?? pcm5102_pam8403/reports/fx_priority_20261026/
+?? pcm5102_pam8403/reports/performance_experience_20261026/
+?? pcm5102_pam8403/reports/touch16_delivery_20261026/
+?? pcm5102_pam8403/reports/touch16_reverb_20261026/
+?? pcm5102_pam8403/sim/tb_audio_fx_chain.v
+?? pcm5102_pam8403/sim/tb_fx3_frame_take.v
+?? pcm5102_pam8403/sim/tb_fx3_replay_decode.v
+?? pcm5102_pam8403/sim/tb_fx3_reset.v
+?? pcm5102_pam8403/sim/tb_fx_protocol.v
+?? pcm5102_pam8403/sim/tb_fx_take_atomic_528.v
+?? pcm5102_pam8403/sim/tb_top_touch16_recovery.v
+?? pcm5102_pam8403/src/audio_fx_chain.v
+?? pcm5102_pam8403/提示词_演奏体验与三效果自然化_20261026.md

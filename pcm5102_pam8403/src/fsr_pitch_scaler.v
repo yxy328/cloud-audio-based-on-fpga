@@ -21,6 +21,8 @@ module fsr_pitch_scaler #(
     input wire [2:0] bend_index,
     input wire [15:0] bend_ratio,
     input wire [15:0] bend_min,bend_max,bend_slew,
+    input wire [15:0] score_ratio,
+    input wire [6:0] score_keys,
     output wire [255:0] phase_increments
 );
     generate if(PER_VOICE_BEND) begin: individual
@@ -28,7 +30,7 @@ module fsr_pitch_scaler #(
             .clk(clk),.resetn(resetn),.sample_ce(sample_ce),.pitch_ratio(pitch_ratio),
             .note_increments(note_increments),.bend_write(bend_write),.bend_reset(bend_reset),
             .bend_index(bend_index),.bend_ratio(bend_ratio),
-            .bend_min(bend_min),.bend_max(bend_max),.bend_slew(bend_slew),.phase_increments(phase_increments));
+            .score_ratio(score_ratio),.score_keys(score_keys),.bend_min(bend_min),.bend_max(bend_max),.bend_slew(bend_slew),.phase_increments(phase_increments));
     end else begin: legacy
     reg [255:0] increments;
     assign phase_increments=increments;
@@ -87,6 +89,8 @@ module voice_pitch_scaler #(
     input wire [2:0] bend_index,
     input wire [15:0] bend_ratio,
     input wire [15:0] bend_min,bend_max,bend_slew,
+    input wire [15:0] score_ratio,
+    input wire [6:0] score_keys,
     output reg [255:0] phase_increments
 );
     localparam INIT=0,IDLE=1,READ=2,LOAD=3,FSR_WAIT=4,FSR_DONE=5,BEND_WAIT=6,BEND_DONE=7;
@@ -108,7 +112,7 @@ module voice_pitch_scaler #(
         ((current_q-target_q>frame_step) ? current_q-frame_step : target_q);
     wire [15:0] next_current=slewed<bend_min ? bend_min : slewed>bend_max ? bend_max : slewed;
     always @(posedge clk) begin
-        target_q<=targets[index];
+        target_q<=(score_ratio!=0 && index<7 && score_keys[index]) ? score_ratio : targets[index];
         // The read result is used in LOAD, after a READ cycle. Hold it on
         // writes to infer supported normal mode, avoiding read-before-write.
         if(!(resetn && (state==INIT || state==LOAD))) current_q<=currents[index];

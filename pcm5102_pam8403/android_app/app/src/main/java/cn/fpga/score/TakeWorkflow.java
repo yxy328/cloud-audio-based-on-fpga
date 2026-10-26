@@ -24,7 +24,7 @@ public final class TakeWorkflow {
     public static String logBlockReason(DeviceControls controls){
         if(controls==null)return "请先读取设备演奏状态";
         StringBuilder reason=new StringBuilder();
-        if(controls.mode16!=0)reason.append("当前为 16 键模式，日志要求 8 键直连；");
+        if(controls.mode16!=0)reason.append("固定 16 键固件不提供旧 REC 日志，请使用手机 MIDI 或板上 TAKE；");
         if(controls.hold!=0)reason.append(controls.hold==2?"当前为踏板态，日志要求 HOLD=0；":"当前已开延音，日志要求 HOLD=0；");
         if(controls.analog!=0)reason.append("当前模拟用途为 ").append(controls.analog).append("，日志要求 ANALOG=0（FSR）；");
         return reason.toString();

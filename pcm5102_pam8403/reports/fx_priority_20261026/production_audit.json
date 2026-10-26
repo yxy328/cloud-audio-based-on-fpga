@@ -1,0 +1,96 @@
+{
+  "label": "production_fx3",
+  "status": "validated",
+  "strategy": {
+    "place_option": 2,
+    "route_option": 0,
+    "route_maxfan": 23
+  },
+  "metrics": {
+    "Logic": {
+      "used": 22624.0,
+      "capacity": 23040.0
+    },
+    "CLS": {
+      "used": 11470.0,
+      "capacity": 11520.0
+    },
+    "Register": {
+      "used": 10726.0,
+      "capacity": 23280.0
+    },
+    "BSRAM": {
+      "used": 53.0,
+      "capacity": 56.0
+    },
+    "DSP": {
+      "used": 26.5,
+      "capacity": 28.0
+    }
+  },
+  "delta_vs_baseline": {
+    "Logic": 1110.0,
+    "CLS": 271.0,
+    "Register": 310.0,
+    "BSRAM": 6.0,
+    "DSP": 0.0
+  },
+  "unrouted_nets": 0,
+  "bitstream_present": true,
+  "bitstream_sha256": "5D6E8A30A8732F181913B644215D551F6E456CE1CC237E1672BE3DDD373A4ABF",
+  "timing": {
+    "setup_violated_endpoints": 0,
+    "setup_worst_path": {
+      "slack_ns": 0.018,
+      "from": "u_main/u_keymap/n58_s0/DOUT[1]",
+      "to": "u_main/u_keymap/reply_97_s1/D"
+    },
+    "setup_reported_violating_paths": [],
+    "hold_violated_endpoints": 0,
+    "hold_worst_path": {
+      "slack_ns": 0.144,
+      "from": "u_main/u_effects/delay_write_12_s0/Q",
+      "to": "u_main/u_effects/delay_memory_delay_memory_0_3_s/DI[0]"
+    },
+    "hold_reported_violating_paths": [],
+    "setup_raw_worst_path": {
+      "slack_ns": 0.018,
+      "from_cell": "u_main/u_keymap/n58_s0",
+      "to_cell": "u_main/u_keymap/reply_97_s1"
+    },
+    "setup_raw_violating_paths": [],
+    "hold_raw_worst_path": {
+      "slack_ns": 0.144,
+      "from_cell": "u_main/u_effects/delay_write_12_s0",
+      "to_cell": "u_main/u_effects/delay_memory_delay_memory_0_3_s"
+    },
+    "hold_raw_violating_paths": []
+  },
+  "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_priority_20261026\\production_inputs.json",
+  "source_manifest_sha256": "F3382AE2738754C0B4E843200741F14F6F9EF19D51A14C853AF8CE9BD5AB748F",
+  "downloadable_song_sha256": null,
+  "snapshot_corrupt_inputs": [],
+  "errors": [],
+  "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+  "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+  "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html",
+  "verified_inputs": 102,
+  "build_exit_code": 0,
+  "changed_inputs_vs_previous_production": [
+    "pcm5102_pam8403/PCM5102_UNIFIED.gprj",
+    "pcm5102_pam8403/src/audio_fx_chain.v",
+    "pcm5102_pam8403/src/hc05_keymap.v",
+    "pcm5102_pam8403/src/hc05_reply.hex",
+    "pcm5102_pam8403/src/top.v"
+  ],
+  "actual_build_file_hashes": {
+    "impl/gwsynthesis/PCM5102_UNIFIED.prj": "0B28925936D8F07B7ADC836173CAA43117C7A95BEA988F7C2D72953C2519209F",
+    "impl/pnr/cmd.do": "4B7BB3C11E0599EAA3235C0662585E0089400BBAFF7EBAD2856D6D0C7E9F0C3E",
+    "impl/pnr/device.cfg": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A",
+    "impl/pnr/PCM5102_UNIFIED.rpt.txt": "F267A26B2CCC5CE41934A879A4E78A73BF749EB045252F5AFC7776F262478E1F",
+    "impl/pnr/PCM5102_UNIFIED_tr_content.html": "44C5835289BB515CCD6274B180698811F6B0C4DEE1E68C52685744882DEB56BA",
+    "impl/pnr/PCM5102_UNIFIED.timing_paths": "00061464F4B25808DC1B44CFAA8883BA6755951EF8721681F3FADF827ED2FB56",
+    "impl/PCM5102_UNIFIED_process_config.json": "6B6602EA3F5A37B2AD9FCEABFE990D47F29C6C703858C7ECDAD61C0DC3C10E21"
+  },
+  "gowin_sha256": "4C172D4C0D2A4C7EF5C764D091A315CBCDE2127573554BFD7D09AC6F2E5EA535"
+}

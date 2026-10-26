@@ -1,0 +1,22 @@
+{
+  "selected": null,
+  "net_cls_recovered": 0,
+  "production_input_count": 102,
+  "production_inputs_match": true,
+  "default_bitstream_sha256": "ACC17F2F956BBE26400E84E3E09AAB82EDECCDFFCFCD9902203E6C34ACFD2F8A",
+  "default_bitstream_matches": true,
+  "tools_match": true,
+  "display_experiment_withdrawn": true,
+  "canonical_test_fixture_sha256": "44FDCED8017EFCD39C281D75775AE8BC856F76EBE804631E36EBABF14B116F8E",
+  "canonical_test_compiles": true,
+  "documentation_hashes": {
+    "pcm5102_pam8403\\README.md": "6256EF958EB86B2C5AF67B749E31B2B8D9E4A5E5658E4884FA7FBB33BD912DF3",
+    "pcm5102_pam8403\\VERIFICATION.md": "6101B1477D1E8A8949647B47C661FE3F31B9921A6419A65CEFB7A70C379B6C76",
+    "pcm5102_pam8403\\reports\\control_pack_20261026\\README.md": "A25D6DE3B273752F7CD69B92A8627C67C484A3856F84AC9CD80D9D385A7BFF2F",
+    "pcm5102_pam8403\\reports\\control_pack_20261026\\DESIGN.md": "69C46FA23709E86489B5A8DA70CC865284E1451CB9E16DB7D0E9993D4656DB60"
+  },
+  "all_selected_outputs_match": null,
+  "burned_fpga": false,
+  "rollback_implementation_outputs_verified": 24,
+  "rollback_implementation_outputs_match": true
+}

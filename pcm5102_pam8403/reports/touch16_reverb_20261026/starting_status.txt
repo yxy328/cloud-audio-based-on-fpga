@@ -1,0 +1,106 @@
+ M docs/CHANGELOG.md
+ M docs/QUICK_START.md
+ M pcm5102_pam8403/AUDIO_VISUAL.md
+ M pcm5102_pam8403/FSR402.md
+ M pcm5102_pam8403/HC05_KEYMAP.md
+ M pcm5102_pam8403/PCM5102_UNIFIED.gprj
+ M pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md
+ M pcm5102_pam8403/README.md
+ M pcm5102_pam8403/REFERENCE_MIGRATION.md
+ M pcm5102_pam8403/SCOPE_DISPLAY.md
+ M pcm5102_pam8403/VERIFICATION.md
+ M pcm5102_pam8403/android_app/README.md
+ M pcm5102_pam8403/android_app/UNIFIED_RECORDING.md
+ M pcm5102_pam8403/android_app/app/build.gradle
+ M pcm5102_pam8403/android_app/app/src/main/AndroidManifest.xml
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/MainActivity.java
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/PianoKeyboardView.java
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/SpectrumPreviewView.java
+ M pcm5102_pam8403/android_app/core_test/SppLinkTest.java
+ M pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk
+ M pcm5102_pam8403/android_app/test-core.ps1
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_fsr100.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_fsr100_64.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_fsr25.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_fsr25_64.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_fsr50.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_fsr50_64.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_overrange.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_overrange_64.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_playing_preview.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_verified_comparison.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_weak128.png
+ M pcm5102_pam8403/design/led_scope_20261022/verified/scope_weak128_64.png
+ M pcm5102_pam8403/impl/PCM5102_UNIFIED_process_config.json
+ M pcm5102_pam8403/impl/project_process_config.json
+ M pcm5102_pam8403/sim/tb_analog_expression.v
+ M pcm5102_pam8403/sim/tb_audio_scope.v
+ M pcm5102_pam8403/sim/tb_audio_visualizer.v
+ M pcm5102_pam8403/sim/tb_hub75e_audio_display.v
+ M pcm5102_pam8403/sim/tb_i2c_master_bus.v
+ M pcm5102_pam8403/sim/tb_top_audio_visual.v
+ M pcm5102_pam8403/src/PCM5102_AUDIO_TAKE.sdc
+ M pcm5102_pam8403/src/PCM5102_EVENT_TAKE.cst
+ M pcm5102_pam8403/src/PCM5102_EVENT_TAKE.sdc
+ M pcm5102_pam8403/src/PCM5102_PAM8403.cst
+ M pcm5102_pam8403/src/PCM5102_PAM8403.sdc
+ M pcm5102_pam8403/src/PCM5102_UNIFIED.sdc
+ M pcm5102_pam8403/src/analog_expression.v
+ M pcm5102_pam8403/src/apds9960_ctrl.v
+ M pcm5102_pam8403/src/audio_scope.v
+ M pcm5102_pam8403/src/audio_visualizer.v
+ M pcm5102_pam8403/src/downloadable_song.v
+ M pcm5102_pam8403/src/gesture_top.v
+ M pcm5102_pam8403/src/hc05_command_decode.v
+ M pcm5102_pam8403/src/hc05_keymap.v
+ M pcm5102_pam8403/src/i2c_master.v
+ M pcm5102_pam8403/src/sensor_poly_audio.v
+ M pcm5102_pam8403/src/tdm_synth.v
+ M pcm5102_pam8403/src/top.v
+ M pcm5102_pam8403/src/top_unified.v
+ M pcm5102_pam8403/src/touch_tdm_synth.v
+ M pcm5102_pam8403/tools/build_unified.tcl
+ M pcm5102_pam8403/tools/check_scope_external.py
+ M pcm5102_pam8403/tools/check_unified_build.ps1
+ M pcm5102_pam8403/tools/generate_hc05_decoder.py
+ M pcm5102_pam8403/tools/render_scope_verification.py
+ M pcm5102_pam8403/tools/run_sim.ps1
+ M pcm5102_pam8403/提示词_侧边栏与演奏参数化.md
+?? pcm5102_pam8403/FX_PREFLIGHT_20261024.md
+?? pcm5102_pam8403/Photograph/
+?? pcm5102_pam8403/android_app/HUE33.md
+?? pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/LedHue.java
+?? pcm5102_pam8403/android_app/buildklive-verify.apk
+?? pcm5102_pam8403/android_app/buildklive-verify.apk.idsig
+?? pcm5102_pam8403/android_app/core_test/LedHueTest.java
+?? pcm5102_pam8403/android_app/design/out/hue33/
+?? pcm5102_pam8403/android_app/design/render_hue_preview.py
+?? pcm5102_pam8403/android_app/dist/FPGA-Music-Hue33-Code25.apk
+?? pcm5102_pam8403/deliveries/APP_HUE33_20261023/
+?? pcm5102_pam8403/deliveries/LED_HUE33_20261023/
+?? pcm5102_pam8403/design/led_scope_20261022/hue_ramp/
+?? pcm5102_pam8403/design/led_scope_20261023/
+?? pcm5102_pam8403/reports/
+?? pcm5102_pam8403/sim/ads1115_model.v
+?? pcm5102_pam8403/sim/reference/tdm_synth_merge_reference.v
+?? pcm5102_pam8403/sim/reference/touch_tdm_synth_merge_reference.v
+?? pcm5102_pam8403/sim/tb_ads1115_bus.v
+?? pcm5102_pam8403/sim/tb_engine_merge_baseline.v
+?? pcm5102_pam8403/sim/tb_fx_frame_budget.v
+?? pcm5102_pam8403/sim/tb_key_live_stream.v
+?? pcm5102_pam8403/sim/tb_synth_shared_arith.v
+?? pcm5102_pam8403/sim/tb_synth_shared_equivalence.v
+?? pcm5102_pam8403/sim/tb_top_dual_analog.v
+?? pcm5102_pam8403/src/ads1115_ctrl.v
+?? pcm5102_pam8403/src/hc05_command.hex
+?? pcm5102_pam8403/src/i2c_arbiter.v
+?? pcm5102_pam8403/src/key_live_stream.v
+?? pcm5102_pam8403/src/synth_shared_arith.v
+?? pcm5102_pam8403/tools/audit_fx_builds.py
+?? pcm5102_pam8403/tools/render_scope_hue_ramp.py
+?? pcm5102_pam8403/tools/render_scope_hue_smooth_preview.py
+?? pcm5102_pam8403/提示词_LED色环音量映射.md
+?? pcm5102_pam8403/提示词_三效果器落地与资源回收_20261025.md
+?? pcm5102_pam8403/提示词_引擎合并.md
+?? pcm5102_pam8403/提示词_引擎合并_V2.md
+?? pcm5102_pam8403/提示词_数字音频效果器.md

@@ -1,0 +1,7 @@
+{
+  "baseline_sha256": "821A437E4A4BE2B23998978143E68D49E27F218694032C80275879224F6869D8",
+  "candidate_sha256": "821A437E4A4BE2B23998978143E68D49E27F218694032C80275879224F6869D8",
+  "equal": true,
+  "sample_count": 2735,
+  "scope": "every external I2S PCM sample and timestamp for the legacy audition scenario"
+}

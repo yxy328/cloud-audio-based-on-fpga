@@ -1,0 +1,6 @@
+{
+  "stage": "isolated staging; production integration requires new admission",
+  "hardware": "candidate",
+  "old_MIDI_behavior": "unchanged; noncenter bend rejected explicitly",
+  "tests": 4827
+}

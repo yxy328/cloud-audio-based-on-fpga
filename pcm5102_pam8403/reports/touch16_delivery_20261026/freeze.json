@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-26",
+  "git_head": "cd5cbbb521bd4ddc753f0de14e32547c3642cbb6",
+  "baseline_inputs_verified": 101,
+  "candidate": "fixed16_clean_sdc",
+  "old_default_sha256": "840AE4C47D7BB57048481ACA3ECB6BEEC59E430E66AF0BD32429FDE99E84AD15",
+  "old_apk_sha256": "40B92B8201DA38F29140129346E8F02579B532AF443C1BCAA8060B847A015AB6",
+  "scope": "Production fixed16 RTL + matching App; existing effects retained; no hardware programming"
+}

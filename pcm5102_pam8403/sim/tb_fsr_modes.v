@@ -23,7 +23,7 @@ module tb_fsr_modes;
         .clk(clk),.resetn(resetn),.sample_ce(ce),.expression_enable(pitch_mode),
         .adc_valid(valid),.adc_sample(adc),.pressure_code(),
         .target_gain(pitch_target),.gain(pitch_gain));
-    fsr_pitch_scaler scaler(.bend_min(16'd8192),.bend_max(16'd32768),.bend_slew(16'd4096),.clk(clk),.resetn(resetn),.sample_ce(scale_ce),.pitch_ratio(scale_ratio),
+    fsr_pitch_scaler scaler(.score_ratio(16'd0),.score_keys(7'd0),.bend_min(16'd8192),.bend_max(16'd32768),.bend_slew(16'd4096),.clk(clk),.resetn(resetn),.sample_ce(scale_ce),.pitch_ratio(scale_ratio),
         .note_increments({base[6],base[5],base[4],base[3],base[2],base[1],base[0]}),
         .phase_increments(steps));
     always @(posedge clk) begin

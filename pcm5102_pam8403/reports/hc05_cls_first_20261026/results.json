@@ -1,0 +1,430 @@
+{
+  "selected": "reply_place1",
+  "trials": [
+    {
+      "label": "parallel_dispatch",
+      "status": "placement_failed",
+      "metrics": {
+        "Logic": {
+          "used": 22859.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11520.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10734.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 53.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": 235.0,
+        "CLS": 50.0,
+        "Register": 8.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": null,
+      "timing": null,
+      "audit_sha256": "DFF064DD0BFFE719311D3880E262D413B2ADCC0E3F1227A247DA8BDE8E9144C3",
+      "selected": false
+    },
+    {
+      "label": "map_serial",
+      "status": "validated",
+      "metrics": {
+        "Logic": {
+          "used": 22673.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11483.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10732.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 53.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": 49.0,
+        "CLS": 13.0,
+        "Register": 6.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 0,
+      "timing": {
+        "setup_violated_endpoints": 0,
+        "setup_worst_path": {
+          "slack_ns": 0.016,
+          "from": "u_main/u_keymap/n58_s0/DOUT[0]",
+          "to": "u_main/u_keymap/reply_55_s1/D"
+        },
+        "setup_reported_violating_paths": [],
+        "hold_violated_endpoints": 0,
+        "hold_worst_path": {
+          "slack_ns": 0.156,
+          "from": "u_main/u_effects/dp_9_s0/Q",
+          "to": "u_main/u_effects/delay_memory_delay_memory_0_3_s/ADA[11]"
+        },
+        "hold_reported_violating_paths": [],
+        "setup_raw_worst_path": {
+          "slack_ns": 0.016,
+          "from_cell": "u_main/u_keymap/n58_s0",
+          "to_cell": "u_main/u_keymap/reply_55_s1"
+        },
+        "setup_raw_violating_paths": [],
+        "hold_raw_worst_path": {
+          "slack_ns": 0.156,
+          "from_cell": "u_main/u_effects/dp_9_s0",
+          "to_cell": "u_main/u_effects/delay_memory_delay_memory_0_3_s"
+        },
+        "hold_raw_violating_paths": []
+      },
+      "audit_sha256": "660AD44F7107AFDD870F2787160E5C873EB7E20530064457AF4A78BC2AB49919",
+      "selected": false
+    },
+    {
+      "label": "reply_parallel",
+      "status": "timing_failed",
+      "metrics": {
+        "Logic": {
+          "used": 22444.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11420.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10732.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 53.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": -180.0,
+        "CLS": -50.0,
+        "Register": 6.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 0,
+      "timing": {
+        "setup_violated_endpoints": 9,
+        "setup_worst_path": {
+          "slack_ns": 0.303,
+          "from": "u_main/u_gesture/u_audio/u_synth/n3838_s1/DOUT[7]",
+          "to": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s/DI[12]"
+        },
+        "setup_reported_violating_paths": [],
+        "hold_violated_endpoints": 0,
+        "hold_worst_path": {
+          "slack_ns": 0.153,
+          "from": "u_main/u_effects/delay_write_14_s0/Q",
+          "to": "u_main/u_effects/delay_memory_delay_memory_0_3_s/DI[2]"
+        },
+        "hold_reported_violating_paths": [],
+        "setup_raw_worst_path": {
+          "slack_ns": -1.586,
+          "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+          "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+        },
+        "setup_raw_violating_paths": [
+          {
+            "slack_ns": -1.586,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -1.443,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -1.279,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -1.153,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.517,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.342,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.336,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/gowin_add_SDPX9B_contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.288,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/gowin_add_SDPX9B_contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.226,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/gowin_add_SDPX9B_contexts_contexts_0_0_s"
+          }
+        ],
+        "hold_raw_worst_path": {
+          "slack_ns": 0.153,
+          "from_cell": "u_main/u_effects/delay_write_14_s0",
+          "to_cell": "u_main/u_effects/delay_memory_delay_memory_0_3_s"
+        },
+        "hold_raw_violating_paths": []
+      },
+      "audit_sha256": "F855D5A57934CE9BA8C17B76E8560ECEF4CA1EF367A4225C51ED3356B50FB985",
+      "selected": false
+    },
+    {
+      "label": "reply_place1",
+      "status": "validated",
+      "metrics": {
+        "Logic": {
+          "used": 22447.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11387.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10732.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 53.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": -177.0,
+        "CLS": -83.0,
+        "Register": 6.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 0,
+      "timing": {
+        "setup_violated_endpoints": 0,
+        "setup_worst_path": {
+          "slack_ns": 0.081,
+          "from": "u_main/u_gesture/u_audio/u_synth/context_work_254_s0/Q",
+          "to": "u_main/u_gesture/u_audio/u_synth/voice_active_2_s2/D"
+        },
+        "setup_reported_violating_paths": [],
+        "hold_violated_endpoints": 0,
+        "hold_worst_path": {
+          "slack_ns": 0.153,
+          "from": "u_main/u_effects/delay_write_13_s0/Q",
+          "to": "u_main/u_effects/delay_memory_delay_memory_0_3_s/DI[1]"
+        },
+        "hold_reported_violating_paths": [],
+        "setup_raw_worst_path": {
+          "slack_ns": 0.081,
+          "from_cell": "u_main/u_gesture/u_audio/u_synth/context_work_254_s0",
+          "to_cell": "u_main/u_gesture/u_audio/u_synth/voice_active_2_s2"
+        },
+        "setup_raw_violating_paths": [],
+        "hold_raw_worst_path": {
+          "slack_ns": 0.153,
+          "from_cell": "u_main/u_effects/delay_write_13_s0",
+          "to_cell": "u_main/u_effects/delay_memory_delay_memory_0_3_s"
+        },
+        "hold_raw_violating_paths": []
+      },
+      "audit_sha256": "BB46F1C987B8B9A49BEC621AD4F9A23DD2F8C472D96EE360A7176828F18735C5",
+      "selected": true
+    },
+    {
+      "label": "reply_fan12",
+      "status": "timing_failed",
+      "metrics": {
+        "Logic": {
+          "used": 22444.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11420.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10732.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 53.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": -180.0,
+        "CLS": -50.0,
+        "Register": 6.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 0,
+      "timing": {
+        "setup_violated_endpoints": 9,
+        "setup_worst_path": {
+          "slack_ns": 0.303,
+          "from": "u_main/u_gesture/u_audio/u_synth/n3838_s1/DOUT[7]",
+          "to": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s/DI[12]"
+        },
+        "setup_reported_violating_paths": [],
+        "hold_violated_endpoints": 0,
+        "hold_worst_path": {
+          "slack_ns": 0.153,
+          "from": "u_main/u_effects/delay_write_14_s0/Q",
+          "to": "u_main/u_effects/delay_memory_delay_memory_0_3_s/DI[2]"
+        },
+        "hold_reported_violating_paths": [],
+        "setup_raw_worst_path": {
+          "slack_ns": -1.586,
+          "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+          "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+        },
+        "setup_raw_violating_paths": [
+          {
+            "slack_ns": -1.586,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -1.443,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -1.279,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -1.153,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.517,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.342,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.336,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/gowin_add_SDPX9B_contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.288,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/gowin_add_SDPX9B_contexts_contexts_0_0_s"
+          },
+          {
+            "slack_ns": -0.226,
+            "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+            "to_cell": "u_main/u_gesture/u_audio/u_synth/gowin_add_SDPX9B_contexts_contexts_0_0_s"
+          }
+        ],
+        "hold_raw_worst_path": {
+          "slack_ns": 0.153,
+          "from_cell": "u_main/u_effects/delay_write_14_s0",
+          "to_cell": "u_main/u_effects/delay_memory_delay_memory_0_3_s"
+        },
+        "hold_raw_violating_paths": []
+      },
+      "audit_sha256": "9749882D38D7B62D09E70CE24D900BBD8C206851627BE29187250642EA05A61D",
+      "selected": false
+    },
+    {
+      "label": "reply_route1",
+      "status": "routing_failed",
+      "metrics": {
+        "Logic": {
+          "used": 22444.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11420.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10732.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 53.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": -180.0,
+        "CLS": -50.0,
+        "Register": 6.0,
+        "BSRAM": 0.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 3925,
+      "timing": null,
+      "audit_sha256": "5A40578F0C2AD20FA3AF7287259D5C1E9F64392D4EF874399A315F15F8146D6E",
+      "selected": false
+    }
+  ],
+  "bitstream_sha256": "ACC17F2F956BBE26400E84E3E09AAB82EDECCDFFCFCD9902203E6C34ACFD2F8A",
+  "source_verification_count": 102,
+  "functional_test_count": 17
+}

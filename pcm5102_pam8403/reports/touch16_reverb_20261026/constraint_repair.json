@@ -1,0 +1,44 @@
+[
+  {
+    "label": "fixed16_clean_sdc",
+    "synthesis_origin": "fixed16_clean",
+    "rtl_rom_project_identical_to_origin": true,
+    "changed_inputs_vs_origin": [
+      "pcm5102_pam8403/src/PCM5102_UNIFIED.sdc",
+      "pcm5102_pam8403/tools/pnr_only.tcl"
+    ],
+    "removed_stale_false_paths": [
+      "set_false_path -from [get_ports {touch_out[*]}] -to [get_pins {u_main/u_touch_input/input_meta*/D}]",
+      "set_false_path -from [get_ports {touch_out[7]}] -to [get_pins {u_main/u_touch_mode_input/input_meta*/D}]"
+    ],
+    "synthesis_files_sha256": {
+      "PCM5102_UNIFIED.vg": "04949646654BF466BA5195C37EA09DD358A2A2FA2260145D004BB43A27239698",
+      "PCM5102_UNIFIED.prj": "B6DFBA6689A7BE5CA02B51A4DBC4F80D6ABD93F12C3DDE10618A96F1FE3522E5",
+      "PCM5102_UNIFIED_syn_rsc.xml": "67211158C18B7F70ECB26E7EAEBB43FED6033AEAB3E3AD7A07403B62EA7B76C3"
+    },
+    "synthesis_prj_retains_original_candidate_paths": true,
+    "new_full_pnr_from_exact_verified_netlist": true,
+    "strategy_changed": false
+  },
+  {
+    "label": "fx_fixed16_sdc",
+    "synthesis_origin": "fx_fixed16",
+    "rtl_rom_project_identical_to_origin": true,
+    "changed_inputs_vs_origin": [
+      "pcm5102_pam8403/src/PCM5102_UNIFIED.sdc",
+      "pcm5102_pam8403/tools/pnr_only.tcl"
+    ],
+    "removed_stale_false_paths": [
+      "set_false_path -from [get_ports {touch_out[*]}] -to [get_pins {u_main/u_touch_input/input_meta*/D}]",
+      "set_false_path -from [get_ports {touch_out[7]}] -to [get_pins {u_main/u_touch_mode_input/input_meta*/D}]"
+    ],
+    "synthesis_files_sha256": {
+      "PCM5102_UNIFIED.vg": "AB2500A32377C56C6909D832F58E898597D458541D83F3815DF40A29B0F7B148",
+      "PCM5102_UNIFIED.prj": "ED68BA7C26AAF22ACEF7CAE64675135401889AC762C69B3CF467345E7CD01514",
+      "PCM5102_UNIFIED_syn_rsc.xml": "8C37E2F2D46D0AAE0DE5D9A58DFEDEED65F96B12D1A71EDFA6A53A106D6A5050"
+    },
+    "synthesis_prj_retains_original_candidate_paths": true,
+    "new_full_pnr_from_exact_verified_netlist": true,
+    "strategy_changed": false
+  }
+]

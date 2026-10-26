@@ -26,7 +26,9 @@ try {
     $classes = @(Get-ChildItem -LiteralPath build\classes -Filter '*.class' -Recurse | ForEach-Object FullName)
     & $java -cp (Join-Path $buildTools.FullName 'lib\d8.jar') com.android.tools.r8.D8 --release --min-api 29 --lib $androidJar --output build\dex @classes
     if ($LASTEXITCODE -ne 0) { throw 'D8 failed' }
-    & (Join-Path $buildTools.FullName 'aapt2.exe') link -I $androidJar --manifest app\src\main\AndroidManifest.xml --min-sdk-version 29 --target-sdk-version 35 -o build\unsigned.apk
+    & (Join-Path $buildTools.FullName 'aapt2.exe') compile --dir app\src\main\res -o build\res.zip
+    if ($LASTEXITCODE -ne 0) { throw 'aapt2 compile failed' }
+    & (Join-Path $buildTools.FullName 'aapt2.exe') link -I $androidJar --manifest app\src\main\AndroidManifest.xml --min-sdk-version 29 --target-sdk-version 35 -o build\unsigned.apk build\res.zip
     if ($LASTEXITCODE -ne 0) { throw 'aapt2 link failed' }
     Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem

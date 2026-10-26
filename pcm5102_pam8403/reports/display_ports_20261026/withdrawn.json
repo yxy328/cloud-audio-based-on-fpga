@@ -1,0 +1,6 @@
+{
+  "reason": "CLS is the primary objective; the display candidate increased CLS by 77 without a verified follow-on saving",
+  "rollback_evidence": "../control_pack_20261026/rollback.json",
+  "rollback_target": "11387 CLS / 53 BSRAM, first HC-05 baseline",
+  "current_production_report": "../control_pack_20261026/README.md"
+}

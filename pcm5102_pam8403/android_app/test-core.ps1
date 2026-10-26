@@ -12,6 +12,16 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Performance parameters compilation failed' }
     & java -cp build\core cn.fpga.score.PerformanceParamsTest
     if ($LASTEXITCODE -ne 0) { throw 'Performance parameters tests failed' }
+    & javac --release 8 -encoding UTF-8 -cp build\core -d build\core app\src\main\java\cn\fpga\score\FxState.java core_test\FxStateTest.java
+    if ($LASTEXITCODE -ne 0) { throw 'FX state compilation failed' }
+    $fxFixtures=@()
+    if(Test-Path -LiteralPath ../sim/build/fx_protocol_replies.txt){$fxFixtures+='../sim/build/fx_protocol_replies.txt'}
+    & java -cp build\core cn.fpga.score.FxStateTest @fxFixtures
+    if ($LASTEXITCODE -ne 0) { throw 'FX state tests failed' }
+    & javac --release 8 -encoding UTF-8 -cp build\core -d build\core app\src\main\java\cn\fpga\score\FxScene.java app\src\main\java\cn\fpga\score\FxSceneStore.java core_test\FxSceneTest.java
+    if ($LASTEXITCODE -ne 0) { throw 'FX scene compilation failed' }
+    & java -cp build\core cn.fpga.score.FxSceneTest
+    if ($LASTEXITCODE -ne 0) { throw 'FX scene tests failed' }
     & javac --release 8 -Xlint:-options -encoding UTF-8 -d build\core app\src\main\java\cn\fpga\score\LedState.java app\src\main\java\cn\fpga\score\LedFrame.java core_test\LedProtocolTest.java
     if ($LASTEXITCODE -ne 0) { throw 'LED protocol compilation failed' }
     & java -cp build\core cn.fpga.score.LedProtocolTest
@@ -58,6 +68,11 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'ADSR tests failed' }
     & java -cp build\core cn.fpga.score.SongCodecTest
     if ($LASTEXITCODE -ne 0) { throw 'Core tests failed' }
+    & javac --release 8 -encoding UTF-8 -cp build\core -d build\core app\src\main\java\cn\fpga\score\ScoreBends.java core_test\ScoreBendsTest.java
+    if ($LASTEXITCODE -ne 0) { throw 'Score bend compilation failed' }
+    & java -cp build\core cn.fpga.score.ScoreBendsTest
+    if ($LASTEXITCODE -ne 0) { throw 'Score bend tests failed' }
+
     & java -cp build\core cn.fpga.score.SppLinkTest
     if ($LASTEXITCODE -ne 0) { throw 'SPP transport tests failed' }
     & java -cp build\core cn.fpga.score.AudioRecordingTest

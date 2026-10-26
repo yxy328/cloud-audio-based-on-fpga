@@ -1,0 +1,14 @@
+[
+  {
+    "path": "fixed16/pcm5102_pam8403/sim/tb_top_fixed16.v",
+    "sha256": "AE21FD03FEAEC98E55562E43016608EB7B1CF469E0E3A4A653910CE744B1C9DF"
+  },
+  {
+    "path": "fx_fixed16/pcm5102_pam8403/sim/tb_fx_fixed16_frame.v",
+    "sha256": "464BEC3414A682CDC445A1BBA134EC8511FAAA144BE0B1596F2B02784DA1E64F"
+  },
+  {
+    "path": "fx_fixed16/pcm5102_pam8403/tools/run_sim.ps1",
+    "sha256": "97476AE677CB1325A3BC9E37AD1E652D873F7FB9E33D431F702F5BD815792DE5"
+  }
+]

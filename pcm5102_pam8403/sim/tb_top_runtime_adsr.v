@@ -4,7 +4,7 @@ module tb_top_runtime_adsr;
     reg clk=0; always #10 clk=~clk;
     reg [7:0] beams=255,pads=0;
     reg rx=1;
-    wire tx,bck,lrck,din,lat;
+    wire tx,bck,lrck,din,lat,touch_scl,touch_sdo;
     tri1 scl,sda;
     integer events=0,frames_seen=0,latches=0,k,first,nonzero;
     time edge_time;
@@ -13,10 +13,14 @@ module tb_top_runtime_adsr;
     top #(.HC05_BAUD(500000),.TOUCH_STARTUP_US(100),
         .TOUCH_DEBOUNCE_MS(1),.ADSR_ATTACK_SAMPLES(4),.ADSR_DECAY_SAMPLES(4),
         .TOUCH_ADSR_RELEASE_SAMPLES(32),.FSR_ENABLE(0)) dut (
-        .clk(clk),.key_s1(1'b0),.key_s2(1'b0),.touch_out(pads),.ir_beam(beams),
+        .clk(clk),.key_s1(1'b0),.key_s2(1'b0),.touch_out(8'd0),.touch_scl(touch_scl),.touch_sdo(touch_sdo),.ir_beam(beams),
         .hc05_rx(rx),.hc05_tx(tx),.i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din),
         .scl(scl),.sda(sda),.hub_ST(lat)
     );
+    // Current production is fixed serial16; retain pads as the stimulus
+    // for the first eight physical sensor channels, with all ADSR checks.
+    ttp229_model chip(.rst_n(dut.resetn),.scl(touch_scl),.connected(1'b1),
+        .dv(1'b0),.stuck_low(1'b0),.keys({8'd0,pads}),.sdo(touch_sdo));
     defparam dut.u_gesture.AUDIO_NOTE_FRAMES=400;
     i2s_pcm_monitor #(.PCM_MIN(-32768),.PCM_MAX(32767)) monitor (
         .bck(bck),.lrck(lrck),.din(din));
@@ -61,7 +65,7 @@ module tb_top_runtime_adsr;
         begin fork receive_ok; begin for(b=length-1;b>=0;b=b-1)send_byte(message[b*8 +: 8]);end join end
     endtask
     initial begin
-        wait(dut.resetn);frames(10);
+        wait(dut.resetn);wait(dut.touch_ready);frames(10);
         command("ADSR,TOUCH,1,1,50,1\n",20);
         pads=1;wait(dut.touch_keys[0]);frames(120);
         if(dut.u_touch_synth.gains[15:0]!=32767) $fatal(1,"Touch UART envelope did not reach 50 percent");

@@ -1,5 +1,9 @@
 # 演奏参数与四档回声
 
+**2026-10-27：曲谱事件弯音已接入，App Code39。** [CSV、协议、试听与录放说明](SCORE_BEND.md)。旧三参数曲谱命令保留；能力查询 `SONG_BEGIN,?` 返回 `SONGBEND,1`。
+
+> 2026-10-26 最新入口：[Code35常用操作](PERFORMANCE_QUICKSTART.md)、[三效果协议](FX3.md)、[扩展候选与资源实测](reports/performance_experience_20261026/REPORT.md)。当前硬件仍保留原手动弯音、颤音与三效果；新增震音、曲谱逐音弯音及分源参数候选未接入。以下阶段预算与旧构建数字为历史记录。
+
 > LED 显示已更新为 [弱信号修正版](deliveries/LED_SCOPE_WEAK_FIX_20261022/README.md)：Logic 21394、CLS 11087、BSRAM 47、DSP 26.5；剩余 1646 Logic /433 CLS /9 BSRAM。原1650 Logic预留少4个，后续功能前需回收；CLS/BSRAM预留满足。本页 C 阶段数字为历史冻结基线。
 
 > 后续App已更新至Code24，安装与现场超时定位以 [HC05_CONNECTION.md](HC05_CONNECTION.md) 为准。下文Code22的APK验证记录属于最初交付，其冻结包内APK已停用，位流记录继续保留。

@@ -1,0 +1,917 @@
+{
+  "production_inputs": [
+    {
+      "Path": "pcm5102_pam8403/src/ads1115_ctrl.v",
+      "SHA256": "C7D2C0F814A9536A7ECF67AD1D3C23400A22A0EEC61FD7497E3E5C451B1D2C1A"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/adsr_config.v",
+      "SHA256": "4078A8EDE4E655F94C04019707FA562C77233A794B7D6FF0C3CEF273AE1E4F15"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/adsr_env.v",
+      "SHA256": "3B93DE95A73C82DA73627FD690E84F294B39E011642025FEEA0473ACB9A39A89"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/analog_expression.v",
+      "SHA256": "462838F13693247A707F493242CD87D3A969D7CDBB018D9E13ACE3EE9BDBD19C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/apds9960_ctrl.v",
+      "SHA256": "4AAA3F1F0E20BFFFB35B49567427ED0054B972D9167F98C5337A3E69FDC77492"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_effects.v",
+      "SHA256": "E6C71CC8FF09E7E1F88BB358D437BFB5722FBD5B3BEFAE6B87E0F73BBE4015A2"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_fx_chain.v",
+      "SHA256": "36528F69FA8971741245249C2CF3F74D140C9790881931A813D926164FAEBC40"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_master_volume.v",
+      "SHA256": "78C33B6DB3EA4471E8DBB21C1504D92F781CFF49DEE5A42F4B8A6FAE83699CD9"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_mixer.v",
+      "SHA256": "FDDC61597D3B0986B9FF5EEF995AC861DB5B1F44FEFC7F708D06DAFD20CD6A4F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_nor_operation.v",
+      "SHA256": "7073D2434D378923D6DCAD6954DE86874B43C94446C28A904064814A117965D8"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_record_stream.v",
+      "SHA256": "E0D8A3EC41F848BB7673B86367DD6F6D33298AA88D7536667C9310875834ABDE"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_scope.v",
+      "SHA256": "33782E6956EBE3A05AB1F77316E903C147348FBF2BF259740E0C267DD77B085A"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_spectrum.v",
+      "SHA256": "C7362DC13E74485AC2464CF46EC1EBBE46A434557717119231ACA6115C5D6A2E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_take_store.v",
+      "SHA256": "9862CE3C7768CC2AFA2757772D97E65C8C16E1A653BDE3BA3A9C2235F0AE74C0"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_visualizer.v",
+      "SHA256": "D334D34CC0B89FAAEC937CFCE2305CED1F81D1016AB2BF09E208051EA70E24AC"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/button_filter.v",
+      "SHA256": "0FDDE927C12BE9F15F9875A188FBD3FE4A66A86470A328ED26AD0CFCD716FC81"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/clk_div.v",
+      "SHA256": "79F36F0741FBB923072357832C8B97C6F8EEB1D44F24B3B8B858E87674DBD83E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/dds_voice.v",
+      "SHA256": "5C8DA023CC9565553F0435A03D630EB57FED85E49F7DC87BF4552C93B2EDB6AC"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/display_mode_control.v",
+      "SHA256": "72149DE38C7D07FC589289FFAE065ACD508C677E2DEE462959E64CD43DCFF085"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/downloadable_song.v",
+      "SHA256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/envelope_gain.v",
+      "SHA256": "D30DA82079347D55CFA2278AD1EF4E502259CF4D21D38C81313332715712F7AC"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/extra_voices.v",
+      "SHA256": "ECA4098D8E783F8FEECA574ABF613A10CED0A2C4155750CC3AF8F9AF38D5A9FA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/fft256_init.hex",
+      "SHA256": "8797D53733A1F17AD995E3EE3C2D0810EF7143D5E19EA4523450DCBDB97036DA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/fsr_dynamics.v",
+      "SHA256": "2C6920307C39EBA238BD1313856DDCC53810C5C9949C9A24E726BD49AE307B83"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/fsr_mode_select.v",
+      "SHA256": "F0401F9F2EFBA2BB9146C693588DCE2F7D3532E5A0169A79F51DE521C546791D"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/fsr_pitch_scaler.v",
+      "SHA256": "0619276D7DCBD735501DE5E161C5F597071433DBD5463390D311F70AB64A8411"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/geita.v",
+      "SHA256": "A15D4016ADE0BE3A9AFD5C52438AB13678F0A89A1EB436C3FE1898B8BF86EE4C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gesture_audio.v",
+      "SHA256": "10FAE5B75401B569F63F10639A47A5D3AE6E5B2F6EF5DDE3AED5FABAB2F8B0B2"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gesture_nco_sine.v",
+      "SHA256": "2FC838AFDA014FD99A6AD211D5B27BC8F6D34BAEF4D15DDAA068C2F5FA565E1A"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gesture_piano_voice.v",
+      "SHA256": "20043297BF44B143F4D84671D4822F1EE47E0A9A6A88A0FDFD22B105B687D855"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gesture_top.v",
+      "SHA256": "C4DAA5087E778D6500C344AE723BAB741F684F54D3CAD89DFAF6CED8D4B6CA51"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gowin_fsr_adc.v",
+      "SHA256": "80459203E1588C597D35CA418E051991B11B45869F25B8EA6962929486C613F3"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hc05_command.hex",
+      "SHA256": "B0C1326CF9EC2824367753B313F7DA7B8CBE6A29E80DFF91FDE27BDB0D6C7E61"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hc05_command_decode.v",
+      "SHA256": "5CEAD8FF34201612ADEF7A98E18B8BA71F3E47A82FA15484214971C76AF5CD0B"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hc05_keymap.v",
+      "SHA256": "3C30AC8ABAD9A8299C1BB7B6B258D69D7C940E540E91A2F2C3B52A8E5427A25C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hc05_reply.hex",
+      "SHA256": "DA668387FE28FC3EF76FD882682679609B750D84AFB246D1344DC684D7B556D0"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hub75e_rhythm_display.v",
+      "SHA256": "94603E0B3243FAB9B9AE303879BD33CAAFC6BF7B00104D945A3D207BBF0A800F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hub75e_status.v",
+      "SHA256": "431E8C4D0E518825541BF0673E80A6D07010730554B485E2B7C35401B086812F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/i2c_arbiter.v",
+      "SHA256": "A5C8FCAC8DECD7F1BC878BFAE3C7ABAAFBE551FC964452B7CA7652E6411247AA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/i2c_master.v",
+      "SHA256": "32A498FC7EB7B47344A1DB645EBFF4F18BA6A8F2633DF91C030640D954E65B75"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/i2s_tx.v",
+      "SHA256": "ECBD6FE51BA37B29343F7EB740DCFEB73D4422A83F6F8B741C40207F5A1FE99E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/ir_strings.v",
+      "SHA256": "A011D1B2F0C0A46751053A6797BA4546BB644DC26394733B59903A9607D1A457"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/key_live_stream.v",
+      "SHA256": "36ACC42D731E7F54BA2B099591328175D0BC07259F7E1C9F02B74620BD6D2F4D"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/lissajous_reference.v",
+      "SHA256": "88CCA236982CA39C158222F6DF747221F6B58CD1B609D08EBD2AF73528E7549C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/midi_note_lut.v",
+      "SHA256": "AB22313AA47025F96D3C1427A60BB5C0BCA6360617113C4AFC054AD051BABDC4"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/nco_sine.v",
+      "SHA256": "17C026767A0F6B92F888C378122F7A0BAE930E629A02954EBC36D34E3B9369AE"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_AUDIO_TAKE.sdc",
+      "SHA256": "3BB3C6AFCD423DD45886196ED7336E0739D8B96A103F3CE27AFF4B4FFA1148F3"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_EVENT_TAKE.cst",
+      "SHA256": "9CE0D09F10E32057740EF71F4D28BF3933B8D8960416855D16DD65E78AB25624"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_EVENT_TAKE.sdc",
+      "SHA256": "DB1D2F0A7EA731326CFBEE1B6D93A731B82638F17CFA6FF51391175798AFF151"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_PAM8403.cst",
+      "SHA256": "73F2A482975B8E735EF211167CE8E187826F628C0D04EB5B4D136FCA73DA2BB8"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_PAM8403.sdc",
+      "SHA256": "8D89A33A94386D9940039D4BE7FCCD70551BD51ECCA7518CAC6F973D59A36877"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_UNIFIED.sdc",
+      "SHA256": "D6CBD2947834A1C945BF7DF0D7E3C854400CBC59D24830B291EC2C51D8A999CA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/performance_logger.v",
+      "SHA256": "F8CD95E1728176F46EBA17E442CE7FD5357B02CCDF90BF7769BCBEBABFF3947C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/performance_take.v",
+      "SHA256": "15B5676C2454158BD95977199A7F4A235B20794560BFC39D18A4A3561625461C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/pitch_control.v",
+      "SHA256": "12BAD5A168B117B4B1519E9A3C4E1B7DE64B82CC5579688E9EA90A1FB9668148"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/poly_demo_control.v",
+      "SHA256": "DAECD8671BBBD7E0F973438F7D9A897AC5AB637D97AC424ED69F5EF39D2B4614"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/poly_synth.v",
+      "SHA256": "EF0916D52B0E2FFF0D0D97AFEC0019A8D1E8FD1872FE953AC212FE5610D089E3"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/rhythm_guide.v",
+      "SHA256": "5C876FC4ED397404C618D8B657AAC4FAC3AC012F253744D18CBB7F4ACB6864D8"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/scope_style.hex",
+      "SHA256": "116D70713DF3C47237E730CBAE00D7B69D97137FA59129BD30F184AD90FBF15E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/sensor_poly_audio.v",
+      "SHA256": "DE2282A8534D0BE28BBD14957701A202AE6EB0E6C88C512AE45ABFDCA9C2874E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/sine_lookup.v",
+      "SHA256": "F4FC3AE4DE5252570591E2BEFA265F4355A649909B8A2E850C487E8866B3B011"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/sine_rom.v",
+      "SHA256": "C6421EADF98EB28FABB3965662C7BFCE07C7FA38666D2A8F65B295A840491DF3"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/synth_shared_arith.v",
+      "SHA256": "340147C580A5FD4EC0BA90A0862E3BD145E73117F79AFF1D140CAB61B0BE6BEA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/synth_voice.v",
+      "SHA256": "6D825539E639BF38A9F75C85DDE1F420E21F40C2E1D0E02066A87BB7E0D88F8E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/take_key_control.v",
+      "SHA256": "B19EB4127859C6113D4D731525D52DE95ED3F64D70DE601FA3D767B91F2E7DC7"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/take_nor_store.v",
+      "SHA256": "EA40B6DDAD00421DDD759C9C2A8F89BBA754183521201143215652B0ADB460C9"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/take_spi_transaction.v",
+      "SHA256": "0FCDA057DFE7448F848A326BEAA0D9189A5ABF979A3A28B05A6E9E993F1E7F7F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/tdm_sine256.hex",
+      "SHA256": "969483C54B36DD4CD6361994E65F302538D9184FE154E34DD71E53D400026CD8"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/tdm_synth.v",
+      "SHA256": "16D163D7351D8ADD91416C3D8CAD6491DB2E575D024DCA1411D34DFDAFF9124F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/top.v",
+      "SHA256": "7C97FC16BBBB85E978113AED055AD07F45ABA2A42C4DCD525D09D2F68B2A2922"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/top_audio_take.v",
+      "SHA256": "1388C4DFC67BB3631A911A69C3771F36A697E6F97A5BA5A84FA46AC858942007"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/top_take.v",
+      "SHA256": "0CE3C8E0F8E23A08AD26573F9E3360A08498FE6AA4769D51640B9EE7309D48A1"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/top_unified.v",
+      "SHA256": "109677E0D300CCF308E528173F8DF37B51FD87AE2D793A8508D1B6D1E55AA4F7"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/touch_sine_rom.v",
+      "SHA256": "D7A871F3819D6E2E592CA00ACE43EBAF49A45CA9626226DE425A53BBBEDCBEA0"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/touch_tdm_synth.v",
+      "SHA256": "9ACF07B89374E26C9B228581B2A43A6FE734C70E37CE76FA7137D38E2A519B7A"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/ttp229_keys.v",
+      "SHA256": "46FF3FC3550C8E0FFA06791257F85C0CE90EE9C2C4ADAEB101CBBF1B398591AB"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/twinkle_sequencer.v",
+      "SHA256": "6F78D36930BF9B69E9CD4736D204E2B4B027BDE804A7D0E65A07AEA8ABDED734"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/uart_8n1.v",
+      "SHA256": "07A9B6273BA364243B1DF7A6624346BBD195E1C0CF6662C2B72794879DBF5251"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/vibrato.v",
+      "SHA256": "561FDBDF9A32C8D1723B4F3071731DE9BC619B9FE781F6AB853E491CC0B51DFC"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/volume_key.v",
+      "SHA256": "2EF21A6F29BA64DF4BEAB4C98B563397063ACAF7C6B4BA4BDF6012FDF11BD3A2"
+    },
+    {
+      "Path": "pmod_hub75e/src/display_rom.v",
+      "SHA256": "E516B11FA572904BEFE6EAC585C72B4107D4127A56C97844F9F0877D5249BAA9"
+    },
+    {
+      "Path": "pmod_hub75e/src/gao_touch_debug.v",
+      "SHA256": "5A2E6DB29728B2756F5E9DD2A9950267670DA657F32C0C0475EA05768DA79F64"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_clkdiv/gowin_clkdiv.ipc",
+      "SHA256": "9CB6BD0B76066011F32BE567B2658BB513D37DBB511650D9AEEDAACBE6F8F533"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_clkdiv/gowin_clkdiv.mod",
+      "SHA256": "68EBE0B520577BA2072D5E8DDB0389DB4607A0DAF956651B10C519E16800FF81"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_clkdiv/gowin_clkdiv_tmp.v",
+      "SHA256": "6AD681CF59C4CC68A2250003CA2EEBE67FB4550AE386251D68551AC896EE7614"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_prom/gowin_prom.ipc",
+      "SHA256": "0E331E9A14D75F97EC9E3864A12414F8EC4A79FDEDFBC1EB08817E37D2E5240D"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_prom/gowin_prom.mod",
+      "SHA256": "DE9B2C3B1CE3B163C173F189EA6FE8D009B15CBB93D86E03E0EE39487F81E1E8"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_prom/gowin_prom.v",
+      "SHA256": "9E5359CA61E698B07FF9B6FF8A46EFB07A44D69E9B288E3A3E366D3B65BE3A7C"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_prom/gowin_prom_tmp.v",
+      "SHA256": "F48046C47CD8F04415865D8A950B128615C52B0D686A9AB8960636692330741E"
+    },
+    {
+      "Path": "pmod_hub75e/src/HUB75E.cst",
+      "SHA256": "EC35340183BD630141D60082ABE8DB28605E796E403C80C6BA083EEB31B0D4D7"
+    },
+    {
+      "Path": "pmod_hub75e/src/HUB75E.gao",
+      "SHA256": "4DC797FDBBED29E18A76815CD767075CE14711E9BF9E4A06583974FD27BD6262"
+    },
+    {
+      "Path": "pmod_hub75e/src/HUB75E.sdc",
+      "SHA256": "C8A6C87C66FB04FC2924264BF90D0C5EB8DEC0199C1680977B03A85CF91F1AB7"
+    },
+    {
+      "Path": "pmod_hub75e/src/logoS.hex",
+      "SHA256": "2B9F28FC0B36C8556BC3869A2F766A8CC18397B306940F53AB11753325DE9480"
+    },
+    {
+      "Path": "pmod_hub75e/src/logoT.hex",
+      "SHA256": "18471B9DCC4E8660A358208D94D367A81C56C08FC99187F8A81E5CD0682D641E"
+    },
+    {
+      "Path": "pmod_hub75e/src/top.v.v",
+      "SHA256": "47EADBBEF0523AC8148D0F11366FD690BA8AFB0D6C9D3FB93471DBDB6414B91F"
+    },
+    {
+      "Path": "pmod_hub75e/src/touch_ui.v",
+      "SHA256": "1FC04E76EBF5A344DB564DB2E9081A333BFA0E750361510E154B41D330CBB879"
+    },
+    {
+      "Path": "pmod_hub75e/src/TT25664.hex",
+      "SHA256": "6206A5342DC2B1D4EA9DDC8184938C1C57EC576865088D1B01E76B5EEAF476B5"
+    },
+    {
+      "Path": "pmod_hub75e/src/ttp229_ctrl.v",
+      "SHA256": "69BEDA2E1CD4BFB408438BED818F6E9DA3659871C74DCC9D2C857098C2E05267"
+    },
+    {
+      "Path": "pmod_hub75e/src/ttp229_gpio_input.v",
+      "SHA256": "36320ADC278AE38D10196B26874BD3ECB771AF1AD7ED8F1BD7BD7A8BA88CD16F"
+    },
+    {
+      "Path": "pmod_hub75e/src/ttp229_mode_select.v",
+      "SHA256": "309209D2A07F6C26BFA4683675EFF1C62A3F0E9253C9323CE0982374FC43463B"
+    },
+    {
+      "Path": "pcm5102_pam8403/PCM5102_UNIFIED.gprj",
+      "SHA256": "9E3927602474C4809AA3BA07BA0AD114CB3EDE75DFB876FC914C2F84E8FEC301"
+    },
+    {
+      "Path": "pcm5102_pam8403/tools/build_unified.tcl",
+      "SHA256": "DE4924CDC3B36284395E0FBFA926BA2BF6D50E8855DDD28BFB105CE170E52EA4"
+    }
+  ],
+  "baseline_audit": {
+    "label": "reply_place1",
+    "status": "validated",
+    "strategy": {
+      "place_option": 1,
+      "route_option": 0,
+      "route_maxfan": 23
+    },
+    "metrics": {
+      "Logic": {
+        "used": 22447.0,
+        "capacity": 23040.0
+      },
+      "CLS": {
+        "used": 11387.0,
+        "capacity": 11520.0
+      },
+      "Register": {
+        "used": 10732.0,
+        "capacity": 23280.0
+      },
+      "BSRAM": {
+        "used": 53.0,
+        "capacity": 56.0
+      },
+      "DSP": {
+        "used": 26.5,
+        "capacity": 28.0
+      }
+    },
+    "delta_vs_baseline": {
+      "Logic": -177.0,
+      "CLS": -83.0,
+      "Register": 6.0,
+      "BSRAM": 0.0,
+      "DSP": 0.0
+    },
+    "unrouted_nets": 0,
+    "bitstream_present": true,
+    "bitstream_sha256": "ACC17F2F956BBE26400E84E3E09AAB82EDECCDFFCFCD9902203E6C34ACFD2F8A",
+    "timing": {
+      "setup_violated_endpoints": 0,
+      "setup_worst_path": {
+        "slack_ns": 0.081,
+        "from": "u_main/u_gesture/u_audio/u_synth/context_work_254_s0/Q",
+        "to": "u_main/u_gesture/u_audio/u_synth/voice_active_2_s2/D"
+      },
+      "setup_reported_violating_paths": [],
+      "hold_violated_endpoints": 0,
+      "hold_worst_path": {
+        "slack_ns": 0.153,
+        "from": "u_main/u_effects/delay_write_13_s0/Q",
+        "to": "u_main/u_effects/delay_memory_delay_memory_0_3_s/DI[1]"
+      },
+      "hold_reported_violating_paths": [],
+      "setup_raw_worst_path": {
+        "slack_ns": 0.081,
+        "from_cell": "u_main/u_gesture/u_audio/u_synth/context_work_254_s0",
+        "to_cell": "u_main/u_gesture/u_audio/u_synth/voice_active_2_s2"
+      },
+      "setup_raw_violating_paths": [],
+      "hold_raw_worst_path": {
+        "slack_ns": 0.153,
+        "from_cell": "u_main/u_effects/delay_write_13_s0",
+        "to_cell": "u_main/u_effects/delay_memory_delay_memory_0_3_s"
+      },
+      "hold_raw_violating_paths": []
+    },
+    "changed_inputs_vs_baseline": [
+      "pcm5102_pam8403/src/hc05_keymap.v",
+      "pcm5102_pam8403/tools/build_unified.tcl"
+    ],
+    "changed_input_hashes": {
+      "pcm5102_pam8403/src/hc05_keymap.v": {
+        "baseline": "3957358A568F1BDB42246F7A8AB14256FCC79F87094973589B63200E85F8EB27",
+        "candidate": "3C30AC8ABAD9A8299C1BB7B6B258D69D7C940E540E91A2F2C3B52A8E5427A25C"
+      },
+      "pcm5102_pam8403/tools/build_unified.tcl": {
+        "baseline": "381FB71908812B6E730653CB42A041C14CA0E267E7CF0C429CEC18F3DD7326FE",
+        "candidate": "DE4924CDC3B36284395E0FBFA926BA2BF6D50E8855DDD28BFB105CE170E52EA4"
+      }
+    },
+    "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\hc05_cls_first_20261026\\reply_place1\\sources.json",
+    "source_manifest_sha256": "1BAB483BC88C40DC59BF5F020336F5688309AC74B317306429F01AFA60127FA2",
+    "downloadable_song_sha256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414",
+    "snapshot_corrupt_inputs": [],
+    "errors": [],
+    "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\hc05_cls_first_20261026\\reply_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+    "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\hc05_cls_first_20261026\\reply_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+    "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\hc05_cls_first_20261026\\reply_place1\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html",
+    "unplaced_LUT_equivalents": 0,
+    "gowin_sha256": "4C172D4C0D2A4C7EF5C764D091A315CBCDE2127573554BFD7D09AC6F2E5EA535",
+    "actual_build_file_hashes": {
+      "impl/gwsynthesis/PCM5102_UNIFIED.prj": "7A39B8FF259A0B9BAF53278AFAD8B56166FD46C2D26C5DC8261DB6C64CABC82A",
+      "impl/pnr/cmd.do": "9596C0C87AD4982361CAEB11DC7181344E34F97E72A87F93EB8BA1287EBBB40A",
+      "impl/pnr/device.cfg": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A",
+      "impl/pnr/PCM5102_UNIFIED.rpt.txt": "639338B878063106D2F6628FAB56C78A52D86DCC8132D1DA301FA16A7C0DF441",
+      "impl/pnr/PCM5102_UNIFIED_tr_content.html": "C302C12E7FD3EA777B155D1C6977E8917799FC273C2B448F361DDE531853C564",
+      "impl/pnr/PCM5102_UNIFIED.timing_paths": "32CF43D480521844C7E616B006C37F0FE0FE3C5A3246DDDFDB83266CE71F9E73"
+    }
+  },
+  "gowin_sha256": "4C172D4C0D2A4C7EF5C764D091A315CBCDE2127573554BFD7D09AC6F2E5EA535",
+  "app_inputs": [
+    {
+      "Path": "app/build.gradle",
+      "SHA256": "EAC1CC8EFDB2FACB86860CE52EE61D6D013FD0EA9B399019EB363DF36F0DC45C"
+    },
+    {
+      "Path": "app/src/main/AndroidManifest.xml",
+      "SHA256": "19AE87D3D0DD4492E0736A5642BF43A09AE6567D771F51EF66BACA2534C90EB2"
+    },
+    {
+      "Path": "app/src/main/assets/backdrop.png",
+      "SHA256": "88FBE15DC4F3832ED637A7EAE73D0FE1FB8E6CD37D8EA5F6093B163D9950BE11"
+    },
+    {
+      "Path": "app/src/main/assets/hero.png",
+      "SHA256": "FD7C06858F7BE176827BA05E97870AEDDDB9FA84205571B35083A69E1C641AC0"
+    },
+    {
+      "Path": "app/src/main/assets/hero_art.png",
+      "SHA256": "D468909BD3112D22F08138ABC152FDD28CF5C6DFC5FDEEE2FDAB647D13AC6D9D"
+    },
+    {
+      "Path": "app/src/main/assets/mascot_0.png",
+      "SHA256": "E32A9BD69BF78957B86B4EFF3D8C3F5C01092AB5E0E5168F4A9A0268F1B2084F"
+    },
+    {
+      "Path": "app/src/main/assets/mascot_1.png",
+      "SHA256": "6E5833043F76C5CD048921C6274BC14618DD586FFBBBADF2264F7C53B90A051B"
+    },
+    {
+      "Path": "app/src/main/assets/mascot_2.png",
+      "SHA256": "7265CCF5326411EF71CAF3010DB1494EF34F0680C00130A926498F1302D217E5"
+    },
+    {
+      "Path": "app/src/main/assets/mascot_3.png",
+      "SHA256": "22BECFD2B2DDB7B4F6EE1CE8E59429C2D43F2B7DCB132F4CF4024C3C1BB6002A"
+    },
+    {
+      "Path": "app/src/main/assets/mascot_4.png",
+      "SHA256": "CDED3E88AEC99ACD3EC44C1B02667188DDB60C15507DD5BBA939194646E939B2"
+    },
+    {
+      "Path": "app/src/main/assets/mascot_5.png",
+      "SHA256": "69DA0CA83CDD45723F3CA8E735737F37519444363DE3ED143DC3E38446C0811F"
+    },
+    {
+      "Path": "app/src/main/assets/third_party/usbserial-LICENSE.txt",
+      "SHA256": "6F467D3D79C5D31734881FB83E082E84512BDE05D3F7893E0E8373FD0D2B5D2C"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/AdsrEnvelopeView.java",
+      "SHA256": "F1876133E3A79295D471CC9DB3614514CE82105EF9F9B496A706F126FFCECA40"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/AdsrProfile.java",
+      "SHA256": "08F7D1C68C724ECF2AF73767BB9BAAE29B2C9C762DCEC985FB17002D12856961"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/AppearanceController.java",
+      "SHA256": "12E4B36E2655BE37DBEBE3E65B684D51C1FC107F446B747BC8AAF62BE48E72EE"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/ArtAssets.java",
+      "SHA256": "66CB6A2DF18047C02FEBC5B8D2A4759AD576F216F578C02FE7163062E604477D"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/AudioRecording.java",
+      "SHA256": "6F8C7BA9EE9F5AE20B846F22FF6F9D276C47E8B27D482B9520C491104BB516C6"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/BeatBarsView.java",
+      "SHA256": "5EC5603CF2A01AFF33896921C2A44F37FFEBDF623419B7E3B2F5A868EBEA6AC9"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/ChromaticKeys.java",
+      "SHA256": "9D9A5F7318774623802100524C75CF88B2EDD492FDD1C34DF0CA26E5E3FDE4E6"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/ControlState.java",
+      "SHA256": "5BEA2349E8C707B97B0C814F69022CEEF89DEBA8129530568D4903F6E7A48DAB"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/DeviceControls.java",
+      "SHA256": "0B72C0E015186A8F98ED28E5A4AA5392ADBA0BCD7B10616416C7FE0D4126A2E9"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/FxScene.java",
+      "SHA256": "5EA55626B8A8DA0015A229585ECD8FDEA9E4512078E9F0C86393EE95AC2FC623"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/FxSceneStore.java",
+      "SHA256": "BCFE41EEA57E9B3582EE0867103CCF85BE56AEB983F8974542D97E454E8A507C"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/FxState.java",
+      "SHA256": "CC95CD3BC32876EFBF1338A5AE21E591241EDEB50DD148FD2A25EDBB2DD3854D"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/LedFrame.java",
+      "SHA256": "71E0FECDAEEF6B63CC78D4F12FF5176B87E443CCBCCBCABABF184D77E0EF3DB6"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/LedHue.java",
+      "SHA256": "F9712F02D03E6F107B932176E440EC764FB43484590DF8435C39A33156C5EF17"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/LedState.java",
+      "SHA256": "CF09C14E83D8B5BF4E97B3C374DFAF013C0BC7A147FA79394C6D0DE0675D40C5"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/MainActivity.java",
+      "SHA256": "56AD2420A39168B9608B80482909EECE9DB15FAF6BC3F811BE7F4498CD29C74F"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/PerformanceParams.java",
+      "SHA256": "4715FB6CE6DBBA06A3C3BF76D826DAB7A9D963C2B93A4FD695180147566BE8BB"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/PhonePiano.java",
+      "SHA256": "12B17633D5E3EEDC79A27A4BC4F2D81C583BFC92678F5284206B51F4FF0A6A9E"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/PhoneTake.java",
+      "SHA256": "C90383ED2FBA177DDDF06591CF573BB5FABFFC58CC8DC0611456EF38DDCCE4A2"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/PhoneTakeStore.java",
+      "SHA256": "09288DCA551C5686A344C1B3087EC09BFAE2CB775D7B82E0329D16EB84EC4036"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/PianoKeyboardView.java",
+      "SHA256": "5384FF89278F4D888780ABD707952FF9026B0B31456353875D272AEDD5CD62A1"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/RecordingSupport.java",
+      "SHA256": "C968E41191BBE145CD06D0E0B5BCEA925C54141445739315A79288A49DE1DE37"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/SegmentButton.java",
+      "SHA256": "AE49FFB24425684974CD05FFB0AB1D3DE82B1AD0BDD7212D0B4438200052E589"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/SongCodec.java",
+      "SHA256": "EA3C24B6637833F56AF2788CF12265C201430227D5F8C735074BC5901176FB02"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/SongLibrary.java",
+      "SHA256": "EFE1648A37CC106C07A9B8111D7B20B8324C7BEB6B7F75827AEE8089B950E5F7"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/SpectrumPreviewView.java",
+      "SHA256": "08068A62F6703F55C4AC0D9CCBE4D872E138D4E94CF67B322F610AF622E445B7"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/SppLink.java",
+      "SHA256": "A03F6FE99DB12FA6F54FBA83F4D0ACE0F1D0D875FAFBE507EF29F3223A8EF2E3"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/StageBackdropView.java",
+      "SHA256": "6761BED16150DBC646193F75BAE9F8359563104EA054259ED72ACC21C5B2ACB7"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/TakeStatus.java",
+      "SHA256": "B9B13D4E03DC08D2ED9A6D9DC22AD5FA2FAD01644CEACEBEBD9872F08543DF34"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/TakeWorkflow.java",
+      "SHA256": "B80A3007BAA4923F8D603AEABAABD75962C60975CBB0F8172EE427F668051D0B"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/Theme.java",
+      "SHA256": "514F7A6FFC2839E08B04A2BD8DF57E34966B10AC2A3E2D6ED2D5469C9C894D40"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/UsbAudioLink.java",
+      "SHA256": "A05EC3A42B21282F2DE3B76F6D964E2053F8CBA898DFE2196EF71D7C87805DEF"
+    },
+    {
+      "Path": "app/src/main/java/cn/fpga/score/VoiceBend.java",
+      "SHA256": "F44B620E1D48E453A2E657F70C94A2FB6A10C950B8F9B1B66386B4C31D4B3663"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/BuildConfig.java",
+      "SHA256": "EAC07953A7E4CCC3808841D2DB8C579C314753BA04DE66ECA161FACC8A7C61FA"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/CdcAcmSerialDriver.java",
+      "SHA256": "F47737123212DD506D46AAD33A9531FB2D395BBA3F19160BCAF90F0C676465B5"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/Ch34xSerialDriver.java",
+      "SHA256": "4C8E53043D5CEDBEFB7997AA865A3629989F6C207DC63AE05702868FBC47D0D6"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/ChromeCcdSerialDriver.java",
+      "SHA256": "D74F66BD67087BC24B28FD950F6E8E048DDBDCCF269A490A21D92C436187AB52"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/CommonUsbSerialPort.java",
+      "SHA256": "6F2EEE9C7988CFD1FB3D5C59B6E1A5FC8BFFC53871A7B894401771488CEAB53E"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/Cp21xxSerialDriver.java",
+      "SHA256": "A092B92E118F4A8110AE7DB0563D9B09DF32A9C37D1A0AC5F0BC676B3ECF99FE"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/FtdiSerialDriver.java",
+      "SHA256": "5D56017AFE9D91499BEA9392F940721D024CD66891DE80D6BBAC72BBBA75B741"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/GsmModemSerialDriver.java",
+      "SHA256": "3FFB6F1D77DC37644D17E9C2DCC72C625DDBE3BF500851ACC4DAA35CE836D734"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/ProbeTable.java",
+      "SHA256": "5DB744B235E4C2A93D57D41828720F8B78940FB4D5A1A397C18DF9D7A8A20D07"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/ProlificSerialDriver.java",
+      "SHA256": "B577E1C84B1A4671C9BCB9B998F2D8AE66A7D3CD5529F293E42F7DEF776377D7"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/SerialTimeoutException.java",
+      "SHA256": "0934207AAE9DC4AEE7F20D91B44C9387FC364995A746CB33F9E2F52F57DD3F9C"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbId.java",
+      "SHA256": "9AEDCD07CAE0BB1EA521A653E19731E2763913EEE7661BB6AB0B445F2AB22360"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialDriver.java",
+      "SHA256": "EE606636A29CD4C682B4325EEC27DFFBBA66F07EDA93B8C3FD9716520DBAC8F1"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialPort.java",
+      "SHA256": "9D7FBCB8599D15B03BD2A3B67749AFDA385EF0497274C65EDB6BDD32A33C542A"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialProber.java",
+      "SHA256": "F8CB4C38F6CBB80C16498EE0D15933559165E2D4179997BCD7C9F34769DB18AD"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/util/HexDump.java",
+      "SHA256": "06E0C6E28C2B6D850FF451A54660F64BF83AEAE93B688C80F1CF6FBA41B81C2E"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/util/MonotonicClock.java",
+      "SHA256": "73E29449754CFF976E0AB1C3EC4F890F11F6630CEE1E3E164DF5E3092CEA2E12"
+    },
+    {
+      "Path": "app/src/main/java/com/hoho/android/usbserial/util/UsbUtils.java",
+      "SHA256": "B366665E94D7E4F5DA6C0492E31FD63C67DCFB77AB25698DFE1BEA4105D3E26F"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "SHA256": "4A76D848A55CA3991A268A59915E4F908977F979785FA560C364F02AF0CB387D"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "SHA256": "479E89C793C77FF4F9FCFBD04D205414BEB1C68CCE74B6DF2E4D5B7FDF9C1AA2"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png",
+      "SHA256": "33A7B85EF0FE31A96676CB59079D549ADDD39D03E3698E7DF1F7C988CEBF65D2"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "SHA256": "F92360B067E0E772E65A8E5F482C4FCA4FA3F985378FA880FDABF1AF1C38D81C"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png",
+      "SHA256": "F0C413620A4EA38CFFD09F477B12118099A9D0E19DF31C73D24D8584B99C8B02"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "SHA256": "2594E4620C76DD81C423D3883E96C98506785CA641900AF0A05FA13428AA5022"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png",
+      "SHA256": "A6143927F160D12D0C1C2ED9D02B8E69152234F3133EA8C911CF5A84694A4101"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "SHA256": "E84DD5F6773DE318CDE0EF26706E2B8B9653B7D5672479526C466A68C67D1630"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png",
+      "SHA256": "69B6C486D34BA004B76C37108F2E6602A7AB67B945D72C7D17FDC909E41DFBFE"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "SHA256": "43FCDAF1DEC18CA590EDDAEB9D5E0D9FF2DED86286CA0EF30F63E04D1594DE83"
+    },
+    {
+      "Path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+      "SHA256": "1F142F6719A4F425ADDA2E122317883279965CDDCF0AD62B607E86E6509822D7"
+    },
+    {
+      "Path": "app/src/main/res/values/colors.xml",
+      "SHA256": "16419ABF11A5F6C213699FCB35A5E3E44FB3B73C0FEDE239FBF03A3E2FAFCDE7"
+    },
+    {
+      "Path": "build-apk.ps1",
+      "SHA256": "7F9550739F1A250270F0686B9AF1CF4EEB942A0657FC77133018DBD40C5D6A66"
+    },
+    {
+      "Path": "core_test/AdsrProfileTest.java",
+      "SHA256": "221512C1331669855FB8D6749BFBCC009C433109EB48F717893DD3426DEA24FB"
+    },
+    {
+      "Path": "core_test/android/bluetooth/BluetoothDevice.java",
+      "SHA256": "4793207F81F40A48E9145F77405D51DFC7E62F3C659C0473718770FA44D026B8"
+    },
+    {
+      "Path": "core_test/android/bluetooth/BluetoothSocket.java",
+      "SHA256": "B61DD0A049EB2EC58D50D46A9671399D02DE0A78685270C982C85011841816CB"
+    },
+    {
+      "Path": "core_test/AudioRecordingTest.java",
+      "SHA256": "7174740748D8F8F0848EE5DE8DDF853AF5048C5E77C7C864D9724A47DD4163F5"
+    },
+    {
+      "Path": "core_test/ChromaticKeysTest.java",
+      "SHA256": "101F4C4B3B0050467F38EBA809F1F8407D424663892D23BC2BCE382FB9F55FAC"
+    },
+    {
+      "Path": "core_test/ControlStateTest.java",
+      "SHA256": "0A207FA8CAF9E7EE94D51CEBA401412479FB3FDF92898E1857726E3CC0FCA4F5"
+    },
+    {
+      "Path": "core_test/DeviceControlsTest.java",
+      "SHA256": "10958FDE6C455679CA5BC84A67BD4521E5AECE84174CCCDC3788A62F85867229"
+    },
+    {
+      "Path": "core_test/FxSceneTest.java",
+      "SHA256": "1473F136DBD061D93745002A000CB8B91E916F1D8C35F5CA391318421D68EBD4"
+    },
+    {
+      "Path": "core_test/FxStateTest.java",
+      "SHA256": "04079474EC32D6DFC0AA58E0CDDFD701C4C3B33507043A9301BF7BA85090D30B"
+    },
+    {
+      "Path": "core_test/LedHueTest.java",
+      "SHA256": "E47DD94889C688031DCA962D804C870ABAE6DB693A19D959B243FEEF11544C19"
+    },
+    {
+      "Path": "core_test/LedProtocolTest.java",
+      "SHA256": "47D793DC263151723C141C7EE12791EB08EF04E9ECD658051D0A5FF2CC4DD85D"
+    },
+    {
+      "Path": "core_test/PerformanceParamsTest.java",
+      "SHA256": "AB4E36A49450120BBEFD59EA612DBC9DCF4E35D5DBF0F7DC62AD94B958BA10D0"
+    },
+    {
+      "Path": "core_test/PhoneTakeTest.java",
+      "SHA256": "673B67480DFC95C61057FB75C4F90168F114C3B3F3B459301B6431C0962C70DF"
+    },
+    {
+      "Path": "core_test/RecordingSupportTest.java",
+      "SHA256": "9B6FB952338353BA5BAAD0DF3BA0D6693DCDC597299FDF2A66CC2AE8E3918491"
+    },
+    {
+      "Path": "core_test/SongCodecTest.java",
+      "SHA256": "CEA77F48E538F09BCF5025578E9BE7E62278F7ACF0DC96501B7745FCC822AE36"
+    },
+    {
+      "Path": "core_test/SongLibraryTest.java",
+      "SHA256": "AFBA7A04930054D4C23EDDA9C5E3CDC2228E5A1A45948703C3D90A4571D23CC2"
+    },
+    {
+      "Path": "core_test/SppAudioTest.java",
+      "SHA256": "8F0746C40362037B51EBB248CEA5BF3FF14769009086449A47C225CBBF6099C0"
+    },
+    {
+      "Path": "core_test/SppLinkTest.java",
+      "SHA256": "9E4D0C095F69E32E16BAB7DCA2BAA6B9D9C053A33FDECC7A617241A8C440B98C"
+    },
+    {
+      "Path": "core_test/TakeStatusTest.java",
+      "SHA256": "05E2F91848FFF004366DACE05488447886F58B213DE88B42E90F1ADEEC893F6D"
+    },
+    {
+      "Path": "core_test/TakeWorkflowTest.java",
+      "SHA256": "4F700E136992BEE519E2F4F1D629E8D4F10FE639D1DCEDDA08A9CCAFC15D4CE9"
+    },
+    {
+      "Path": "core_test/VoiceBendTest.java",
+      "SHA256": "0DB3B2F750240BF7AA3C9B4FBBC76CA9195878984CA7950CC7D1CBA06A11133A"
+    },
+    {
+      "Path": "test-core.ps1",
+      "SHA256": "D1D9B23B6DBD959E993AACACE2C1430504559EAFEDF93568621D8645A30E9763"
+    },
+    {
+      "Path": "third_party/README.md",
+      "SHA256": "DC59A815846F529BA3170A375FB4E9D5A006E9F0918FD2006AE4571A2D86DBC6"
+    },
+    {
+      "Path": "third_party/usbserial-LICENSE.txt",
+      "SHA256": "6F467D3D79C5D31734881FB83E082E84512BDE05D3F7893E0E8373FD0D2B5D2C"
+    }
+  ],
+  "rollback_apk_sha256": "C53E3A02A09B0C2CEC5D02A90C44302AF89D084B574B62ED55761BB18D12B66A"
+}

@@ -1,0 +1,17 @@
+{
+  "RTL_samples_checked": 755280,
+  "rates_Hz": [
+    0.7450580596923828,
+    1.4901161193847656,
+    2.9802322387695312,
+    5.9604644775390625
+  ],
+  "depths": [
+    0,
+    4,
+    8
+  ],
+  "dynamic_switch_reset_silence": true,
+  "off_or_zero_depth_matches_FX3": true,
+  "max_stage_clocks": 52
+}

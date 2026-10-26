@@ -11,7 +11,7 @@ module tb_performance_params;
     reg compare_default=1;
     integer i,frames,qstep,target,elapsed,ideal,expected_current;
     reg [47:0] expected_product;
-    voice_pitch_scaler dut(.note_increments(note_increments),.*);
+    voice_pitch_scaler dut(.score_ratio(16'd0),.score_keys(7'd0),.note_increments(note_increments),.*);
     voice_pitch_scaler_reference reference(
         .clk(clk),.resetn(resetn),.sample_ce(sample_ce),.pitch_ratio(pitch_ratio),
         .bend_write(bend_write),.bend_reset(bend_reset),.bend_index(bend_index),

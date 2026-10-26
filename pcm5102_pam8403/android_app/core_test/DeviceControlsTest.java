@@ -9,7 +9,8 @@ public final class DeviceControlsTest {
             DeviceControls c=DeviceControls.parse("CTRL,"+mode+","+effect+","+wet+",1,"+analog+","+volume+",0");
             yes(c.mode16==mode&&c.effect==effect&&c.wet==wet&&c.analog==analog&&c.volume==volume&&c.hold==1&&c.pressure==0);
         }
-        yes(DeviceControls.touchCommand(0).equals("TOUCH,8"));yes(DeviceControls.touchCommand(1).equals("TOUCH,16"));
+        yes(DeviceControls.parse("CTRL,1,0,4,0,0,16,0").summary().contains("16 键串行"));
+        yes(DeviceControls.parse("CTRL,0,0,4,0,0,16,0").summary().contains("旧固件"));
         for(int poly:new int[]{1,2,4,8,16})for(int voices=0;voices<=16;voices++){
             DeviceControls c=DeviceControls.parse("CTRL2,1,2,8,2,4,16,0,"+poly+","+voices);
             yes(c.extended&&c.hold==2&&c.poly==poly&&c.voices==voices&&c.summary().contains("钢琴踏板"));

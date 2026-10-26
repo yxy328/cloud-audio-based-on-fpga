@@ -18,7 +18,7 @@ public final class SppLinkTest {
         a.onCommand=c->{a.feed("EVT,120,01,0,39321,65535\r");a.feed("\nERR,REC_OVERFLOW,1\r\nO");a.feed("K\r\n");};
         yes(link.command("STOP","OK").equals("OK"));yes(link.connected());yes(lines.contains("ERR,REC_OVERFLOW,1"));
         // New controls use the same acknowledged transport while recording lines arrive.
-        for(String control:new String[]{"GUITAR","TONE,0","TONE,1","TONE,2","TONE,3","TONE,4","VIBRATO,0","VIBRATO,1","BANK,0","BANK,1","ADSR,TOUCH,10,80,60,200","ADSR,SENSOR,10,80,60,200","ADSR_RESET,TOUCH","ADSR_RESET,SENSOR","BEND,1,8192","BEND,4,16384","BEND,7,32768","BEND_RESET","TOUCH,8","TOUCH,16","EFFECT,1,8","EFFECT,2,4","HOLD,1","HOLD,0","HOLD,2","POLY,1","POLY,2","POLY,4","POLY,8","POLY,16","VOLUME,0","VOLUME,16","ANALOG,1","ANALOG,2","ANALOG,3","ANALOG,4","PRESSURE,1","CAL,0,590","SERIAL,0","SERIAL,1","PANIC"}){
+        for(String control:new String[]{"GUITAR","TONE,0","TONE,1","TONE,2","TONE,3","TONE,4","VIBRATO,0","VIBRATO,1","BANK,0","BANK,1","ADSR,TOUCH,10,80,60,200","ADSR,SENSOR,10,80,60,200","ADSR_RESET,TOUCH","ADSR_RESET,SENSOR","BEND,1,8192","BEND,4,16384","BEND,7,32768","BEND_RESET","TOUCH,8","TOUCH,16","EFFECT,1,8","EFFECT,2,4","EFFECT,3,7,82,1092","HOLD,1","HOLD,0","HOLD,2","POLY,1","POLY,2","POLY,4","POLY,8","POLY,16","VOLUME,0","VOLUME,16","ANALOG,1","ANALOG,2","ANALOG,3","ANALOG,4","PRESSURE,1","CAL,0,590","SERIAL,0","SERIAL,1","PANIC"}){
             final String expected=control+"\n";
             a.onCommand=c->{yes(c.equals(expected));a.feed("EVT,140,03,1,30000,65535\r\nERR,REC_OVERFLOW,2\r\nOK\r\n");};
             yes(link.command(control,"OK").equals("OK"));
@@ -55,6 +55,8 @@ public final class SppLinkTest {
         a.onCommand=c->a.feed("EFFECT2,0\r\n");yes(link.command("EFFECT2,?","EFFECT2").equals("EFFECT2,0"));
         a.onCommand=c->{a.feed("P");a.feed("ITCH,2000,8000,1000,4000\r\n");};
         yes(link.command("PITCH,?","PITCH").equals("PITCH,2000,8000,1000,4000"));
+        a.onCommand=c->{a.feed("K,01,1\r\nEFF");a.feed("ECT3,7,52,444,4,D2,800\r\n");};
+        yes(link.command("EFFECT,?","EFFECT3").equals("EFFECT3,7,52,444,4,D2,800"));
         // Live key uplink: unsolicited K lines must reach the listener without swallowing the ACK.
         a.onCommand=c->{yes(c.equals("KLIVE_ON\n"));a.feed("K,01,1\r\nK,03,1\r\nOK\r\nK,01,0\r\n");};
         yes(link.command("KLIVE_ON","OK").equals("OK"));yes(lines.contains("K,01,1"));yes(lines.contains("K,01,0"));
@@ -65,6 +67,7 @@ public final class SppLinkTest {
             {"MAP?","MAP","MAP,60,61,62,63,64,65,66"},
             {"CTRL2?","CTRL2","CTRL2,1,0,4,0,0,16,0,16,00"},
             {"SERIAL?","SERIAL","SERIAL,0"},{"CAL?","CAL","CAL,000,3FF"},
+            {"EFFECT,?","EFFECT3","EFFECT3,0,52,444,0,52,444"},
             {"PITCH,?","PITCH","PITCH,2000,8000,1000,4000"},
             {"VIB,?","VIB","VIB,0008,0D96,100,0000"},{"EFFECT2,?","EFFECT2","EFFECT2,0"},
             {"TAKE?","TAKE,","TAKE,00,0,000000,000,000000"},{"VIS?","VIS","VIS,0,0,2,0,0,0,0"}

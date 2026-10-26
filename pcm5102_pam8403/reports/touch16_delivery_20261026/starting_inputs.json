@@ -1,0 +1,1150 @@
+[
+  {
+    "path": "src/ads1115_ctrl.v",
+    "sha256": "C7D2C0F814A9536A7ECF67AD1D3C23400A22A0EEC61FD7497E3E5C451B1D2C1A"
+  },
+  {
+    "path": "src/adsr_config.v",
+    "sha256": "4078A8EDE4E655F94C04019707FA562C77233A794B7D6FF0C3CEF273AE1E4F15"
+  },
+  {
+    "path": "src/adsr_env.v",
+    "sha256": "3B93DE95A73C82DA73627FD690E84F294B39E011642025FEEA0473ACB9A39A89"
+  },
+  {
+    "path": "src/analog_expression.v",
+    "sha256": "462838F13693247A707F493242CD87D3A969D7CDBB018D9E13ACE3EE9BDBD19C"
+  },
+  {
+    "path": "src/apds9960_ctrl.v",
+    "sha256": "4AAA3F1F0E20BFFFB35B49567427ED0054B972D9167F98C5337A3E69FDC77492"
+  },
+  {
+    "path": "src/audio_effects.v",
+    "sha256": "E6C71CC8FF09E7E1F88BB358D437BFB5722FBD5B3BEFAE6B87E0F73BBE4015A2"
+  },
+  {
+    "path": "src/audio_master_volume.v",
+    "sha256": "78C33B6DB3EA4471E8DBB21C1504D92F781CFF49DEE5A42F4B8A6FAE83699CD9"
+  },
+  {
+    "path": "src/audio_mixer.v",
+    "sha256": "FDDC61597D3B0986B9FF5EEF995AC861DB5B1F44FEFC7F708D06DAFD20CD6A4F"
+  },
+  {
+    "path": "src/audio_nor_operation.v",
+    "sha256": "7073D2434D378923D6DCAD6954DE86874B43C94446C28A904064814A117965D8"
+  },
+  {
+    "path": "src/audio_record_stream.v",
+    "sha256": "E0D8A3EC41F848BB7673B86367DD6F6D33298AA88D7536667C9310875834ABDE"
+  },
+  {
+    "path": "src/audio_scope.v",
+    "sha256": "33782E6956EBE3A05AB1F77316E903C147348FBF2BF259740E0C267DD77B085A"
+  },
+  {
+    "path": "src/audio_spectrum.v",
+    "sha256": "C7362DC13E74485AC2464CF46EC1EBBE46A434557717119231ACA6115C5D6A2E"
+  },
+  {
+    "path": "src/audio_take_store.v",
+    "sha256": "9862CE3C7768CC2AFA2757772D97E65C8C16E1A653BDE3BA3A9C2235F0AE74C0"
+  },
+  {
+    "path": "src/audio_visualizer.v",
+    "sha256": "D334D34CC0B89FAAEC937CFCE2305CED1F81D1016AB2BF09E208051EA70E24AC"
+  },
+  {
+    "path": "src/button_filter.v",
+    "sha256": "0FDDE927C12BE9F15F9875A188FBD3FE4A66A86470A328ED26AD0CFCD716FC81"
+  },
+  {
+    "path": "src/clk_div.v",
+    "sha256": "79F36F0741FBB923072357832C8B97C6F8EEB1D44F24B3B8B858E87674DBD83E"
+  },
+  {
+    "path": "src/dds_voice.v",
+    "sha256": "5C8DA023CC9565553F0435A03D630EB57FED85E49F7DC87BF4552C93B2EDB6AC"
+  },
+  {
+    "path": "src/display_mode_control.v",
+    "sha256": "72149DE38C7D07FC589289FFAE065ACD508C677E2DEE462959E64CD43DCFF085"
+  },
+  {
+    "path": "src/downloadable_song.v",
+    "sha256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414"
+  },
+  {
+    "path": "src/envelope_gain.v",
+    "sha256": "D30DA82079347D55CFA2278AD1EF4E502259CF4D21D38C81313332715712F7AC"
+  },
+  {
+    "path": "src/extra_voices.v",
+    "sha256": "ECA4098D8E783F8FEECA574ABF613A10CED0A2C4155750CC3AF8F9AF38D5A9FA"
+  },
+  {
+    "path": "src/fft256_init.hex",
+    "sha256": "8797D53733A1F17AD995E3EE3C2D0810EF7143D5E19EA4523450DCBDB97036DA"
+  },
+  {
+    "path": "src/fsr_dynamics.v",
+    "sha256": "2C6920307C39EBA238BD1313856DDCC53810C5C9949C9A24E726BD49AE307B83"
+  },
+  {
+    "path": "src/fsr_mode_select.v",
+    "sha256": "F0401F9F2EFBA2BB9146C693588DCE2F7D3532E5A0169A79F51DE521C546791D"
+  },
+  {
+    "path": "src/fsr_pitch_scaler.v",
+    "sha256": "0619276D7DCBD735501DE5E161C5F597071433DBD5463390D311F70AB64A8411"
+  },
+  {
+    "path": "src/geita.v",
+    "sha256": "A15D4016ADE0BE3A9AFD5C52438AB13678F0A89A1EB436C3FE1898B8BF86EE4C"
+  },
+  {
+    "path": "src/gesture_audio.v",
+    "sha256": "10FAE5B75401B569F63F10639A47A5D3AE6E5B2F6EF5DDE3AED5FABAB2F8B0B2"
+  },
+  {
+    "path": "src/gesture_nco_sine.v",
+    "sha256": "2FC838AFDA014FD99A6AD211D5B27BC8F6D34BAEF4D15DDAA068C2F5FA565E1A"
+  },
+  {
+    "path": "src/gesture_piano_voice.v",
+    "sha256": "20043297BF44B143F4D84671D4822F1EE47E0A9A6A88A0FDFD22B105B687D855"
+  },
+  {
+    "path": "src/gesture_top.v",
+    "sha256": "C4DAA5087E778D6500C344AE723BAB741F684F54D3CAD89DFAF6CED8D4B6CA51"
+  },
+  {
+    "path": "src/gowin_fsr_adc.v",
+    "sha256": "80459203E1588C597D35CA418E051991B11B45869F25B8EA6962929486C613F3"
+  },
+  {
+    "path": "src/hc05_command.hex",
+    "sha256": "B0C1326CF9EC2824367753B313F7DA7B8CBE6A29E80DFF91FDE27BDB0D6C7E61"
+  },
+  {
+    "path": "src/hc05_command_decode.v",
+    "sha256": "5CEAD8FF34201612ADEF7A98E18B8BA71F3E47A82FA15484214971C76AF5CD0B"
+  },
+  {
+    "path": "src/hc05_keymap.v",
+    "sha256": "8649F22EDBFFE448AEE57BF91DF8C12393DAF45707D4A2D44D94DA02FC813B81"
+  },
+  {
+    "path": "src/hc05_reply.hex",
+    "sha256": "E5068FE0273F7DF6DDE071567EC3372C38F3E37574016E78D8E8480F05B1A502"
+  },
+  {
+    "path": "src/hub75e_rhythm_display.v",
+    "sha256": "94603E0B3243FAB9B9AE303879BD33CAAFC6BF7B00104D945A3D207BBF0A800F"
+  },
+  {
+    "path": "src/hub75e_status.v",
+    "sha256": "431E8C4D0E518825541BF0673E80A6D07010730554B485E2B7C35401B086812F"
+  },
+  {
+    "path": "src/i2c_arbiter.v",
+    "sha256": "A5C8FCAC8DECD7F1BC878BFAE3C7ABAAFBE551FC964452B7CA7652E6411247AA"
+  },
+  {
+    "path": "src/i2c_master.v",
+    "sha256": "32A498FC7EB7B47344A1DB645EBFF4F18BA6A8F2633DF91C030640D954E65B75"
+  },
+  {
+    "path": "src/i2s_tx.v",
+    "sha256": "ECBD6FE51BA37B29343F7EB740DCFEB73D4422A83F6F8B741C40207F5A1FE99E"
+  },
+  {
+    "path": "src/ir_strings.v",
+    "sha256": "A011D1B2F0C0A46751053A6797BA4546BB644DC26394733B59903A9607D1A457"
+  },
+  {
+    "path": "src/key_live_stream.v",
+    "sha256": "36ACC42D731E7F54BA2B099591328175D0BC07259F7E1C9F02B74620BD6D2F4D"
+  },
+  {
+    "path": "src/lissajous_reference.v",
+    "sha256": "88CCA236982CA39C158222F6DF747221F6B58CD1B609D08EBD2AF73528E7549C"
+  },
+  {
+    "path": "src/midi_note_lut.v",
+    "sha256": "AB22313AA47025F96D3C1427A60BB5C0BCA6360617113C4AFC054AD051BABDC4"
+  },
+  {
+    "path": "src/nco_sine.v",
+    "sha256": "17C026767A0F6B92F888C378122F7A0BAE930E629A02954EBC36D34E3B9369AE"
+  },
+  {
+    "path": "src/PCM5102_AUDIO_TAKE.sdc",
+    "sha256": "3BB3C6AFCD423DD45886196ED7336E0739D8B96A103F3CE27AFF4B4FFA1148F3"
+  },
+  {
+    "path": "src/PCM5102_EVENT_TAKE.cst",
+    "sha256": "9CE0D09F10E32057740EF71F4D28BF3933B8D8960416855D16DD65E78AB25624"
+  },
+  {
+    "path": "src/PCM5102_EVENT_TAKE.sdc",
+    "sha256": "DB1D2F0A7EA731326CFBEE1B6D93A731B82638F17CFA6FF51391175798AFF151"
+  },
+  {
+    "path": "src/PCM5102_PAM8403.cst",
+    "sha256": "73F2A482975B8E735EF211167CE8E187826F628C0D04EB5B4D136FCA73DA2BB8"
+  },
+  {
+    "path": "src/PCM5102_PAM8403.sdc",
+    "sha256": "8D89A33A94386D9940039D4BE7FCCD70551BD51ECCA7518CAC6F973D59A36877"
+  },
+  {
+    "path": "src/PCM5102_UNIFIED.sdc",
+    "sha256": "9F69FA604522BCB83FB4870A86C6519BF2A8D1C0EDA455B27B84D4C89C1CFD15"
+  },
+  {
+    "path": "src/performance_logger.v",
+    "sha256": "F8CD95E1728176F46EBA17E442CE7FD5357B02CCDF90BF7769BCBEBABFF3947C"
+  },
+  {
+    "path": "src/performance_take.v",
+    "sha256": "15B5676C2454158BD95977199A7F4A235B20794560BFC39D18A4A3561625461C"
+  },
+  {
+    "path": "src/pitch_control.v",
+    "sha256": "12BAD5A168B117B4B1519E9A3C4E1B7DE64B82CC5579688E9EA90A1FB9668148"
+  },
+  {
+    "path": "src/poly_demo_control.v",
+    "sha256": "DAECD8671BBBD7E0F973438F7D9A897AC5AB637D97AC424ED69F5EF39D2B4614"
+  },
+  {
+    "path": "src/poly_synth.v",
+    "sha256": "EF0916D52B0E2FFF0D0D97AFEC0019A8D1E8FD1872FE953AC212FE5610D089E3"
+  },
+  {
+    "path": "src/rhythm_guide.v",
+    "sha256": "5C876FC4ED397404C618D8B657AAC4FAC3AC012F253744D18CBB7F4ACB6864D8"
+  },
+  {
+    "path": "src/scope_style.hex",
+    "sha256": "116D70713DF3C47237E730CBAE00D7B69D97137FA59129BD30F184AD90FBF15E"
+  },
+  {
+    "path": "src/sensor_poly_audio.v",
+    "sha256": "DE2282A8534D0BE28BBD14957701A202AE6EB0E6C88C512AE45ABFDCA9C2874E"
+  },
+  {
+    "path": "src/sine_lookup.v",
+    "sha256": "F4FC3AE4DE5252570591E2BEFA265F4355A649909B8A2E850C487E8866B3B011"
+  },
+  {
+    "path": "src/sine_rom.v",
+    "sha256": "C6421EADF98EB28FABB3965662C7BFCE07C7FA38666D2A8F65B295A840491DF3"
+  },
+  {
+    "path": "src/synth_shared_arith.v",
+    "sha256": "340147C580A5FD4EC0BA90A0862E3BD145E73117F79AFF1D140CAB61B0BE6BEA"
+  },
+  {
+    "path": "src/synth_voice.v",
+    "sha256": "6D825539E639BF38A9F75C85DDE1F420E21F40C2E1D0E02066A87BB7E0D88F8E"
+  },
+  {
+    "path": "src/take_key_control.v",
+    "sha256": "B19EB4127859C6113D4D731525D52DE95ED3F64D70DE601FA3D767B91F2E7DC7"
+  },
+  {
+    "path": "src/take_nor_store.v",
+    "sha256": "EA40B6DDAD00421DDD759C9C2A8F89BBA754183521201143215652B0ADB460C9"
+  },
+  {
+    "path": "src/take_spi_transaction.v",
+    "sha256": "0FCDA057DFE7448F848A326BEAA0D9189A5ABF979A3A28B05A6E9E993F1E7F7F"
+  },
+  {
+    "path": "src/tdm_sine256.hex",
+    "sha256": "969483C54B36DD4CD6361994E65F302538D9184FE154E34DD71E53D400026CD8"
+  },
+  {
+    "path": "src/tdm_synth.v",
+    "sha256": "16D163D7351D8ADD91416C3D8CAD6491DB2E575D024DCA1411D34DFDAFF9124F"
+  },
+  {
+    "path": "src/top.v",
+    "sha256": "5C5722DC5DB74A322E0A416A0F3998001CEAEA3D80A6EAB63EF3A23C4D8DA99E"
+  },
+  {
+    "path": "src/top_audio_take.v",
+    "sha256": "1388C4DFC67BB3631A911A69C3771F36A697E6F97A5BA5A84FA46AC858942007"
+  },
+  {
+    "path": "src/top_take.v",
+    "sha256": "0CE3C8E0F8E23A08AD26573F9E3360A08498FE6AA4769D51640B9EE7309D48A1"
+  },
+  {
+    "path": "src/top_unified.v",
+    "sha256": "109677E0D300CCF308E528173F8DF37B51FD87AE2D793A8508D1B6D1E55AA4F7"
+  },
+  {
+    "path": "src/touch_sine_rom.v",
+    "sha256": "D7A871F3819D6E2E592CA00ACE43EBAF49A45CA9626226DE425A53BBBEDCBEA0"
+  },
+  {
+    "path": "src/touch_tdm_synth.v",
+    "sha256": "9ACF07B89374E26C9B228581B2A43A6FE734C70E37CE76FA7137D38E2A519B7A"
+  },
+  {
+    "path": "src/ttp229_keys.v",
+    "sha256": "46FF3FC3550C8E0FFA06791257F85C0CE90EE9C2C4ADAEB101CBBF1B398591AB"
+  },
+  {
+    "path": "src/twinkle_sequencer.v",
+    "sha256": "6F78D36930BF9B69E9CD4736D204E2B4B027BDE804A7D0E65A07AEA8ABDED734"
+  },
+  {
+    "path": "src/uart_8n1.v",
+    "sha256": "07A9B6273BA364243B1DF7A6624346BBD195E1C0CF6662C2B72794879DBF5251"
+  },
+  {
+    "path": "src/vibrato.v",
+    "sha256": "561FDBDF9A32C8D1723B4F3071731DE9BC619B9FE781F6AB853E491CC0B51DFC"
+  },
+  {
+    "path": "src/volume_key.v",
+    "sha256": "2EF21A6F29BA64DF4BEAB4C98B563397063ACAF7C6B4BA4BDF6012FDF11BD3A2"
+  },
+  {
+    "path": "sim/ads1115_model.v",
+    "sha256": "DDD40B0F2113B957741BDDFE009A6A9701795515BCFF8935826E0973F1AA84C3"
+  },
+  {
+    "path": "sim/audio_nor_model.v",
+    "sha256": "53184FC090F9F8F84A832D125C7F454BBC7B8A417BA41625CCB2CEB4D4D7E4B4"
+  },
+  {
+    "path": "sim/gowin_adc_model.v",
+    "sha256": "B0A54634E2F008D55B63B70A426F861F517884DBC8716223E978795656620FD4"
+  },
+  {
+    "path": "sim/i2s_pcm_monitor.v",
+    "sha256": "BD3356BDAC1C9E95883424928B5CD8BBC0467C484987328588D83690E48DDE73"
+  },
+  {
+    "path": "sim/take_nor_model.v",
+    "sha256": "6F6E0836360A8C7BE04383AFB404B114036C2D349DFAC46B20D08BD0A9BE9C8A"
+  },
+  {
+    "path": "sim/tb_ads1115_bus.v",
+    "sha256": "D99DE14D04F874C292342265A7A9417515BBA65920D920D77C23B2D23C78916B"
+  },
+  {
+    "path": "sim/tb_adsr_env.v",
+    "sha256": "80026AA697BD6EACC6823F920A06991086AF817FD85AC366D60D010CF96F2BC8"
+  },
+  {
+    "path": "sim/tb_analog_expression.v",
+    "sha256": "5E310A1B0BC80ECF33047CBF4AF462ACCB75482EDE9A4074F4A8479430D2E5F0"
+  },
+  {
+    "path": "sim/tb_apds_nack.v",
+    "sha256": "9080CC659E5702201193E4DBE51DFD6DC42073E55965B1465B9DE76B8FC8D825"
+  },
+  {
+    "path": "sim/tb_audio_effects.v",
+    "sha256": "86CA83947DB9F7F01E04143998A0C0383F93BC7D57835145B89FDEFB069D3B5A"
+  },
+  {
+    "path": "sim/tb_audio_master_volume.v",
+    "sha256": "51BF9C55547F3BC4FEDEF95547666304AB438D7702D4058E05FB7288A2933256"
+  },
+  {
+    "path": "sim/tb_audio_mixer.v",
+    "sha256": "27488A0B57E3F2CF82806317FB8E136A9F666DB55B91A11B6C995E9AE02B8244"
+  },
+  {
+    "path": "sim/tb_audio_record_stream.v",
+    "sha256": "B4B49B3D286EDE064D14FBF12A29FC92E9EA5400A6293B20D89DFEBA144B989A"
+  },
+  {
+    "path": "sim/tb_audio_scope.v",
+    "sha256": "D82271BC0733324228547465C36D18EFE687FAFA64C6580F732F478823F41820"
+  },
+  {
+    "path": "sim/tb_audio_spectrum.v",
+    "sha256": "FBF6897B14BE5E0E66E1CCF5F30949215F9CF10B137B763CEF9EC9FA0A8758E1"
+  },
+  {
+    "path": "sim/tb_audio_take_safety.v",
+    "sha256": "3681FD7515A55389ED190B5FC19DAF5FCA856C37EBA7850213D3B1D93BEA4F99"
+  },
+  {
+    "path": "sim/tb_audio_take_store.v",
+    "sha256": "4CD5BD88EFD782B440F4074DE1A7182296D46B2247B394BBC7B8B7E8696A05B3"
+  },
+  {
+    "path": "sim/tb_audio_units.v",
+    "sha256": "8BC3C2CBED4D47561D195758695C4F3544E93CF708F7E09A0C2661DB2CED0CA8"
+  },
+  {
+    "path": "sim/tb_audio_visualizer.v",
+    "sha256": "F81D8E15D2BC56B5BF81A21A8CFFFAABB74A689DE753B17CD5AEE55DC5FF2661"
+  },
+  {
+    "path": "sim/tb_bend_ram_equivalence.v",
+    "sha256": "ABD16DDCF18223A9D011F8C2EC6097F72054B90D46183FBF5645EA36CC44B28F"
+  },
+  {
+    "path": "sim/tb_button_filter.v",
+    "sha256": "228BE2FA476DBE9EAEC6BE30D5621EE494E0C3B1A4FBE525EE8BF87C446E7EA7"
+  },
+  {
+    "path": "sim/tb_command_protocol.v",
+    "sha256": "84818D541502451CC120F6801957C0DDF2331077BF7C9B25DE2D8EC12B12B8D8"
+  },
+  {
+    "path": "sim/tb_dds_voice.v",
+    "sha256": "867A12E1CBDABCBB3B4A3FD68E59AFC35D955A3176039FEF03B0DE5E307FC579"
+  },
+  {
+    "path": "sim/tb_display_mode_control.v",
+    "sha256": "EB682E7592D9EBD10C56C445D851AB6E73EB1013E4AAA3CC3A457EA13F4E1C37"
+  },
+  {
+    "path": "sim/tb_downloadable_song.out",
+    "sha256": "5E9E6C57E5DA79C2F35BF168176D396E31529C96979B839EB3407B570989901E"
+  },
+  {
+    "path": "sim/tb_downloadable_song.v",
+    "sha256": "2811625F63D43B556A8509CA2384C83455291EF0E461F741B87CB136EA8A0A87"
+  },
+  {
+    "path": "sim/tb_echo_params.v",
+    "sha256": "B9334D9DA6CC57604E06E3200F1F0EF3BABDFA973DD830961205890A7B6A4B50"
+  },
+  {
+    "path": "sim/tb_engine_merge_baseline.v",
+    "sha256": "7CF5C02500A765482018CE7E8C32A2080D5FC713AB4D8CFD57AD34804E0F7FCB"
+  },
+  {
+    "path": "sim/tb_envelope_gain.v",
+    "sha256": "60AAD768A310AB7E53CDA7CB5343A9E45A3AF3C2C9729BBA783F8C499B927BCD"
+  },
+  {
+    "path": "sim/tb_fsr_adc_capture.v",
+    "sha256": "6626CB18555A3F97FAD1E2845532070C1F0D359AD15B468C0E88A34C662C600B"
+  },
+  {
+    "path": "sim/tb_fsr_dynamics.v",
+    "sha256": "17FE21A24467B3A91F88A87451EF7D7059E01FCFAB1642A0A5064D7F7B18877F"
+  },
+  {
+    "path": "sim/tb_fsr_modes.v",
+    "sha256": "74687B1C06C0CBAA0399B3A7A99BFC09D0F741F283A8EBCE0C724316B49CD9F8"
+  },
+  {
+    "path": "sim/tb_fsr_pipeline.v",
+    "sha256": "96DCFF0643AFCE8EA87912F12F78D7C28B114F132A4F9717E3512FA14FFC4ED5"
+  },
+  {
+    "path": "sim/tb_fx_frame_budget.v",
+    "sha256": "6005D215DFA17CBA9E89FA069982BBF623E135B21E7E6FD10A130826B542BDD5"
+  },
+  {
+    "path": "sim/tb_gesture_audio.v",
+    "sha256": "FBDD51E6964B8B7CB089A3C94F50E76EC18C2EB7EC3DD99C6911E7616F9B880E"
+  },
+  {
+    "path": "sim/tb_gesture_external_control.v",
+    "sha256": "49E09998D2DB9E41AA1964D815476971496757B322DCC85B748DC03CA9768A77"
+  },
+  {
+    "path": "sim/tb_gesture_nco_pipeline.v",
+    "sha256": "40AD3EF5C605A109100431E18E1962D36AA5E5FFE7F940037622EDEA1F391FB7"
+  },
+  {
+    "path": "sim/tb_gowin_fsr_adc.v",
+    "sha256": "B7DC501A2B1C2DC8C481BA23FC8439BC9C0E2D1113ED4611095D8EFC5E44F9B3"
+  },
+  {
+    "path": "sim/tb_hc05_adsr.v",
+    "sha256": "17944D4175CCA1F8DB63D07D3AC9B4A5CDF543BEC93EA11CB75EF76C51FA37BC"
+  },
+  {
+    "path": "sim/tb_hc05_audio_record.v",
+    "sha256": "F67E686BDF0F589427FFBB62953592BCB5A7318B21723EBD4146DA907AB558C7"
+  },
+  {
+    "path": "sim/tb_hc05_bend.v",
+    "sha256": "022723F991CBA001C5F247D0A07C5C235B2C2C55A62617F431D7B10E97142CA6"
+  },
+  {
+    "path": "sim/tb_hc05_control_races.v",
+    "sha256": "1EC8D6A2AC09E5262863AB013200341ECD440BC1608ABB6A84B1BEB12C04B4BC"
+  },
+  {
+    "path": "sim/tb_hc05_decoder_equivalence.v",
+    "sha256": "59A45AA9B574E57640573E7D4C1DBEC87C600362EC17D48D327C7B81FCCA7860"
+  },
+  {
+    "path": "sim/tb_hc05_download.out",
+    "sha256": "90DE1C4819641E3B66A16FF515C8287FCC09885830C00B25E12AEC7C6265A8FD"
+  },
+  {
+    "path": "sim/tb_hc05_download.v",
+    "sha256": "1CEFF4C5CC782EEBC3E4E08C8E6243AF3F2819A62FF64B86E78E034E2A1737DC"
+  },
+  {
+    "path": "sim/tb_hc05_extensions.v",
+    "sha256": "69FFA7C200C06220B0C8C90BB460167C55C143FF44EE404B19592E5C1CCF857A"
+  },
+  {
+    "path": "sim/tb_hc05_keymap.v",
+    "sha256": "FBC22CE67372A804EBB395F5C2E6A37C7D87F135AF9D136454050E1466020DE1"
+  },
+  {
+    "path": "sim/tb_hc05_pnr.v",
+    "sha256": "F703F3C4CECAFC142171CB20E08CFDC04CE486AA450F802561451A9474206291"
+  },
+  {
+    "path": "sim/tb_hc05_take.v",
+    "sha256": "F10A59CAD6D5014357113582595C9CF8D9FDA8411C2F8FB16A07758C6299A1C2"
+  },
+  {
+    "path": "sim/tb_hc05_visual.v",
+    "sha256": "CE9BE0E666727F933A3319CF14E85EED88D567D21C19A6BC00AF6A421EDFE771"
+  },
+  {
+    "path": "sim/tb_hc05_xy.v",
+    "sha256": "134FB61E6CD813384C658043E0EEDC73BBEBA493F282754B3C011596594773E0"
+  },
+  {
+    "path": "sim/tb_hub75e_audio_display.v",
+    "sha256": "1313AF8FEC01828B2DB162230BDA8B8572D8FA2785E37B1AAC79DB9228F49604"
+  },
+  {
+    "path": "sim/tb_hub75e_ram_equivalence.v",
+    "sha256": "A6047DD8D4866E3658BC7D0DB36A45E49C5AEB6F53BC9CFAB8642696F457ACC6"
+  },
+  {
+    "path": "sim/tb_hub75e_rhythm_display.out",
+    "sha256": "BBE154862358BFD76B23DFE72D88E8CCAE09D0E12AB16E631E0481D9C86F84F7"
+  },
+  {
+    "path": "sim/tb_hub75e_rhythm_display.v",
+    "sha256": "F4083F2C597A84D51DEEC5EB2024E4DCD5F9E2AC7411E5AA157B66B2E6B8817F"
+  },
+  {
+    "path": "sim/tb_hub75e_status.v",
+    "sha256": "0267CF395FFD3DC3E533714E6DEB56A140897F89ECD33BAC508A13C39AC77909"
+  },
+  {
+    "path": "sim/tb_i2c_master_bus.v",
+    "sha256": "447EE7125626980F18DD9BE86A7D89DAA921685C254ED1FD295F159AE390900B"
+  },
+  {
+    "path": "sim/tb_ir_strings.v",
+    "sha256": "7FA906E7916C95ABA847CB7B74E78007074CD337FD01E1A378D06B79B114A277"
+  },
+  {
+    "path": "sim/tb_karplus.v",
+    "sha256": "E005FC7E22C1AFCD7710D3DD20E23E6C5A57313CDD36123A06784B88F804C0EB"
+  },
+  {
+    "path": "sim/tb_karplus_external.v",
+    "sha256": "2482E4521FBC51B558BFCAC858891B02176A942E0227DC7EA5F096DD077D2B09"
+  },
+  {
+    "path": "sim/tb_key_live_stream.v",
+    "sha256": "9F25582F99CB50119B5BD488C99F9DDE5DC1181240F1E2178A7D6184790C499F"
+  },
+  {
+    "path": "sim/tb_lissajous_delay.v",
+    "sha256": "9838250904D428F39D0F6DD217812A3C101A6D4A90FC10B03D8557014725B487"
+  },
+  {
+    "path": "sim/tb_lissajous_reference.v",
+    "sha256": "F6C5268F81A1DB9BD55C6AA4DDA9E6E89D39665BFBCB84095BCCC5259034B536"
+  },
+  {
+    "path": "sim/tb_midi_block_rom.v",
+    "sha256": "FA4011C0D160AA5EF8906A73AC8E88E3E3EB0F13F3AFC94CFEB71F79A5A2BA2E"
+  },
+  {
+    "path": "sim/tb_music_preview.v",
+    "sha256": "2CEC0504EDCB1A900E9F1A7D11A016FAF38E56EEABD8795F52A6FD60EC2FB640"
+  },
+  {
+    "path": "sim/tb_performance_logger.v",
+    "sha256": "0A71DF7B969B300CD82423B5215A6972332F6E164972B13A852047AC203A129E"
+  },
+  {
+    "path": "sim/tb_performance_params.v",
+    "sha256": "C7652BFEEFF692C4C3851C711C48FDA41FE8D8287B28B37C152D2FC81B541FD1"
+  },
+  {
+    "path": "sim/tb_performance_take.v",
+    "sha256": "F621B6DB2F2FBD0B99A836D70585C83C0FEAFFF6C592F66BFC7BD4485EA9F5C7"
+  },
+  {
+    "path": "sim/tb_poly_pipeline.v",
+    "sha256": "221C269D0E0163382FD53886ECA1BE162F3F6444ACC7FE4226D814C565C67ACE"
+  },
+  {
+    "path": "sim/tb_poly_synth.v",
+    "sha256": "85EAF27C5A7CEA5FCB2E2853CDAF0AA6D20FA31893E161EFDDFF7834C460F552"
+  },
+  {
+    "path": "sim/tb_rhythm_guide.v",
+    "sha256": "BBE9D139A8DB68E5D959DA371E8290694D626737E9019851663AFEC0900D67B6"
+  },
+  {
+    "path": "sim/tb_runtime_adsr.v",
+    "sha256": "A75BD861DD7531B52F682504715CA758599FADF6523BC57FCCE053668695F28C"
+  },
+  {
+    "path": "sim/tb_sensor_eight_timbres.v",
+    "sha256": "A81D12D7FB1BE1CF30875089E18CC1CA145952781C9F08C68F01D4F4D7AC61CD"
+  },
+  {
+    "path": "sim/tb_sensor_poly_audio.v",
+    "sha256": "C7A9DC7E4A5A41FF5EF5D16B283E1289BFDE253279F3C0808B5E90CB77E9C0A6"
+  },
+  {
+    "path": "sim/tb_sensor_queue_equivalence.v",
+    "sha256": "0A0E21DCDBA65B51BD389DE0FD18B2336C4C75EE3C85AFBD1A9DA38F2C57C18D"
+  },
+  {
+    "path": "sim/tb_song_time_bound.v",
+    "sha256": "D8E343E6587E6552BA4BFF45EFC431A19D79E03F12079DB9AA9999A7E7EAD301"
+  },
+  {
+    "path": "sim/tb_synth_shared_arith.v",
+    "sha256": "DA284EA51C2579F4C92A59A74D1A54D0EFEDC9DC8886E308701EBB1B16D16B80"
+  },
+  {
+    "path": "sim/tb_synth_shared_equivalence.v",
+    "sha256": "51C3AF9DC5FF41970B7AB9D4D9F5E476B9F39F268DFE603D3F2FD067B7EE2FD4"
+  },
+  {
+    "path": "sim/tb_take_atomic.v",
+    "sha256": "03D8464491BED0C3D1D03BC699A5FDB9E79BE61C83C2A45512FDC977663D8340"
+  },
+  {
+    "path": "sim/tb_take_key_control.v",
+    "sha256": "78EBDD04B540078A1D0A1789FA338D8FDC0B57C71E655FBD263F700FF9552777"
+  },
+  {
+    "path": "sim/tb_take_nor_store.v",
+    "sha256": "F639943E590C6E49535B4A5270431578104AAE91D59371DE0DB3F0AE22387A21"
+  },
+  {
+    "path": "sim/tb_take_spi_guard.v",
+    "sha256": "04EC8626556841B4C18C2E3910AEBF235004DE06D2BE1BEC47E67F3C3BF90CB3"
+  },
+  {
+    "path": "sim/tb_take_spi_partition.v",
+    "sha256": "EBB3EC80C35C700AB4927884F1BBF0FE62FE63C12605A19AC6FD49A27423E709"
+  },
+  {
+    "path": "sim/tb_tdm_adsr.v",
+    "sha256": "F02A1871898CDC64EC78E205EE51EA54CF100B02884ED73B82E86601F25D8142"
+  },
+  {
+    "path": "sim/tb_tdm_geometry_equivalence.v",
+    "sha256": "2846320532362F232B6DE45867EE9400B6685C151FF27882FDF7F389F82466FF"
+  },
+  {
+    "path": "sim/tb_tdm_harmonic_equivalence.v",
+    "sha256": "837A2EBFA59CECA5FF387E81C8E00C6F43AF83F265470E5FA11FA507AD6DC3AB"
+  },
+  {
+    "path": "sim/tb_tdm_queue.v",
+    "sha256": "E3BBA4BB523AC9D72AF474A3B4B7953790991D3D836EE67AEDAF9FB63D821AF7"
+  },
+  {
+    "path": "sim/tb_tdm_take_equivalence.v",
+    "sha256": "062117BF5D9F5E28FEE015BB95A3B9F6D925D2214B896819621FCF7FA2ABE7EA"
+  },
+  {
+    "path": "sim/tb_top.v",
+    "sha256": "6A82FB90D177BDC21822B4CAA12704DC548DDD9F25583750649D578B7A93BD28"
+  },
+  {
+    "path": "sim/tb_top_audio_record.v",
+    "sha256": "8AD1694DD7F2F451831BC7A41149F8CF9A9F946A73A948FD9E06E483133428BC"
+  },
+  {
+    "path": "sim/tb_top_audio_visual.v",
+    "sha256": "AA0284D45614647E168721451887E5569236024923BF9110235EB58086E1AE85"
+  },
+  {
+    "path": "sim/tb_top_audition.v",
+    "sha256": "237A1D1674F0117912DF13D41AB75743D2C15918209A625E67A77025FF18FF99"
+  },
+  {
+    "path": "sim/tb_top_dual_analog.v",
+    "sha256": "EA066C41EB3EDACFE7393563C1F8BEAE20DED722A4C4FAEC5A7D45E643F89D3B"
+  },
+  {
+    "path": "sim/tb_top_flash_audio.v",
+    "sha256": "E21C1491267148FEA8D22171E578B300C10CF0C0A8946C67EA90BFD174652D94"
+  },
+  {
+    "path": "sim/tb_top_fsr.v",
+    "sha256": "F5B7475DB69C1CF5AE81D31A7A2F8BF63FA23336541E132437E4C07EA9AF9599"
+  },
+  {
+    "path": "sim/tb_top_fsr_modes.v",
+    "sha256": "EB477E490238FE83ADA0866337CF47FDD583C9C679A04CAE3885009FCCB070B6"
+  },
+  {
+    "path": "sim/tb_top_hc05_map.v",
+    "sha256": "D60A1F5E9617C97FCCF2A756F71645A7B8322601104A125A6E6795A5B5909AF4"
+  },
+  {
+    "path": "sim/tb_top_hc05_only.v",
+    "sha256": "58F32280AE537DA2E86EF24C18BF411E0A162EAFFD0A74F5F544A2C9173635E2"
+  },
+  {
+    "path": "sim/tb_top_idle.v",
+    "sha256": "86C60DEFC27AD76078D013D33D24BF3B9F863F14451D7F37C0FD50AD0673AAC7"
+  },
+  {
+    "path": "sim/tb_top_integrated.v",
+    "sha256": "723999CF899D051E1FF34AEE9A483A3C47D9AB1B82CBC648FCA0A9266727FC3F"
+  },
+  {
+    "path": "sim/tb_top_ir_tdm.v",
+    "sha256": "330F0797ABC88CBAA38024B4E156293508508D736739C2139B95892CAD645FAB"
+  },
+  {
+    "path": "sim/tb_top_live.v",
+    "sha256": "0C7476BFF6DD131D4B4EEB6FCB645DCCD72BBFED2A118D3934A1CBFB88E5D67E"
+  },
+  {
+    "path": "sim/tb_top_pedal.v",
+    "sha256": "A255FB452427B79FE847847BB0FD5ACB2EDDDAC558427987FCA50C0217FB1A0D"
+  },
+  {
+    "path": "sim/tb_top_performance.v",
+    "sha256": "DF10A3BD405884DF0C08B57609C48AFE35116442A83BC4813C32E845C4E7D3F9"
+  },
+  {
+    "path": "sim/tb_top_runtime_adsr.v",
+    "sha256": "DA9D6CC66EB7E47D3CCB6CCC701F8B15BE7B3E60510E25719246F81A961B3970"
+  },
+  {
+    "path": "sim/tb_top_score_config.v",
+    "sha256": "C4BC6E366A284F1DCF0FD6CCEDE328B3D99228A1AB81E3A184069F4BBC9C872C"
+  },
+  {
+    "path": "sim/tb_top_song.v",
+    "sha256": "5D17700F385182A8BC8072C495FECE9A343DD2900CAFF1307B488A88006FCCB9"
+  },
+  {
+    "path": "sim/tb_top_take.v",
+    "sha256": "8902655ADA59E40CB6CE663C2DB534DEEBA600B27945E017017EDC35310155B4"
+  },
+  {
+    "path": "sim/tb_top_touch.v",
+    "sha256": "53C15A5E2A594FB5468BC7880D4CE97FC0866931367506A5A2F58CA2BB2485E6"
+  },
+  {
+    "path": "sim/tb_top_touch16.v",
+    "sha256": "7E3DE65C81E213CA96CD32926F2DA071AE211A22D4810CB52F7394CFB22D7197"
+  },
+  {
+    "path": "sim/tb_top_touch_response.v",
+    "sha256": "CC77A4777D6F2C9D04C0C43245B68014A56EDC0771F6C79C86AAA4DB08CDFC02"
+  },
+  {
+    "path": "sim/tb_top_unified.v",
+    "sha256": "CB69A60655B7C2C79B942532CA436AA8D30EC088ED8437EEB0DFDF70CF8D6D6D"
+  },
+  {
+    "path": "sim/tb_top_voice_bend.v",
+    "sha256": "B421D8D2C8225EC340C8551C92953EBE8A870F63ADF37A098C74E1FA6767D8CA"
+  },
+  {
+    "path": "sim/tb_touch_pedal_timing.v",
+    "sha256": "E275A367CB211009F8EA39C4EBD40342C666AED374A985CD90847F71548075C5"
+  },
+  {
+    "path": "sim/tb_touch_sine_rom.v",
+    "sha256": "C890BA9BE7EFFCB38EDD00068125FCD0C81863CC195DF00671B7A50A9742BAC2"
+  },
+  {
+    "path": "sim/tb_touch_tdm_synth.v",
+    "sha256": "43B39DE59B96B802A09CE8F2A26769C49652CEB48F7A144C9385BBAC7CDAE122"
+  },
+  {
+    "path": "sim/tb_ttp229_glitches.v",
+    "sha256": "41C99CD2AFA9A1283965DC542DD239B2CBF5D0DB0AFD809976616C3831F01C4D"
+  },
+  {
+    "path": "sim/tb_ttp229_key1_key7.v",
+    "sha256": "0CC560C484A60DB81570DD50D2B98FBE92FAD3EBC826D2D08171407B54851F8A"
+  },
+  {
+    "path": "sim/tb_ttp229_tolerant.v",
+    "sha256": "D03D0780940B08BA9A58519549CAE80F517D0C1F0DB8E3E18249BB48239FE67E"
+  },
+  {
+    "path": "sim/tb_tuning_params.v",
+    "sha256": "72FF86D567DF339E9AE710E7533D7C61DC674EFF4692FAC36DA8CAE57A5D0E07"
+  },
+  {
+    "path": "sim/tb_twinkle_sequencer.v",
+    "sha256": "AF1659BE40655A654B7D8D03F7DC4AB01D233063DAE4EF29E4DB60CAF217F50F"
+  },
+  {
+    "path": "sim/tb_uart_8n1.v",
+    "sha256": "8AB628B628D994F738C3B273B20CE45A800533397DC9DB4D5739829F8BC57625"
+  },
+  {
+    "path": "sim/tb_vibrato_params.v",
+    "sha256": "F070AB513AFEBF1D8E15F2958963D9A1298A55899AFADBC845404387CE32F11B"
+  },
+  {
+    "path": "sim/tb_voice_bend.v",
+    "sha256": "FDCC39D0C5FE9400A9585D8051F2B3FD0B622D7B068AEC752EE36CD3BD4247DE"
+  },
+  {
+    "path": "sim/ttp229_model.v",
+    "sha256": "4F995F5271541735B42AB024FE640A08870E033DA6E14160FDF78861C12C3590"
+  },
+  {
+    "path": "sim/reference/audio_effects_fixed_reference.v",
+    "sha256": "719F25F96230F877EA3C799E9B4DF52A1FFCC71F9AB1A6A696BCF4AF3BC99DA1"
+  },
+  {
+    "path": "sim/reference/hc05_keymap_parallel_reference.v",
+    "sha256": "C39D2008356DC7BE860115A74D3CB3F2F13FC97A400BB5FF9C6A70F508783CB3"
+  },
+  {
+    "path": "sim/reference/hub75e_rhythm_display_reference.v",
+    "sha256": "2ADB0915604A56A7D3B6B52D2C155DDC5C23B225376AB4EF692AE5BF71452DE0"
+  },
+  {
+    "path": "sim/reference/sensor_poly_audio_reference.v",
+    "sha256": "B1654EC0058AABFB66697295A9A8A501912AFD97D89DE2BE97E5D52ABFB5895A"
+  },
+  {
+    "path": "sim/reference/tdm_synth_before_take_opt.v",
+    "sha256": "11EFE6B26B979179DDFAA41D1CE6062115527241555E5F7720269E6C3ADFF248"
+  },
+  {
+    "path": "sim/reference/tdm_synth_fixed_reference.v",
+    "sha256": "EDF5962DD32CAE08453377B5CD460F96485E4DADD4F3601B7EA0CD10C2810B8A"
+  },
+  {
+    "path": "sim/reference/tdm_synth_merge_reference.v",
+    "sha256": "0D9ACA1EBBE8B840BBC1E44DC51C1DCF5688313E9EEE65D1A763F69E1C94F2E7"
+  },
+  {
+    "path": "sim/reference/tdm_synth_parallel_reference.v",
+    "sha256": "0B343F1F22F4304F8AB2B2B40235DA17EB03B198622E17160CEECD9C66259E70"
+  },
+  {
+    "path": "sim/reference/touch_tdm_synth_merge_reference.v",
+    "sha256": "7C16742DBCC60C26D66E6AF3C73701124B2EC7987C2B16F5E0C84745AA2113AB"
+  },
+  {
+    "path": "sim/reference/vibrato_fixed_reference.v",
+    "sha256": "5CF141BC7F18063E46D300FF62345AC81F4A14088BE1EF4797CDC0FF3F8C10C6"
+  },
+  {
+    "path": "sim/reference/voice_pitch_scaler_reference.v",
+    "sha256": "E0F32B50812C6CD3530899685180A0181D50BD40FB75C4718DA1DDED17DEB81A"
+  },
+  {
+    "path": "android_app/app/src/main/AndroidManifest.xml",
+    "sha256": "82563A70D424EA7192C3BD6A868B6CED54D6D3EA575816825A3199B9590CD01F"
+  },
+  {
+    "path": "android_app/app/src/main/assets/backdrop.png",
+    "sha256": "88FBE15DC4F3832ED637A7EAE73D0FE1FB8E6CD37D8EA5F6093B163D9950BE11"
+  },
+  {
+    "path": "android_app/app/src/main/assets/hero.png",
+    "sha256": "B9BDFABA574B960055485A844238D8247BFE312C9E344B1A5DB7F595CEB724C0"
+  },
+  {
+    "path": "android_app/app/src/main/assets/hero_art.png",
+    "sha256": "D468909BD3112D22F08138ABC152FDD28CF5C6DFC5FDEEE2FDAB647D13AC6D9D"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/BuildConfig.java",
+    "sha256": "EAC07953A7E4CCC3808841D2DB8C579C314753BA04DE66ECA161FACC8A7C61FA"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/CdcAcmSerialDriver.java",
+    "sha256": "F47737123212DD506D46AAD33A9531FB2D395BBA3F19160BCAF90F0C676465B5"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/Ch34xSerialDriver.java",
+    "sha256": "4C8E53043D5CEDBEFB7997AA865A3629989F6C207DC63AE05702868FBC47D0D6"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/ChromeCcdSerialDriver.java",
+    "sha256": "D74F66BD67087BC24B28FD950F6E8E048DDBDCCF269A490A21D92C436187AB52"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/CommonUsbSerialPort.java",
+    "sha256": "6F2EEE9C7988CFD1FB3D5C59B6E1A5FC8BFFC53871A7B894401771488CEAB53E"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/Cp21xxSerialDriver.java",
+    "sha256": "A092B92E118F4A8110AE7DB0563D9B09DF32A9C37D1A0AC5F0BC676B3ECF99FE"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/FtdiSerialDriver.java",
+    "sha256": "5D56017AFE9D91499BEA9392F940721D024CD66891DE80D6BBAC72BBBA75B741"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/GsmModemSerialDriver.java",
+    "sha256": "3FFB6F1D77DC37644D17E9C2DCC72C625DDBE3BF500851ACC4DAA35CE836D734"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/ProbeTable.java",
+    "sha256": "5DB744B235E4C2A93D57D41828720F8B78940FB4D5A1A397C18DF9D7A8A20D07"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/ProlificSerialDriver.java",
+    "sha256": "B577E1C84B1A4671C9BCB9B998F2D8AE66A7D3CD5529F293E42F7DEF776377D7"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/SerialTimeoutException.java",
+    "sha256": "0934207AAE9DC4AEE7F20D91B44C9387FC364995A746CB33F9E2F52F57DD3F9C"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/UsbId.java",
+    "sha256": "9AEDCD07CAE0BB1EA521A653E19731E2763913EEE7661BB6AB0B445F2AB22360"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialDriver.java",
+    "sha256": "EE606636A29CD4C682B4325EEC27DFFBBA66F07EDA93B8C3FD9716520DBAC8F1"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialPort.java",
+    "sha256": "9D7FBCB8599D15B03BD2A3B67749AFDA385EF0497274C65EDB6BDD32A33C542A"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialProber.java",
+    "sha256": "F8CB4C38F6CBB80C16498EE0D15933559165E2D4179997BCD7C9F34769DB18AD"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/util/HexDump.java",
+    "sha256": "06E0C6E28C2B6D850FF451A54660F64BF83AEAE93B688C80F1CF6FBA41B81C2E"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/util/MonotonicClock.java",
+    "sha256": "73E29449754CFF976E0AB1C3EC4F890F11F6630CEE1E3E164DF5E3092CEA2E12"
+  },
+  {
+    "path": "android_app/app/src/main/java/com/hoho/android/usbserial/util/UsbUtils.java",
+    "sha256": "B366665E94D7E4F5DA6C0492E31FD63C67DCFB77AB25698DFE1BEA4105D3E26F"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/AdsrEnvelopeView.java",
+    "sha256": "F1876133E3A79295D471CC9DB3614514CE82105EF9F9B496A706F126FFCECA40"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/AdsrProfile.java",
+    "sha256": "08F7D1C68C724ECF2AF73767BB9BAAE29B2C9C762DCEC985FB17002D12856961"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/AppearanceController.java",
+    "sha256": "12E4B36E2655BE37DBEBE3E65B684D51C1FC107F446B747BC8AAF62BE48E72EE"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/ArtAssets.java",
+    "sha256": "81AB648ABD53D35040E8648817D6B92E2C5A813B7CC67E27745F70578442A0CB"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/AudioRecording.java",
+    "sha256": "6F8C7BA9EE9F5AE20B846F22FF6F9D276C47E8B27D482B9520C491104BB516C6"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/BeatBarsView.java",
+    "sha256": "5EC5603CF2A01AFF33896921C2A44F37FFEBDF623419B7E3B2F5A868EBEA6AC9"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/ChromaticKeys.java",
+    "sha256": "9D9A5F7318774623802100524C75CF88B2EDD492FDD1C34DF0CA26E5E3FDE4E6"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/ControlState.java",
+    "sha256": "5BEA2349E8C707B97B0C814F69022CEEF89DEBA8129530568D4903F6E7A48DAB"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/DeviceControls.java",
+    "sha256": "2982B6A4FD7E4BC5273038F3CF70AEB80652F6B27C2CA21E7843DC1B704BE826"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/LedFrame.java",
+    "sha256": "71E0FECDAEEF6B63CC78D4F12FF5176B87E443CCBCCBCABABF184D77E0EF3DB6"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/LedHue.java",
+    "sha256": "F9712F02D03E6F107B932176E440EC764FB43484590DF8435C39A33156C5EF17"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/LedState.java",
+    "sha256": "CF09C14E83D8B5BF4E97B3C374DFAF013C0BC7A147FA79394C6D0DE0675D40C5"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/MainActivity.java",
+    "sha256": "5DA01ABCD8AA0E5D528E36150939BB0F133D3B8E278491B9245340E602497B8C"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/PerformanceParams.java",
+    "sha256": "4715FB6CE6DBBA06A3C3BF76D826DAB7A9D963C2B93A4FD695180147566BE8BB"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/PhonePiano.java",
+    "sha256": "12B17633D5E3EEDC79A27A4BC4F2D81C583BFC92678F5284206B51F4FF0A6A9E"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/PhoneTake.java",
+    "sha256": "C90383ED2FBA177DDDF06591CF573BB5FABFFC58CC8DC0611456EF38DDCCE4A2"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/PhoneTakeStore.java",
+    "sha256": "09288DCA551C5686A344C1B3087EC09BFAE2CB775D7B82E0329D16EB84EC4036"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/PianoKeyboardView.java",
+    "sha256": "5384FF89278F4D888780ABD707952FF9026B0B31456353875D272AEDD5CD62A1"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/RecordingSupport.java",
+    "sha256": "C968E41191BBE145CD06D0E0B5BCEA925C54141445739315A79288A49DE1DE37"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/SegmentButton.java",
+    "sha256": "AE49FFB24425684974CD05FFB0AB1D3DE82B1AD0BDD7212D0B4438200052E589"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/SongCodec.java",
+    "sha256": "EA3C24B6637833F56AF2788CF12265C201430227D5F8C735074BC5901176FB02"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/SongLibrary.java",
+    "sha256": "EFE1648A37CC106C07A9B8111D7B20B8324C7BEB6B7F75827AEE8089B950E5F7"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/SpectrumPreviewView.java",
+    "sha256": "08068A62F6703F55C4AC0D9CCBE4D872E138D4E94CF67B322F610AF622E445B7"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/SppLink.java",
+    "sha256": "A03F6FE99DB12FA6F54FBA83F4D0ACE0F1D0D875FAFBE507EF29F3223A8EF2E3"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/StageBackdropView.java",
+    "sha256": "6761BED16150DBC646193F75BAE9F8359563104EA054259ED72ACC21C5B2ACB7"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/TakeStatus.java",
+    "sha256": "B9B13D4E03DC08D2ED9A6D9DC22AD5FA2FAD01644CEACEBEBD9872F08543DF34"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/TakeWorkflow.java",
+    "sha256": "D0BE7E8777429A6E8D3C57BD4AD98B2E0A732F61CD62B85BA365F739DE432AFD"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/Theme.java",
+    "sha256": "7420E6D57C266C6C1DE8E865AAC96DEE311981B75E95BF42DC1DBAA13CD1F1BA"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/UsbAudioLink.java",
+    "sha256": "A05EC3A42B21282F2DE3B76F6D964E2053F8CBA898DFE2196EF71D7C87805DEF"
+  },
+  {
+    "path": "android_app/app/src/main/java/cn/fpga/score/VoiceBend.java",
+    "sha256": "F44B620E1D48E453A2E657F70C94A2FB6A10C950B8F9B1B66386B4C31D4B3663"
+  },
+  {
+    "path": "android_app/app/src/main/assets/third_party/usbserial-LICENSE.txt",
+    "sha256": "6F467D3D79C5D31734881FB83E082E84512BDE05D3F7893E0E8373FD0D2B5D2C"
+  },
+  {
+    "path": "android_app/core_test/AdsrProfileTest.java",
+    "sha256": "221512C1331669855FB8D6749BFBCC009C433109EB48F717893DD3426DEA24FB"
+  },
+  {
+    "path": "android_app/core_test/AudioRecordingTest.java",
+    "sha256": "7174740748D8F8F0848EE5DE8DDF853AF5048C5E77C7C864D9724A47DD4163F5"
+  },
+  {
+    "path": "android_app/core_test/ChromaticKeysTest.java",
+    "sha256": "101F4C4B3B0050467F38EBA809F1F8407D424663892D23BC2BCE382FB9F55FAC"
+  },
+  {
+    "path": "android_app/core_test/ControlStateTest.java",
+    "sha256": "0A207FA8CAF9E7EE94D51CEBA401412479FB3FDF92898E1857726E3CC0FCA4F5"
+  },
+  {
+    "path": "android_app/core_test/DeviceControlsTest.java",
+    "sha256": "17B594651977755138C00D3F563D53B3A7B87BDF3190DF358D50EE2AA80F945F"
+  },
+  {
+    "path": "android_app/core_test/LedHueTest.java",
+    "sha256": "E47DD94889C688031DCA962D804C870ABAE6DB693A19D959B243FEEF11544C19"
+  },
+  {
+    "path": "android_app/core_test/LedProtocolTest.java",
+    "sha256": "47D793DC263151723C141C7EE12791EB08EF04E9ECD658051D0A5FF2CC4DD85D"
+  },
+  {
+    "path": "android_app/core_test/PerformanceParamsTest.java",
+    "sha256": "AB4E36A49450120BBEFD59EA612DBC9DCF4E35D5DBF0F7DC62AD94B958BA10D0"
+  },
+  {
+    "path": "android_app/core_test/PhoneTakeTest.java",
+    "sha256": "673B67480DFC95C61057FB75C4F90168F114C3B3F3B459301B6431C0962C70DF"
+  },
+  {
+    "path": "android_app/core_test/RecordingSupportTest.java",
+    "sha256": "9B6FB952338353BA5BAAD0DF3BA0D6693DCDC597299FDF2A66CC2AE8E3918491"
+  },
+  {
+    "path": "android_app/core_test/SongCodecTest.java",
+    "sha256": "CEA77F48E538F09BCF5025578E9BE7E62278F7ACF0DC96501B7745FCC822AE36"
+  },
+  {
+    "path": "android_app/core_test/SongLibraryTest.java",
+    "sha256": "AFBA7A04930054D4C23EDDA9C5E3CDC2228E5A1A45948703C3D90A4571D23CC2"
+  },
+  {
+    "path": "android_app/core_test/SppAudioTest.java",
+    "sha256": "8F0746C40362037B51EBB248CEA5BF3FF14769009086449A47C225CBBF6099C0"
+  },
+  {
+    "path": "android_app/core_test/SppLinkTest.java",
+    "sha256": "F1DFE1BA8DEFB948B1F57DEF38A34CCBF3BB75C1C5AA2B96468E2DE86DB98D99"
+  },
+  {
+    "path": "android_app/core_test/TakeStatusTest.java",
+    "sha256": "05E2F91848FFF004366DACE05488447886F58B213DE88B42E90F1ADEEC893F6D"
+  },
+  {
+    "path": "android_app/core_test/TakeWorkflowTest.java",
+    "sha256": "9F7A7386D2B3A4C02998FF80F594689521E221F8EEE1957A64AB0345D7FDDFBD"
+  },
+  {
+    "path": "android_app/core_test/VoiceBendTest.java",
+    "sha256": "0DB3B2F750240BF7AA3C9B4FBBC76CA9195878984CA7950CC7D1CBA06A11133A"
+  },
+  {
+    "path": "android_app/core_test/android/bluetooth/BluetoothDevice.java",
+    "sha256": "4793207F81F40A48E9145F77405D51DFC7E62F3C659C0473718770FA44D026B8"
+  },
+  {
+    "path": "android_app/core_test/android/bluetooth/BluetoothSocket.java",
+    "sha256": "B61DD0A049EB2EC58D50D46A9671399D02DE0A78685270C982C85011841816CB"
+  }
+]

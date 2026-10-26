@@ -1,0 +1,19 @@
+{
+  "assessment_date": "2026-10-26",
+  "baseline_inputs_verified": 101,
+  "baseline_reuses_existing_complete_production_build": true,
+  "baseline_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+  "prior_audit": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_delivery_20261025\\final_production_audit.json",
+  "all_prior_actual_build_artifact_hashes_match": true,
+  "gowin_sha256": "4C172D4C0D2A4C7EF5C764D091A315CBCDE2127573554BFD7D09AC6F2E5EA535",
+  "strategy": {
+    "place": 2,
+    "route": 0,
+    "maxfan": 23
+  },
+  "production_fs_sha256": "840AE4C47D7BB57048481ACA3ECB6BEEC59E430E66AF0BD32429FDE99E84AD15",
+  "production_keymap_sha256": "8649F22EDBFFE448AEE57BF91DF8C12393DAF45707D4A2D44D94DA02FC813B81",
+  "production_rtl_modified": false,
+  "candidate_changes": "hc05_keymap fixed wire mode16=1, reject TOUCH8, remove mode writes; FX variant adds previous unchanged minimum prototype",
+  "eight_key_removal_does_not_remove_eight_synth_voices": true
+}

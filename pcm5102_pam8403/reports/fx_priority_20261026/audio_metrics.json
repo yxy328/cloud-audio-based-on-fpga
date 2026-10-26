@@ -1,0 +1,104 @@
+{
+  "sample_rate": 48828.125,
+  "frames": 1555536,
+  "max_cycles": 49,
+  "reverb": [
+    {
+      "preset": 0,
+      "feedback": 0.625,
+      "first_wet_ms": 25.31328,
+      "last_nonzero_ms": 391.76192,
+      "direct_EDC_minus60_ms": 391.7824,
+      "T20_extrapolated_RT60_ms": 399.36000000000007,
+      "positive_negative_exactly_symmetric": true,
+      "last10000_samples_zero": true,
+      "wet_peak": 144,
+      "wet_energy": 852596.0
+    },
+    {
+      "preset": 1,
+      "feedback": 0.75,
+      "first_wet_ms": 25.31328,
+      "last_nonzero_ms": 607.08864,
+      "direct_EDC_minus60_ms": 607.0886399999999,
+      "T20_extrapolated_RT60_ms": 658.3296,
+      "positive_negative_exactly_symmetric": true,
+      "last10000_samples_zero": true,
+      "wet_peak": 144,
+      "wet_energy": 1186244.0
+    },
+    {
+      "preset": 2,
+      "feedback": 0.8125,
+      "first_wet_ms": 25.31328,
+      "last_nonzero_ms": 822.41536,
+      "direct_EDC_minus60_ms": 822.4153600000001,
+      "T20_extrapolated_RT60_ms": 906.24,
+      "positive_negative_exactly_symmetric": true,
+      "last10000_samples_zero": true,
+      "wet_peak": 144,
+      "wet_energy": 1525090.0
+    },
+    {
+      "preset": 3,
+      "feedback": 0.875,
+      "first_wet_ms": 25.31328,
+      "last_nonzero_ms": 1222.30784,
+      "direct_EDC_minus60_ms": 1191.56736,
+      "T20_extrapolated_RT60_ms": 1403.4739200000001,
+      "positive_negative_exactly_symmetric": true,
+      "last10000_samples_zero": true,
+      "wet_peak": 144,
+      "wet_energy": 2204410.0
+    }
+  ],
+  "delay": [
+    {
+      "tap": 0,
+      "first_wet_frame": 4096,
+      "first_wet_ms": 83.88608,
+      "nominal_ms": 83.88608,
+      "configuration_extra_frames": 0,
+      "first_wet_amplitude": 5000
+    },
+    {
+      "tap": 1,
+      "first_wet_frame": 8193,
+      "first_wet_ms": 167.79264,
+      "nominal_ms": 167.77216,
+      "configuration_extra_frames": 1,
+      "first_wet_amplitude": 1250
+    },
+    {
+      "tap": 2,
+      "first_wet_frame": 16387,
+      "first_wet_ms": 335.60576,
+      "nominal_ms": 335.54432,
+      "configuration_extra_frames": 3,
+      "first_wet_amplitude": 527
+    },
+    {
+      "tap": 3,
+      "first_wet_frame": 24581,
+      "first_wet_ms": 503.41888,
+      "nominal_ms": 503.31648,
+      "configuration_extra_frames": 5,
+      "first_wet_amplitude": 296
+    }
+  ],
+  "chorus": {
+    "lfo_Hz": 0.7450580596923828,
+    "delay_samples_base": 1024,
+    "excursion_samples": [
+      31.99609375,
+      63.99609375,
+      127.99609375,
+      255.9921875
+    ],
+    "test_tone_Hz": 440,
+    "interpolated_error_RMS_LSB": 1.7216808784446775,
+    "integer_delay_error_RMS_LSB": 137.9195303602673,
+    "error_reduction_dB": 38.07346227119949,
+    "metric": "Error against analytic continuously delayed sine, excluding startup; not an acoustic recording or total THD measurement"
+  }
+}

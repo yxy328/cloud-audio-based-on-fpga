@@ -9,7 +9,9 @@ module downloadable_song #(
     input wire clk, resetn,
     input wire request,
     input wire [2:0] operation,
-    input wire [15:0] arg0, arg1, arg2,
+    input wire [15:0] arg0, arg1, arg2, arg3,
+    input wire [15:0] score_min,score_max,
+    output wire [15:0] score_ratio,
     input wire edit_allowed,
     input wire [55:0] note_map,
     input wire toggle_play, restart,
@@ -39,8 +41,8 @@ module downloadable_song #(
     localparam integer REQUIRED_TIME_BITS=$clog2(64'd7680000+PRE_ROLL_MS+LOOKAHEAD_MS+64'd2);
     localparam integer TIME_BITS=REQUIRED_TIME_BITS>32 ? 32 : REQUIRED_TIME_BITS;
     (* syn_encoding="onehot" *) reg [2:0] state;
-    reg [28:0] score [0:255]; // {MIDI 60..72 mask, duration_ms}; two banks
-    reg [28:0] fetched;
+    reg [44:0] score [0:255]; // {MIDI 60..72 mask, duration_ms}; two banks
+    reg [44:0] fetched;
     reg active_bank, staging, check_play;
     reg [127:0] written;
     reg [7:0] staged_count, active_count, index;
@@ -49,7 +51,8 @@ module downloadable_song #(
     reg [MS_BITS-1:0] ms_count;
     reg [TIME_BITS-1:0] elapsed_ms;
 
-    reg [28:0] cur_word, next_word, future_word;
+    reg [44:0] cur_word, next_word, future_word;
+    assign score_ratio=cur_word[44:29];
     reg cur_have, next_have, future_have, current_finished, future_finished;
     reg [7:0] cur_index, future_index;
     // Key/pitch decoding is registered with the word it came from so the two
@@ -199,6 +202,7 @@ module downloadable_song #(
                 CHECK: begin
                     if(!check_play && !written[index[6:0]]) finish(4);
                     else if(fetched[15:0]==0 || fetched[15:0]>60000) finish(2);
+                    else if(fetched[44:29]!=0 && (fetched[44:29]<score_min || fetched[44:29]>score_max)) finish(2);
                     else if((fetched[28:16] & ~covered_mask)!=0) finish(5);
                     else if(index==(check_play ? active_count : staged_count)-1) begin
                         if(check_play) begin
@@ -294,11 +298,11 @@ module downloadable_song #(
                         else if(!staging) error<=3;
                         else if(arg0>=staged_count || arg2==0 || arg2>60000 ||
                             (operation==2 && (arg1<60 || arg1>72)) ||
-                            (operation==6 && arg1>8191)) error<=2;
+                            (operation==6 && (arg1>8191 || (arg3!=0 && (arg3<8192 || arg3>32768))))) error<=2;
                         else begin
                             if(operation==2)
-                                score[{!active_bank,arg0[6:0]}]<={(13'b1 << (arg1-60)),arg2};
-                            else score[{!active_bank,arg0[6:0]}]<={arg1[12:0],arg2};
+                                score[{!active_bank,arg0[6:0]}]<={16'd0,(13'b1 << (arg1-60)),arg2};
+                            else score[{!active_bank,arg0[6:0]}]<={arg3,arg1[12:0],arg2};
                             written[arg0[6:0]]<=1; error<=0;
                         end
                     end

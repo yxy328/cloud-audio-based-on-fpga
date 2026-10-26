@@ -1,0 +1,110 @@
+{
+  "selected": null,
+  "trials": [
+    {
+      "label": "window3",
+      "status": "routing_failed",
+      "metrics": {
+        "Logic": {
+          "used": 22618.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11451.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10759.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 49.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": 171.0,
+        "CLS": 64.0,
+        "Register": 27.0,
+        "BSRAM": -4.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 221,
+      "timing": null,
+      "selected": false,
+      "previously_selected": false
+    },
+    {
+      "label": "window3_place2",
+      "status": "validated",
+      "metrics": {
+        "Logic": {
+          "used": 22607.0,
+          "capacity": 23040.0
+        },
+        "CLS": {
+          "used": 11464.0,
+          "capacity": 11520.0
+        },
+        "Register": {
+          "used": 10759.0,
+          "capacity": 23280.0
+        },
+        "BSRAM": {
+          "used": 49.0,
+          "capacity": 56.0
+        },
+        "DSP": {
+          "used": 26.5,
+          "capacity": 28.0
+        }
+      },
+      "delta_vs_baseline": {
+        "Logic": 160.0,
+        "CLS": 77.0,
+        "Register": 27.0,
+        "BSRAM": -4.0,
+        "DSP": 0.0
+      },
+      "unrouted_nets": 0,
+      "timing": {
+        "setup_violated_endpoints": 0,
+        "setup_worst_path": {
+          "slack_ns": 0.895,
+          "from": "u_main/u_gesture/u_audio/u_synth/n4027_s1/DOUT[4]",
+          "to": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s/DI[16]"
+        },
+        "setup_reported_violating_paths": [],
+        "hold_violated_endpoints": 0,
+        "hold_worst_path": {
+          "slack_ns": 0.165,
+          "from": "u_main/take_enabled.u_take/field_2_s0/Q",
+          "to": "u_main/take_enabled.u_take/history_history_0_0_s/ADA[6]"
+        },
+        "hold_reported_violating_paths": [],
+        "setup_raw_worst_path": {
+          "slack_ns": 0.895,
+          "from_cell": "u_main/u_gesture/u_audio/u_synth/n4027_s1",
+          "to_cell": "u_main/u_gesture/u_audio/u_synth/contexts_contexts_0_0_s"
+        },
+        "setup_raw_violating_paths": [],
+        "hold_raw_worst_path": {
+          "slack_ns": 0.165,
+          "from_cell": "u_main/take_enabled.u_take/field_2_s0",
+          "to_cell": "u_main/take_enabled.u_take/history_history_0_0_s"
+        },
+        "hold_raw_violating_paths": []
+      },
+      "selected": false,
+      "previously_selected": true
+    }
+  ],
+  "functional_checks": 10,
+  "all_functional_passed": true,
+  "previously_selected": "window3_place2",
+  "withdrawn_for_cls_objective": true
+}

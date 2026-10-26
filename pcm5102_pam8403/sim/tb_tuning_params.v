@@ -11,7 +11,7 @@ module tb_tuning_params;
     wire touch_overrun,sensor_overrun,sensor_busy;
     wire [31:0] sensor_active;
     wire [5:0] sensor_count;
-    fsr_pitch_scaler #(.PER_VOICE_BEND(1)) scaler(
+    fsr_pitch_scaler #(.PER_VOICE_BEND(1)) scaler(.score_ratio(16'd0),.score_keys(7'd0),
         .clk(clk),.resetn(resetn),.sample_ce(sample_ce),.pitch_ratio(16'd65535),.note_increments(BASE),
         .bend_write(1'b0),.bend_reset(1'b0),.bend_index(3'd0),.bend_ratio(16'd16384),
         .bend_min(16'd8192),.bend_max(16'd32768),.bend_slew(16'd4096),.phase_increments(steps));

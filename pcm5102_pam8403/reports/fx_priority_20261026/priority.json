@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-26",
+  "user_request": "暂停后续扩展，优先把混响和三效果做好",
+  "deferred_D_B2_E_reserve": {
+    "Logic": 1650,
+    "CLS": 330,
+    "BSRAM": 4
+  },
+  "retained_CLS_safety": 35,
+  "existing_features_preserved": true,
+  "baseline_reused_after_101_inputs_and_actual_build_hashes_verified": true,
+  "gowin_sha256": "4C172D4C0D2A4C7EF5C764D091A315CBCDE2127573554BFD7D09AC6F2E5EA535",
+  "previous_fs_sha256": "0D205CFE2795BEDE06987C0828D3BD70BE75726428B744C45FDDCE78B86E106C",
+  "previous_apk_sha256": "CE178B7094C09AAC3F1E25AD7374022731A8F25CACC21FDB3561416997CF4C3B"
+}

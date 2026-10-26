@@ -1,0 +1,25 @@
+ M pcm5102_pam8403/CHROMATIC_KEYS.md
+ M pcm5102_pam8403/HC05_KEYMAP.md
+ M pcm5102_pam8403/REFERENCE_MIGRATION.md
+ M pcm5102_pam8403/VERIFICATION.md
+ M pcm5102_pam8403/android_app/README.md
+ M pcm5102_pam8403/android_app/app/build.gradle
+ M pcm5102_pam8403/android_app/app/src/main/AndroidManifest.xml
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/DeviceControls.java
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/MainActivity.java
+ M pcm5102_pam8403/android_app/app/src/main/java/cn/fpga/score/TakeWorkflow.java
+ M pcm5102_pam8403/android_app/core_test/DeviceControlsTest.java
+ M pcm5102_pam8403/android_app/core_test/TakeWorkflowTest.java
+ M pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk
+ M pcm5102_pam8403/sim/tb_hc05_extensions.v
+ M pcm5102_pam8403/sim/tb_top_touch16.v
+ M pcm5102_pam8403/src/PCM5102_UNIFIED.sdc
+ M pcm5102_pam8403/src/hc05_keymap.v
+ M pcm5102_pam8403/src/top.v
+ M pcm5102_pam8403/tools/run_sim.ps1
+?? pcm5102_pam8403/TOUCH16.md
+?? pcm5102_pam8403/android_app/dist/FPGA-Music-Touch16-Code26.apk
+?? pcm5102_pam8403/reports/fx_priority_20261026/
+?? pcm5102_pam8403/reports/touch16_delivery_20261026/
+?? pcm5102_pam8403/reports/touch16_reverb_20261026/
+?? pcm5102_pam8403/sim/tb_top_touch16_recovery.v

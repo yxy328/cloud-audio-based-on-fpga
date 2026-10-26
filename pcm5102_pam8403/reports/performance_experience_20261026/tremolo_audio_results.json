@@ -1,0 +1,46 @@
+{
+  "RTL_samples_checked": 813954,
+  "rates": [
+    {
+      "rate": 1,
+      "measured_from_DDS_increment_Hz": 1.0011717677116394
+    },
+    {
+      "rate": 2,
+      "measured_from_DDS_increment_Hz": 1.9994331523776054
+    },
+    {
+      "rate": 3,
+      "measured_from_DDS_increment_Hz": 3.000604920089245
+    },
+    {
+      "rate": 4,
+      "measured_from_DDS_increment_Hz": 3.998866304755211
+    },
+    {
+      "rate": 5,
+      "measured_from_DDS_increment_Hz": 5.00003807246685
+    },
+    {
+      "rate": 6,
+      "measured_from_DDS_increment_Hz": 6.00120984017849
+    },
+    {
+      "rate": 7,
+      "measured_from_DDS_increment_Hz": 6.999471224844456
+    },
+    {
+      "rate": 8,
+      "measured_from_DDS_increment_Hz": 8.000642992556095
+    }
+  ],
+  "depths": [
+    0,
+    4,
+    8
+  ],
+  "dynamic_switch_reset_silence": true,
+  "off_or_zero_depth_matches_FX3": true,
+  "TAKE_phase_limit": "configuration saved; phase not stored, deterministic modulation phase is not guaranteed across arbitrary playback start",
+  "max_stage_clocks": 53
+}

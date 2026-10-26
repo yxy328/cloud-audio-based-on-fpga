@@ -1,0 +1,9 @@
+{
+  "constant_mode_diagnostic": "fixed16",
+  "complete_removal_candidates": [
+    "fixed16_clean",
+    "fx_fixed16"
+  ],
+  "reason": "syn_preserve on two GPIO synchronizers retains 32 unused registers after mode constant propagation",
+  "production_modified": false
+}

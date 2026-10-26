@@ -1,0 +1,268 @@
+{
+  "required_count": 25,
+  "all_passed": true,
+  "checks": [
+    {
+      "test": "tb_score_bend_words",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\initial_g2001\\tb_score_bend_words.log",
+      "sha256": "BD1A74C61E76FD7D30EADEF80EA7A4EA7E1E329EE1D1850C048AAD43C520569E",
+      "pass_lines": [
+        "PASS D target words: both event targets, active bank preserved on failed END, current-range PLAY validation, 128x60000ms full-width data (139 commands)"
+      ]
+    },
+    {
+      "test": "tb_score_legacy",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\initial_g2001\\tb_score_legacy.log",
+      "sha256": "8AC9B009F0AFC045B2D6D35FAE7CF9E324CE07A653138C5467DB88CA2049BCFD",
+      "pass_lines": [
+        "PASS tb_score_legacy: atomic banks, chords/rests, shared RAM, timing, lookahead, backpressure, STOP/restart, 128 dense notes"
+      ]
+    },
+    {
+      "test": "tb_score_bend_protocol",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\initial_g2001\\tb_score_bend_protocol.log",
+      "sha256": "087248CE7DD9702E708D6D0CB486DE85231F43A1A7E55B28ECFCCA89E9BC94F9",
+      "pass_lines": [
+        "PASS FX protocol: 52 replies, all8 masks, atomic bounds, legacy0/1/2 and EFFECT2, configured/applied state"
+      ]
+    },
+    {
+      "test": "tb_score_bend_manual_legacy",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\initial_g2001\\tb_score_bend_manual_legacy.log",
+      "sha256": "D6E8C5A084343A3917B75AAF007E68F32EEF39E0F029FE5E5CE8AF4EBFDCFBB9",
+      "pass_lines": [
+        "PASS per-voice bend: exact unity/bounds, 1024 monotonic steps, independent seven keys, FSR stacking, invalid guards, smooth reset, audio-frame timing"
+      ]
+    },
+    {
+      "test": "tb_score_bend_slew",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\slew\\tb_score_bend_slew.log",
+      "sha256": "232052C0DA4B0B1D96288841D07798E6C350D28A74E2F9739691B708CD3E1867",
+      "pass_lines": [
+        "PASS score priority/glide/manual restore: 4501 arithmetic checks, seven keys, null/unity, pressure, runtime clamp, fractional slew and original frame deadline"
+      ]
+    },
+    {
+      "test": "tb_score_bend_scope",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\final_audio\\tb_score_bend_scope.log",
+      "sha256": "81FD59E01811E354C7F42B87920E1FDA863D53C15CE90187C690A7FAC141EDC1",
+      "pass_lines": [
+        "PASS [score bend scope]: distinct event targets, silent pre-roll/PLAY isolation, manual bank retained, STOP restore; UART opt-in, silent pre-roll, three/seven independent voices at external I2S, repeated note articulation/rest/end, STOP preserves held live notes, mapping rejection"
+      ]
+    },
+    {
+      "test": "tb_score_bend_frame_take",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\integration\\tb_score_bend_frame_take.log",
+      "sha256": "6972C55B13CA79AEC4CBD12C2B82DD2BF80C1B1C691C83519EFA4360E6FF6F13",
+      "pass_lines": [
+        "PASS frame budget: real UART/TTP229, 16 voices, four slewing bends, playing score, C+D+R and pressure/ADS1115, independent deadlines and overlap",
+        "PASS FX3 actual UART/TTP/dual ADC/TAKE playback: states A=342 B=147 events=63, stored wet overrides changed live slider",
+        "PASS score bend target, independent real frame deadlines, and applied bent increments replayed by unchanged TAKE: 293 frames"
+      ]
+    },
+    {
+      "test": "tb_hc05_download_current",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\integration\\tb_hc05_download_current.log",
+      "sha256": "4835262EBE570BC1D099BF83CC01B64C29C8DA3DE68D9CE8DB64C5E4FDCDD158",
+      "pass_lines": [
+        "PASS current downloads: original score atomicity/retry/bounds, chromatic chord/rest, fixed16 legacy guard and MAP reset"
+      ]
+    },
+    {
+      "test": "tb_fx3_replay_decode",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\integration\\tb_fx3_replay_decode.log",
+      "sha256": "68632D62A570AF6B1F98BA7C2DF7E494BB295AB31F6A175EF249CEFF01E0C9BB",
+      "pass_lines": [
+        "PASS FX3 replay old/new version and unchanged musical fields: 2075 checks"
+      ]
+    },
+    {
+      "test": "tb_fx_take_atomic_528",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\integration\\tb_fx_take_atomic_528.log",
+      "sha256": "0402226AE2AD59ADC425FA2F029B378E2FC18CE0503FAA1648928C5DB3E420A2",
+      "pass_lines": [
+        "PASS full528 FX atomic snapshot: 34 checks; complete capture and no mixed words at any audio frame"
+      ]
+    },
+    {
+      "test": "tb_top_score_config",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\integration\\tb_top_score_config.log",
+      "sha256": "F2813F9868A1DFD6383DFFE9ABF51C41D5D09F921DB1B0D61F0D8B25103A5C36",
+      "pass_lines": [
+        "PASS top score configuration: default S1 stays silent, enabled demo reaches I2S, production audition works without legacy LUT, independent K1/K16 and release"
+      ]
+    },
+    {
+      "test": "tb_top_audition",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\final_audio\\tb_top_audition.log",
+      "sha256": "424BE0CED4E621BABFC61B24AA6BA2ED0100301C8D8F1557BAC31D428E6A9B48",
+      "pass_lines": [
+        "PASS [top audition]: UART opt-in, silent pre-roll, three/seven independent voices at external I2S, repeated note articulation/rest/end, STOP preserves held live notes, mapping rejection"
+      ]
+    },
+    {
+      "test": "tb_top_touch16_recovery",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\final_audio\\tb_top_touch16_recovery.log",
+      "sha256": "F69CE6116ED01BB304C0CE78A6195475DBC77CF2A643FA43DA20E08515BE0054",
+      "pass_lines": [
+        "PASS fixed16 recovery: high-active sensor from boot, SERIAL1 accepted while not ready, all16 voiced, busy protection and TOUCH8 rejection retained"
+      ]
+    },
+    {
+      "test": "tb_song_time_bound",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\final_audio\\tb_song_time_bound.log",
+      "sha256": "3009B4C1FD0D176F0532E777B417442CD5C1250DE4310CE9B221AE3CAA6B6E81",
+      "pass_lines": [
+        "PASS song bound: 128 x 60000ms, 23-bit horizon, note-off boundaries, stalled visual drain without wrap"
+      ]
+    },
+    {
+      "test": "tb_command_protocol_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_equivalence\\tb_command_protocol_score_equiv.log",
+      "sha256": "79F18DE2DE14A98899A27D381C178B5873D9A8D2B8AE965D7210B2E4D6D2ED9F",
+      "pass_lines": [
+        "PASS performance protocol: 81 wire-level replies, sparse fields, atomic rejection, busy guards, 64/65-byte frames"
+      ]
+    },
+    {
+      "test": "tb_hc05_extensions_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_equivalence\\tb_hc05_extensions_score_equiv.log",
+      "sha256": "AE7BDC368EBAF2A10CEA4A04AC9C28E818729DCC2EFA623D13214700913C8A04",
+      "pass_lines": [
+        "PASS extension UART: 47 bit-level replies, state/ADC query, busy/recording gates, strict bounds/atomic rejection, panic"
+      ]
+    },
+    {
+      "test": "tb_hc05_control_races_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_equivalence\\tb_hc05_control_races_score_equiv.log",
+      "sha256": "C57EE6258D572082E3D28A5170DA9B07F8BB4989A8D85140F172C896884CFE21",
+      "pass_lines": [
+        "PASS tb_hc05_control_races: real UART map lock during hardware validation, stale completion rejection, ordinary immediate/delayed ACKs"
+      ]
+    },
+    {
+      "test": "tb_fx_protocol_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_equivalence\\tb_fx_protocol_score_equiv.log",
+      "sha256": "1727D216F8A4CD37F13FABD76644AF1FD89CF36496F8779645C134DBB2BDEA39",
+      "pass_lines": [
+        "PASS FX protocol: 36 replies, all8 masks, atomic bounds, legacy0/1/2 and EFFECT2, configured/applied state"
+      ]
+    },
+    {
+      "test": "tb_hc05_keymap_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_remainder\\tb_hc05_keymap_score_equiv.log",
+      "sha256": "63FF2A5FCD4C7AAA22ACABA5213D0DDD1183B3AE518C09F26BF6FC90C15513FC",
+      "pass_lines": [
+        "PASS [HC05 protocol]: 57 replies; all commands/keys/13 notes, exact DDS steps/pressure octave, busy guards, query bursts, CR/LF/CRLF, invalid/partial/long/binary lines, framing recovery and reset"
+      ]
+    },
+    {
+      "test": "tb_hc05_download_current_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_remainder\\tb_hc05_download_current_score_equiv.log",
+      "sha256": "1B55E7C8683178147D7EA43995EAF5C25FCE09D72B1347563E3D988102570A0F",
+      "pass_lines": [
+        "PASS current downloads: original score atomicity/retry/bounds, chromatic chord/rest, fixed16 legacy guard and MAP reset"
+      ]
+    },
+    {
+      "test": "tb_hc05_take_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_remainder\\tb_hc05_take_score_equiv.log",
+      "sha256": "2DD3788EC29BE3AC61DF82CA50777BB4B9D7EF609F7355FDC86E16009AEDF9B3",
+      "pass_lines": [
+        "PASS tb_hc05_take: 24 bit-level UART transactions"
+      ]
+    },
+    {
+      "test": "tb_hc05_adsr_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_remainder\\tb_hc05_adsr_score_equiv.log",
+      "sha256": "437B30E518F8CC14E18AA04B425235ADC6923409AFCF6D985ED98BBA46635024",
+      "pass_lines": [
+        "PASS UART ADSR: 20 replies; profile conversion, strict four fields, bounds/zero, invalid-command atomicity, controls while notes/score busy, independent restore"
+      ]
+    },
+    {
+      "test": "tb_hc05_bend_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_remainder\\tb_hc05_bend_score_equiv.log",
+      "sha256": "E63CF42BB9EF32F9C23B76CA8729D68370298040E167D76A844D872B1C294DA8",
+      "pass_lines": [
+        "PASS UART bend: 19 replies, endpoints, exact voice address, strict fields/bounds/atomic rejection, busy playing allowed, reset, ADSR coexistence"
+      ]
+    },
+    {
+      "test": "tb_hc05_visual_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_remainder\\tb_hc05_visual_score_equiv.log",
+      "sha256": "89D8F08E4FDF8F829BB869F79E8274D45EB6A559F61600FE0190DC472361A48E",
+      "pass_lines": [
+        "PASS visual UART: four pages, requested/active state, 32-byte atomic snapshots, strict errors, XY/PING coexistence"
+      ]
+    },
+    {
+      "test": "tb_hc05_xy_score_equiv",
+      "passed": true,
+      "exit_code": 0,
+      "log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate\\tests\\legacy_remainder\\tb_hc05_xy_score_equiv.log",
+      "sha256": "22AD3C0426EBFF76331F2F1B134E95F7BF79C6A5EBA4DC33619DB7F7C8F65546",
+      "pass_lines": [
+        "PASS UART XY: all 16 settings, strict syntax/range, atomic rejection, one write/command, available while playing, PING coexistence"
+      ]
+    }
+  ],
+  "legacy_outputs_compared": 67,
+  "legacy_audio_equivalence": {
+    "baseline_sha256": "821A437E4A4BE2B23998978143E68D49E27F218694032C80275879224F6869D8",
+    "candidate_sha256": "821A437E4A4BE2B23998978143E68D49E27F218694032C80275879224F6869D8",
+    "equal": true,
+    "sample_count": 2735,
+    "scope": "every external I2S PCM sample and timestamp for the legacy audition scenario"
+  },
+  "app_core_log_sha256": "999B42A5EDCF5D8954474A4690BE1047976146F0848109EDFEFC0071DB034BA0",
+  "app_build_log_sha256": "F8CED6E7D8C6222275E7EF783375A81BEDFB3D2D23D168111DEAE0DCDD2626B1"
+}

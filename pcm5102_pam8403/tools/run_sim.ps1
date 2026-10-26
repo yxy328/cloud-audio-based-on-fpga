@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [string] $IverilogDir = 'C:/iverilog/bin',
     [string] $GowinDir = 'E:/130_FPGA_Verilog/Gowin/Gowin_V1.9.11.03_Education_x64',
@@ -36,7 +36,7 @@ try {
     }
     if (!$Netlist) { $defaultTests += @('tb_top_dual_analog','tb_hub75e_status','tb_audio_record_stream','tb_hc05_audio_record','tb_top_audio_record') + $rtlTests }
     if (!$Netlist) { $rtl += @('sim/ttp229_model.v','src/touch_sine_rom.v','src/ttp229_keys.v','src/touch_tdm_synth.v','src/analog_expression.v','src/audio_effects.v','src/audio_master_volume.v') }
-    $rtl += @('sim/i2s_pcm_monitor.v')
+    $rtl += @('sim/i2s_pcm_monitor.v','src/audio_fx_chain.v')
     if (!$Netlist) { $rtl += @('src/audio_take_store.v','src/audio_nor_operation.v','src/top_audio_take.v','sim/audio_nor_model.v') }
     if (!$Netlist) { $rtl += @('sim/gowin_adc_model.v','sim/ads1115_model.v') }
     if (!$Netlist) { $defaultTests += @('tb_hc05_visual','tb_hc05_decoder_equivalence','tb_song_time_bound','tb_top_hc05_only','tb_top_pedal','tb_touch_pedal_timing','tb_performance_params','tb_command_protocol','tb_vibrato_params','tb_tuning_params','tb_top_performance') }
@@ -64,6 +64,7 @@ try {
         if ($Quick) { $pcmKind += '_quick' }
         $pcmFile = if ($test -eq 'tb_top_touch16') { 'sim/build/decoded_pcm_touch16.csv' } elseif ($test -eq 'tb_top_voice_bend') { 'sim/build/decoded_pcm_voice_bend.csv' } elseif ($test -eq 'tb_top_runtime_adsr') { 'sim/build/decoded_pcm_runtime_adsr.csv' } elseif ($test -eq 'tb_top_ir_tdm') { 'sim/build/decoded_pcm_top_ir_tdm.csv' } elseif ($test -eq 'tb_top_integrated') { 'sim/build/decoded_pcm_top_integrated.csv' } elseif ($test -eq 'tb_top_live') { 'sim/build/decoded_pcm_top_live.csv' } elseif ($test -eq 'tb_top_song') { 'sim/build/decoded_pcm_song_short.csv' } elseif ($test -eq 'tb_top_hc05_map') { "sim/build/decoded_pcm_hc05_map_$pcmKind.csv" } elseif ($test -eq 'tb_top_touch_response') { "sim/build/decoded_pcm_touch_response_$pcmKind.csv" } elseif ($test -eq 'tb_top_touch') { "sim/build/decoded_pcm_touch_$pcmKind.csv" } elseif ($test -eq 'tb_top_fsr_modes') { "sim/build/decoded_pcm_fsr_modes_$pcmKind.csv" } elseif ($test -eq 'tb_top_fsr') { "sim/build/decoded_pcm_fsr_$pcmKind.csv" } elseif ($test -eq 'tb_fsr_pipeline') { "sim/build/decoded_pcm_fsr_pipeline_$pcmKind.csv" } else { "sim/build/decoded_pcm_$pcmKind.csv" }
         if ($test -eq 'tb_top_pedal') { $pcmFile = "sim/build/decoded_pcm_pedal_$pcmKind.csv" }
+        if ($test -eq 'tb_top_touch16_recovery') { $pcmFile = 'sim/build/decoded_pcm_touch16_recovery.csv' }
         & $vvp '-i' $output "+pcm_csv=$pcmFile" | Tee-Object -FilePath "sim/build/$test$suffix.log"
         if ($LASTEXITCODE -ne 0) { throw "$test simulation failed" }
     }

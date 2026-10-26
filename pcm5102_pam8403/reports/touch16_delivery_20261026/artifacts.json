@@ -1,0 +1,14 @@
+{
+  "default_fs": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.fs",
+  "fs_sha256": "0D205CFE2795BEDE06987C0828D3BD70BE75726428B744C45FDDCE78B86E106C",
+  "named_fs": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\touch16_delivery_20261026\\PCM5102_UNIFIED_touch16_20261026.fs",
+  "apk": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\android_app\\dist\\FPGA-Music-Touch16-Code26.apk",
+  "rolling_apk": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\android_app\\dist\\FPGA-Music-Unified.apk",
+  "apk_sha256": "CE178B7094C09AAC3F1E25AD7374022731A8F25CACC21FDB3561416997CF4C3B",
+  "matching_signer_sha256": "cbeccbe6a3df4025a0dc82103d6dfb98c80de795887c8f31a8cebeabd0362e26",
+  "versionCode": 26,
+  "versionName": "1.25-touch16",
+  "hardware_programmed": false,
+  "phone_installed": false,
+  "analog_audio_captured": false
+}

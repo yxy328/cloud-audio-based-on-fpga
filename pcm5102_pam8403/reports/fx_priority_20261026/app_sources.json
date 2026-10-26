@@ -1,0 +1,310 @@
+[
+  {
+    "Path": "app/build.gradle",
+    "SHA256": "EF5D76788866A7D45DA06D6AC5FE3020C61A01CA84E28DE9C0F45F1C6AA67EBF"
+  },
+  {
+    "Path": "app/src/main/AndroidManifest.xml",
+    "SHA256": "7F03BFD0B4F3292C5B8E47238D9E159DDB3C3B3C566E8EC451554C74B6A4B5E7"
+  },
+  {
+    "Path": "app/src/main/assets/backdrop.png",
+    "SHA256": "88FBE15DC4F3832ED637A7EAE73D0FE1FB8E6CD37D8EA5F6093B163D9950BE11"
+  },
+  {
+    "Path": "app/src/main/assets/hero.png",
+    "SHA256": "B9BDFABA574B960055485A844238D8247BFE312C9E344B1A5DB7F595CEB724C0"
+  },
+  {
+    "Path": "app/src/main/assets/hero_art.png",
+    "SHA256": "D468909BD3112D22F08138ABC152FDD28CF5C6DFC5FDEEE2FDAB647D13AC6D9D"
+  },
+  {
+    "Path": "app/src/main/assets/third_party/usbserial-LICENSE.txt",
+    "SHA256": "6F467D3D79C5D31734881FB83E082E84512BDE05D3F7893E0E8373FD0D2B5D2C"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/AdsrEnvelopeView.java",
+    "SHA256": "F1876133E3A79295D471CC9DB3614514CE82105EF9F9B496A706F126FFCECA40"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/AdsrProfile.java",
+    "SHA256": "08F7D1C68C724ECF2AF73767BB9BAAE29B2C9C762DCEC985FB17002D12856961"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/AppearanceController.java",
+    "SHA256": "12E4B36E2655BE37DBEBE3E65B684D51C1FC107F446B747BC8AAF62BE48E72EE"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/ArtAssets.java",
+    "SHA256": "81AB648ABD53D35040E8648817D6B92E2C5A813B7CC67E27745F70578442A0CB"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/AudioRecording.java",
+    "SHA256": "6F8C7BA9EE9F5AE20B846F22FF6F9D276C47E8B27D482B9520C491104BB516C6"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/BeatBarsView.java",
+    "SHA256": "5EC5603CF2A01AFF33896921C2A44F37FFEBDF623419B7E3B2F5A868EBEA6AC9"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/ChromaticKeys.java",
+    "SHA256": "9D9A5F7318774623802100524C75CF88B2EDD492FDD1C34DF0CA26E5E3FDE4E6"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/ControlState.java",
+    "SHA256": "5BEA2349E8C707B97B0C814F69022CEEF89DEBA8129530568D4903F6E7A48DAB"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/DeviceControls.java",
+    "SHA256": "0B72C0E015186A8F98ED28E5A4AA5392ADBA0BCD7B10616416C7FE0D4126A2E9"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/FxState.java",
+    "SHA256": "CC95CD3BC32876EFBF1338A5AE21E591241EDEB50DD148FD2A25EDBB2DD3854D"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/LedFrame.java",
+    "SHA256": "71E0FECDAEEF6B63CC78D4F12FF5176B87E443CCBCCBCABABF184D77E0EF3DB6"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/LedHue.java",
+    "SHA256": "F9712F02D03E6F107B932176E440EC764FB43484590DF8435C39A33156C5EF17"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/LedState.java",
+    "SHA256": "CF09C14E83D8B5BF4E97B3C374DFAF013C0BC7A147FA79394C6D0DE0675D40C5"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/MainActivity.java",
+    "SHA256": "BDC189DBC5B0DCF84F87F7516063B684CB8AFE576AE9C44732EAADDA1F55CAFE"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PerformanceParams.java",
+    "SHA256": "4715FB6CE6DBBA06A3C3BF76D826DAB7A9D963C2B93A4FD695180147566BE8BB"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PhonePiano.java",
+    "SHA256": "12B17633D5E3EEDC79A27A4BC4F2D81C583BFC92678F5284206B51F4FF0A6A9E"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PhoneTake.java",
+    "SHA256": "C90383ED2FBA177DDDF06591CF573BB5FABFFC58CC8DC0611456EF38DDCCE4A2"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PhoneTakeStore.java",
+    "SHA256": "09288DCA551C5686A344C1B3087EC09BFAE2CB775D7B82E0329D16EB84EC4036"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PianoKeyboardView.java",
+    "SHA256": "5384FF89278F4D888780ABD707952FF9026B0B31456353875D272AEDD5CD62A1"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/RecordingSupport.java",
+    "SHA256": "C968E41191BBE145CD06D0E0B5BCEA925C54141445739315A79288A49DE1DE37"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SegmentButton.java",
+    "SHA256": "AE49FFB24425684974CD05FFB0AB1D3DE82B1AD0BDD7212D0B4438200052E589"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SongCodec.java",
+    "SHA256": "EA3C24B6637833F56AF2788CF12265C201430227D5F8C735074BC5901176FB02"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SongLibrary.java",
+    "SHA256": "EFE1648A37CC106C07A9B8111D7B20B8324C7BEB6B7F75827AEE8089B950E5F7"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SpectrumPreviewView.java",
+    "SHA256": "08068A62F6703F55C4AC0D9CCBE4D872E138D4E94CF67B322F610AF622E445B7"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SppLink.java",
+    "SHA256": "A03F6FE99DB12FA6F54FBA83F4D0ACE0F1D0D875FAFBE507EF29F3223A8EF2E3"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/StageBackdropView.java",
+    "SHA256": "6761BED16150DBC646193F75BAE9F8359563104EA054259ED72ACC21C5B2ACB7"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/TakeStatus.java",
+    "SHA256": "B9B13D4E03DC08D2ED9A6D9DC22AD5FA2FAD01644CEACEBEBD9872F08543DF34"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/TakeWorkflow.java",
+    "SHA256": "B80A3007BAA4923F8D603AEABAABD75962C60975CBB0F8172EE427F668051D0B"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/Theme.java",
+    "SHA256": "7420E6D57C266C6C1DE8E865AAC96DEE311981B75E95BF42DC1DBAA13CD1F1BA"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/UsbAudioLink.java",
+    "SHA256": "A05EC3A42B21282F2DE3B76F6D964E2053F8CBA898DFE2196EF71D7C87805DEF"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/VoiceBend.java",
+    "SHA256": "F44B620E1D48E453A2E657F70C94A2FB6A10C950B8F9B1B66386B4C31D4B3663"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/BuildConfig.java",
+    "SHA256": "EAC07953A7E4CCC3808841D2DB8C579C314753BA04DE66ECA161FACC8A7C61FA"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/CdcAcmSerialDriver.java",
+    "SHA256": "F47737123212DD506D46AAD33A9531FB2D395BBA3F19160BCAF90F0C676465B5"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/Ch34xSerialDriver.java",
+    "SHA256": "4C8E53043D5CEDBEFB7997AA865A3629989F6C207DC63AE05702868FBC47D0D6"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/ChromeCcdSerialDriver.java",
+    "SHA256": "D74F66BD67087BC24B28FD950F6E8E048DDBDCCF269A490A21D92C436187AB52"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/CommonUsbSerialPort.java",
+    "SHA256": "6F2EEE9C7988CFD1FB3D5C59B6E1A5FC8BFFC53871A7B894401771488CEAB53E"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/Cp21xxSerialDriver.java",
+    "SHA256": "A092B92E118F4A8110AE7DB0563D9B09DF32A9C37D1A0AC5F0BC676B3ECF99FE"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/FtdiSerialDriver.java",
+    "SHA256": "5D56017AFE9D91499BEA9392F940721D024CD66891DE80D6BBAC72BBBA75B741"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/GsmModemSerialDriver.java",
+    "SHA256": "3FFB6F1D77DC37644D17E9C2DCC72C625DDBE3BF500851ACC4DAA35CE836D734"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/ProbeTable.java",
+    "SHA256": "5DB744B235E4C2A93D57D41828720F8B78940FB4D5A1A397C18DF9D7A8A20D07"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/ProlificSerialDriver.java",
+    "SHA256": "B577E1C84B1A4671C9BCB9B998F2D8AE66A7D3CD5529F293E42F7DEF776377D7"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/SerialTimeoutException.java",
+    "SHA256": "0934207AAE9DC4AEE7F20D91B44C9387FC364995A746CB33F9E2F52F57DD3F9C"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbId.java",
+    "SHA256": "9AEDCD07CAE0BB1EA521A653E19731E2763913EEE7661BB6AB0B445F2AB22360"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialDriver.java",
+    "SHA256": "EE606636A29CD4C682B4325EEC27DFFBBA66F07EDA93B8C3FD9716520DBAC8F1"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialPort.java",
+    "SHA256": "9D7FBCB8599D15B03BD2A3B67749AFDA385EF0497274C65EDB6BDD32A33C542A"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialProber.java",
+    "SHA256": "F8CB4C38F6CBB80C16498EE0D15933559165E2D4179997BCD7C9F34769DB18AD"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/util/HexDump.java",
+    "SHA256": "06E0C6E28C2B6D850FF451A54660F64BF83AEAE93B688C80F1CF6FBA41B81C2E"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/util/MonotonicClock.java",
+    "SHA256": "73E29449754CFF976E0AB1C3EC4F890F11F6630CEE1E3E164DF5E3092CEA2E12"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/util/UsbUtils.java",
+    "SHA256": "B366665E94D7E4F5DA6C0492E31FD63C67DCFB77AB25698DFE1BEA4105D3E26F"
+  },
+  {
+    "Path": "build-apk.ps1",
+    "SHA256": "2DD194D9A9FF01DD4F3A79370FF0A292E324391451633AABBCB2B4ADDA8040FB"
+  },
+  {
+    "Path": "core_test/AdsrProfileTest.java",
+    "SHA256": "221512C1331669855FB8D6749BFBCC009C433109EB48F717893DD3426DEA24FB"
+  },
+  {
+    "Path": "core_test/android/bluetooth/BluetoothDevice.java",
+    "SHA256": "4793207F81F40A48E9145F77405D51DFC7E62F3C659C0473718770FA44D026B8"
+  },
+  {
+    "Path": "core_test/android/bluetooth/BluetoothSocket.java",
+    "SHA256": "B61DD0A049EB2EC58D50D46A9671399D02DE0A78685270C982C85011841816CB"
+  },
+  {
+    "Path": "core_test/AudioRecordingTest.java",
+    "SHA256": "7174740748D8F8F0848EE5DE8DDF853AF5048C5E77C7C864D9724A47DD4163F5"
+  },
+  {
+    "Path": "core_test/ChromaticKeysTest.java",
+    "SHA256": "101F4C4B3B0050467F38EBA809F1F8407D424663892D23BC2BCE382FB9F55FAC"
+  },
+  {
+    "Path": "core_test/ControlStateTest.java",
+    "SHA256": "0A207FA8CAF9E7EE94D51CEBA401412479FB3FDF92898E1857726E3CC0FCA4F5"
+  },
+  {
+    "Path": "core_test/DeviceControlsTest.java",
+    "SHA256": "10958FDE6C455679CA5BC84A67BD4521E5AECE84174CCCDC3788A62F85867229"
+  },
+  {
+    "Path": "core_test/FxStateTest.java",
+    "SHA256": "04079474EC32D6DFC0AA58E0CDDFD701C4C3B33507043A9301BF7BA85090D30B"
+  },
+  {
+    "Path": "core_test/LedHueTest.java",
+    "SHA256": "E47DD94889C688031DCA962D804C870ABAE6DB693A19D959B243FEEF11544C19"
+  },
+  {
+    "Path": "core_test/LedProtocolTest.java",
+    "SHA256": "47D793DC263151723C141C7EE12791EB08EF04E9ECD658051D0A5FF2CC4DD85D"
+  },
+  {
+    "Path": "core_test/PerformanceParamsTest.java",
+    "SHA256": "AB4E36A49450120BBEFD59EA612DBC9DCF4E35D5DBF0F7DC62AD94B958BA10D0"
+  },
+  {
+    "Path": "core_test/PhoneTakeTest.java",
+    "SHA256": "673B67480DFC95C61057FB75C4F90168F114C3B3F3B459301B6431C0962C70DF"
+  },
+  {
+    "Path": "core_test/RecordingSupportTest.java",
+    "SHA256": "9B6FB952338353BA5BAAD0DF3BA0D6693DCDC597299FDF2A66CC2AE8E3918491"
+  },
+  {
+    "Path": "core_test/SongCodecTest.java",
+    "SHA256": "CEA77F48E538F09BCF5025578E9BE7E62278F7ACF0DC96501B7745FCC822AE36"
+  },
+  {
+    "Path": "core_test/SongLibraryTest.java",
+    "SHA256": "AFBA7A04930054D4C23EDDA9C5E3CDC2228E5A1A45948703C3D90A4571D23CC2"
+  },
+  {
+    "Path": "core_test/SppAudioTest.java",
+    "SHA256": "8F0746C40362037B51EBB248CEA5BF3FF14769009086449A47C225CBBF6099C0"
+  },
+  {
+    "Path": "core_test/SppLinkTest.java",
+    "SHA256": "9E4D0C095F69E32E16BAB7DCA2BAA6B9D9C053A33FDECC7A617241A8C440B98C"
+  },
+  {
+    "Path": "core_test/TakeStatusTest.java",
+    "SHA256": "05E2F91848FFF004366DACE05488447886F58B213DE88B42E90F1ADEEC893F6D"
+  },
+  {
+    "Path": "core_test/TakeWorkflowTest.java",
+    "SHA256": "4F700E136992BEE519E2F4F1D629E8D4F10FE639D1DCEDDA08A9CCAFC15D4CE9"
+  },
+  {
+    "Path": "core_test/VoiceBendTest.java",
+    "SHA256": "0DB3B2F750240BF7AA3C9B4FBBC76CA9195878984CA7950CC7D1CBA06A11133A"
+  },
+  {
+    "Path": "test-core.ps1",
+    "SHA256": "4A2EDF7FCDD91E7AE0230C3398D771723B3EC9B8ACC35E7578983336305B01D2"
+  }
+]

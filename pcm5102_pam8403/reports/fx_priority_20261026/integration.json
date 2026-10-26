@@ -1,0 +1,30 @@
+{
+  "changed_rtl": [
+    "src/audio_fx_chain.v",
+    "src/hc05_keymap.v",
+    "src/top.v",
+    "src/hc05_reply.hex",
+    "PCM5102_UNIFIED.gprj",
+    "tools/generate_hc05_replies.py",
+    "tools/run_sim.ps1"
+  ],
+  "new_tests": [
+    "tb_audio_fx_chain.v",
+    "tb_fx_protocol.v",
+    "tb_fx_take_atomic_528.v",
+    "tb_fx3_replay_decode.v",
+    "tb_fx3_frame_take.v"
+  ],
+  "changed_app": [
+    "app/build.gradle",
+    "app/src/main/AndroidManifest.xml",
+    "app/src/main/java/cn/fpga/score/MainActivity.java",
+    "app/src/main/java/cn/fpga/score/DeviceControls.java",
+    "app/src/main/java/cn/fpga/score/FxState.java",
+    "core_test/FxStateTest.java",
+    "core_test/SppLinkTest.java",
+    "test-core.ps1"
+  ],
+  "candidate_source_manifest_verified": true,
+  "previous_production_inputs_verified": 101
+}

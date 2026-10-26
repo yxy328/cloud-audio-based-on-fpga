@@ -1,0 +1,54 @@
+    // Two sliding three-row windows replace the six independent read RAMs.
+    // Each clock reads only the entering endpoint; the other two raw heads
+    // are retained and snooped by EVERY bitmap write. Never retain clipped
+    // heads: at row 31 -> 0 the two physical windows exchange roles.
+    wire row_advance=state==S_LATCH_LOW;
+    wire window_swap=row_advance && scan_row==31;
+    wire window_down=scroll && !row_advance;
+    wire window_up=row_advance && !scroll;
+    wire [6:0] window_raw[0:5];
+    wire [6:0] panel_heads[0:5];
+    genvar half,dy;
+    generate for(half=0;half<2;half=half+1)begin: panel_windows
+        localparam integer OFFSET=half*32;
+        localparam integer OTHER=(1-half)*3;
+        (* syn_ramstyle="block_ram" *) reg [6:0] memory[0:63];
+        reg [6:0] q,retained0,retained1;
+        reg forward_q,bottom_q;
+        reg [2:0] valid_q;
+        wire [6:0] read_value=forward_q ? write_previous : q;
+        assign window_raw[half*3]=bottom_q ? retained0 : read_value;
+        assign window_raw[half*3+1]=bottom_q ? retained1 : retained0;
+        assign window_raw[half*3+2]=bottom_q ? read_value : retained1;
+        wire [6:0] old0=window_swap ? window_raw[OTHER] : window_raw[half*3];
+        wire [6:0] old1=window_swap ? window_raw[OTHER+1] : window_raw[half*3+1];
+        wire [6:0] old2=window_swap ? window_raw[OTHER+2] : window_raw[half*3+2];
+        wire [6:0] requested_y={2'd0,next_scan_row}+OFFSET;
+        wire [5:0] base=next_head_top+requested_y[5:0];
+        wire [5:0] read_address=window_down ? base-6'd2 : base;
+        wire collision=head_write && read_address==head_write_address;
+        wire [5:0] retained_address0=window_down ? base : base-6'd1;
+        wire [5:0] retained_address1=window_down ? base-6'd1 : base-6'd2;
+        wire [6:0] keep0=window_down ? old1 : (window_up ? old0 : old1);
+        wire [6:0] keep1=window_down ? old2 : (window_up ? old1 : old2);
+        always @(posedge clk)begin
+            if(head_write)memory[head_write_address]<=head_write_data;
+            // Suppress undefined physical same-address read/write behavior.
+            if(!collision)q<=memory[read_address];
+            forward_q<=collision;
+            bottom_q<=window_down;
+            retained0<=head_write && retained_address0==head_write_address ? head_write_data : keep0;
+            retained1<=head_write && retained_address1==head_write_address ? head_write_data : keep1;
+        end
+        for(dy=0;dy<3;dy=dy+1)begin: taps
+            wire [5:0] address=base-dy;
+            wire updated=head_write && address==head_write_address;
+            wire survives=head_valid[address] && !(scroll && address==wrapped_head);
+            always @(posedge clk)
+                valid_q[dy]<=resetn && playing && requested_y>=dy && requested_y<=HIT_Y+dy &&
+                    (updated || survives);
+            assign panel_heads[half*3+dy]=valid_q[dy] ? window_raw[half*3+dy] : 7'd0;
+        end
+    end endgenerate
+    wire [6:0] upper_glyph=panel_heads[0] | panel_heads[1] | panel_heads[2];
+    wire [6:0] lower_glyph=panel_heads[3] | panel_heads[4] | panel_heads[5];

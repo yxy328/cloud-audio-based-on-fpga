@@ -123,7 +123,7 @@ module hc05_keymap_parallel_reference #(
     downloadable_song #(.CLK_HZ(CLK_HZ),.ENABLE_LOOKAHEAD(ENABLE_LOOKAHEAD),
         .LOOKAHEAD_MS(LOOKAHEAD_MS)) u_download (
         .clk(clk),.resetn(resetn),.request(song_request),.operation(song_operation),
-        .arg0(song_arg0),.arg1(song_arg1),.arg2(song_arg2),.edit_allowed(edit_allowed),
+        .arg3(16'd0),.score_min(16'd8192),.score_max(16'd32768),.arg0(song_arg0),.arg1(song_arg1),.arg2(song_arg2),.edit_allowed(edit_allowed),
         .note_map(note_map),.toggle_play(toggle_play),.restart(restart),
         .done(song_done),.error(song_error),.valid(downloaded_valid),.playing(downloaded_playing),
         .gate(downloaded_gate),.current_note(download_note),.guide_keys(guide_keys),

@@ -1,0 +1,5 @@
+{
+  "label": "chain_partial_query_length",
+  "reason": "Reply template length assertion caught 27 rather than 26 bytes before complete integration; unintended build stopped; not counted as evidence",
+  "production_modified": false
+}

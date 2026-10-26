@@ -1,5 +1,8 @@
 # 参考工程功能迁移：App v1.4 / 8、16 键演奏
 
+> 2026-10-26 固定十六键：当前统一工程上电即串行十六键，删除八键输入和 App 切换入口。`TOUCH,8` 返回 `ERR,RANGE`；键盘未就绪时可在空闲状态用 `SERIAL,0/1` 修正极性。以 [当前操作与协议](TOUCH16.md) 为准；下文八键及旧版构建说明保留历史用途。
+
+
 基于本机 `xqr/fpga-musical-magic-box-master/1/fpga_project_1`，修改当前
 `PCM5102_PAM8403.gprj`，顶层仍为 `top`。保留 PCM5102、PAM8403、HC-05、
 HUB75E、原 FSR ADC、红外和 APDS-9960 的现有接口。硬件由用户改接；本次不自动烧录。

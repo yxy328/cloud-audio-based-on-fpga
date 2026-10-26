@@ -1,0 +1,694 @@
+{
+  "selected": "candidate_place2",
+  "physical_audit": {
+    "label": "candidate_place2",
+    "status": "validated",
+    "strategy": {
+      "place_option": 2,
+      "route_option": 0,
+      "route_maxfan": 23
+    },
+    "metrics": {
+      "Logic": {
+        "used": 22453.0,
+        "capacity": 23040.0
+      },
+      "CLS": {
+        "used": 11439.0,
+        "capacity": 11520.0
+      },
+      "Register": {
+        "used": 10783.0,
+        "capacity": 23280.0
+      },
+      "BSRAM": {
+        "used": 55.0,
+        "capacity": 56.0
+      },
+      "DSP": {
+        "used": 26.5,
+        "capacity": 28.0
+      }
+    },
+    "delta_vs_baseline": {
+      "Logic": 6.0,
+      "CLS": 52.0,
+      "Register": 51.0,
+      "BSRAM": 2.0,
+      "DSP": 0.0
+    },
+    "unrouted_nets": 0,
+    "bitstream_present": true,
+    "bitstream_sha256": "EBAEAD00A4D77286F8A97704ACDFF3A2416FAD576F4031C6D2E5925636496509",
+    "timing": {
+      "setup_violated_endpoints": 0,
+      "setup_worst_path": {
+        "slack_ns": 0.265,
+        "from": "u_main/u_keymap/u_download/elapsed_ms_1_s4/Q",
+        "to": "u_main/u_keymap/u_download/cur_end_ms_17_s1/CE"
+      },
+      "setup_reported_violating_paths": [],
+      "hold_violated_endpoints": 0,
+      "hold_worst_path": {
+        "slack_ns": 0.149,
+        "from": "u_main/u_touch_synth/lookup_phase_29_s0/Q",
+        "to": "u_main/u_touch_synth/u_sine/memory_memory_0_0_s/AD[11]"
+      },
+      "hold_reported_violating_paths": [],
+      "setup_raw_worst_path": {
+        "slack_ns": 0.265,
+        "from_cell": "u_main/u_keymap/u_download/elapsed_ms_1_s4",
+        "to_cell": "u_main/u_keymap/u_download/cur_end_ms_17_s1"
+      },
+      "setup_raw_violating_paths": [],
+      "hold_raw_worst_path": {
+        "slack_ns": 0.149,
+        "from_cell": "u_main/u_touch_synth/lookup_phase_29_s0",
+        "to_cell": "u_main/u_touch_synth/u_sine/memory_memory_0_0_s"
+      },
+      "hold_raw_violating_paths": []
+    },
+    "changed_inputs_vs_baseline": [
+      "pcm5102_pam8403/src/downloadable_song.v",
+      "pcm5102_pam8403/src/fsr_pitch_scaler.v",
+      "pcm5102_pam8403/src/hc05_keymap.v",
+      "pcm5102_pam8403/src/hc05_reply.hex",
+      "pcm5102_pam8403/src/top.v",
+      "pcm5102_pam8403/tools/build_unified.tcl"
+    ],
+    "changed_input_hashes": {
+      "pcm5102_pam8403/src/downloadable_song.v": {
+        "baseline": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414",
+        "candidate": "DAE4496564538D6121A8AED95D2F0D659104B7201AADCFB8F82DFDA827DE1771"
+      },
+      "pcm5102_pam8403/src/fsr_pitch_scaler.v": {
+        "baseline": "0619276D7DCBD735501DE5E161C5F597071433DBD5463390D311F70AB64A8411",
+        "candidate": "440857234F9268A02AAEACCF1C2E1B6CB80957AD723D3466DB392C07BCAE3D69"
+      },
+      "pcm5102_pam8403/src/hc05_keymap.v": {
+        "baseline": "3C30AC8ABAD9A8299C1BB7B6B258D69D7C940E540E91A2F2C3B52A8E5427A25C",
+        "candidate": "5F3E36077430CEF3D6A28F372E3F65EA0179CF73750715E99D5C9154F449DC43"
+      },
+      "pcm5102_pam8403/src/hc05_reply.hex": {
+        "baseline": "DA668387FE28FC3EF76FD882682679609B750D84AFB246D1344DC684D7B556D0",
+        "candidate": "E69657474D176996AEA07DD93885BD1DE41662FDB52310D909692BF11ED7382F"
+      },
+      "pcm5102_pam8403/src/top.v": {
+        "baseline": "7C97FC16BBBB85E978113AED055AD07F45ABA2A42C4DCD525D09D2F68B2A2922",
+        "candidate": "195E67BD0B9974FF74B36883A29E47C83B79DB6E107CEED87C418F2182230F1D"
+      },
+      "pcm5102_pam8403/tools/build_unified.tcl": {
+        "baseline": "DE4924CDC3B36284395E0FBFA926BA2BF6D50E8855DDD28BFB105CE170E52EA4",
+        "candidate": "DE04461C116036B36561293DDF4715F6D1EDAA6D01B1A07817AC7E96BC4EA96F"
+      }
+    },
+    "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate_place2\\sources.json",
+    "source_manifest_sha256": "EC0671E2B73415BBE7FC98C0C6E4C72B0004D79996FFC453BE9E80E59EFBED36",
+    "downloadable_song_sha256": "DAE4496564538D6121A8AED95D2F0D659104B7201AADCFB8F82DFDA827DE1771",
+    "snapshot_corrupt_inputs": [],
+    "errors": [],
+    "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate_place2\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+    "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate_place2\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+    "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\candidate_place2\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html",
+    "unplaced_LUT_equivalents": 0,
+    "gowin_sha256": "4C172D4C0D2A4C7EF5C764D091A315CBCDE2127573554BFD7D09AC6F2E5EA535",
+    "actual_build_file_hashes": {
+      "impl/gwsynthesis/PCM5102_UNIFIED.prj": "3DCABA1EF85AB27B6BA4C105AC2A1DB0838A7FFAC32497D67AF5CF6D47B9F123",
+      "impl/pnr/cmd.do": "4C064D8D7F7E345CB03D8886D635F3FE7BE500178D8E83BDBE319B5DB700D2A4",
+      "impl/pnr/device.cfg": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A",
+      "impl/pnr/PCM5102_UNIFIED.rpt.txt": "89673A950E90C1240B5B081DCC25F46F76890A29E92A8778DE03136B940B09D1",
+      "impl/pnr/PCM5102_UNIFIED_tr_content.html": "E770ED43B4CB53BD76EE22E288BA72DE8048229F88D55C7BC362AF59EF649579",
+      "impl/pnr/PCM5102_UNIFIED.timing_paths": "262B7F525059B63BBB3DA738724C9AC2B92B5E01D1DB5A79480D4C1403661F45"
+    },
+    "cls_free": 81.0,
+    "admitted_physical": true
+  },
+  "production_inputs": [
+    {
+      "Path": "pcm5102_pam8403/src/ads1115_ctrl.v",
+      "SHA256": "C7D2C0F814A9536A7ECF67AD1D3C23400A22A0EEC61FD7497E3E5C451B1D2C1A"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/adsr_config.v",
+      "SHA256": "4078A8EDE4E655F94C04019707FA562C77233A794B7D6FF0C3CEF273AE1E4F15"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/adsr_env.v",
+      "SHA256": "3B93DE95A73C82DA73627FD690E84F294B39E011642025FEEA0473ACB9A39A89"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/analog_expression.v",
+      "SHA256": "462838F13693247A707F493242CD87D3A969D7CDBB018D9E13ACE3EE9BDBD19C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/apds9960_ctrl.v",
+      "SHA256": "4AAA3F1F0E20BFFFB35B49567427ED0054B972D9167F98C5337A3E69FDC77492"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_effects.v",
+      "SHA256": "E6C71CC8FF09E7E1F88BB358D437BFB5722FBD5B3BEFAE6B87E0F73BBE4015A2"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_fx_chain.v",
+      "SHA256": "36528F69FA8971741245249C2CF3F74D140C9790881931A813D926164FAEBC40"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_master_volume.v",
+      "SHA256": "78C33B6DB3EA4471E8DBB21C1504D92F781CFF49DEE5A42F4B8A6FAE83699CD9"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_mixer.v",
+      "SHA256": "FDDC61597D3B0986B9FF5EEF995AC861DB5B1F44FEFC7F708D06DAFD20CD6A4F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_nor_operation.v",
+      "SHA256": "7073D2434D378923D6DCAD6954DE86874B43C94446C28A904064814A117965D8"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_record_stream.v",
+      "SHA256": "E0D8A3EC41F848BB7673B86367DD6F6D33298AA88D7536667C9310875834ABDE"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_scope.v",
+      "SHA256": "33782E6956EBE3A05AB1F77316E903C147348FBF2BF259740E0C267DD77B085A"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_spectrum.v",
+      "SHA256": "C7362DC13E74485AC2464CF46EC1EBBE46A434557717119231ACA6115C5D6A2E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_take_store.v",
+      "SHA256": "9862CE3C7768CC2AFA2757772D97E65C8C16E1A653BDE3BA3A9C2235F0AE74C0"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/audio_visualizer.v",
+      "SHA256": "D334D34CC0B89FAAEC937CFCE2305CED1F81D1016AB2BF09E208051EA70E24AC"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/button_filter.v",
+      "SHA256": "0FDDE927C12BE9F15F9875A188FBD3FE4A66A86470A328ED26AD0CFCD716FC81"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/clk_div.v",
+      "SHA256": "79F36F0741FBB923072357832C8B97C6F8EEB1D44F24B3B8B858E87674DBD83E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/dds_voice.v",
+      "SHA256": "5C8DA023CC9565553F0435A03D630EB57FED85E49F7DC87BF4552C93B2EDB6AC"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/display_mode_control.v",
+      "SHA256": "72149DE38C7D07FC589289FFAE065ACD508C677E2DEE462959E64CD43DCFF085"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/downloadable_song.v",
+      "SHA256": "DAE4496564538D6121A8AED95D2F0D659104B7201AADCFB8F82DFDA827DE1771"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/envelope_gain.v",
+      "SHA256": "D30DA82079347D55CFA2278AD1EF4E502259CF4D21D38C81313332715712F7AC"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/extra_voices.v",
+      "SHA256": "ECA4098D8E783F8FEECA574ABF613A10CED0A2C4155750CC3AF8F9AF38D5A9FA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/fft256_init.hex",
+      "SHA256": "8797D53733A1F17AD995E3EE3C2D0810EF7143D5E19EA4523450DCBDB97036DA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/fsr_dynamics.v",
+      "SHA256": "2C6920307C39EBA238BD1313856DDCC53810C5C9949C9A24E726BD49AE307B83"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/fsr_mode_select.v",
+      "SHA256": "F0401F9F2EFBA2BB9146C693588DCE2F7D3532E5A0169A79F51DE521C546791D"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/fsr_pitch_scaler.v",
+      "SHA256": "440857234F9268A02AAEACCF1C2E1B6CB80957AD723D3466DB392C07BCAE3D69"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/geita.v",
+      "SHA256": "A15D4016ADE0BE3A9AFD5C52438AB13678F0A89A1EB436C3FE1898B8BF86EE4C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gesture_audio.v",
+      "SHA256": "10FAE5B75401B569F63F10639A47A5D3AE6E5B2F6EF5DDE3AED5FABAB2F8B0B2"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gesture_nco_sine.v",
+      "SHA256": "2FC838AFDA014FD99A6AD211D5B27BC8F6D34BAEF4D15DDAA068C2F5FA565E1A"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gesture_piano_voice.v",
+      "SHA256": "20043297BF44B143F4D84671D4822F1EE47E0A9A6A88A0FDFD22B105B687D855"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gesture_top.v",
+      "SHA256": "C4DAA5087E778D6500C344AE723BAB741F684F54D3CAD89DFAF6CED8D4B6CA51"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/gowin_fsr_adc.v",
+      "SHA256": "80459203E1588C597D35CA418E051991B11B45869F25B8EA6962929486C613F3"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hc05_command.hex",
+      "SHA256": "B0C1326CF9EC2824367753B313F7DA7B8CBE6A29E80DFF91FDE27BDB0D6C7E61"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hc05_command_decode.v",
+      "SHA256": "5CEAD8FF34201612ADEF7A98E18B8BA71F3E47A82FA15484214971C76AF5CD0B"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hc05_keymap.v",
+      "SHA256": "5F3E36077430CEF3D6A28F372E3F65EA0179CF73750715E99D5C9154F449DC43"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hc05_reply.hex",
+      "SHA256": "E69657474D176996AEA07DD93885BD1DE41662FDB52310D909692BF11ED7382F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hub75e_rhythm_display.v",
+      "SHA256": "94603E0B3243FAB9B9AE303879BD33CAAFC6BF7B00104D945A3D207BBF0A800F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/hub75e_status.v",
+      "SHA256": "431E8C4D0E518825541BF0673E80A6D07010730554B485E2B7C35401B086812F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/i2c_arbiter.v",
+      "SHA256": "A5C8FCAC8DECD7F1BC878BFAE3C7ABAAFBE551FC964452B7CA7652E6411247AA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/i2c_master.v",
+      "SHA256": "32A498FC7EB7B47344A1DB645EBFF4F18BA6A8F2633DF91C030640D954E65B75"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/i2s_tx.v",
+      "SHA256": "ECBD6FE51BA37B29343F7EB740DCFEB73D4422A83F6F8B741C40207F5A1FE99E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/ir_strings.v",
+      "SHA256": "A011D1B2F0C0A46751053A6797BA4546BB644DC26394733B59903A9607D1A457"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/key_live_stream.v",
+      "SHA256": "36ACC42D731E7F54BA2B099591328175D0BC07259F7E1C9F02B74620BD6D2F4D"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/lissajous_reference.v",
+      "SHA256": "88CCA236982CA39C158222F6DF747221F6B58CD1B609D08EBD2AF73528E7549C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/midi_note_lut.v",
+      "SHA256": "AB22313AA47025F96D3C1427A60BB5C0BCA6360617113C4AFC054AD051BABDC4"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/nco_sine.v",
+      "SHA256": "17C026767A0F6B92F888C378122F7A0BAE930E629A02954EBC36D34E3B9369AE"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_AUDIO_TAKE.sdc",
+      "SHA256": "3BB3C6AFCD423DD45886196ED7336E0739D8B96A103F3CE27AFF4B4FFA1148F3"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_EVENT_TAKE.cst",
+      "SHA256": "9CE0D09F10E32057740EF71F4D28BF3933B8D8960416855D16DD65E78AB25624"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_EVENT_TAKE.sdc",
+      "SHA256": "DB1D2F0A7EA731326CFBEE1B6D93A731B82638F17CFA6FF51391175798AFF151"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_PAM8403.cst",
+      "SHA256": "73F2A482975B8E735EF211167CE8E187826F628C0D04EB5B4D136FCA73DA2BB8"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_PAM8403.sdc",
+      "SHA256": "8D89A33A94386D9940039D4BE7FCCD70551BD51ECCA7518CAC6F973D59A36877"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/PCM5102_UNIFIED.sdc",
+      "SHA256": "D6CBD2947834A1C945BF7DF0D7E3C854400CBC59D24830B291EC2C51D8A999CA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/performance_logger.v",
+      "SHA256": "F8CD95E1728176F46EBA17E442CE7FD5357B02CCDF90BF7769BCBEBABFF3947C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/performance_take.v",
+      "SHA256": "15B5676C2454158BD95977199A7F4A235B20794560BFC39D18A4A3561625461C"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/pitch_control.v",
+      "SHA256": "12BAD5A168B117B4B1519E9A3C4E1B7DE64B82CC5579688E9EA90A1FB9668148"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/poly_demo_control.v",
+      "SHA256": "DAECD8671BBBD7E0F973438F7D9A897AC5AB637D97AC424ED69F5EF39D2B4614"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/poly_synth.v",
+      "SHA256": "EF0916D52B0E2FFF0D0D97AFEC0019A8D1E8FD1872FE953AC212FE5610D089E3"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/rhythm_guide.v",
+      "SHA256": "5C876FC4ED397404C618D8B657AAC4FAC3AC012F253744D18CBB7F4ACB6864D8"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/scope_style.hex",
+      "SHA256": "116D70713DF3C47237E730CBAE00D7B69D97137FA59129BD30F184AD90FBF15E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/sensor_poly_audio.v",
+      "SHA256": "DE2282A8534D0BE28BBD14957701A202AE6EB0E6C88C512AE45ABFDCA9C2874E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/sine_lookup.v",
+      "SHA256": "F4FC3AE4DE5252570591E2BEFA265F4355A649909B8A2E850C487E8866B3B011"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/sine_rom.v",
+      "SHA256": "C6421EADF98EB28FABB3965662C7BFCE07C7FA38666D2A8F65B295A840491DF3"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/synth_shared_arith.v",
+      "SHA256": "340147C580A5FD4EC0BA90A0862E3BD145E73117F79AFF1D140CAB61B0BE6BEA"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/synth_voice.v",
+      "SHA256": "6D825539E639BF38A9F75C85DDE1F420E21F40C2E1D0E02066A87BB7E0D88F8E"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/take_key_control.v",
+      "SHA256": "B19EB4127859C6113D4D731525D52DE95ED3F64D70DE601FA3D767B91F2E7DC7"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/take_nor_store.v",
+      "SHA256": "EA40B6DDAD00421DDD759C9C2A8F89BBA754183521201143215652B0ADB460C9"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/take_spi_transaction.v",
+      "SHA256": "0FCDA057DFE7448F848A326BEAA0D9189A5ABF979A3A28B05A6E9E993F1E7F7F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/tdm_sine256.hex",
+      "SHA256": "969483C54B36DD4CD6361994E65F302538D9184FE154E34DD71E53D400026CD8"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/tdm_synth.v",
+      "SHA256": "16D163D7351D8ADD91416C3D8CAD6491DB2E575D024DCA1411D34DFDAFF9124F"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/top.v",
+      "SHA256": "195E67BD0B9974FF74B36883A29E47C83B79DB6E107CEED87C418F2182230F1D"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/top_audio_take.v",
+      "SHA256": "1388C4DFC67BB3631A911A69C3771F36A697E6F97A5BA5A84FA46AC858942007"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/top_take.v",
+      "SHA256": "0CE3C8E0F8E23A08AD26573F9E3360A08498FE6AA4769D51640B9EE7309D48A1"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/top_unified.v",
+      "SHA256": "109677E0D300CCF308E528173F8DF37B51FD87AE2D793A8508D1B6D1E55AA4F7"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/touch_sine_rom.v",
+      "SHA256": "D7A871F3819D6E2E592CA00ACE43EBAF49A45CA9626226DE425A53BBBEDCBEA0"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/touch_tdm_synth.v",
+      "SHA256": "9ACF07B89374E26C9B228581B2A43A6FE734C70E37CE76FA7137D38E2A519B7A"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/ttp229_keys.v",
+      "SHA256": "46FF3FC3550C8E0FFA06791257F85C0CE90EE9C2C4ADAEB101CBBF1B398591AB"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/twinkle_sequencer.v",
+      "SHA256": "6F78D36930BF9B69E9CD4736D204E2B4B027BDE804A7D0E65A07AEA8ABDED734"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/uart_8n1.v",
+      "SHA256": "07A9B6273BA364243B1DF7A6624346BBD195E1C0CF6662C2B72794879DBF5251"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/vibrato.v",
+      "SHA256": "561FDBDF9A32C8D1723B4F3071731DE9BC619B9FE781F6AB853E491CC0B51DFC"
+    },
+    {
+      "Path": "pcm5102_pam8403/src/volume_key.v",
+      "SHA256": "2EF21A6F29BA64DF4BEAB4C98B563397063ACAF7C6B4BA4BDF6012FDF11BD3A2"
+    },
+    {
+      "Path": "pmod_hub75e/src/display_rom.v",
+      "SHA256": "E516B11FA572904BEFE6EAC585C72B4107D4127A56C97844F9F0877D5249BAA9"
+    },
+    {
+      "Path": "pmod_hub75e/src/gao_touch_debug.v",
+      "SHA256": "5A2E6DB29728B2756F5E9DD2A9950267670DA657F32C0C0475EA05768DA79F64"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_clkdiv/gowin_clkdiv.ipc",
+      "SHA256": "9CB6BD0B76066011F32BE567B2658BB513D37DBB511650D9AEEDAACBE6F8F533"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_clkdiv/gowin_clkdiv.mod",
+      "SHA256": "68EBE0B520577BA2072D5E8DDB0389DB4607A0DAF956651B10C519E16800FF81"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_clkdiv/gowin_clkdiv_tmp.v",
+      "SHA256": "6AD681CF59C4CC68A2250003CA2EEBE67FB4550AE386251D68551AC896EE7614"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_prom/gowin_prom.ipc",
+      "SHA256": "0E331E9A14D75F97EC9E3864A12414F8EC4A79FDEDFBC1EB08817E37D2E5240D"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_prom/gowin_prom.mod",
+      "SHA256": "DE9B2C3B1CE3B163C173F189EA6FE8D009B15CBB93D86E03E0EE39487F81E1E8"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_prom/gowin_prom.v",
+      "SHA256": "9E5359CA61E698B07FF9B6FF8A46EFB07A44D69E9B288E3A3E366D3B65BE3A7C"
+    },
+    {
+      "Path": "pmod_hub75e/src/gowin_prom/gowin_prom_tmp.v",
+      "SHA256": "F48046C47CD8F04415865D8A950B128615C52B0D686A9AB8960636692330741E"
+    },
+    {
+      "Path": "pmod_hub75e/src/HUB75E.cst",
+      "SHA256": "EC35340183BD630141D60082ABE8DB28605E796E403C80C6BA083EEB31B0D4D7"
+    },
+    {
+      "Path": "pmod_hub75e/src/HUB75E.gao",
+      "SHA256": "4DC797FDBBED29E18A76815CD767075CE14711E9BF9E4A06583974FD27BD6262"
+    },
+    {
+      "Path": "pmod_hub75e/src/HUB75E.sdc",
+      "SHA256": "C8A6C87C66FB04FC2924264BF90D0C5EB8DEC0199C1680977B03A85CF91F1AB7"
+    },
+    {
+      "Path": "pmod_hub75e/src/logoS.hex",
+      "SHA256": "2B9F28FC0B36C8556BC3869A2F766A8CC18397B306940F53AB11753325DE9480"
+    },
+    {
+      "Path": "pmod_hub75e/src/logoT.hex",
+      "SHA256": "18471B9DCC4E8660A358208D94D367A81C56C08FC99187F8A81E5CD0682D641E"
+    },
+    {
+      "Path": "pmod_hub75e/src/top.v.v",
+      "SHA256": "47EADBBEF0523AC8148D0F11366FD690BA8AFB0D6C9D3FB93471DBDB6414B91F"
+    },
+    {
+      "Path": "pmod_hub75e/src/touch_ui.v",
+      "SHA256": "1FC04E76EBF5A344DB564DB2E9081A333BFA0E750361510E154B41D330CBB879"
+    },
+    {
+      "Path": "pmod_hub75e/src/TT25664.hex",
+      "SHA256": "6206A5342DC2B1D4EA9DDC8184938C1C57EC576865088D1B01E76B5EEAF476B5"
+    },
+    {
+      "Path": "pmod_hub75e/src/ttp229_ctrl.v",
+      "SHA256": "69BEDA2E1CD4BFB408438BED818F6E9DA3659871C74DCC9D2C857098C2E05267"
+    },
+    {
+      "Path": "pmod_hub75e/src/ttp229_gpio_input.v",
+      "SHA256": "36320ADC278AE38D10196B26874BD3ECB771AF1AD7ED8F1BD7BD7A8BA88CD16F"
+    },
+    {
+      "Path": "pmod_hub75e/src/ttp229_mode_select.v",
+      "SHA256": "309209D2A07F6C26BFA4683675EFF1C62A3F0E9253C9323CE0982374FC43463B"
+    },
+    {
+      "Path": "pcm5102_pam8403/PCM5102_UNIFIED.gprj",
+      "SHA256": "9E3927602474C4809AA3BA07BA0AD114CB3EDE75DFB876FC914C2F84E8FEC301"
+    },
+    {
+      "Path": "pcm5102_pam8403/tools/build_unified.tcl",
+      "SHA256": "DE04461C116036B36561293DDF4715F6D1EDAA6D01B1A07817AC7E96BC4EA96F"
+    }
+  ],
+  "changed_inputs": [
+    "pcm5102_pam8403/src/downloadable_song.v",
+    "pcm5102_pam8403/src/fsr_pitch_scaler.v",
+    "pcm5102_pam8403/src/hc05_keymap.v",
+    "pcm5102_pam8403/src/hc05_reply.hex",
+    "pcm5102_pam8403/src/top.v",
+    "pcm5102_pam8403/tools/build_unified.tcl"
+  ],
+  "changed_generator": "tools/generate_hc05_replies.py",
+  "test_changes": [
+    "sim/reference/hc05_keymap_parallel_reference.v",
+    "sim/tb_bend_ram_equivalence.v",
+    "sim/tb_downloadable_song.v",
+    "sim/tb_fsr_modes.v",
+    "sim/tb_hc05_adsr.v",
+    "sim/tb_hc05_bend.v",
+    "sim/tb_hc05_download_current.v",
+    "sim/tb_hc05_keymap.v",
+    "sim/tb_performance_params.v",
+    "sim/tb_score_bend_frame_take.v",
+    "sim/tb_score_bend_manual_legacy.v",
+    "sim/tb_score_bend_protocol.v",
+    "sim/tb_score_bend_scope.v",
+    "sim/tb_score_bend_slew.v",
+    "sim/tb_score_bend_words.v",
+    "sim/tb_score_legacy.v",
+    "sim/tb_song_time_bound.v",
+    "sim/tb_top_audition.v",
+    "sim/tb_tuning_params.v",
+    "sim/tb_voice_bend.v"
+  ],
+  "app_changes": [
+    "app/build.gradle",
+    "app/src/main/AndroidManifest.xml",
+    "app/src/main/java/cn/fpga/score/MainActivity.java",
+    "app/src/main/java/cn/fpga/score/ScoreBends.java",
+    "core_test/ScoreBendsTest.java",
+    "test-core.ps1"
+  ],
+  "outputs": [
+    {
+      "Path": "pcm5102_pam8403/src/hc05_keymap.v",
+      "SHA256": "5F3E36077430CEF3D6A28F372E3F65EA0179CF73750715E99D5C9154F449DC43"
+    },
+    {
+      "Path": "pcm5102_pam8403/tools/build_unified.tcl",
+      "SHA256": "DE04461C116036B36561293DDF4715F6D1EDAA6D01B1A07817AC7E96BC4EA96F"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/gwsynthesis/PCM5102_UNIFIED.log",
+      "SHA256": "F456A11BE48E2AFA55F58571A6AB4F52628500C6988D9ED891105811B0EFEF69"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/gwsynthesis/PCM5102_UNIFIED.prj",
+      "SHA256": "3DCABA1EF85AB27B6BA4C105AC2A1DB0838A7FFAC32497D67AF5CF6D47B9F123"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/gwsynthesis/PCM5102_UNIFIED.vg",
+      "SHA256": "FE3F2DBE6E0207183AC6B93893D0C28DB1CDBFD91340AFACC057005171E26067"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/gwsynthesis/PCM5102_UNIFIED_syn.rpt.html",
+      "SHA256": "F426D9A4D647D2795795B28368BE95D9C4FE301750A4AF4D42D5F7689DAA4E5B"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/gwsynthesis/PCM5102_UNIFIED_syn_resource.html",
+      "SHA256": "FCD1266451BF81F463CEA1A8D9EB4DF54CAB71327DEC7FC47293FA3349D82DBF"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/gwsynthesis/PCM5102_UNIFIED_syn_rsc.xml",
+      "SHA256": "6982AD6DAEE62F336FB0389BE49D28FE9DF0F041F1D86BC6935A62953377AAAB"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.bin",
+      "SHA256": "D397B799463F7E71672B310B58E15971BCF6EA24BEB0222FDA8DA28048C51CA4"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.binx",
+      "SHA256": "1BCDC84C484D6CE340E844E805FB867D6854FA9A0DB22B3B24FCD465AA16FE7F"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.db",
+      "SHA256": "F3ABE7917005D810FF6315C5DB6E32DDBC3F4C1553EC1048DAE672FAD3825677"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.fs",
+      "SHA256": "EBAEAD00A4D77286F8A97704ACDFF3A2416FAD576F4031C6D2E5925636496509"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.log",
+      "SHA256": "E968CFDE46EB0BC1BF68E4C8068C5A21146E85BE2FE302FA1EB4BDADA0FBB26E"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.p",
+      "SHA256": "A73D35C55795F624842B42934228A48FAE45CD463D87E93FF7CEAA47ACD684D2"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.pin.html",
+      "SHA256": "B0B48B97B92B263936F71B7DF9CE740216D5F9F1CE9D13B1105DBDAF53DA9117"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.power.html",
+      "SHA256": "3F0E398BAB06C5950EDB8134A8356731C72AE49D59DB9493E2D84B249FB65143"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.pr",
+      "SHA256": "F16CE0CB1F5A2677E54F045398A6833CD14A61635442821210A2CB61BF31A4E3"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.rpt.html",
+      "SHA256": "20C4D5B89B3F3E380A95B30677A3F5F664BD7AD2B1CB6D7F9FED66FA2D4AEEF3"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.rpt.txt",
+      "SHA256": "89673A950E90C1240B5B081DCC25F46F76890A29E92A8778DE03136B940B09D1"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.timing_paths",
+      "SHA256": "262B7F525059B63BBB3DA738724C9AC2B92B5E01D1DB5A79480D4C1403661F45"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.tr.html",
+      "SHA256": "A61E25FCFB53517B6BE804BF5F137E80E50683420426A2914AA031CD0FD796CA"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED.vo",
+      "SHA256": "819203A255CF92172CCC052C0263EB5CD9070A8CC3417DDBB7184848435ED634"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED_tr_cata.html",
+      "SHA256": "CA60E69566280868C0C8BF5023DCC566A2A6794CA49EA9EFEFC67C68EFEDD497"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/PCM5102_UNIFIED_tr_content.html",
+      "SHA256": "E770ED43B4CB53BD76EE22E288BA72DE8048229F88D55C7BC362AF59EF649579"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/cmd.do",
+      "SHA256": "4C064D8D7F7E345CB03D8886D635F3FE7BE500178D8E83BDBE319B5DB700D2A4"
+    },
+    {
+      "Path": "pcm5102_pam8403/impl/pnr/device.cfg",
+      "SHA256": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A"
+    }
+  ],
+  "app_version": "1.38-scorebend / Code39",
+  "apk_sha256": "4BF0C69A3DBF016AFB00AE56B7C29003093B168C8DF3DD1E1AD71EBDC1536BE1",
+  "bitstream_sha256": "EBAEAD00A4D77286F8A97704ACDFF3A2416FAD576F4031C6D2E5925636496509",
+  "same_certificate": true,
+  "production_sources_match": true,
+  "production_outputs_match": true,
+  "installed": false,
+  "programmed": false,
+  "board_flash_written": false,
+  "rollback_bitstream": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\production_before\\impl\\pnr\\PCM5102_UNIFIED.fs",
+  "rollback_bitstream_sha256": "ACC17F2F956BBE26400E84E3E09AAB82EDECCDFFCFCD9902203E6C34ACFD2F8A",
+  "rollback_apk": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\score_bend_integration_20261026\\production_before\\rollback_app.apk",
+  "rollback_apk_sha256": "C53E3A02A09B0C2CEC5D02A90C44302AF89D084B574B62ED55761BB18D12B66A"
+}

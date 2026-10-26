@@ -1,6 +1,22 @@
+# 2026-10-26 演奏体验版：1.34-performance / Code35
+
+**2026-10-27：曲谱事件弯音已接入，App Code39。** [CSV、协议、试听与录放说明](../SCORE_BEND.md)。旧三参数曲谱命令保留；能力查询 `SONG_BEGIN,?` 返回 `SONGBEND,1`。
+
+当前安装包：[FPGA-Music-Performance-Code35.apk](dist/FPGA-Music-Performance-Code35.apk)，滚动入口 [FPGA-Music-Unified.apk](dist/FPGA-Music-Unified.apk) 已核对为相同文件。打开默认进入“演奏”，集中总音量、三效果摘要、录放状态、场景与紧急止音。进阶参数可折叠；手机本地场景支持保存设备配置、改名、删除、主动应用和写后匹配，保留三张独立效果卡草稿。保留Code34外观素材。
+
+参阅 [一页操作说明](../PERFORMANCE_QUICKSTART.md) 与 [完整验收报告](../reports/performance_experience_20261026/REPORT.md)。硬件仍为原有三效果功能；震音、曲谱逐音弯音和分源扩展候选未接入。Java/D8/aapt2、核心测试、签名与版本核对通过；未安装App，手机布局、蓝牙及听音待实机验收。
+
+## 历史三效果版：1.26-fx3 / Code27
+
+历史命名安装包为 `dist/FPGA-Music-FX3-Code27.apk`。混音页提供独立合唱、延迟、混响卡片，可同时开启；分别显示配置/实际值，保留草稿，逐卡应用。BPM 延迟计算器位于延迟卡内。固定 16 键、手机本地 MIDI、TAKE、双模拟输入及其余控制保留。固件与协议见 [FX3.md](../FX3.md)。旧固件不支持三效果查询时显示不可用，其余控制仍可使用。
+
+Java 全量编译、核心测试和 RTL 回复夹具交叉测试通过；未做手机界面、真实蓝牙或听音验收。命名 Code26 安装包保留供回退。下文为此前版本说明。
+
 # 安卓 HC-05 曲谱助手
 
-**当前版本为 [v1.24-hue / Code25独立APK](dist/FPGA-Music-Hue33-Code25.apk)，滚动入口为 [FPGA-Music-Unified.apk](dist/FPGA-Music-Unified.apk)。** 显示分区顶部新增33档青蓝紫红色环、深色频谱和渐变音源幅度条；色值与RTL逐项一致，无新增FPGA资源。界面、数据口径与验证见 [HUE33.md](HUE33.md)。
+**2026-10-26 当前版本：[v1.25-touch16 / Code26](dist/FPGA-Music-Touch16-Code26.apk)，滚动入口为 [FPGA-Music-Unified.apk](dist/FPGA-Music-Unified.apk)。** 配套统一固件固定为 TTP229 十六键串行输入，上电即进入十六键；App 移除八键选择和旧日志的一键八键配置。保留串行极性、压力用途、全部十六个触摸声部、手机 MIDI 与板上 TAKE。极性不匹配、键盘未就绪时，可在松键且曲谱/录制空闲、延音关闭后应用正确极性，再等待校准。完整构建与验证见 [本轮报告](../reports/touch16_delivery_20261026/README.md)。以下旧版说明保留历史用途。
+
+**上一版为 [v1.24-hue / Code25独立APK](dist/FPGA-Music-Hue33-Code25.apk)。** 显示分区顶部新增33档青蓝紫红色环、深色频谱和渐变音源幅度条；色值与RTL逐项一致，无新增FPGA资源。界面、数据口径与验证见 [HUE33.md](HUE33.md)。
 
 **连接诊断沿用 Code24，保留 [Code24独立APK](dist/FPGA-Music-LinkDiag-Code24.apk)。** 设备状态下显示实际安装版本；超时会显示失败命令、期望回复及收发情况。修正回复分发为单处匹配、补测完整初始化，命令正文最多64字符且只追加LF。旧四档回声冻结包仍保留有缺陷的Code22 APK，勿从该包安装；现场超时尚待新版提示定位，不能将本次核心测试通过记作实机连接已恢复。详见 [连接说明](../HC05_CONNECTION.md)。
 

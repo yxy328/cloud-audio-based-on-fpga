@@ -1,5 +1,11 @@
 # Tang Primer 25K：触摸 / 压力 / 红外 / 手势 / 吉他 / 蓝牙 / 64×64 LED
 
+**2026-10-27 曲谱弯音已接入：[完整交付与回退](reports/score_bend_integration_20261026/README.md)。** App Code39；Logic 22453、CLS 11439、BSRAM 55、DSP 26.5。剩余 81 CLS，保留35后可用 46。50MHz 完整布通，setup/hold 违例0/0，原始 WNS +0.265/+0.149ns。默认入口已更新，未安装或烧录。以下旧版本记录保留。
+
+**2026-10-26 CLS 优先复核：[第三步实测、失败记录与回退](reports/control_pack_20261026/README.md)。** 第二步增加77 CLS的显示方案已撤回，实验与命名位流保留。第三步已完成多组结构与物理实现对照，尚未找到满足净减CLS与时序要求的候选，均未接入。当前默认保持第一轮 HC-05 版本：Logic 22447、CLS 11387、BSRAM 53、DSP 26.5；剩余133 CLS，保留35后预算98。第三步新增收益为0。未烧录。以下资源和位流指纹为历史记录。
+
+**2026-10-26 演奏体验版：[Code35 / 1.34-performance APK](android_app/dist/FPGA-Music-Performance-Code35.apk) · [常用操作](PERFORMANCE_QUICKSTART.md) · [逐项结果、资源与回退](reports/performance_experience_20261026/REPORT.md)。** 新增常用演奏入口与手机本地三效果场景，保留现有外观素材和演奏功能。硬件保持已验证三效果基线，剩余50 CLS、其中35保留；本轮震音、D/E候选均未满足资源准入，B2依赖未满足。编译、数字音频与协议测试范围见报告；手机、蓝牙和听音待实机验收。未安装或烧录。以下为历史记录。
+
 **2026-10-23 App 色环版：[Code25 /1.24-hue APK](android_app/dist/FPGA-Music-Hue33-Code25.apk) · [界面效果与说明](android_app/HUE33.md)。** “显示”分区顶部加入青蓝紫红色环、深色频谱与渐变幅度条；本次只改手机端，无新增 FPGA 资源。核心测试、排版检查和签名构建通过，手机实机联调待验。
 
 **2026-10-23 33 档音量色环：[已验证位流、完整 PASS 与资源对比](deliveries/LED_HUE33_20261023/README.md) · [显示说明](SCOPE_DISPLAY.md)。** 每 64 PCM 计数一级，青→蓝→紫→品红→红；±1 青色、零信号灰色。五项仿真逐个通过（含完整顶层），无新增 BSRAM/DSP；50MHz、WNS +0.198ns。整机 Logic21503 /CLS11202 /BSRAM47 /DSP26.5；相对本任务前 8 档为 -87 Logic、+122 CLS。默认位流已同步，尚未烧录；后续规划预留差113 Logic /47 CLS，详见报告。以下为历史记录。

@@ -1,0 +1,37 @@
+{
+  "production_input_count": 102,
+  "source_drift": [],
+  "actual_build_file_drift": [
+    "impl/pnr/PCM5102_UNIFIED.rpt.txt",
+    "impl/pnr/PCM5102_UNIFIED_tr_content.html"
+  ],
+  "bitstream_matches": false,
+  "gowin_matches": true,
+  "previous_apk_sha256": "4D95EEE795E9AFB854F76BC7E6F22D7718271E1CA39E10C2F639D53AA03B8085",
+  "previous_fs_sha256": "B65D960EA566A44FAA6BF69979F7C592CF935753BD43B1A5C992E99051E626AB",
+  "metrics": {
+    "Logic": {
+      "used": 22624.0,
+      "capacity": 23040.0
+    },
+    "CLS": {
+      "used": 11470.0,
+      "capacity": 11520.0
+    },
+    "Register": {
+      "used": 10726.0,
+      "capacity": 23280.0
+    },
+    "BSRAM": {
+      "used": 53.0,
+      "capacity": 56.0
+    },
+    "DSP": {
+      "used": 26.5,
+      "capacity": 28.0
+    }
+  },
+  "safety_CLS": 35,
+  "current_manifest_version": "1.31-iconback / Code32",
+  "prior_gradle_version_stale": "1.26-fx3 / Code27"
+}

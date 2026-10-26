@@ -1,0 +1,38 @@
+{
+  "current": {
+    "Logic": {
+      "used": 21514.0,
+      "capacity": 23040.0
+    },
+    "CLS": {
+      "used": 11199.0,
+      "capacity": 11520.0
+    },
+    "Register": {
+      "used": 10416.0,
+      "capacity": 23280.0
+    },
+    "BSRAM": {
+      "used": 47.0,
+      "capacity": 56.0
+    },
+    "DSP": {
+      "used": 26.5,
+      "capacity": 28.0
+    }
+  },
+  "delta_vs_previous": {
+    "Logic": -135.0,
+    "CLS": 16.0,
+    "Register": -163.0,
+    "BSRAM": 0.0,
+    "DSP": 0.0
+  },
+  "remaining_after_minimum_known_future_reserve": {
+    "Logic": -124.0,
+    "CLS": -44.0,
+    "BSRAM": 5.0
+  },
+  "future_Register_DSP_reserves": "Not quantified; not assumed zero",
+  "three_effects_integrated": false
+}

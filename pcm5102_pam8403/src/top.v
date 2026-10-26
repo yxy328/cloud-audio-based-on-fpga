@@ -147,6 +147,9 @@ module top #(
     end
     wire [1:0] effect_mode;
     wire [3:0] effect_wet;
+    wire [2:0] fx_mask,fx_applied_mask;
+    wire [7:0] fx_settings,fx_applied_settings;
+    wire [11:0] fx_mix,fx_live_mix,fx_applied_mix;
     wire [4:0] master_volume;
     wire [2:0] analog_mode;
     wire pressure_write,pressure_value;
@@ -263,6 +266,7 @@ module top #(
     assign audition_keys=(downloaded_audition && downloaded_gate) ? song_guide_keys : 7'd0;
     // Include synchronized raw pads, debounced gates, and release tails.
     wire [15:0] bend_min,bend_max,bend_slew,tuning_ratio;
+    wire [15:0] score_ratio;
     wire [31:0] vibrato_inc;
     wire [9:0] vibrato_depth;
     wire [15:0] vibrato_delay;
@@ -292,7 +296,7 @@ module top #(
         .gesture_vibrato(gesture_vibrato),.gesture_bank(gesture_bank),
         .sensor_test32(sensor_test32),.touch_adsr(touch_adsr),.sensor_adsr(sensor_adsr),
         .bend_write(bend_write),.bend_reset(bend_reset),.bend_index(bend_index),.bend_ratio(bend_ratio),
-        .bend_min(bend_min),.bend_max(bend_max),.bend_slew(bend_slew),.tuning_ratio(tuning_ratio),
+        .score_ratio(score_ratio),.bend_min(bend_min),.bend_max(bend_max),.bend_slew(bend_slew),.tuning_ratio(tuning_ratio),
         .vibrato_inc(vibrato_inc),.vibrato_depth(vibrato_depth),.vibrato_delay(vibrato_delay),.vibrato_update(vibrato_update),
         .echo_tap(echo_tap),
         .xy_write(xy_write),.xy_ratio(xy_ratio),.xy_phase(xy_phase),
@@ -303,6 +307,8 @@ module top #(
         .poly_limit(touch_poly),.touch_voice_count(touch_voice_count),
         .pedal_clear(perf_kill || previous_touch_mode!=touch_mode16),.take_recording(perf_recording),
         .effect_mode(effect_mode),.effect_wet(effect_wet),.master_volume(master_volume),
+        .fx_mask(fx_mask),.fx_settings(fx_settings),.fx_mix(fx_mix),
+        .fx_applied_mask(fx_applied_mask),.fx_applied_settings(fx_applied_settings),.fx_applied_mix(fx_applied_mix),
         .analog_mode(analog_mode),.pressure_write(pressure_write),.pressure_value(pressure_value),
         .analog_min(analog_min),.analog_max(analog_max),.adc_sample(status_adc_sample),.adc_timeout(status_adc_timeout),
         .audio_rec_busy(audio_rec_busy),.audio_rec_ready(audio_rec_ready),.audio_rec_overflow(audio_rec_overflow),.audio_rec_valid(audio_rec_valid),
@@ -341,9 +347,10 @@ module top #(
          {start_dir,end_dir}=={3'd4,3'd3} ? 4'b1000 : 4'd0) : 4'd0;
     assign perf_live_pulses={panic,1'b0,sensor_test32,guitar_pluck,live_gesture,
         ir_note_valid ? (8'b1<<ir_note_index) : 8'd0};
-    assign perf_live_state={live_note_gates,{11'd0,gesture_bank,gesture_vibrato,gesture_timbre},
-        {10'd0,effect_mode,effective_wet},{3'd0,master_target},effective_pitch_ratio,fsr_gain,
-        {14'd0,sensor_adsr},touch_adsr,touch_phase_increments[223:0]};
+    // Version1 uses formerly reserved bits; all existing musical fields stay put.
+    assign perf_live_state={live_note_gates,{1'b1,10'd0,gesture_bank,gesture_vibrato,gesture_timbre},
+        {1'b0,fx_settings,fx_mask,effective_wet},{3'd0,master_target},effective_pitch_ratio,fsr_gain,
+        {fx_live_mix,2'd0,sensor_adsr},touch_adsr,touch_phase_increments[223:0]};
     wire synth_sensor_mul,synth_touch_mul,synth_sensor_rom,synth_touch_rom;
     wire synth_touch_mul_grant,synth_touch_rom_grant;
     wire signed [32:0] synth_sensor_a,synth_touch_a;
@@ -466,22 +473,14 @@ module top #(
         .pressure_code(), .target_gain(fsr_target_pitch_ratio), .gain(fsr_pitch_ratio)
     );
 
-    // Reuse the shared reader with separate confirmation times for notes/mode.
-    // Mask unused inputs at their physical idle polarity in each reader.
-    ttp229_gpio_input #(
-        .CLK_FREQ(50_000_000), .STARTUP_US(TOUCH_STARTUP_US),
-        .DEBOUNCE_MS(TOUCH_DEBOUNCE_MS), .ACTIVE_LOW(TOUCH_ACTIVE_LOW)
-    ) u_touch_input (
-        .clk(clk), .resetn(resetn), .enable(!touch_mode16), .touch_out({touch_idle,touch_out[6:0]}),
-        .keys_raw(note_keys_raw), .keys_stable(note_keys), .sample_valid(), .ready(note_ready)
-    );
-    ttp229_gpio_input #(
-        .CLK_FREQ(50_000_000), .STARTUP_US(TOUCH_STARTUP_US),
-        .DEBOUNCE_MS(TOUCH_MODE_DEBOUNCE_MS), .ACTIVE_LOW(TOUCH_ACTIVE_LOW)
-    ) u_touch_mode_input (
-        .clk(clk), .resetn(resetn), .enable(!touch_mode16), .touch_out({touch_out[7],{7{touch_idle}}}),
-        .keys_raw(mode_keys_raw), .keys_stable(mode_keys), .sample_valid(), .ready(mode_ready)
-    );
+    // Fixed16 assessment: legacy parallel readers are absent, including
+    // their syn_preserve synchronizers. Serial input remains unchanged.
+    assign note_keys_raw=8'd0;
+    assign note_keys=8'd0;
+    assign mode_keys_raw=8'd0;
+    assign mode_keys=8'd0;
+    assign note_ready=1'b0;
+    assign mode_ready=1'b0;
     fsr_mode_select u_fsr_mode (
         .clk(clk), .resetn(resetn), .keys_ready(touch_ready),
         .key8_raw(!touch_mode16 && touch_keys_raw[7]), .key8_stable(!touch_mode16 && touch_keys[7]),
@@ -544,6 +543,7 @@ module top #(
     // Serial K1..12 follow the physical chromatic octave; K1..7 retain HC-05 remapping.
     // Fs=48828.125Hz. Pressure pitch changes preserve each DDS phase.
     fsr_pitch_scaler #(.PER_VOICE_BEND(1)) u_fsr_pitch_scaler (
+        .score_ratio(score_ratio),.score_keys(downloaded_audition ? song_guide_keys : 7'd0),
         .bend_min(bend_min),.bend_max(bend_max),.bend_slew(bend_slew),
         .clk(clk), .resetn(resetn), .sample_ce(frame_ce), .pitch_ratio(effective_pitch_ratio),
         .note_increments(touch_base_increments),
@@ -592,16 +592,23 @@ module top #(
         .pressure_pitch(fsr_pitch_ratio),.volume(master_volume),.wet(effect_wet),
         .pitch_ratio(effective_pitch_ratio),.master_gain(master_target),.effect_wet(effective_wet),
         .position(analog_position),.available(analog_available));
-    // Dry bypass retains the original frame timing. Wet modes add the
-    // reference effect pipeline, and the panel observes the final PCM.
-    audio_effects #(.ADDRESS_BITS(12)) u_effects (
-        .echo_tap(echo_tap),
+    // ANALOG4 overrides effective wet levels, preserving each configured value.
+    assign fx_live_mix=(analog_mode==4 && analog_available) ?
+        {effective_wet,effective_wet,effective_wet} : fx_mix;
+    wire [1:0] old_replay_mode=perf_state[485:484];
+    assign fx_applied_mask=perf_replay ? (perf_state[511] ? perf_state[486:484] :
+        old_replay_mode==1 ? 3'd2 : old_replay_mode==2 ? 3'd1 : 3'd0) : fx_mask;
+    assign fx_applied_settings=perf_replay ? (perf_state[511] ? perf_state[494:487] :
+        {2'd1,2'd1,echo_tap,2'd3}) : fx_settings;
+    assign fx_applied_mix=perf_replay ? (perf_state[511] ? perf_state[431:420] :
+        {perf_state[483:480],perf_state[483:480],perf_state[483:480]}) : fx_live_mix;
+    audio_fx_chain u_effects (
         .clk(clk),.resetn(resetn && !panic && !perf_kill),.sample_valid(frame_ce),.dry(dry_audio_sample),
-        .mode(perf_replay ? perf_state[484 +: 2] : effect_mode),
-        .wet(perf_replay ? perf_state[480 +: 4] : effective_wet),.sample(effect_sample),.valid(effect_valid));
+        .mask(fx_applied_mask),.settings(fx_applied_settings),.wet_mix(fx_applied_mix),
+        .sample(effect_sample),.valid(effect_valid),.overrun());
     audio_master_volume u_master_volume (
         .clk(clk),.resetn(resetn && !perf_kill),.frame_ce(frame_ce),
-        .sample_in((perf_replay ? perf_state[484 +: 2] : effect_mode)==0 ? dry_audio_sample : effect_sample),
+        .sample_in(fx_applied_mask==0 ? dry_audio_sample : effect_sample),
         .target_gain(perf_replay ? perf_state[464 +: 13] : master_target),.sample_out(audio_sample),.applied_gain());
     i2s_tx u_i2s_tx (
         .clk(clk), .resetn(resetn), .bck_fall_ce(bck_fall_ce),

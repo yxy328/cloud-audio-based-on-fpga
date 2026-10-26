@@ -29,32 +29,42 @@ final class Theme {
     static final int VIOLET = 0xff7a4fd8;
     /** 青色，冷色点缀。 */
     static final int CYAN = 0xff20b7c6;
-    /** 浅色卡片底。 */
-    static final int SURFACE = 0xfffffbff;
-    /** 次级浅底（输入框、信息块）。 */
-    static final int SURFACE_ALT = 0xfffdf2f8;
-    /** 卡片描边。 */
-    static final int LINE = 0x1fe8447f;
-    /** 深色面板（日志区）。 */
-    static final int PANEL = 0xff2a1b33;
+    /** 浅色卡片底：93% 不透明，让舞台背景微微透出。 */
+    static final int SURFACE = 0xedfffbff;
+    /** 次级浅底（输入框、信息块）：同 93%。 */
+    static final int SURFACE_ALT = 0xedfdf2f8;
+    /** 卡片描边：98% 不透明热粉，玻璃底上的清晰框线。 */
+    static final int LINE = 0xfae8447f;
+    /** 深色面板（日志区）：同 93%。 */
+    static final int PANEL = 0xed2a1b33;
     /** 深色面板上的文字。 */
     static final int PANEL_TEXT = 0xffe9dcff;
-    /** 危险/停止类文字与其浅底。 */
+    /** 危险/停止类文字与其浅底（93%）。 */
     static final int DANGER = 0xffb3204f;
-    static final int DANGER_BG = 0xffffeaf1;
-    /** 禁用态。 */
-    static final int DISABLED_BG = 0xfff3eef6;
+    static final int DANGER_BG = 0xedffeaf1;
+    /** 透明顶栏等舞台底上的文字：带一点粉调的近白。 */
+    static final int ON_STAGE = 0xf5ffffff;
+    /** 舞台文字柔影：亮色自定义照片上仍保可读。 */
+    static final int STAGE_SHADOW = 0x66140820;
+    /** 白玻璃底（汉堡按钮）。 */
+    static final int GLASS = 0x26ffffff;
+    /** 粉玻璃底（状态胶囊）。 */
+    static final int GLASS_PINK = 0x40e8447f;
+    /** 粉玻璃上的胶囊文字。 */
+    static final int ON_GLASS_PINK = 0xffffd3e2;
+    /** 禁用态（93%）。 */
+    static final int DISABLED_BG = 0xedf3eef6;
     static final int DISABLED_FG = 0xffa99fb4;
 
-    /** 主按钮渐变：热粉 → 蝶紫。 */
-    static final int[] BUTTON = {0xfff04c8a, 0xffa44be0};
+    /** 主按钮渐变：热粉 → 蝶紫，93% 不透明。 */
+    static final int[] BUTTON = {0xedf04c8a, 0xeda44be0};
     /** 主按钮按下时的水波纹。 */
     static final int RIPPLE = 0x40ffffff;
-    /** 次级按钮描边色。 */
-    static final int GHOST_LINE = 0x40a44be0;
+    /** 次级按钮描边色：98% 不透明蝶紫。 */
+    static final int GHOST_LINE = 0xfaa44be0;
 
-    /** 顶部主视觉：深梅 → 紫罗兰 → 热粉。 */
-    static final int[] HERO = {0xff2a1440, 0xff6a2b8f, 0xffe8447f};
+    /** 顶部主视觉：深梅 → 紫罗兰 → 热粉，93% 不透明。 */
+    static final int[] HERO = {0xed2a1440, 0xed6a2b8f, 0xede8447f};
     /** 页面默认背景：淡樱花 → 淡丁香。 */
     static final int[] BACKDROP = {0xfffff4f9, 0xfff6f0ff, 0xfffff6fb};
     /** 背景柔光。 */

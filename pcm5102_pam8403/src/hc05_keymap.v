@@ -44,8 +44,9 @@ module hc05_keymap #(
     output reg [2:0] bend_index,
     output reg [15:0] bend_ratio,
     output reg [15:0] bend_min,bend_max,bend_slew,tuning_ratio,
+    output wire [15:0] score_ratio,
     output reg [31:0] vibrato_inc,
-    output reg [1:0] echo_tap,
+    output wire [1:0] echo_tap,
     output reg [9:0] vibrato_depth,
     output reg [15:0] vibrato_delay,
     output reg vibrato_update,
@@ -55,13 +56,20 @@ module hc05_keymap #(
     output reg [1:0] remote_mode,
     input wire [1:0] visual_requested,reference_ratio,reference_phase,
     input wire [111:0] visual_snapshot,
-    output reg touch_mode16,panic,serial_active_high,
+    output wire touch_mode16,
+    output reg panic,serial_active_high,
     output reg [1:0] touch_hold,
     output reg [4:0] poly_limit,
     input wire [4:0] touch_voice_count,
     input wire pedal_clear,take_recording,
-    output reg [1:0] effect_mode,
-    output reg [3:0] effect_wet,
+    output wire [1:0] effect_mode,
+    output wire [3:0] effect_wet,
+    output reg [2:0] fx_mask,
+    output reg [7:0] fx_settings,
+    output reg [11:0] fx_mix,
+    input wire [2:0] fx_applied_mask,
+    input wire [7:0] fx_applied_settings,
+    input wire [11:0] fx_applied_mix,
     output reg [4:0] master_volume,
     output reg [2:0] analog_mode,
     output reg pressure_write,pressure_value,
@@ -85,6 +93,13 @@ module hc05_keymap #(
     input wire [23:0] take_elapsed,take_duration,
     input wire [10:0] take_count
 );
+    // Assessment candidate: only the serial sixteen-key interface exists.
+    assign touch_mode16=1'b1;
+    assign echo_tap=fx_settings[3:2];
+    assign effect_mode=fx_mask[1] ? 2'd1 : fx_mask[0] ? 2'd2 : 2'd0;
+    assign effect_wet=fx_mask[1] ? fx_mix[7:4] : fx_mask[0] ? fx_mix[3:0] :
+        fx_mask[2] ? fx_mix[11:8] : fx_mix[3:0];
+
     localparam [55:0] DEFAULT_MAP={8'd66,8'd65,8'd64,8'd63,8'd62,8'd61,8'd60};
     localparam COLLECT=0, EXECUTE=1, RESPOND=2, DECIMAL=3, SONG_WAIT=4, DECIMAL_READ=5, ADSR_WAIT=6, DECODE_START=7, DECODE_WAIT=8;
     // BEGIN GENERATED HC05 COMMAND IDS
@@ -184,11 +199,12 @@ module hc05_keymap #(
     wire select_live=!select_stream && !select_log && (live_owned || (state!=RESPOND && live_valid));
     wire [7:0] requested_note={4'd0,line[11:8]}*8'd10+{4'd0,line[3:0]};
     wire download_busy;
-    wire edit_allowed=keys_ready && !song_busy && !download_busy && !notes_busy && !recording && !rec_busy;
+    wire controls_idle=!song_busy && !download_busy && !notes_busy && !recording && !rec_busy;
+    wire edit_allowed=keys_ready && controls_idle;
     reg song_request, rec_start, rec_stop;
     reg audition_pending;
     reg [2:0] song_operation;
-    reg [15:0] song_arg0, song_arg1, song_arg2;
+    reg [15:0] song_arg0, song_arg1, song_arg2, song_arg3;
     wire song_done;
     wire [2:0] song_error;
     wire [7:0] download_note;
@@ -241,7 +257,7 @@ module hc05_keymap #(
     downloadable_song #(.CLK_HZ(CLK_HZ),.ENABLE_LOOKAHEAD(ENABLE_LOOKAHEAD),
         .LOOKAHEAD_MS(LOOKAHEAD_MS)) u_download (
         .clk(clk),.resetn(resetn),.request(song_request),.operation(song_operation),
-        .arg0(song_arg0),.arg1(song_arg1),.arg2(song_arg2),.edit_allowed(edit_allowed),
+        .arg0(song_arg0),.arg1(song_arg1),.arg2(song_arg2),.arg3(song_arg3),.score_min(bend_min),.score_max(bend_max),.score_ratio(score_ratio),.edit_allowed(edit_allowed),
         .note_map(note_map),.toggle_play(toggle_play),.restart(restart),
         .done(song_done),.error(song_error),.valid(downloaded_valid),.playing(downloaded_playing),
         .gate(downloaded_gate),.current_note(download_note),.guide_keys(guide_keys),
@@ -313,10 +329,52 @@ module hc05_keymap #(
             state<=DECIMAL_READ;
         end
     endtask
+    // Reply data has one writer and a small parallel source mux. The
+    // command FSM still owns validation, commits, reply format and timing.
+    // Speculative data captured for rejected/set commands is never consumed:
+    // every dynamic reply snapshots its complete payload on its EXECUTE edge.
+    always @(posedge clk)begin
+        if(!resetn)reply<=0;
+        else if(state==RESPOND)begin
+            if(reply_char_ready && !select_log && !select_stream && !select_live &&
+               tx_ready && reply_template==8'hff)reply<={reply[107:0],4'd0};
+        end else if(state==EXECUTE)begin
+            case(decoded_command)
+                CMD_EFFECT2_SET: reply<={2'd0,echo_tap,108'd0};
+                CMD_VIB_SET: reply<={vibrato_inc,2'd0,vibrato_depth,vibrato_delay,52'd0};
+                CMD_PITCH_SET: reply<={bend_min,bend_max,bend_slew,tuning_ratio,48'd0};
+                CMD_CTRL_QUERY, CMD_CTRL2_QUERY: reply<={{3'd0,touch_mode16},{2'd0,effect_mode},effect_wet,
+                                (decoded_command==CMD_CTRL_QUERY ? {3'd0,touch_hold!=0} : {2'd0,touch_hold}),
+                                {1'd0,analog_mode},(master_volume>=10 ? 4'd1 : 4'd0),
+                                (master_volume>=10 ? master_volume[3:0]-4'd10 : master_volume[3:0]),{3'd0,pressure_mode},
+                                (poly_limit>=10 ? 4'd1 : 4'd0),(poly_limit>=10 ? poly_limit[3:0]-4'd10 : poly_limit[3:0]),
+                                (touch_voice_count>=10 ? 4'd1 : 4'd0),(touch_voice_count>=10 ? touch_voice_count[3:0]-4'd10 : touch_voice_count[3:0]),64'd0};
+                CMD_SERIAL_QUERY: reply<={{3'd0,serial_active_high},108'd0};
+                CMD_CAL_QUERY: reply<={2'd0,analog_min,2'd0,analog_max,88'd0};
+                CMD_ADC_QUERY: reply<={2'd0,adc_sample,3'd0,adc_timeout,96'd0};
+                CMD_EFFECT_SET: reply<={1'b0,fx_mask,fx_settings,fx_mix,1'b0,fx_applied_mask,fx_applied_settings,fx_applied_mix,64'd0};
+                CMD_HOLD_SET: reply<={2'd0,touch_hold,108'd0};
+                CMD_POLY_SET: reply<={(poly_limit>=10 ? 4'd1 : 4'd0),
+                                    (poly_limit>=10 ? poly_limit[3:0]-4'd10 : poly_limit[3:0]),104'd0};
+                CMD_TAKE_QUERY: reply<={take_flags,take_error,take_elapsed,1'b0,take_count,take_duration,40'd0};
+                CMD_AREC_QUERY: if(ENABLE_FLASH_AUDIO) reply<={{3'd0,audio_rec_busy},{3'd0,audio_rec_ready},{3'd0,audio_rec_overflow},
+                                    {3'd0,audio_rec_valid},audio_rec_status,audio_rec_error,audio_rec_generation,
+                                    3'd0,audio_rec_stored_samples,48'd0};
+                    else reply<={{3'd0,audio_rec_busy},{3'd0,audio_rec_ready},{3'd0,audio_rec_overflow},100'd0};
+                CMD_VIS_QUERY: reply<={{2'd0,visual_requested},{2'd0,visual_snapshot[103:102]},
+                                {2'd0,reference_ratio},{2'd0,reference_phase},{2'd0,visual_snapshot[101:100]},
+                                {2'd0,visual_snapshot[99:98]},visual_snapshot[107:104],84'd0};
+                CMD_VIZ_QUERY: reply<=visual_snapshot;
+                CMD_MAP_QUERY: reply<={(note_map[7:0]<70 ? 4'd6 : 4'd7),(note_map[7:0]<70 ? note_map[3:0]-4'd12 : note_map[3:0]-4'd6),(note_map[15:8]<70 ? 4'd6 : 4'd7),(note_map[15:8]<70 ? note_map[11:8]-4'd12 : note_map[11:8]-4'd6),(note_map[23:16]<70 ? 4'd6 : 4'd7),(note_map[23:16]<70 ? note_map[19:16]-4'd12 : note_map[19:16]-4'd6),(note_map[31:24]<70 ? 4'd6 : 4'd7),(note_map[31:24]<70 ? note_map[27:24]-4'd12 : note_map[27:24]-4'd6),(note_map[39:32]<70 ? 4'd6 : 4'd7),(note_map[39:32]<70 ? note_map[35:32]-4'd12 : note_map[35:32]-4'd6),(note_map[47:40]<70 ? 4'd6 : 4'd7),(note_map[47:40]<70 ? note_map[43:40]-4'd12 : note_map[43:40]-4'd6),(note_map[55:48]<70 ? 4'd6 : 4'd7),(note_map[55:48]<70 ? note_map[51:48]-4'd12 : note_map[51:48]-4'd6),56'd0};
+                CMD_MAP_SET: reply<={line[27:24],line[11:8],line[3:0],100'd0};
+                default: begin end
+            endcase
+        end
+    end
     always @(posedge clk) begin
         if(!resetn) begin
             note_map<=DEFAULT_MAP; state<=COLLECT; line_error<=NO_ERROR;
-            line<=0; line_length<=0; reply<=0; reply_remaining<=0;reply_format<=0;reply_char_ready<=0;log_owned<=0;
+            line<=0; line_length<=0; reply_remaining<=0;reply_format<=0;reply_char_ready<=0;log_owned<=0;
             live_owned<=0; klive_enable<=0;
             song_request<=0; rec_start<=0; rec_stop<=0;
             downloaded_audition<=0; audition_pending<=0;
@@ -326,14 +384,14 @@ module hc05_keymap #(
             sensor_test32<=0;
             audio_rec_prepare<=0;audio_rec_start<=0;audio_rec_stop<=0;audio_rec_abort<=0;audio_rec_send<=0;audio_rec_ack<=0;
             audio_rec_ack_sequence<=0;audio_rec_session<=0;take_command<=0;stream_owned<=0;
-            touch_mode16<=DEFAULT_TOUCH_MODE16!=0;serial_active_high<=0;touch_hold<=0;poly_limit<=16;panic<=0;effect_mode<=0;effect_wet<=4;
+            serial_active_high<=0;touch_hold<=0;poly_limit<=16;panic<=0;fx_mask<=0;fx_settings<=8'h52;fx_mix<=12'h444;
             master_volume<=16;analog_mode<=0;analog_min<=0;analog_max<=1023;pressure_write<=0;pressure_value<=0;control_parse<=0;
             xy_write<=0;xy_ratio<=2;xy_phase<=0;
             visual_write<=0;remote_mode<=0;
             bend_parse<=0;bend_write<=0;bend_reset<=0;bend_index<=0;bend_ratio<=16384;
             performance_parse<=0;bend_min<=8192;bend_max<=32768;bend_slew<=4096;tuning_ratio<=16384;
             vibrato_inc<=527766;vibrato_depth<=256;vibrato_delay<=0;vibrato_update<=0;
-            echo_tap<=0;
+            
             adsr_parse<=0;adsr_target<=0;adsr_request<=0;adsr_restore<=0;
             adsr_a<=0;adsr_d<=0;adsr_s<=0;adsr_r<=0;value2<=0;
             field_index<=0; field_count<=0; accumulator<=0; value0<=0; value1<=0;
@@ -360,7 +418,7 @@ module hc05_keymap #(
             if(state==RESPOND) begin
                 if(!reply_char_ready)reply_char_ready<=1;
                 else if(!select_log && !select_stream && !select_live && tx_ready) begin
-                    if(reply_template==8'hff)reply<={reply[107:0],4'd0};
+
                     reply_char_ready<=0;
                     reply_remaining<=reply_remaining-1'b1;
                     if(reply_remaining==1)state<=COLLECT;
@@ -392,7 +450,7 @@ module hc05_keymap #(
                         else if(decoded_command==CMD_PING) respond(5'd9,6'd6);
                         else if(decoded_command==CMD_EFFECT2_SET)begin
                             if(line_length==9 && line[7:0]=="?")begin
-                                reply<={2'd0,echo_tap,108'd0};respond(5'd29,6'd11);
+                                respond(5'd29,6'd11);
                             end else begin
                                 performance_parse<=3;parse_numbers(8,1);
                                 value0<={14'd0,echo_tap};
@@ -400,7 +458,7 @@ module hc05_keymap #(
                         end
                         else if(decoded_command==CMD_VIB_SET)begin
                             if(line_length==5 && line[7:0]=="?")begin
-                                reply<={vibrato_inc,2'd0,vibrato_depth,vibrato_delay,52'd0};respond(5'd28,6'd24);
+                                respond(5'd28,6'd24);
                             end else begin
                                 performance_parse<=2;parse_numbers(4,4);
                                 value0<=vibrato_inc[31:16];value1<=vibrato_inc[15:0];value2<={6'd0,vibrato_depth};
@@ -408,45 +466,42 @@ module hc05_keymap #(
                         end
                         else if(decoded_command==CMD_PITCH_SET) begin
                             if(line_length==7 && line[7:0]=="?")begin
-                                reply<={bend_min,bend_max,bend_slew,tuning_ratio,48'd0};respond(5'd27,6'd27);
+                                respond(5'd27,6'd27);
                             end else begin
                                 performance_parse<=1;parse_numbers(6,4);
                                 value0<=bend_min;value1<=bend_max;value2<=bend_slew;
                             end
                         end
                         else if(decoded_command==CMD_CTRL_QUERY || decoded_command==CMD_CTRL2_QUERY)begin
-                            reply<={{3'd0,touch_mode16},{2'd0,effect_mode},effect_wet,
-                                (decoded_command==CMD_CTRL_QUERY ? {3'd0,touch_hold!=0} : {2'd0,touch_hold}),
-                                {1'd0,analog_mode},(master_volume>=10 ? 4'd1 : 4'd0),
-                                (master_volume>=10 ? master_volume[3:0]-4'd10 : master_volume[3:0]),{3'd0,pressure_mode},
-                                (poly_limit>=10 ? 4'd1 : 4'd0),(poly_limit>=10 ? poly_limit[3:0]-4'd10 : poly_limit[3:0]),
-                                (touch_voice_count>=10 ? 4'd1 : 4'd0),(touch_voice_count>=10 ? touch_voice_count[3:0]-4'd10 : touch_voice_count[3:0]),64'd0};
+                            
                             respond(decoded_command==CMD_CTRL_QUERY ? 5'd10 : 5'd26,decoded_command==CMD_CTRL_QUERY ? 6'd21 : 6'd28);
                         end else if(decoded_command==CMD_SERIAL_QUERY) begin
-                            reply<={{3'd0,serial_active_high},108'd0};respond(5'd11,6'd10);
+                            respond(5'd11,6'd10);
                         end else if(decoded_command==CMD_SERIAL_SET) begin
                             control_parse<=8;parse_numbers(7,1);
                         end else if(decoded_command==CMD_CAL_QUERY) begin
-                            reply<={2'd0,analog_min,2'd0,analog_max,88'd0};respond(5'd12,6'd13);
+                            respond(5'd12,6'd13);
                         end else if(decoded_command==CMD_CAL_SET) begin
                             control_parse<=7;parse_numbers(4,2);
                         end else if(decoded_command==CMD_ADC_QUERY) begin
-                            reply<={2'd0,adc_sample,3'd0,adc_timeout,96'd0};respond(5'd13,6'd11);
+                            respond(5'd13,6'd11);
                         end else if(decoded_command==CMD_PANIC) begin
                             panic<=1;touch_hold<=0;downloaded_audition<=0;audition_pending<=0;
                             builtin_stop<=1;song_request<=1;song_operation<=5;state<=SONG_WAIT;
                         end else if(decoded_command==CMD_TOUCH_SET) begin
                             control_parse<=1;parse_numbers(6,1);
                         end else if(decoded_command==CMD_EFFECT_SET) begin
-                            control_parse<=2;parse_numbers(7,2);
+                            if(line_length==8 && line[7:0]=="?")begin
+                                
+                                respond(5'd30,6'd27);
+                            end else begin control_parse<=2;parse_numbers(7,2);end
                         end else if(decoded_command==CMD_HOLD_SET) begin
                             if(line_length==6 && line[7:0]=="?")begin
-                                reply<={2'd0,touch_hold,108'd0};respond(5'd24,6'd8);
+                                respond(5'd24,6'd8);
                             end else begin control_parse<=3;parse_numbers(5,1);end
                         end else if(decoded_command==CMD_POLY_SET)begin
                             if(line_length==6 && line[7:0]=="?")begin
-                                reply<={(poly_limit>=10 ? 4'd1 : 4'd0),
-                                    (poly_limit>=10 ? poly_limit[3:0]-4'd10 : poly_limit[3:0]),104'd0};respond(5'd25,6'd9);
+                                respond(5'd25,6'd9);
                             end else begin control_parse<=12;parse_numbers(5,1);end
                         end else if(decoded_command==CMD_VOLUME_SET) begin
                             control_parse<=4;parse_numbers(7,1);
@@ -456,7 +511,7 @@ module hc05_keymap #(
                             control_parse<=6;parse_numbers(9,1);
                         end
                         else if(decoded_command==CMD_TAKE_QUERY && ENABLE_EVENT_TAKE)begin
-                            reply<={take_flags,take_error,take_elapsed,1'b0,take_count,take_duration,40'd0};respond(5'd14,6'd29);
+                            respond(5'd14,6'd29);
                         end else if(ENABLE_EVENT_TAKE &&
                             ((line_length==8 && (decoded_command==CMD_TAKE_REC || decoded_command==CMD_TAKE_DEL || decoded_command==CMD_TAKE_YES)) ||
                              (line_length==9 && (decoded_command==CMD_TAKE_STOP || decoded_command==CMD_TAKE_PLAY || decoded_command==CMD_TAKE_SAVE)) ||
@@ -482,11 +537,9 @@ module hc05_keymap #(
                             audio_rec_abort<=1;if(ENABLE_FLASH_AUDIO && audio_stream_busy)state<=COLLECT;else result(0);
                         end else if(decoded_command==CMD_AREC_QUERY)begin
                             if(ENABLE_FLASH_AUDIO)begin
-                                reply<={{3'd0,audio_rec_busy},{3'd0,audio_rec_ready},{3'd0,audio_rec_overflow},
-                                    {3'd0,audio_rec_valid},audio_rec_status,audio_rec_error,audio_rec_generation,
-                                    3'd0,audio_rec_stored_samples,48'd0};respond(5'd15,6'd30);
+                                respond(5'd15,6'd30);
                             end else begin
-                                reply<={{3'd0,audio_rec_busy},{3'd0,audio_rec_ready},{3'd0,audio_rec_overflow},100'd0};respond(5'd16,6'd12);
+                                respond(5'd16,6'd12);
                             end
                         end
                         else if(decoded_command==CMD_AREC_PREP)begin
@@ -502,12 +555,10 @@ module hc05_keymap #(
                                 remote_mode<=line[1:0];visual_write<=1;result(0);
                             end else result(2);
                         end else if(decoded_command==CMD_VIS_QUERY) begin
-                            reply<={{2'd0,visual_requested},{2'd0,visual_snapshot[103:102]},
-                                {2'd0,reference_ratio},{2'd0,reference_phase},{2'd0,visual_snapshot[101:100]},
-                                {2'd0,visual_snapshot[99:98]},visual_snapshot[107:104],84'd0};respond(5'd17,6'd19);
+                            respond(5'd17,6'd19);
                         end else if(decoded_command==CMD_VIZ_QUERY) begin
                             // Exactly 32 UART bytes, captured atomically into the existing reply register.
-                            reply<=visual_snapshot;respond(5'd18,6'd32);
+                            respond(5'd18,6'd32);
                         end
                         else if(decoded_command==CMD_XY_SET && line[15:8]==",") begin
                             if(line[23:16]>="0" && line[23:16]<="3" && line[7:0]>="0" && line[7:0]<="3") begin
@@ -543,7 +594,7 @@ module hc05_keymap #(
                             else begin gesture_bank<=line[0]; result(0); end
                         end
                         else if(decoded_command==CMD_MAP_QUERY) begin
-                            reply<={(note_map[7:0]<70 ? 4'd6 : 4'd7),(note_map[7:0]<70 ? note_map[3:0]-4'd12 : note_map[3:0]-4'd6),(note_map[15:8]<70 ? 4'd6 : 4'd7),(note_map[15:8]<70 ? note_map[11:8]-4'd12 : note_map[11:8]-4'd6),(note_map[23:16]<70 ? 4'd6 : 4'd7),(note_map[23:16]<70 ? note_map[19:16]-4'd12 : note_map[19:16]-4'd6),(note_map[31:24]<70 ? 4'd6 : 4'd7),(note_map[31:24]<70 ? note_map[27:24]-4'd12 : note_map[27:24]-4'd6),(note_map[39:32]<70 ? 4'd6 : 4'd7),(note_map[39:32]<70 ? note_map[35:32]-4'd12 : note_map[35:32]-4'd6),(note_map[47:40]<70 ? 4'd6 : 4'd7),(note_map[47:40]<70 ? note_map[43:40]-4'd12 : note_map[43:40]-4'd6),(note_map[55:48]<70 ? 4'd6 : 4'd7),(note_map[55:48]<70 ? note_map[51:48]-4'd12 : note_map[51:48]-4'd6),56'd0};respond(5'd19,6'd26);
+                            respond(5'd19,6'd26);
                         end else if(decoded_command==CMD_MAP_RESET) begin
                             if(!edit_allowed) result(1);
                             else begin note_map<=DEFAULT_MAP; respond(5'd20,6'd14); end
@@ -554,10 +605,12 @@ module hc05_keymap #(
                             else if(!edit_allowed) result(1);
                             else begin
                                 note_map[(line[26:24]-3'd1)*8 +: 8]<=requested_note;
-                                reply<={line[27:24],line[11:8],line[3:0],100'd0};respond(5'd23,6'd13);
+                                respond(5'd23,6'd13);
                             end
                         end else if(decoded_command==CMD_SONG_BEGIN) begin
-                            song_operation<=1; parse_numbers(11,1);
+                            if(line_length==12 && line[7:0]=="?")begin
+                                respond(5'd31,6'd12);
+                            end else begin song_operation<=1;parse_numbers(11,1);end
                         end else if(decoded_command==CMD_SONG_NOTE) begin
                             song_operation<=2; parse_numbers(10,3);
                         end else if(decoded_command==CMD_SONG_CHORD) begin
@@ -612,15 +665,25 @@ module hc05_keymap #(
                             end else if(performance_parse==3)begin
                                 if(pitch0>3)result(2);
                                 else if(rec_busy || recording || take_recording)result(1);
-                                else begin echo_tap<=pitch0[1:0];result(0);end
+                                else begin fx_settings[3:2]<=pitch0[1:0];result(0);end
                             end else if(!have_digit || field_count==0 || field_index!=field_count-1) result(7);
                             else if(control_parse!=0) begin
                                 case(control_parse)
-                                    1:if(accumulator!=8 && accumulator!=16)result(2);
+                                    1:if(accumulator!=16)result(2);
                                       else if(!edit_allowed || touch_hold)result(1);
-                                      else begin touch_mode16<=accumulator==16;result(0);end
-                                    2:if(value0>2 || accumulator>8)result(2);
-                                      else begin effect_mode<=value0[1:0];effect_wet<=accumulator[3:0];result(0);end
+                                      else result(0);
+                                    2:if(field_count==4)begin
+                                          if(value0!=3 || value1>7 || value2>255 || accumulator>4095 ||
+                                             accumulator[3:0]>8 || accumulator[7:4]>8 || accumulator[11:8]>8)result(2);
+                                          else begin fx_mask<=value1[2:0];fx_settings<=value2[7:0];fx_mix<=accumulator[11:0];result(0);end
+                                      end else if(value0>2 || accumulator>8)result(2);
+                                      else begin
+                                          fx_mask<=value0==1 ? 3'd2 : value0==2 ? 3'd1 : 3'd0;
+                                          fx_mix<={accumulator[3:0],accumulator[3:0],accumulator[3:0]};
+                                          if(value0==1)fx_settings[5:4]<=1;
+                                          if(value0==2)fx_settings[1:0]<=3;
+                                          result(0);
+                                      end
                                     3:if(accumulator>2)result(2);
                                       else if(rec_busy || recording || (accumulator==2 && take_recording))result(1);
                                       else begin touch_hold<=accumulator[1:0];result(0);end
@@ -636,7 +699,9 @@ module hc05_keymap #(
                                       else if(rec_busy || recording)result(1);
                                       else begin analog_min<=value0[9:0];analog_max<=accumulator[9:0];result(0);end
                                     8:if(accumulator>1)result(2);
-                                      else if(!edit_allowed || touch_hold)result(1);
+                                      // A wrong sensor polarity can prevent ready forever.
+                                      // Allow recovery while idle; keep every activity gate.
+                                      else if(!controls_idle || touch_hold)result(1);
                                       else begin serial_active_high<=accumulator[0];result(0);end
                                     9:if(audio_rec_busy || (ENABLE_FLASH_AUDIO && ENABLE_EVENT_TAKE && take_flags[5]))result(1);
                                       else if(!audio_rec_ready)result(3);
@@ -663,13 +728,16 @@ module hc05_keymap #(
                                 end
                             end else begin
                                 song_arg0<=(field_count==1) ? accumulator : value0;
-                                song_arg1<=value1; song_arg2<=accumulator;
+                                song_arg1<=value1; song_arg2<=field_count==4 ? value2 : accumulator;song_arg3<=field_count==4 ? accumulator : 16'd0;
                                 song_request<=1; state<=SONG_WAIT;
                             end
                         end else if(ch==",") begin
                             if(!have_digit && performance_parse==0) result(7);
-                            else if(field_index>=field_count-1) result(7);
+                            else if(field_index>=field_count-1 && !(song_operation==6 && field_index==2 &&
+                                control_parse==0 && performance_parse==0 && !bend_parse && !adsr_parse)) result(7);
                             else begin
+                                if(song_operation==6 && field_index==2 && control_parse==0 && performance_parse==0 && !bend_parse && !adsr_parse)field_count<=4;
+                                if(control_parse==2 && field_index==0 && accumulator==3)field_count<=4;
                                 if(have_digit)begin
                                     if(field_index==0) value0<=accumulator; else if(field_index==1) value1<=accumulator; else value2<=accumulator;
                                 end

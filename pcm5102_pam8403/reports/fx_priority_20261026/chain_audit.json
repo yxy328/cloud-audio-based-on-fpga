@@ -1,0 +1,106 @@
+{
+  "label": "chain",
+  "status": "validated",
+  "strategy": {
+    "place_option": 2,
+    "route_option": 0,
+    "route_maxfan": 23
+  },
+  "metrics": {
+    "Logic": {
+      "used": 22624.0,
+      "capacity": 23040.0
+    },
+    "CLS": {
+      "used": 11470.0,
+      "capacity": 11520.0
+    },
+    "Register": {
+      "used": 10726.0,
+      "capacity": 23280.0
+    },
+    "BSRAM": {
+      "used": 53.0,
+      "capacity": 56.0
+    },
+    "DSP": {
+      "used": 26.5,
+      "capacity": 28.0
+    }
+  },
+  "delta_vs_baseline": {
+    "Logic": 1110.0,
+    "CLS": 271.0,
+    "Register": 310.0,
+    "BSRAM": 6.0,
+    "DSP": 0.0
+  },
+  "unrouted_nets": 0,
+  "bitstream_present": true,
+  "bitstream_sha256": "AE13F7D9A1EFC959811522CF20F530575154E00926C3BA072C3CD8ACF6975F6C",
+  "timing": {
+    "setup_violated_endpoints": 0,
+    "setup_worst_path": {
+      "slack_ns": 0.018,
+      "from": "u_main/u_keymap/n58_s0/DOUT[1]",
+      "to": "u_main/u_keymap/reply_97_s1/D"
+    },
+    "setup_reported_violating_paths": [],
+    "hold_violated_endpoints": 0,
+    "hold_worst_path": {
+      "slack_ns": 0.144,
+      "from": "u_main/u_effects/delay_write_12_s0/Q",
+      "to": "u_main/u_effects/delay_memory_delay_memory_0_3_s/DI[0]"
+    },
+    "hold_reported_violating_paths": [],
+    "setup_raw_worst_path": {
+      "slack_ns": 0.018,
+      "from_cell": "u_main/u_keymap/n58_s0",
+      "to_cell": "u_main/u_keymap/reply_97_s1"
+    },
+    "setup_raw_violating_paths": [],
+    "hold_raw_worst_path": {
+      "slack_ns": 0.144,
+      "from_cell": "u_main/u_effects/delay_write_12_s0",
+      "to_cell": "u_main/u_effects/delay_memory_delay_memory_0_3_s"
+    },
+    "hold_raw_violating_paths": []
+  },
+  "changed_inputs_vs_baseline": [
+    "pcm5102_pam8403/PCM5102_UNIFIED.gprj",
+    "pcm5102_pam8403/src/audio_fx_chain.v",
+    "pcm5102_pam8403/src/hc05_keymap.v",
+    "pcm5102_pam8403/src/hc05_reply.hex",
+    "pcm5102_pam8403/src/top.v"
+  ],
+  "changed_input_hashes": {
+    "pcm5102_pam8403/PCM5102_UNIFIED.gprj": {
+      "baseline": "906F7A5C079EAD8D85DF60F9B289783F21F244F21D761D7327E50F2BA789C5FA",
+      "candidate": "9E3927602474C4809AA3BA07BA0AD114CB3EDE75DFB876FC914C2F84E8FEC301"
+    },
+    "pcm5102_pam8403/src/audio_fx_chain.v": {
+      "baseline": null,
+      "candidate": "36528F69FA8971741245249C2CF3F74D140C9790881931A813D926164FAEBC40"
+    },
+    "pcm5102_pam8403/src/hc05_keymap.v": {
+      "baseline": "3FFC4A22DAD7E7C6E3BD3FE573B7B25E2B010A7DDEB9ED619C66169C0A4DB7C2",
+      "candidate": "3957358A568F1BDB42246F7A8AB14256FCC79F87094973589B63200E85F8EB27"
+    },
+    "pcm5102_pam8403/src/hc05_reply.hex": {
+      "baseline": "E5068FE0273F7DF6DDE071567EC3372C38F3E37574016E78D8E8480F05B1A502",
+      "candidate": "DA668387FE28FC3EF76FD882682679609B750D84AFB246D1344DC684D7B556D0"
+    },
+    "pcm5102_pam8403/src/top.v": {
+      "baseline": "D7047494F44A9A83D3A6036C22AB1FC927C1397FE26A037D651D70012B9D9051",
+      "candidate": "7C97FC16BBBB85E978113AED055AD07F45ABA2A42C4DCD525D09D2F68B2A2922"
+    }
+  },
+  "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_priority_20261026\\chain\\sources.json",
+  "source_manifest_sha256": "01BDCE8FEAECFD104992E093799BC5B803AAA80C7AFAF90BBA962AE4C3BF0CE4",
+  "downloadable_song_sha256": "180F62359C71B062ECF6E77FE096F211267D3756C87FF9DAF083F81F96B4C414",
+  "snapshot_corrupt_inputs": [],
+  "errors": [],
+  "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_priority_20261026\\chain\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+  "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_priority_20261026\\chain\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+  "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_priority_20261026\\chain\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html"
+}

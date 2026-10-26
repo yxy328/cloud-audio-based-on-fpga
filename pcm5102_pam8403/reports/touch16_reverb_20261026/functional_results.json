@@ -1,0 +1,62 @@
+{
+  "passing_tests": [
+    {
+      "label": "fixed16_clean",
+      "matching_final_pnr_label": "fixed16_clean_sdc",
+      "all_rtl_rom_hashes_identical_to_final_pnr": true,
+      "test": "tb_top_fixed16_controls_ready",
+      "log": "fixed16_ready_functional.log",
+      "log_sha256": "350BC27840FDA99ED073CEC723AC1FCEA6AE9E0F5D10A154CDC939CEBBFDBBB3",
+      "test_source_sha256": "0019944B4CFA6A86DFE493A891C949CCD19C07DA284E4C340B331337C05B08D2",
+      "pass_lines": [
+        "PASS fixed16 controls: serial startup, real UART and TTP pins, 16 note gates, GPIO isolation, TOUCH8 rejected held and idle, hold/panic, K16/pressure, sensor reset, BUSY until ready and successful retry, high-active polarity"
+      ]
+    },
+    {
+      "label": "fx_fixed16",
+      "matching_final_pnr_label": "fx_fixed16_sdc",
+      "all_rtl_rom_hashes_identical_to_final_pnr": true,
+      "test": "tb_fx_fixed16_frame_clean",
+      "log": "fx_fixed16_clean_functional.log",
+      "log_sha256": "936D987738BCEDE45E9F88569D9D269420DC78D02994623E7F08A0F5C2BBA6BF",
+      "test_source_sha256": "32B23EA74432F45A2546828938A86AE16FC2A11CD3069A26AD3D0BB6BC63663D",
+      "pass_lines": [
+        "FRAME_BUDGET frames=1452 touch=1012 pitch=43 fx=37 sensor=535 sum=1092 union=1012 overlap=43 fx_idle=987 union_idle=12",
+        "FRAME_DEADLINES touch_latency=1012 pitch_latency=43 fx_latency=37 stress_frames=339 stress_onsets=4 divide_cycles=256 overflow_frames=0 clipped_cycles=0",
+        "PASS frame budget: real UART/TTP229, 16 voices, four slewing bends, playing score, isolated C+D+R prototype, independent deadlines and overlap"
+      ]
+    }
+  ],
+  "partial_failed_integration": {
+    "failed_test": "tb_top_fixed16",
+    "failed_log": "fixed16_clean_functional.log",
+    "failed_log_sha256": "2FB454393101DC9DBE8CCD629F0F521B85AA00D5CAA621EE2F8F64FF86EA1580",
+    "whole_test_passed": false,
+    "failure": "Sensor model switched its clock polarity after UART acknowledgement while fixed16 reader was already scanning",
+    "preceding_sequential_checks_completed": [
+      "startup16",
+      "GPIO ignored",
+      "16 active voices",
+      "TOUCH8 ERR,RANGE held",
+      "8192-sample I2S spectrum all16 pitches",
+      "HOLD",
+      "PANIC",
+      "K16",
+      "PRESSURE",
+      "TOUCH8 ERR,RANGE idle"
+    ],
+    "evidence_for_preceding_checks": "Linear initial sequence reached SERIAL1 near 197.998 ms without an earlier fatal; no final whole-test PASS claim",
+    "followup": "tb_top_fixed16_controls validates controls without repeating spectrum, resets reconfigured sensor through UART and releases it in normal GAP",
+    "does_not_validate": "Arbitrary live polarity flips of a connected sensor in the middle of a packet",
+    "intermediate_followup": {
+      "test": "tb_top_fixed16_controls",
+      "passed": false,
+      "log": "fixed16_controls_functional.log",
+      "log_sha256": "7237F3FA5520CE09354394620F40F5B5D6328D1A464A623F8695E7931025FB41",
+      "failure": "Expected OK for TOUCH16 while reader was still calibrating; got legitimate ERR,BUSY",
+      "final_followup": "tb_top_fixed16_controls_ready explicitly checks BUSY, waits for ready, then checks OK and actual high-active note gates"
+    },
+    "full_run_raw_pcm_retained": false,
+    "full_run_raw_pcm_note": "Generic runner PCM filename was reused by focused followup; original test source, compiled VVP, log and sequential assertion evidence remain. Future fixed16 tests use distinct PCM paths."
+  }
+}

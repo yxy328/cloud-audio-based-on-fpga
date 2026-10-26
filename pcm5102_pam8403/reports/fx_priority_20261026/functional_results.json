@@ -1,0 +1,91 @@
+{
+  "functional/full.log": {
+    "SHA256": "A07A4B0381677C9B7FB0B8FA192E087D59A3DD9D71A68A5BB912FBED38A18745",
+    "passes": [
+      "PASS FX chain independent sample model frames=1555536 max_latency=49"
+    ]
+  },
+  "protocol_take.log": {
+    "SHA256": "7BDADEE57B3682C8DDA838F3C706DFAABC6E39A3ECC2DE66DA1D800B35E10787",
+    "passes": [
+      "PASS FX protocol: 36 replies, all8 masks, atomic bounds, legacy0/1/2 and EFFECT2, configured/applied state",
+      "PASS tb_take_atomic: 5 checks; complete capture and no mixed words at any audio frame",
+      "PASS tb_performance_take: 25 checks, mock storage only",
+      "PASS tb_take_nor_store: 114 checks; behavioral NOR only"
+    ]
+  },
+  "take528_final.log": {
+    "SHA256": "7D73278F039DD1A0066F3F9482D72ACF9B237BEB30D77BF115573AE71292C711",
+    "passes": [
+      "PASS full528 FX atomic snapshot: 34 checks; complete capture and no mixed words at any audio frame"
+    ]
+  },
+  "top_integration.log": {
+    "SHA256": "B67F746E9F48917234DF099A221830F4D5923441E1275E9FE48B968675F1F525",
+    "passes": [
+      "PASS frame budget: real UART/TTP229, 16 voices, four slewing bends, playing score, C+D+R and pressure/ADS1115, independent deadlines and overlap",
+      "PASS FX3 actual UART/TTP/dual ADC/TAKE playback: states A=196 B=99 events=102, stored wet overrides changed live slider"
+    ]
+  },
+  "production_regression.log": {
+    "SHA256": "DFEF16264A54478435A3972E06D2A17986AFE84B557A0612E2E6D9580B91A744",
+    "passes": [
+      "PASS FX protocol: 36 replies, all8 masks, atomic bounds, legacy0/1/2 and EFFECT2, configured/applied state",
+      "PASS extension UART: 47 bit-level replies, state/ADC query, busy/recording gates, strict bounds/atomic rejection, panic",
+      "PASS [live idle]: production parameters; S1/S2 produce no audio without touch, 136 stereo pairs",
+      "PASS [dual analog]: pressure gain/pitch and slider master volume are independent, both active together, slider fault falls back without muting pressure",
+      "PASS [ADS1115 bus]: config D283 written, 16->10-bit mapping, continuous updates, timeout hold and recovery; 4 conversions",
+      "PASS: pin-level I2C write ACK, repeated-start two-byte read, master ACK/NACK, absent-slave NACK and bus release",
+      "PASS: absent APDS retries initialization, records NACK and emits no false gesture"
+    ]
+  },
+  "reset.log": {
+    "SHA256": "13C23539D1CBD3816DE3E2AF8E90DED57EABB03DE3A6294554EC6EFE79F68E5F",
+    "passes": [
+      "PASS FX3 reset during active reverb, filled RAM history invalidation, 2500 silent outputs and sticky overrun/reset"
+    ]
+  },
+  "audio_examples.log": {
+    "SHA256": "8DA9C72129DAC80269809326AE1C7E30CA2E5E9D01B5F5D6886D39E6DEB05E74",
+    "passes": [
+      "PASS 3 identical-input RTL audio examples, no clipping: [('dry', 5594, 0), ('reverb', 5633, 0), ('chorus_delay_reverb', 5490, 0)]"
+    ]
+  },
+  "app_core_production.log": {
+    "SHA256": "59235051F0FB0F50480E3DF4F25AACB9E3221F748CE588E91A5C23F7ECE98583",
+    "passes": [
+      "PASS RTL RGB5 palette -> App: all 64 hardware codes match",
+      "PASS LedHue: 431 checks, 33 anchors/HSV, silence, saturation and independent App scales",
+      "PASS PerformanceParams: 8690 checks; unit conversions, quantized round trips, firmware bounds, query parsing, Chinese errors",
+      "PASS FX configuration/applied state, independent block updates and RTL replies: 5498 checks",
+      "PASS LedProtocol: 180 checks",
+      "PASS RTL UART -> Java LED state/spectrum: atomic live and reset snapshots",
+      "PASS top live C4 -> UART -> Java spectrum: frequency band and frame metadata",
+      "PASS LedProtocol: 203 checks",
+      "PASS TakeStatusTest: 17 checks",
+      "PASS RecordingSupport: 17 checks; event-only queries and rejection recovery",
+      "PASS PhoneTake: 10054 checks; local note timing/hold/velocity, standard MIDI, 25 independent saves/reopen/rename/delete, CRC, failure preservation, 10000-note bound and long silence",
+      "PASS SongLibrary: 4128 assertions",
+      "PASS ControlState: 33 checks",
+      "PASS TakeWorkflow: 285 checks",
+      "PASS SppAudio: 15 checks; removed PCM commands never reach Bluetooth",
+      "PASS ChromaticKeys: 77 checks; scan/pitch geometry and all sixteen MIDI notes",
+      "PASS device controls: 4695 assertions",
+      "PASS VoiceBend: 7229 assertions; all cents, protocol, pitch error, coalescing/fairness/offline/last edit/batch isolation",
+      "PASS AdsrProfile: 5032 assertions",
+      "PASS SongCodec: 31 assertions",
+      "PASS SppLink: 267 assertions",
+      "PASS AudioRecording: 1203 checks",
+      "PASS RTL UART -> Java receiver -> WAV: 1501 samples preserved bit for bit",
+      "PASS AudioRecording: 11 checks",
+      "PASS top I2S -> 2Mbps UART -> Java receiver -> WAV: 712 samples bit-exact",
+      "PASS AudioRecording: 11 checks"
+    ]
+  },
+  "app_rtl_fixtures.log": {
+    "SHA256": "BE9192330A6E494C3676E572022F4849FB8460B8F4DFEB4FE104B08FFBA3BC37",
+    "passes": [
+      "PASS FX configuration/applied state, independent block updates and RTL replies: 5498 checks"
+    ]
+  }
+}

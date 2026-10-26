@@ -1,0 +1,77 @@
+{
+  "app_version": "1.34-performance / Code35",
+  "app_stage": {
+    "directory": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\performance_experience_20261026\\app_code35",
+    "code": 35,
+    "version": "1.34-performance",
+    "apk": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\android_app\\dist\\FPGA-Music-Performance-Code35.apk",
+    "apk_sha256": "C53E3A02A09B0C2CEC5D02A90C44302AF89D084B574B62ED55761BB18D12B66A",
+    "source_inputs_unchanged": true,
+    "installed": false,
+    "staged_only": false,
+    "rolling_entry_updated": true
+  },
+  "hardware_label": "base",
+  "hardware_resources": {
+    "Logic": {
+      "used": 22624.0,
+      "capacity": 23040.0
+    },
+    "CLS": {
+      "used": 11470.0,
+      "capacity": 11520.0
+    },
+    "Register": {
+      "used": 10726.0,
+      "capacity": 23280.0
+    },
+    "BSRAM": {
+      "used": 53.0,
+      "capacity": 56.0
+    },
+    "DSP": {
+      "used": 26.5,
+      "capacity": 28.0
+    }
+  },
+  "artifacts": {
+    "FPGA-Music-Performance-Code35.apk": {
+      "path": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\android_app\\dist\\FPGA-Music-Performance-Code35.apk",
+      "sha256": "C53E3A02A09B0C2CEC5D02A90C44302AF89D084B574B62ED55761BB18D12B66A"
+    },
+    "PCM5102_UNIFIED_PERFORMANCE_20261026.fs": {
+      "path": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\performance_experience_20261026\\PCM5102_UNIFIED_PERFORMANCE_20261026.fs",
+      "sha256": "597A55DC689B871E4378C987182DFBCFF9809E2757F6BFED02AC31E0677599DC"
+    },
+    "rollback_Code34.apk": {
+      "path": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\android_app\\dist\\FPGA-Music-Stickers-Code34.apk",
+      "sha256": "5348841E44A157E8D9E8DDC2A9E08D693EEB3DDDF81865C7F01E1499696AE422"
+    },
+    "rollback_Code27.apk": {
+      "path": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\android_app\\dist\\FPGA-Music-FX3-Code27.apk",
+      "sha256": "4D95EEE795E9AFB854F76BC7E6F22D7718271E1CA39E10C2F639D53AA03B8085"
+    },
+    "rollback_FX3.fs": {
+      "path": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\fx_priority_20261026\\PCM5102_UNIFIED_FX3_20261026.fs",
+      "sha256": "5D6E8A30A8732F181913B644215D551F6E456CE1CC237E1672BE3DDD373A4ABF"
+    },
+    "previous_default.fs": {
+      "path": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\performance_experience_20261026\\previous_default.fs",
+      "sha256": "B65D960EA566A44FAA6BF69979F7C592CF935753BD43B1A5C992E99051E626AB"
+    }
+  },
+  "same_signing_certificate": {
+    "new": "CBECCBE6A3DF4025A0DC82103D6DFB98C80DE795887C8F31A8CEBEABD0362E26",
+    "Code34": "CBECCBE6A3DF4025A0DC82103D6DFB98C80DE795887C8F31A8CEBEABD0362E26",
+    "Code27": "CBECCBE6A3DF4025A0DC82103D6DFB98C80DE795887C8F31A8CEBEABD0362E26"
+  },
+  "rolling_hashes_match": true,
+  "installed": false,
+  "programmed": false,
+  "physical_flash_written": false,
+  "source_snapshot": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\performance_experience_20261026\\base\\sources.json",
+  "source_inputs_match_frozen_build": true,
+  "output_snapshot": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\performance_experience_20261026\\production_output_hashes.json",
+  "copied_output_file_count": 24,
+  "bitstream_source": "validated frozen build; copied together with synthesis/PnR reports, not a new build in production path"
+}

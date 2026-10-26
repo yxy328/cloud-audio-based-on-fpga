@@ -5,6 +5,7 @@ module tb_top_touch16;
     reg rx=1;reg [7:0] pads=0;reg [15:0] keys=0;
     wire tx,bck,lrck,din,tscl,sdo,model_sdo;
     reg model_high=0;
+    reg sensor_reset=0;
     assign sdo=model_high ? ~model_sdo : model_sdo;
     tri1 scl,sda;
     integer reply_count=0,bit_index,expected_count,frame=0,i,n,j;
@@ -16,7 +17,7 @@ module tb_top_touch16;
         .ADSR_ATTACK_SAMPLES(4),.ADSR_DECAY_SAMPLES(4),.TOUCH_ADSR_RELEASE_SAMPLES(16),.FSR_ENABLE(0)) dut(
         .clk(clk),.key_s1(1'b0),.key_s2(1'b0),.touch_out(pads),.touch_sdo(sdo),.touch_scl(tscl),
         .ir_beam(8'hff),.hc05_rx(rx),.hc05_tx(tx),.i2s_bck(bck),.i2s_lrck(lrck),.i2s_din(din),.scl(scl),.sda(sda));
-    ttp229_model chip(.rst_n(dut.resetn),.scl(model_high ? ~tscl : tscl),.connected(1'b1),.dv(1'b0),.stuck_low(1'b0),.keys(keys),.sdo(model_sdo));
+    ttp229_model chip(.rst_n(dut.resetn && !sensor_reset),.scl(model_high ? ~tscl : tscl),.connected(1'b1),.dv(1'b0),.stuck_low(1'b0),.keys(keys),.sdo(model_sdo));
     i2s_pcm_monitor #(.PCM_MIN(-32768),.PCM_MAX(32767)) monitor(.bck(bck),.lrck(lrck),.din(din));
     always @(negedge clk)if(dut.resetn && dut.frame_ce)begin
         frame=frame+1;if(dut.u_touch_synth.overrun || dut.sensor_overrun)$fatal(1,"Synthesis frame deadline");
@@ -71,16 +72,18 @@ module tb_top_touch16;
     endtask
     initial begin
         expected_count=0;wait(dut.touch_ready);frames(2);
-        if(tscl!==1 || dut.touch_mode16)$fatal(1,"Default direct mode");
+        if(dut.touch_mode16!==1'b1)$fatal(1,"Default fixed serial mode");
         transact("TOUCH,16\n",9,{"OK",8'd13,"\n"});
         wait(dut.touch_ready);frames(4);pads=255;frames(10);
         if(dut.touch_keys!=0)$fatal(1,"16-key mode read direct pins");
         keys=16'hffff;wait(dut.touch_keys==16'hffff);frames(20);
         if(dut.touch_active[6:0]!=127 || dut.extended_active!=511)$fatal(1,"16 physical keys not all voiced");
         if(dut.fsr_pitch_mode)$fatal(1,"Serial K8 toggled pressure mode");
-        transact("TOUCH,8\n",8,{"ERR,BUSY",8'd13,"\n"});
+        transact("TOUCH,8\n",8,{"ERR,RANGE",8'd13,"\n"});
+        if(!dut.touch_mode16 || dut.touch_keys!=16'hffff)$fatal(1,"Rejected TOUCH8 changed active serial notes");
         // End-to-end I2S spectrum: every physical key must contribute its own pitch.
-        start_sample=monitor.pcm_count;wait(monitor.pcm_count>=start_sample+8192);
+        start_sample=monitor.pcm_count;
+        $display("SPECTRUM_START sample=%0d",start_sample);wait(monitor.pcm_count>=start_sample+8192);
         for(j=0;j<16;j=j+1)begin
             co=0;si=0;weight=0;
             for(n=0;n<8192;n=n+1)begin
@@ -92,6 +95,7 @@ module tb_top_touch16;
                 co=co+window*monitor.pcm[start_sample+n]*$cos(angle);si=si+window*monitor.pcm[start_sample+n]*$sin(angle);
             end
             amp=2*$sqrt(co*co+si*si)/weight;
+            $display("KEY_SPECTRUM key=%0d amplitude=%f",j+1,amp);
             if(amp<(j<7 ? 1000 : 480))$fatal(1,"I2S missing physical key %0d amplitude %f",j+1,amp);
         end
         transact("HOLD,1\n",7,{"OK",8'd13,"\n"});frames(3);
@@ -103,16 +107,21 @@ module tb_top_touch16;
         if(dut.extended_active!=256 || dut.touch_active[6:0])$fatal(1,"K16 addressing / note-off");
         transact("PRESSURE,1\n",11,{"OK",8'd13,"\n"});if(!dut.fsr_pitch_mode)$fatal(1,"Remote pressure control");
         keys=0;wait(dut.touch_keys==0);frames(30);pads=0;
-        transact("TOUCH,8\n",8,{"OK",8'd13,"\n"});wait(dut.touch_ready);frames(4);
-        if(tscl!==1 || dut.extended_active || dut.touch_keys)$fatal(1,"Return to GPIO left serial state");
-        pads=1;wait(dut.touch_keys==1);frames(20);
-        if(!dut.touch_active[0] || dut.extended_active)$fatal(1,"GPIO did not recover");
-        pads=0;wait(dut.touch_keys==0);frames(30);
+        transact("TOUCH,8\n",8,{"ERR,RANGE",8'd13,"\n"});frames(4);
+        if(!dut.touch_mode16 || dut.extended_active || dut.touch_keys)$fatal(1,"Idle TOUCH8 changed serial state");
+        pads=255;frames(30);
+        if(dut.touch_keys || dut.touch_active || dut.extended_active)$fatal(1,"Removed GPIO path became active");
+        pads=0;frames(4);
+        sensor_reset=1;
         transact("SERIAL,1\n",9,{"OK",8'd13,"\n"});model_high=1;
-        transact("TOUCH,16\n",9,{"OK",8'd13,"\n"});wait(dut.touch_ready);frames(4);
+        wait(dut.u_touch_serial.state==1);
+        @(negedge clk);sensor_reset=0;
+        transact("TOUCH,16\n",9,{"ERR,BUSY",8'd13,"\n"});
+        wait(dut.touch_ready);frames(4);
+        transact("TOUCH,16\n",9,{"OK",8'd13,"\n"});frames(4);
         keys=16'h8100;wait(dut.touch_keys==16'h8100);frames(20);
         if(dut.touch_active!=16'h8100)$fatal(1,"High-active serial polarity / chord addressing");
-        $display("PASS 8/16 integration: real UART and TTP serial pins, all 16 pitches in decoded I2S, GPIO isolation, busy rejection, hold/panic, K16/pressure, return to GPIO");$finish;
+        $display("PASS fixed16 integration: serial startup, real UART and TTP pins, all 16 pitches in decoded I2S, GPIO isolation, TOUCH8 rejected held and idle, hold/panic, K16/pressure, sensor reset, BUSY until ready, both polarities");$finish;
     end
     initial begin #250000000;$fatal(1,"16-key integration timeout keys=%h ready=%b replies=%0d",dut.touch_keys,dut.touch_ready,reply_count);end
 endmodule

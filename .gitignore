@@ -84,3 +84,28 @@ auth.json
 
 # Layout renders duplicate the same images inside deliveries/APP_HUE33_20261023/layouts/.
 /pcm5102_pam8403/android_app/design/out/hue33/[0-9]*_[0-9]*.png
+
+# Rebuilt bitstream and APK copies plus raw per-sample simulation vectors inside
+# audit folders stay local; only written reports and JSON/CSV summaries are versioned.
+/pcm5102_pam8403/reports/*/*.fs
+/pcm5102_pam8403/reports/*/*.apk
+/pcm5102_pam8403/reports/*/*_vectors.txt
+/pcm5102_pam8403/reports/*/*_output.csv
+
+# dist/ keeps the rolling entry plus the APKs documented by the release notes;
+# superseded per-code appearance builds stay local and remain in git history.
+/pcm5102_pam8403/android_app/dist/*.apk
+
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-HC05-Audio-Route2.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-Pedal.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-Chromatic.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-LinkDiag-Code24.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-Hue33-Code25.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-Touch16-Code26.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-FX3-Code27.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-Performance-Code35.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-ScoreBend-Code39.apk
+
+# Manual design backups next to the rendered assets they already replace.
+/pcm5102_pam8403/android_app/design/*_backup.png

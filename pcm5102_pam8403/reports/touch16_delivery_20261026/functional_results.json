@@ -1,0 +1,78 @@
+{
+  "touch16_full.log": {
+    "sha256": "C40627F7EB5528FC81C5A3B5E23A6D294C0E452E05997173ECC3A211D8521583",
+    "passes": [
+      "PASS fixed16 integration: serial startup, real UART and TTP pins, all 16 pitches in decoded I2S, GPIO isolation, TOUCH8 rejected held and idle, hold/panic, K16/pressure, sensor reset, BUSY until ready, both polarities"
+    ],
+    "spectrum_8192_samples": {
+      "1": 1254.947835,
+      "2": 1265.060691,
+      "3": 1245.074903,
+      "4": 1231.87382,
+      "5": 1235.463872,
+      "6": 1246.661843,
+      "7": 1240.654747,
+      "8": 619.908871,
+      "9": 614.540292,
+      "10": 617.579251,
+      "11": 617.07643,
+      "12": 615.153031,
+      "13": 613.955077,
+      "14": 614.348465,
+      "15": 614.281735,
+      "16": 614.343432
+    },
+    "pcm_capture": {
+      "path": "decoded_pcm_touch16.csv",
+      "sha256": "FFD3ED4D659FFEF8258C58E7CB07C4D2C6C8A80000144791CFE9986D45430092"
+    }
+  },
+  "polarity_recovery.log": {
+    "sha256": "C7C2D75D3D15D5D7A3358DDDED3FC31605B2C204518CFBBCAC908BF5E3CC0EAA",
+    "passes": [
+      "PASS fixed16 recovery: high-active sensor from boot, SERIAL1 accepted while not ready, all16 voiced, busy protection and TOUCH8 rejection retained"
+    ]
+  },
+  "rtl_regression.log": {
+    "sha256": "0C1FF74ABAAC4E24220CC87680F6002A9E1774705FE865EB830D487C0D61ABB8",
+    "passes": [
+      "PASS extension UART: 47 bit-level replies, state/ADC query, busy/recording gates, strict bounds/atomic rejection, panic",
+      "PASS [live idle]: production parameters; S1/S2 produce no audio without touch, 136 stereo pairs",
+      "PASS [dual analog]: pressure gain/pitch and slider master volume are independent, both active together, slider fault falls back without muting pressure"
+    ]
+  },
+  "app_core.log": {
+    "sha256": "FDD9B3110F8FB158599B2B04A4FCF8BF37F36B6392AE4E49CA324FB1E43A229F",
+    "passes": [
+      "PASS RTL RGB5 palette -> App: all 64 hardware codes match",
+      "PASS LedHue: 431 checks, 33 anchors/HSV, silence, saturation and independent App scales",
+      "PASS PerformanceParams: 8690 checks; unit conversions, quantized round trips, firmware bounds, query parsing, Chinese errors",
+      "PASS LedProtocol: 180 checks",
+      "PASS RTL UART -> Java LED state/spectrum: atomic live and reset snapshots",
+      "PASS top live C4 -> UART -> Java spectrum: frequency band and frame metadata",
+      "PASS LedProtocol: 203 checks",
+      "PASS TakeStatusTest: 17 checks",
+      "PASS RecordingSupport: 17 checks; event-only queries and rejection recovery",
+      "PASS PhoneTake: 10054 checks; local note timing/hold/velocity, standard MIDI, 25 independent saves/reopen/rename/delete, CRC, failure preservation, 10000-note bound and long silence",
+      "PASS SongLibrary: 4128 assertions",
+      "PASS ControlState: 33 checks",
+      "PASS TakeWorkflow: 285 checks",
+      "PASS SppAudio: 15 checks; removed PCM commands never reach Bluetooth",
+      "PASS ChromaticKeys: 77 checks; scan/pitch geometry and all sixteen MIDI notes",
+      "PASS device controls: 4695 assertions",
+      "PASS VoiceBend: 7229 assertions; all cents, protocol, pitch error, coalescing/fairness/offline/last edit/batch isolation",
+      "PASS AdsrProfile: 5032 assertions",
+      "PASS SongCodec: 31 assertions",
+      "PASS SppLink: 261 assertions",
+      "PASS AudioRecording: 1203 checks",
+      "PASS RTL UART -> Java receiver -> WAV: 1501 samples preserved bit for bit",
+      "PASS AudioRecording: 11 checks",
+      "PASS top I2S -> 2Mbps UART -> Java receiver -> WAV: 712 samples bit-exact",
+      "PASS AudioRecording: 11 checks"
+    ]
+  },
+  "app_build.log": {
+    "sha256": "C46AABB22936CF38C97F49E7F43F24A13003CD944F8B5BD678F5B8929618E981",
+    "passes": []
+  }
+}

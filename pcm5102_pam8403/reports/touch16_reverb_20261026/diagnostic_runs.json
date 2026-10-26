@@ -1,0 +1,11 @@
+{
+  "constant_only_fixed16_build": "Complete; see build_audit.json",
+  "constant_only_pin_test": "Stopped intentionally after preparing the authoritative fixed16_clean pin test; no FATAL observed before stop; not a passing test",
+  "constant_only_pin_test_process_id": 9012,
+  "first_fx_frame_test": "Passed with 1452 complete frames and max FX 37 cycles, but compiled before explicit GPIO-instance removal; retained only as diagnostic evidence",
+  "authoritative_tests": [
+    "fixed16_clean/tb_top_fixed16",
+    "fx_fixed16/tb_fx_fixed16_frame_clean"
+  ],
+  "production_changes": false
+}

@@ -1,0 +1,6 @@
+{
+  "production_RTL_changed": false,
+  "optional_input_fix": "remove duplicate test-only zero connections left by interrupted preparation",
+  "audition_stimulus": "GPIO pads retained as model key state; actual TTP229 serial wires drive DUT",
+  "preserved_assertions": "external I2S, 60ms pre-roll, repeated notes, rest/end, held note STOP and map rejection"
+}

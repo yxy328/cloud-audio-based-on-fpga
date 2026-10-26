@@ -16,7 +16,7 @@ module tb_downloadable_song;
     downloadable_song #(.CLK_HZ(20000),.ENABLE_LOOKAHEAD(1)) dut(
         .clk(clk),.resetn(resetn),.request(request),.edit_allowed(edit_allowed),
         .toggle_play(toggle_play),.restart(restart),.operation(operation),
-        .arg0(arg0),.arg1(arg1),.arg2(arg2),.note_map(note_map),
+        .arg3(16'd0),.score_min(16'd8192),.score_max(16'd32768),.arg0(arg0),.arg1(arg1),.arg2(arg2),.note_map(note_map),
         .done(done),.valid(valid),.playing(playing),.gate(gate),.error(error),
         .current_note(current_note),.guide_keys(guide_keys),.ms_tick(ms_tick),
         .guide_reset(guide_reset),.note_spawn(note_spawn),.spawn_keys(spawn_keys),
@@ -28,7 +28,7 @@ module tb_downloadable_song;
     downloadable_song #(.CLK_HZ(20000)) legacy(
         .clk(clk),.resetn(resetn),.request(request),.edit_allowed(edit_allowed),
         .toggle_play(toggle_play),.restart(restart),.operation(operation),
-        .arg0(arg0),.arg1(arg1),.arg2(arg2),.note_map(note_map),
+        .arg3(16'd0),.score_min(16'd8192),.score_max(16'd32768),.arg0(arg0),.arg1(arg1),.arg2(arg2),.note_map(note_map),
         .playing(legacy_playing),.gate(legacy_gate),.guide_keys(legacy_keys)
     );
 

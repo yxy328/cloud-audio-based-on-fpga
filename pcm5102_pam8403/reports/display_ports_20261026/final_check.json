@@ -1,0 +1,20 @@
+{
+  "production_input_count": 102,
+  "production_inputs_match": true,
+  "output_count": 26,
+  "outputs_match": true,
+  "frozen_candidate_matches": true,
+  "gowin_unchanged": true,
+  "rollback_bitstream_matches": true,
+  "production_test_fixture_matches": true,
+  "integrated_raster_compile_passed": true,
+  "default_bitstream_sha256": "CB9A5EEE4227DB681E73A0E05EACB00A243597F0AF8465F334BEDF341FA93006",
+  "doc_hashes": {
+    "pcm5102_pam8403\\README.md": "3613B299B671368534E428C02B26B350BBA984085F3191E7CED38D774FB9FEA3",
+    "pcm5102_pam8403\\VERIFICATION.md": "E9542AA99BAF01B8FDC724BA15A239CD9B0F555580E3B8C2702E357FB6BBBEE3",
+    "pcm5102_pam8403\\reports\\display_ports_20261026\\README.md": "A06FD83A0C46211F069B9632214A37F9F0E4C76CED92B037C96B88013FAE0F20",
+    "pcm5102_pam8403\\reports\\display_ports_20261026\\DESIGN.md": "7DA505538EF9842726C5628F3CA032E25F9D5D5011B16F7015A6A9D9B3B885C7",
+    "pcm5102_pam8403\\reports\\display_ports_20261026\\report.py": "87665BF8F8DFA65B1CE28674C5A5FDBE2965D4F246043021C23B0692B231B717",
+    "pcm5102_pam8403\\reports\\display_ports_20261026\\finish.py": "5FE0EFA52A33C0D3A99F6B6739C449D8D52321BEBDA5FF5BA984AE6F4DCAFF82"
+  }
+}

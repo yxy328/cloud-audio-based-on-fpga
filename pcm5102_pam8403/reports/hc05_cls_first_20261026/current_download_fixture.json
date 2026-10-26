@@ -1,0 +1,11 @@
+{
+  "original_fixture_unchanged_sha256": "1CEFF4C5CC782EEBC3E4E08C8E6243AF3F2819A62FF64B86E78E034E2A1737DC",
+  "reason": "Historical fixture accepts legacy REC_START; frozen fixed16 production already rejects it",
+  "changes": [
+    "Original explicit diatonic mapping and chord0x15 assertion preserved",
+    "Legal chord/rest duration2ms",
+    "Existing fixed16 legacy logger refusal",
+    "Existing chromatic default MAP"
+  ],
+  "fixture_sha256": "31943ED57223193F58B3042676DA3CFE5E38B2F3FC1338F5DCB312D0C885C64A"
+}

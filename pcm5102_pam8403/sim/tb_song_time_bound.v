@@ -13,7 +13,7 @@ module tb_song_time_bound;
     wire [15:0] delay_ms;
     downloadable_song #(.CLK_HZ(1000),.ENABLE_LOOKAHEAD(1)) dut(
         .clk(clk),.resetn(resetn),.request(request),.operation(op),
-        .arg0(a),.arg1(b),.arg2(c),.edit_allowed(1'b1),
+        .arg3(16'd0),.score_min(16'd8192),.score_max(16'd32768),.arg0(a),.arg1(b),.arg2(c),.edit_allowed(1'b1),
         .note_map({8'd72,8'd69,8'd67,8'd65,8'd64,8'd62,8'd60}),
         .toggle_play(1'b0),.restart(1'b0),.done(done),.error(error),
         .playing(playing),.gate(gate),.guide_keys(keys),.note_ready(ready),

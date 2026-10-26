@@ -1,0 +1,285 @@
+{
+  "RTL_verified_frames": 729722,
+  "sample_rate": 48828.125,
+  "interpretation": "one synthetic chord and control timing; measured discontinuity is not a confirmed audible defect",
+  "vector_sha256": "4A8C7CA559A218A17B05869AC966B83D205CDF6F74059C82774755D7B99CC4A2",
+  "output_sha256": "05CE9791FFA25CD5E07CB682E216CC9C5BC67DCF6125D9C67C6296B51CE405F7",
+  "cases": [
+    {
+      "case": "chorus_wet_step",
+      "before": [
+        1,
+        82,
+        4
+      ],
+      "after": [
+        1,
+        82,
+        5
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -197,
+      "counterfactual_signal_jump_LSB": -80,
+      "control_induced_boundary_jump_LSB": -117,
+      "control_induced_boundary_dBFS": -48.945281464271126,
+      "max_control_error_first_ms_LSB": 301,
+      "clipped_samples": 0
+    },
+    {
+      "case": "delay_wet_step",
+      "before": [
+        2,
+        82,
+        64
+      ],
+      "after": [
+        2,
+        82,
+        80
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -366,
+      "counterfactual_signal_jump_LSB": -171,
+      "control_induced_boundary_jump_LSB": -195,
+      "control_induced_boundary_dBFS": -44.508306471944,
+      "max_control_error_first_ms_LSB": 277,
+      "clipped_samples": 0
+    },
+    {
+      "case": "reverb_wet_step",
+      "before": [
+        4,
+        82,
+        1024
+      ],
+      "after": [
+        4,
+        82,
+        1280
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -168,
+      "counterfactual_signal_jump_LSB": -184,
+      "control_induced_boundary_jump_LSB": 16,
+      "control_induced_boundary_dBFS": -66.22659904607586,
+      "max_control_error_first_ms_LSB": 16,
+      "clipped_samples": 0
+    },
+    {
+      "case": "all_wet_jump",
+      "before": [
+        7,
+        82,
+        0
+      ],
+      "after": [
+        7,
+        82,
+        2184
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -2560,
+      "counterfactual_signal_jump_LSB": -184,
+      "control_induced_boundary_jump_LSB": -2376,
+      "control_induced_boundary_dBFS": -22.79206997301124,
+      "max_control_error_first_ms_LSB": 3559,
+      "clipped_samples": 0
+    },
+    {
+      "case": "chorus_off",
+      "before": [
+        1,
+        82,
+        8
+      ],
+      "after": [
+        0,
+        82,
+        8
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": 961,
+      "counterfactual_signal_jump_LSB": 24,
+      "control_induced_boundary_jump_LSB": 937,
+      "control_induced_boundary_dBFS": -30.874206881438795,
+      "max_control_error_first_ms_LSB": 2407,
+      "clipped_samples": 0
+    },
+    {
+      "case": "delay_off",
+      "before": [
+        2,
+        82,
+        128
+      ],
+      "after": [
+        0,
+        82,
+        128
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": 1407,
+      "counterfactual_signal_jump_LSB": -157,
+      "control_induced_boundary_jump_LSB": 1564,
+      "control_induced_boundary_dBFS": -26.424263724717775,
+      "max_control_error_first_ms_LSB": 2218,
+      "clipped_samples": 0
+    },
+    {
+      "case": "reverb_off",
+      "before": [
+        4,
+        82,
+        2048
+      ],
+      "after": [
+        0,
+        82,
+        2048
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -309,
+      "counterfactual_signal_jump_LSB": -184,
+      "control_induced_boundary_jump_LSB": -125,
+      "control_induced_boundary_dBFS": -48.37079843903324,
+      "max_control_error_first_ms_LSB": 129,
+      "clipped_samples": 0
+    },
+    {
+      "case": "chorus_on",
+      "before": [
+        0,
+        82,
+        8
+      ],
+      "after": [
+        1,
+        82,
+        8
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -184,
+      "counterfactual_signal_jump_LSB": -184,
+      "control_induced_boundary_jump_LSB": 0,
+      "control_induced_boundary_dBFS": null,
+      "max_control_error_first_ms_LSB": 0,
+      "clipped_samples": 0
+    },
+    {
+      "case": "chorus_depth",
+      "before": [
+        1,
+        82,
+        8
+      ],
+      "after": [
+        1,
+        83,
+        8
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": 961,
+      "counterfactual_signal_jump_LSB": 24,
+      "control_induced_boundary_jump_LSB": 937,
+      "control_induced_boundary_dBFS": -30.874206881438795,
+      "max_control_error_first_ms_LSB": 2407,
+      "clipped_samples": 0
+    },
+    {
+      "case": "delay_time",
+      "before": [
+        2,
+        82,
+        128
+      ],
+      "after": [
+        2,
+        86,
+        128
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": 1407,
+      "counterfactual_signal_jump_LSB": -157,
+      "control_induced_boundary_jump_LSB": 1564,
+      "control_induced_boundary_dBFS": -26.424263724717775,
+      "max_control_error_first_ms_LSB": 2218,
+      "clipped_samples": 0
+    },
+    {
+      "case": "delay_feedback",
+      "before": [
+        2,
+        82,
+        128
+      ],
+      "after": [
+        2,
+        98,
+        128
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -157,
+      "counterfactual_signal_jump_LSB": -157,
+      "control_induced_boundary_jump_LSB": 0,
+      "control_induced_boundary_dBFS": null,
+      "max_control_error_first_ms_LSB": 0,
+      "clipped_samples": 0
+    },
+    {
+      "case": "reverb_preset",
+      "before": [
+        4,
+        82,
+        2048
+      ],
+      "after": [
+        4,
+        210,
+        2048
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -309,
+      "counterfactual_signal_jump_LSB": -184,
+      "control_induced_boundary_jump_LSB": -125,
+      "control_induced_boundary_dBFS": -48.37079843903324,
+      "max_control_error_first_ms_LSB": 129,
+      "clipped_samples": 0
+    },
+    {
+      "case": "scene_change",
+      "before": [
+        5,
+        81,
+        515
+      ],
+      "after": [
+        2,
+        24,
+        64
+      ],
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -1107,
+      "counterfactual_signal_jump_LSB": -193,
+      "control_induced_boundary_jump_LSB": -914,
+      "control_induced_boundary_dBFS": -31.09007478451773,
+      "max_control_error_first_ms_LSB": 914,
+      "clipped_samples": 0
+    },
+    {
+      "case": "slider_boundary_chatter",
+      "before": [
+        7,
+        82,
+        1092
+      ],
+      "after": null,
+      "switch_frame": 50123,
+      "adjacent_output_jump_LSB": -433,
+      "counterfactual_signal_jump_LSB": -64,
+      "control_induced_boundary_jump_LSB": -369,
+      "control_induced_boundary_dBFS": -38.96847137601315,
+      "max_control_error_first_ms_LSB": 524,
+      "clipped_samples": 0
+    }
+  ]
+}

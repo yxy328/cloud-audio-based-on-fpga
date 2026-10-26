@@ -1,0 +1,9 @@
+{
+  "original_sha256": "DA9D6CC66EB7E47D3CCB6CCC701F8B15BE7B3E60510E25719246F81A961B3970",
+  "current_fixture_sha256": "2572592C5B32D85E9EBE32F813B2E082C6CE65292B7625DD0CC535F1AF70F67B",
+  "changes": [
+    "Drive the serial16 TTP229 model instead of removed GPIO pads",
+    "Wait for real key readiness"
+  ],
+  "original_functional_assertions_retained": true
+}

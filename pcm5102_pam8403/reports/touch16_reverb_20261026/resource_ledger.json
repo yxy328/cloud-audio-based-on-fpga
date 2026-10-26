@@ -1,0 +1,141 @@
+{
+  "base": {
+    "Logic": {
+      "used": 21649.0,
+      "capacity": 23040.0,
+      "physical_free": 1391.0,
+      "future_reserve": 1650,
+      "free_after_known_reserve": -259.0
+    },
+    "CLS": {
+      "used": 11183.0,
+      "capacity": 11520.0,
+      "physical_free": 337.0,
+      "future_reserve": 365,
+      "free_after_known_reserve": -28.0
+    },
+    "Register": {
+      "used": 10579.0,
+      "capacity": 23280.0,
+      "physical_free": 12701.0,
+      "future_reserve": null,
+      "free_after_known_reserve": null
+    },
+    "BSRAM": {
+      "used": 47.0,
+      "capacity": 56.0,
+      "physical_free": 9.0,
+      "future_reserve": 4,
+      "free_after_known_reserve": 5.0
+    },
+    "DSP": {
+      "used": 26.5,
+      "capacity": 28.0,
+      "physical_free": 1.5,
+      "future_reserve": null,
+      "free_after_known_reserve": null
+    },
+    "implementation_label": "base"
+  },
+  "fixed16_clean": {
+    "Logic": {
+      "used": 21452.0,
+      "capacity": 23040.0,
+      "physical_free": 1588.0,
+      "future_reserve": 1650,
+      "free_after_known_reserve": -62.0
+    },
+    "CLS": {
+      "used": 11169.0,
+      "capacity": 11520.0,
+      "physical_free": 351.0,
+      "future_reserve": 365,
+      "free_after_known_reserve": -14.0
+    },
+    "Register": {
+      "used": 10424.0,
+      "capacity": 23280.0,
+      "physical_free": 12856.0,
+      "future_reserve": null,
+      "free_after_known_reserve": null
+    },
+    "BSRAM": {
+      "used": 47.0,
+      "capacity": 56.0,
+      "physical_free": 9.0,
+      "future_reserve": 4,
+      "free_after_known_reserve": 5.0
+    },
+    "DSP": {
+      "used": 26.5,
+      "capacity": 28.0,
+      "physical_free": 1.5,
+      "future_reserve": null,
+      "free_after_known_reserve": null
+    },
+    "implementation_label": "fixed16_clean_sdc"
+  },
+  "fx_fixed16": {
+    "Logic": {
+      "used": 22127.0,
+      "capacity": 23040.0,
+      "physical_free": 913.0,
+      "future_reserve": 1650,
+      "free_after_known_reserve": -737.0
+    },
+    "CLS": {
+      "used": 11333.0,
+      "capacity": 11520.0,
+      "physical_free": 187.0,
+      "future_reserve": 365,
+      "free_after_known_reserve": -178.0
+    },
+    "Register": {
+      "used": 10653.0,
+      "capacity": 23280.0,
+      "physical_free": 12627.0,
+      "future_reserve": null,
+      "free_after_known_reserve": null
+    },
+    "BSRAM": {
+      "used": 53.0,
+      "capacity": 56.0,
+      "physical_free": 3.0,
+      "future_reserve": 4,
+      "free_after_known_reserve": -1.0
+    },
+    "DSP": {
+      "used": 26.5,
+      "capacity": 28.0,
+      "physical_free": 1.5,
+      "future_reserve": null,
+      "free_after_known_reserve": null
+    },
+    "implementation_label": "fx_fixed16_sdc"
+  },
+  "fixed16_fx_delta_vs_prior_fx_apds": {
+    "Logic": -291.0,
+    "CLS": -82.0,
+    "Register": -158.0,
+    "BSRAM": 0.0,
+    "DSP": 0.0
+  },
+  "reserves": {
+    "D": {
+      "Logic": 150,
+      "CLS": 30
+    },
+    "B2": {
+      "Logic": 900,
+      "CLS": 200,
+      "BSRAM": 2
+    },
+    "E100": {
+      "Logic": 600,
+      "CLS": 100,
+      "BSRAM": 2
+    },
+    "CLS_safety": 35,
+    "Register_DSP": "Not quantified for future features; no zero-reserve claim"
+  }
+}

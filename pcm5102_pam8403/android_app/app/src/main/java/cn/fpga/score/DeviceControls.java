@@ -20,9 +20,10 @@ public final class DeviceControls {
         if(ext&&v[7]!=1&&v[7]!=2&&v[7]!=4&&v[7]!=8&&v[7]!=16)throw new IOException("设备复音上限无效");
         return new DeviceControls(v,ext);
     }
-    public static String touchCommand(int selection){if(selection<0||selection>1)throw new IllegalArgumentException();return "TOUCH,"+(selection==0?8:16);}
-    public String summary(){return (mode16==0?"8 键直连 · 7 音＋压力切换":"16 键串行 · 16 音和弦")+
-        "\n音效："+new String[]{"原声","回声","合唱"}[effect]+" · 湿度 "+wet+"/8 · 总音量 "+volume+"/16"+
+    public String summary(){return summary(true);}
+    public String keyboardSummary(){return summary(false);}
+    private String summary(boolean legacy){return (mode16==0?"旧固件：8 键直连，请更新配套 16 键固件":"16 键串行 · 16 音和弦")+
+        (legacy?"\n音效："+new String[]{"原声","回声","合唱"}[effect]+" · 湿度 "+wet+"/8":"")+"\n总音量 "+volume+"/16"+
         "\n延音："+new String[]{"关闭","无限锁存","钢琴踏板"}[hold]+" · 模拟输入用途 "+analog+" · 压力"+(pressure==1?"音高":"音量")+
         (extended?"\n复音上限："+poly+" · 当前发声："+voices+"（按住的键优先）":"\n旧固件：未提供踏板及复音状态");}
 }

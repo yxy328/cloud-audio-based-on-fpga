@@ -1,0 +1,306 @@
+[
+  {
+    "Path": "app/build.gradle",
+    "SHA256": "A98F5C586BBA758C9AAA0DD6025A6653E1197F971FA2C0D907E62496098D3926"
+  },
+  {
+    "Path": "app/src/main/AndroidManifest.xml",
+    "SHA256": "966A12FBAA634C721B491971390E05534240C94316324ECB4293BC050B00D3B3"
+  },
+  {
+    "Path": "app/src/main/assets/backdrop.png",
+    "SHA256": "88FBE15DC4F3832ED637A7EAE73D0FE1FB8E6CD37D8EA5F6093B163D9950BE11"
+  },
+  {
+    "Path": "app/src/main/assets/hero.png",
+    "SHA256": "FD7C06858F7BE176827BA05E97870AEDDDB9FA84205571B35083A69E1C641AC0"
+  },
+  {
+    "Path": "app/src/main/assets/hero_art.png",
+    "SHA256": "D468909BD3112D22F08138ABC152FDD28CF5C6DFC5FDEEE2FDAB647D13AC6D9D"
+  },
+  {
+    "Path": "app/src/main/assets/mascot_0.png",
+    "SHA256": "E32A9BD69BF78957B86B4EFF3D8C3F5C01092AB5E0E5168F4A9A0268F1B2084F"
+  },
+  {
+    "Path": "app/src/main/assets/mascot_1.png",
+    "SHA256": "6E5833043F76C5CD048921C6274BC14618DD586FFBBBADF2264F7C53B90A051B"
+  },
+  {
+    "Path": "app/src/main/assets/mascot_2.png",
+    "SHA256": "7265CCF5326411EF71CAF3010DB1494EF34F0680C00130A926498F1302D217E5"
+  },
+  {
+    "Path": "app/src/main/assets/mascot_3.png",
+    "SHA256": "22BECFD2B2DDB7B4F6EE1CE8E59429C2D43F2B7DCB132F4CF4024C3C1BB6002A"
+  },
+  {
+    "Path": "app/src/main/assets/mascot_4.png",
+    "SHA256": "CDED3E88AEC99ACD3EC44C1B02667188DDB60C15507DD5BBA939194646E939B2"
+  },
+  {
+    "Path": "app/src/main/assets/mascot_5.png",
+    "SHA256": "69DA0CA83CDD45723F3CA8E735737F37519444363DE3ED143DC3E38446C0811F"
+  },
+  {
+    "Path": "app/src/main/assets/third_party/usbserial-LICENSE.txt",
+    "SHA256": "6F467D3D79C5D31734881FB83E082E84512BDE05D3F7893E0E8373FD0D2B5D2C"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/AdsrEnvelopeView.java",
+    "SHA256": "F1876133E3A79295D471CC9DB3614514CE82105EF9F9B496A706F126FFCECA40"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/AdsrProfile.java",
+    "SHA256": "08F7D1C68C724ECF2AF73767BB9BAAE29B2C9C762DCEC985FB17002D12856961"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/AppearanceController.java",
+    "SHA256": "12E4B36E2655BE37DBEBE3E65B684D51C1FC107F446B747BC8AAF62BE48E72EE"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/ArtAssets.java",
+    "SHA256": "66CB6A2DF18047C02FEBC5B8D2A4759AD576F216F578C02FE7163062E604477D"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/AudioRecording.java",
+    "SHA256": "6F8C7BA9EE9F5AE20B846F22FF6F9D276C47E8B27D482B9520C491104BB516C6"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/BeatBarsView.java",
+    "SHA256": "5EC5603CF2A01AFF33896921C2A44F37FFEBDF623419B7E3B2F5A868EBEA6AC9"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/ChromaticKeys.java",
+    "SHA256": "9D9A5F7318774623802100524C75CF88B2EDD492FDD1C34DF0CA26E5E3FDE4E6"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/ControlState.java",
+    "SHA256": "5BEA2349E8C707B97B0C814F69022CEEF89DEBA8129530568D4903F6E7A48DAB"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/DeviceControls.java",
+    "SHA256": "0B72C0E015186A8F98ED28E5A4AA5392ADBA0BCD7B10616416C7FE0D4126A2E9"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/FxScene.java",
+    "SHA256": "5EA55626B8A8DA0015A229585ECD8FDEA9E4512078E9F0C86393EE95AC2FC623"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/FxSceneStore.java",
+    "SHA256": "BCFE41EEA57E9B3582EE0867103CCF85BE56AEB983F8974542D97E454E8A507C"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/FxState.java",
+    "SHA256": "CC95CD3BC32876EFBF1338A5AE21E591241EDEB50DD148FD2A25EDBB2DD3854D"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/LedFrame.java",
+    "SHA256": "71E0FECDAEEF6B63CC78D4F12FF5176B87E443CCBCCBCABABF184D77E0EF3DB6"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/LedHue.java",
+    "SHA256": "F9712F02D03E6F107B932176E440EC764FB43484590DF8435C39A33156C5EF17"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/LedState.java",
+    "SHA256": "CF09C14E83D8B5BF4E97B3C374DFAF013C0BC7A147FA79394C6D0DE0675D40C5"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/MainActivity.java",
+    "SHA256": "11A432DFD86274FDF7F10EF5EFC90F40BD143AE781B7C9C124D85E262961D7D2"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PerformanceParams.java",
+    "SHA256": "4715FB6CE6DBBA06A3C3BF76D826DAB7A9D963C2B93A4FD695180147566BE8BB"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PhonePiano.java",
+    "SHA256": "12B17633D5E3EEDC79A27A4BC4F2D81C583BFC92678F5284206B51F4FF0A6A9E"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PhoneTake.java",
+    "SHA256": "C90383ED2FBA177DDDF06591CF573BB5FABFFC58CC8DC0611456EF38DDCCE4A2"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PhoneTakeStore.java",
+    "SHA256": "09288DCA551C5686A344C1B3087EC09BFAE2CB775D7B82E0329D16EB84EC4036"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/PianoKeyboardView.java",
+    "SHA256": "5384FF89278F4D888780ABD707952FF9026B0B31456353875D272AEDD5CD62A1"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/RecordingSupport.java",
+    "SHA256": "C968E41191BBE145CD06D0E0B5BCEA925C54141445739315A79288A49DE1DE37"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/ScoreBends.java",
+    "SHA256": "F0F7201AF5E8EC725985CA93365AF927CF81C558866721A271A4D233BB63B55E"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SegmentButton.java",
+    "SHA256": "AE49FFB24425684974CD05FFB0AB1D3DE82B1AD0BDD7212D0B4438200052E589"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SongCodec.java",
+    "SHA256": "EA3C24B6637833F56AF2788CF12265C201430227D5F8C735074BC5901176FB02"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SongLibrary.java",
+    "SHA256": "EFE1648A37CC106C07A9B8111D7B20B8324C7BEB6B7F75827AEE8089B950E5F7"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SpectrumPreviewView.java",
+    "SHA256": "08068A62F6703F55C4AC0D9CCBE4D872E138D4E94CF67B322F610AF622E445B7"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/SppLink.java",
+    "SHA256": "A03F6FE99DB12FA6F54FBA83F4D0ACE0F1D0D875FAFBE507EF29F3223A8EF2E3"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/StageBackdropView.java",
+    "SHA256": "6761BED16150DBC646193F75BAE9F8359563104EA054259ED72ACC21C5B2ACB7"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/TakeStatus.java",
+    "SHA256": "B9B13D4E03DC08D2ED9A6D9DC22AD5FA2FAD01644CEACEBEBD9872F08543DF34"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/TakeWorkflow.java",
+    "SHA256": "B80A3007BAA4923F8D603AEABAABD75962C60975CBB0F8172EE427F668051D0B"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/Theme.java",
+    "SHA256": "514F7A6FFC2839E08B04A2BD8DF57E34966B10AC2A3E2D6ED2D5469C9C894D40"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/UsbAudioLink.java",
+    "SHA256": "A05EC3A42B21282F2DE3B76F6D964E2053F8CBA898DFE2196EF71D7C87805DEF"
+  },
+  {
+    "Path": "app/src/main/java/cn/fpga/score/VoiceBend.java",
+    "SHA256": "F44B620E1D48E453A2E657F70C94A2FB6A10C950B8F9B1B66386B4C31D4B3663"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/BuildConfig.java",
+    "SHA256": "EAC07953A7E4CCC3808841D2DB8C579C314753BA04DE66ECA161FACC8A7C61FA"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/CdcAcmSerialDriver.java",
+    "SHA256": "F47737123212DD506D46AAD33A9531FB2D395BBA3F19160BCAF90F0C676465B5"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/Ch34xSerialDriver.java",
+    "SHA256": "4C8E53043D5CEDBEFB7997AA865A3629989F6C207DC63AE05702868FBC47D0D6"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/ChromeCcdSerialDriver.java",
+    "SHA256": "D74F66BD67087BC24B28FD950F6E8E048DDBDCCF269A490A21D92C436187AB52"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/CommonUsbSerialPort.java",
+    "SHA256": "6F2EEE9C7988CFD1FB3D5C59B6E1A5FC8BFFC53871A7B894401771488CEAB53E"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/Cp21xxSerialDriver.java",
+    "SHA256": "A092B92E118F4A8110AE7DB0563D9B09DF32A9C37D1A0AC5F0BC676B3ECF99FE"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/FtdiSerialDriver.java",
+    "SHA256": "5D56017AFE9D91499BEA9392F940721D024CD66891DE80D6BBAC72BBBA75B741"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/GsmModemSerialDriver.java",
+    "SHA256": "3FFB6F1D77DC37644D17E9C2DCC72C625DDBE3BF500851ACC4DAA35CE836D734"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/ProbeTable.java",
+    "SHA256": "5DB744B235E4C2A93D57D41828720F8B78940FB4D5A1A397C18DF9D7A8A20D07"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/ProlificSerialDriver.java",
+    "SHA256": "B577E1C84B1A4671C9BCB9B998F2D8AE66A7D3CD5529F293E42F7DEF776377D7"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/SerialTimeoutException.java",
+    "SHA256": "0934207AAE9DC4AEE7F20D91B44C9387FC364995A746CB33F9E2F52F57DD3F9C"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbId.java",
+    "SHA256": "9AEDCD07CAE0BB1EA521A653E19731E2763913EEE7661BB6AB0B445F2AB22360"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialDriver.java",
+    "SHA256": "EE606636A29CD4C682B4325EEC27DFFBBA66F07EDA93B8C3FD9716520DBAC8F1"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialPort.java",
+    "SHA256": "9D7FBCB8599D15B03BD2A3B67749AFDA385EF0497274C65EDB6BDD32A33C542A"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialProber.java",
+    "SHA256": "F8CB4C38F6CBB80C16498EE0D15933559165E2D4179997BCD7C9F34769DB18AD"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/util/HexDump.java",
+    "SHA256": "06E0C6E28C2B6D850FF451A54660F64BF83AEAE93B688C80F1CF6FBA41B81C2E"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/util/MonotonicClock.java",
+    "SHA256": "73E29449754CFF976E0AB1C3EC4F890F11F6630CEE1E3E164DF5E3092CEA2E12"
+  },
+  {
+    "Path": "app/src/main/java/com/hoho/android/usbserial/util/UsbUtils.java",
+    "SHA256": "B366665E94D7E4F5DA6C0492E31FD63C67DCFB77AB25698DFE1BEA4105D3E26F"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+    "SHA256": "4A76D848A55CA3991A268A59915E4F908977F979785FA560C364F02AF0CB387D"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-hdpi/ic_launcher.png",
+    "SHA256": "479E89C793C77FF4F9FCFBD04D205414BEB1C68CCE74B6DF2E4D5B7FDF9C1AA2"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png",
+    "SHA256": "33A7B85EF0FE31A96676CB59079D549ADDD39D03E3698E7DF1F7C988CEBF65D2"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-mdpi/ic_launcher.png",
+    "SHA256": "F92360B067E0E772E65A8E5F482C4FCA4FA3F985378FA880FDABF1AF1C38D81C"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png",
+    "SHA256": "F0C413620A4EA38CFFD09F477B12118099A9D0E19DF31C73D24D8584B99C8B02"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+    "SHA256": "2594E4620C76DD81C423D3883E96C98506785CA641900AF0A05FA13428AA5022"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png",
+    "SHA256": "A6143927F160D12D0C1C2ED9D02B8E69152234F3133EA8C911CF5A84694A4101"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+    "SHA256": "E84DD5F6773DE318CDE0EF26706E2B8B9653B7D5672479526C466A68C67D1630"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png",
+    "SHA256": "69B6C486D34BA004B76C37108F2E6602A7AB67B945D72C7D17FDC909E41DFBFE"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+    "SHA256": "43FCDAF1DEC18CA590EDDAEB9D5E0D9FF2DED86286CA0EF30F63E04D1594DE83"
+  },
+  {
+    "Path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+    "SHA256": "1F142F6719A4F425ADDA2E122317883279965CDDCF0AD62B607E86E6509822D7"
+  },
+  {
+    "Path": "app/src/main/res/values/colors.xml",
+    "SHA256": "16419ABF11A5F6C213699FCB35A5E3E44FB3B73C0FEDE239FBF03A3E2FAFCDE7"
+  }
+]

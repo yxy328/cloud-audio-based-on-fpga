@@ -1,0 +1,9 @@
+{
+  "verified_production_inputs": 101,
+  "changed": [],
+  "all_prior_actual_build_artifact_hashes_match": true,
+  "production_fs_sha256": "840AE4C47D7BB57048481ACA3ECB6BEEC59E430E66AF0BD32429FDE99E84AD15",
+  "rolling_apk_sha256": "40B92B8201DA38F29140129346E8F02579B532AF443C1BCAA8060B847A015AB6",
+  "app_modified": false,
+  "hardware_programmed": false
+}

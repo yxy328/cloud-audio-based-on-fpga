@@ -1,0 +1,28 @@
+{
+  "true_sample_rate": 48828.125,
+  "method": "whole-file RMS, attenuation only; not perceptual LUFS loudness normalization",
+  "examples": [
+    {
+      "name": "dry",
+      "source_sha256": "AC8FBECEB43248884F9BFE27D73669592BBEDB1965E4AC7764C5A9C31E00F376",
+      "RMS_LSB": 635.6763303771298,
+      "attenuation_dB": 0.0,
+      "reference_sha256": "AC8FBECEB43248884F9BFE27D73669592BBEDB1965E4AC7764C5A9C31E00F376"
+    },
+    {
+      "name": "reverb",
+      "source_sha256": "5198D9875D5F6346309F26D6F5061406B37CEDFA61BE6991C5A0C46395965BD6",
+      "RMS_LSB": 639.7436438237618,
+      "attenuation_dB": -0.055398780316440056,
+      "reference_sha256": "E2DE78045EC1723CC71947DA0AD32470600B562B7CB9A786B231E4E5EF1D2134"
+    },
+    {
+      "name": "chorus_delay_reverb",
+      "source_sha256": "8B3446957FCB37FB80E5294A0733F5480380F0F266022AE2F9337C251A83BDEF",
+      "RMS_LSB": 684.2381573049761,
+      "attenuation_dB": -0.6394249762271992,
+      "reference_sha256": "530DE858DA464E026A4B58896F45C07B1D85BFB867AD649B1820FA213DE5AF7D"
+    }
+  ],
+  "board_recording": false
+}

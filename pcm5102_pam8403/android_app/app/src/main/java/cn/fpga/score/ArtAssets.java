@@ -15,7 +15,7 @@ final class ArtAssets {
     /** 素材设计基准宽度，用来换算缩放比例，保证在任何屏幕宽度下印刷尺寸一致。 */
     static final float DESIGN_WIDTH = 1080f;
 
-    private static final LruCache<String, Bitmap> CACHE = new LruCache<>(4);
+    private static final LruCache<String, Bitmap> CACHE = new LruCache<>(16);
 
     private ArtAssets() { }
 

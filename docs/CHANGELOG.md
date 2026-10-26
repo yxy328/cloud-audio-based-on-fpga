@@ -2,9 +2,52 @@
 
 [首页](../README.md) · [文档索引](README.md) · [完整验证记录](../pcm5102_pam8403/VERIFICATION.md)
 
-按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口（内容为 v1.24-hue / Code25 的 2026-10-25 重新构建，含板键联动），带版本号的 `dist/FPGA-Music-Hue33-Code25.apk` 是 2026-10-23 的首个 Code25 构建、不含板键联动，两者 `versionName` 相同但 SHA256 不同；上一版连接诊断另存 `dist/FPGA-Music-LinkDiag-Code24.apk`，更早为 `dist/FPGA-Music-Chromatic.apk` 与 `dist/FPGA-Music-Pedal.apk`。
+按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。
 
-## 2026-10-25 · 当前默认位流：APDS 运算复用与效果器前置核验，未烧录
+`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口，内容为 **v1.38-scorebend / Code39**（2026-10-27 构建，SHA256 `4BF0C69A…`，与 `dist/FPGA-Music-ScoreBend-Code39.apk` 字节相同）。`dist/` 另保留文档引用过的 `FPGA-Music-Performance-Code35.apk`、`FPGA-Music-FX3-Code27.apk`、`FPGA-Music-Touch16-Code26.apk`、`FPGA-Music-Hue33-Code25.apk`、`FPGA-Music-LinkDiag-Code24.apk`、`FPGA-Music-Chromatic.apk` 与 `FPGA-Music-Pedal.apk`；Code28～Code34 与 Code36～Code38 这些外观构建只留在本机 `dist/`，未入库。
+
+## 2026-10-27 · App v1.38-scorebend / Code39，曲谱逐事件弯音（当前默认位流，未烧录）
+
+每条音符或和弦事件可以带一个弯音目标，按设备当前 `PITCH` 滑音速率靠近，和弦各音共用同一目标。曲谱 CSV 新增第三列 `bend_target_cents`（-1200..1200 整数音分；**空白**沿用手动目标，**0** 显式回正，休止行留空）；下行命令在 `SONG_CHORD,index,mask,duration` 后追加 Q2.14 比率（0 沿用手动、16384 回正、允许 8192..32768），能力查询 `SONG_BEGIN,?` 返回 `SONGBEND,1`。旧两列 CSV、旧三参数下载命令与 MIDI 既有行为保留；MIDI 非中心弯音、同一和弦内各音不同目标明确拒绝。STOP、休止、曲谱结束或移除目标后按当前滑音速率返回各自手动目标，手动目标值本身保留；板上 TAKE 仍为 528 位格式，保存实际生效音高，回放不需要曲谱文件。
+
+完整 PnR（Gowin V1.9.11.03 Education，sharing=1 / retiming=1 / place2 / route0 / maxfan23，50MHz）：Logic **22453**、CLS **11439**、Register 10783、BSRAM **55**、DSP 26.5；未布通 0、setup / hold 违例端点 0/0，原始 WNS **+0.265 / +0.149 ns**。相对 10-26 第一轮 HC-05 默认值净增 +6 Logic、**+52 CLS**、+2 BSRAM；CLS 剩余 81，扣除 35 安全垫后功能预算 **46 CLS**。本轮未记录 UserCode。候选 place1（22445 Logic / 11432 CLS）虽完整布通但有 3 个 setup 违例（原始 WNS -0.675 ns），未采用。
+
+验证为数字与软件范围：25 组最终必要检查；11 组旧协议回归每拍比较全部 67 个既有输出；139 条曲谱目标 / 边界命令与 128×60000ms 数据几何；新旧 TAKE 解码 2075 检查、528 位原子快照 34 检查；App 完整核心回归与 CSV 4827 检查。真实 50MHz / 1024 拍帧内触摸最坏 1012 拍、音高 43 拍、效果 49 拍，均在期限内且无溢出削波；旧试听场景外部 I²S 的 2735 个 PCM 样本与未改 RTL 基线逐项一致。**未烧录 FPGA、未安装 App、未做真实 HC-05 链路、实板听音与显示验收。** 位流 SHA256 `EBAEAD00…`，APK SHA256 `4BF0C69A…`；回退位流 `ACC17F2F…`（第一轮 HC-05）、回退 APK `C53E3A02…`（Code35）。逐项证据与回退路径见[曲谱弯音交付报告](../pcm5102_pam8403/reports/score_bend_integration_20261026/README.md)，导入与协议见[曲谱弯音](../pcm5102_pam8403/SCORE_BEND.md)。
+
+## 2026-10-26 · 第一轮 HC-05 回复结构回收 83 CLS（当日默认，次日被曲谱弯音构建取代）
+
+只改 `hc05_keymap.v` 的回复数据寄存器选择结构：17 个原有回复载荷改由独立时序块选择，仍在同一 EXECUTE 边沿锁存完整 112 位载荷；错误 / 设置命令可能更新无效载荷但静态回复不读取它，所有动态回复重新锁存完整载荷。命令状态机、校验、回复时机、仲裁、背压与每字节节奏不变；物理实现策略由 place2 改为 **place1**。
+
+同一器件与工具，50MHz、sharing=1、retiming=1：Logic 22447（-177）、CLS **11387（净 -83）**、Register 10732、BSRAM 53、DSP 26.5；未布通 0、setup / hold 违例端点 0/0，原始 WNS +0.081 / +0.153 ns（基线 +0.018 / +0.144）。CLS 净收益含 RTL 与物理策略的联合变化，不能全部归因于 RTL。位流 SHA256 `ACC17F2F…`。未烧录。见[第一轮 HC-05 CLS 优化](../pcm5102_pam8403/reports/hc05_cls_first_20261026/README.md)。
+
+## 2026-10-26 · 第二、三步 CLS 尝试：显示读口方案已撤回、控制装箱未找到候选
+
+- **第二步（LED 显示 RAM 读口合并）**：功能与时序通过，但净 **+77 CLS**（22607 Logic / 11464 CLS / 49 BSRAM），与本轮以减少 CLS 为主的目标相反，**已撤回默认接入**；29 项文件按哈希恢复，实验与命名位流保留在 `pcm5102_pam8403/reports/display_ports_20261026/`。释放 BSRAM 本身不构成接入理由。
+- **第三步（控制装箱与局部译码）**：完成多组结构与物理实现对照，**未找到同时满足净减 CLS 与时序要求的候选**，新增收益 0；`download_decode` 候选 +14 CLS 未接入。默认工程保持第一轮结果。见[第三步实测、失败记录与回退](../pcm5102_pam8403/reports/control_pack_20261026/README.md)。
+- 附带测试夹具修复：顶层 ADSR 回归仍用 GPIO 注入触摸，在固定十六键工程下超时，已只把激励改为 TTP229 串行模型，包络、I²S 静音与扫描断言不变；不计资源收益。
+- `reports/cls_research_20261026/` 为同日只读调研，未改 RTL、约束、构建选项或默认位流。
+
+## 2026-10-26 · App v1.34-performance / Code35，常用演奏入口与手机本地三效果场景
+
+打开 App 默认进入“演奏”页，集中总音量、三效果摘要、录放状态、场景与紧急止音；进阶演奏参数可折叠，普通界面移除阶段 / 预算文案。手机本地场景可读取并保存设备三效果配置、命名、改名、删除、主动应用与写后匹配，且不会覆盖三张独立效果卡的未提交草稿。同日还有一串外观构建（Code28 图标、Code29 玻璃、Code30 霜面、Code31 星空、Code32 图标背景、Code34 贴纸、Code36 / Code37 吉祥物、Code38 乐队横幅），只改手机端素材与主题，未记录 versionName，也不入库。
+
+硬件保持三效果基线，本轮没有新增 FPGA 功能：全局震音（独立相位 34 CLS / 共享相位 40 CLS）、原 D、E2 静态定弦、E3 逐音锁存、E1 触摸波形候选均未通过 35 CLS 安全垫准入，B2 的 12 键映射依赖未满足，全部未接入。Code35 命名包 SHA256 `C53E3A02…`，当轮记录位流 `PCM5102_UNIFIED_PERFORMANCE_20261026.fs` SHA256 `597A55DC…`。**未安装 App、未烧录；手机布局、真实蓝牙与听音待实机验收。** 逐项结果见[演奏体验验收报告](../pcm5102_pam8403/reports/performance_experience_20261026/REPORT.md)，一页操作见[常用演奏操作](../pcm5102_pam8403/PERFORMANCE_QUICKSTART.md)。
+
+## 2026-10-26 · 合唱 / 延迟 / 混响正式接入统一工程，App v1.26-fx3 / Code27
+
+新增 `src/audio_fx_chain.v` 并登记进 `PCM5102_UNIFIED.gprj`：固定链路为现有混音 → CHORUS → DELAY → REVERB → 总音量 → I²S。三块可分别旁路、分别设置、同时开启，各用独立历史缓冲（2048 / 4096 / 4096 采样），插值 / 反馈 / 湿声共用一个乘法器，整机 DSP 不增加；默认三块全部关闭，避免更新后自动改变演奏声音。上行 `EFFECT,3,m,s,w` 原子写入三块配置（m 的位 0/1/2 = 合唱 / 延迟 / 混响，s 打包合唱深度 / 延迟档 / 延迟反馈 / 混响预设，w 为三个湿声量的 nibble 布局、以十进制发送），旧固件不支持查询时显示不可用，其余控制不受影响。合唱 LFO 约 0.745Hz、调制幅度四档约 32/64/128/256 采样；延迟约 84/168/336/503ms、反馈 25/50/62.5/75%，长三档湿声先一阶低通再按 2/4/6 帧捕获；混响四路并联梳状 + 两路串联全通、半采样率。PANIC、TAKE 结束与复位清整条效果链。
+
+完整 PnR：Logic 22624（+1110）、CLS 11470（+271）、Register 10726、BSRAM 53（+6）、DSP 26.5 不变；50MHz、place2 / route0 / maxfan23，未布通 0、setup / hold 违例端点 0/0，原始 WNS +0.018 / +0.144 ns。**建立时间余量很紧，此后任何 RTL 改动都必须重新完整布线核验。** 独立采样域队列模型与 RTL 逐样本对比 1555536 帧零差异，覆盖全部 8 个掩码、四档正负脉冲、合唱调制、动态设置 / 旁路 / 湿声钳位与复位；四档混响首个湿声均为 25.31328ms（T20 为 -5～-25dB 斜率外推 RT60，不等于 -60dB）。位流 SHA256 `5D6E8A30…`，APK SHA256 `4D95EEE7…`；未烧录、未安装、未做耳机口实物对录。见[三效果优先版交付与验收](../pcm5102_pam8403/reports/fx_priority_20261026/REPORT.md) 与 [FX3 说明](../pcm5102_pam8403/FX3.md)。
+
+## 2026-10-26 · 固定 TTP229 十六键串行输入，App v1.25-touch16 / Code26
+
+生产删除 TTP229 八键 GPIO 读取、去抖与 K8 压力切换路径，上电即进入串行十六键校准，不再由 App 切换模式。顶层 `touch_out[7:0]` 端口与约束引脚保留但内部不再使用，`.sdc` 去掉这两条对应的 false path。十六声部、K1～K7 映射 / 弯音、压力与滑杆、音色、显示、曲谱和 TAKE 全部保留。`CTRL?` / `CTRL2?` 模式字段恒为 `1`，`TOUCH,8` 返回 `ERR,RANGE`，`TOUCH,16` 只在空闲且键盘就绪、延音关闭时接受；`SERIAL,0/1` 即使在键盘未就绪时，只要曲谱、下载、音符、录制均空闲且延音关闭即可应用，用于救回错误极性，设置不跨 FPGA 断电。App 移除八键入口和旧日志的一键八键配置。
+
+先行可行性核验（`reports/touch16_reverb_20261026/`，只改隔离候选、未动生产）：彻底移除八键读取净释放 197 Logic、14 CLS、155 Register，BSRAM 与 DSP 无回收；接回同一份三效果原型后，在保留 D/B2/E 预留与 35 CLS 安全垫的前提下仍缺 737 Logic、178 CLS、1 BSRAM——因此本轮只兑现“固定十六键”，三效果留到同日 FX3 轮次按新的资源账逐项取舍。
+
+完整 PnR：Logic 21514、CLS 11199、Register 10416、BSRAM 47、DSP 26.5；place2 / route0 / maxfan23，未布通 0、setup / hold 违例端点 0/0，原始 WNS +0.146 / +0.194 ns；101 项构建输入前后哈希不变。位流 SHA256 `0D205CFE…`，滚动 APK SHA256 `CE178B70…`（证书与前版相同）。8192 样本十六音高 / 控制 / 极性重配置、上电后极性不匹配恢复、47 条 UART 扩展回复、静默与双模拟回归通过；未烧录、未安装、未做模拟对录。见[交付报告](../pcm5102_pam8403/reports/touch16_delivery_20261026/README.md) 与[固定十六键](../pcm5102_pam8403/TOUCH16.md)。
+
+## 2026-10-25 · APDS 运算复用与效果器前置核验（历史默认位流，未烧录）
 
 `apds9960_ctrl` 的局部累加 / 均值运算复用与两套音源的共享算术（`synth_shared_arith`）合入生产树，相对当日冻结基线净回收 **211 Logic / 134 CLS**。完整 PnR（Gowin V1.9.11.03 Education，place2 / route0 / maxfan23）：Logic **21649**、CLS **11183**、Register 10579、BSRAM 47、DSP 26.5，未布通 0、setup / hold 违例端点 0/0，WNS +0.030 / +0.170 ns。位流 SHA256 `840AE4C47D7BB57048481ACA3ECB6BEEC59E430E66AF0BD32429FDE99E84AD15`，本轮未记录 UserCode；101 项源码 / ROM / 约束 / 工程输入逐项匹配已验证快照。
 
