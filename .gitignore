@@ -82,6 +82,21 @@ auth.json
 /pcm5102_pam8403/android_app/*.apk
 /pcm5102_pam8403/android_app/*.idsig
 
+# Local offline Android SDK bootstrap under android_app/tools/. build-apk.ps1
+# downloads the SDK and regenerates the debug keystore, so only the scripts in
+# that folder are versioned.
+/pcm5102_pam8403/android_app/tools/sdk/
+/pcm5102_pam8403/android_app/tools/repository.xml
+/pcm5102_pam8403/android_app/tools/gradle-distribution.sha256
+/pcm5102_pam8403/android_app/tools/debug.keystore
+
+# Gowin writes a four-file HTML timing bundle next to each run's written report;
+# the bundle is rebuildable from the same build and stays local.
+/pcm5102_pam8403/reports/*/*.rpt.html
+/pcm5102_pam8403/reports/*/*.tr.html
+/pcm5102_pam8403/reports/*/*_tr_cata.html
+/pcm5102_pam8403/reports/*/*_tr_content.html
+
 # Layout renders duplicate the same images inside deliveries/APP_HUE33_20261023/layouts/.
 /pcm5102_pam8403/android_app/design/out/hue33/[0-9]*_[0-9]*.png
 
@@ -106,6 +121,10 @@ auth.json
 !/pcm5102_pam8403/android_app/dist/FPGA-Music-FX3-Code27.apk
 !/pcm5102_pam8403/android_app/dist/FPGA-Music-Performance-Code35.apk
 !/pcm5102_pam8403/android_app/dist/FPGA-Music-ScoreBend-Code39.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-Control12-Code40.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-Rhythm-Code41.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-Score256-Code46.apk
+!/pcm5102_pam8403/android_app/dist/FPGA-Music-CleanUI-Code47.apk
 
 # Manual design backups next to the rendered assets they already replace.
 /pcm5102_pam8403/android_app/design/*_backup.png

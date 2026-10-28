@@ -1,12 +1,65 @@
 # 版本记录
 
+## 2026-10-28 · App v1.46-cleanui / Code47，简洁界面（当前默认安装包，沿用字库修复位流，未烧录）
+
+只改手机侧：导航、同级卡片、录制步骤、曲目与音符预览统一从 01 编号；内层卡片去掉重复编号，移除卡片顶部彩条与重复头像；曲谱页移除独立「小星星示例」和长曲快捷按钮，选曲即自动载入并只保留一个下载入口；文件操作、详细说明与音游设置默认折叠。120 首曲库全部保留，默认白银《伦敦桥》，长曲仍可从列表选择；曲库下载按当前键位数匹配十二键，导入文件与练习谱只校验现有键位。滚动入口 `dist/FPGA-Music-Unified.apk` 与不可变快照 `dist/FPGA-Music-CleanUI-Code47.apk` 逐字节相同，SHA256 `24A2E68A…`。
+
+**FPGA 不改**：沿用 2026-10-28 计分字库修复位流（`0B924964…`）与 Code46 的 256 条单曲容量；超过 128 条仍需该配套位流。验证为 Java/D8/aapt2 构建、APK 签名与既有核心回归通过，本轮无独立 `reports/` 目录；**未在手机安装、未核对实机布局、未做蓝牙实测**。详见 [App 说明](../pcm5102_pam8403/android_app/README.md)。以下 Code46 及更早条目为已发布轮次的历史记录。
+
+## 2026-10-28 · 计分字库硬件修复位流（当前默认位流，Code46 时交付、Code47 沿用，未烧录）
+
+用户实拍 PLAY/S1 跟谱时屏幕没有得分。根因是字库的标量数组写法 `reg hud_font[0:511]` 在当前 Gowin V1.9.11.03 Education 下被综合为恒 0：RTL 仿真能画出数字，而旧的路由后测试只检查启动扫描、没有进入显示分数的状态，因此未捕获。字库改为显式一位向量 `reg [0:0]`、按一位二进制数据加载、读取时显式选 bit0，并把音符层与 HUD 层的像素结果分别保留；整机同时把上电复位终值解码寄存，移除高扇出复位信号前的组合解码，实测仍在第 63 个时钟释放复位。
+
+完整 PnR（候选标签 `score_visible47_r`，place2 / route0 / maxfan23，50MHz，native 32/36 位块）：Logic **22902**、CLS **11504**、Register 11516、BSRAM **55**、DSP 25；剩 **16 CLS**、BSRAM 余 1 块，未布通 0、setup / hold 违例 0/0，原始 WNS **+0.598 / +0.178 ns**，本轮未记录 UserCode。交付位流 `PCM5102_UNIFIED_SCORE_VISIBLE_FIX.fs` SHA256 `0B924964…`，已同步为本机默认 `impl/pnr/PCM5102_UNIFIED.fs`；修复前的默认位流为 `618F23B7…`，与 Code46 命名交付 `0320567B…` 并非同一份产物，回退时按 [release.json](../pcm5102_pam8403/reports/score_visible_20261028/release.json) 的两个字段区分。
+
+**App Code46 无需更新**：256 条曲谱、384000 满分、四类音符、5 像素 TAP 与粉色阶梯、计分规则、协议、引脚与音频数据通路全部保持原样。验证范围：最小字库硬件复现（旧写法 106 个应亮像素全变 0，显式向量 512 地址零错误）、真实判定模块两次 TAP 后的显示模块路由后 RGB/PWM 逐像素核对、RTL 显示回归、整机路由后 40 组外部扫描；新增 `tools/check_rhythm_font_netlist.py` 并挂进两个统一构建入口，字库丢失或初始化错误会让构建检查直接失败。**未烧录开发板、未做实体 LED 确认**。候选 a～s 的十几次尝试（Logic 超 23040、setup -1.107 ns、294 / 262 条未布通等）记录在同轮报告。见[修复位流与验证](../pcm5102_pam8403/reports/score_visible_20261028/README.md)。
+
+## 2026-10-28 · App v1.45-score256 / Code46，单曲256条
+
+单曲由128条扩到256条；120首曲库中19首保留原谱反复，最长252条、约104秒。整机BSRAM仍54/56、DSP仍25，音游支持256连击及384000分。超过128条须配套更新FPGA位流；未安装手机或烧录。写入标记改为暂存区清零检测，计分ROM保留原物理块；频谱复用已有阶段寄存前值，数值和周期逐拍等价。命名位流 `PCM5102_UNIFIED_SCORE256_CODE46.fs`（`0320567B…`）与 APK `4A4BEB47…`（该 APK 已入库）。见[配套产物与完整验证](../pcm5102_pam8403/reports/score256_20261028/README.md)。
+
+
+## 2026-10-28 · App Code45：120首离线曲库
+
+App 1.44-library120：保留原九首，新增111首O’Neill传统旋律；合计原9首、58首新增单遍版、53首明确标注的旋律节选，三个等级各40首。音游、指引和自动演奏共用同一份已下载曲谱，全部曲库只存手机，FPGA逻辑/存储/DSP增量均为0，现有FPGA输入与位流不改动。曲库80015项断言、App核心回归、数据重生成一致性、APK编译/签名通过；未安装手机或连接HC-05实测。见[用法](../pcm5102_pam8403/android_app/SONG_LIBRARY.md)与[交付验证](../pcm5102_pam8403/reports/song_library120_20261028/README.md)。下方默认版本描述按历史记录阅读。
+
+## 2026-10-28 · App v1.43-rhythm-flick / Code44，FLICK 粉色阶梯（当日默认位流，未烧录）
+
+只改显示外观：FLICK 改为 5×2 像素粉色阶梯，上排右 3 点、下排左 3 点；TAP 与底部十二键仍为 5 像素宽。完整 PnR（候选 `rhythm_flick44_b`）Logic 22848 / CLS **11497** / Register 11624 / BSRAM 54 / DSP 25，剩 23 CLS；50MHz 完整布通，主时钟与 ADC 时钟 setup / hold 违例均 0，最差余量 +0.053 / +0.153 ns。命名位流 `PCM5102_UNIFIED_RHYTHM_FLICK_CODE44.fs`（`2447F02E…`），APK `319C838F…`（未入库）。外部扫描轮廓 / 跨区 / 滚动 / 清屏、尾条与旧扫描、路由后 40 组扫描通过；未安装或烧录。见[本轮报告](../pcm5102_pam8403/reports/rhythm_flick_shape_20261028/README.md)。
+
+## 2026-10-28 · App v1.42-rhythm-5px / Code43，TAP 与十二键固定 5 像素（当日默认位流，未烧录）
+
+TAP 固定 5 像素宽、下方十二键每键 5 像素宽，右上横排红色得分，四类玩法与完整长按尾条保留；显示宽度位保持向后兼容。完整 PnR（候选 `rhythm_width5_43a`）Logic 22785 / CLS **11485** / Register 11590 / BSRAM 54 / DSP 25，剩 35 CLS；50MHz 完整布通，setup / hold 违例 0/0，原始最差余量 +0.275 / +0.163 ns。命名位流 `PCM5102_UNIFIED_RHYTHM_5PX_CODE43.fs`（`48858379…`），APK `0A62F2B9…`（未入库）。外部 RGB 逐像素核对、尾条与旧扫描、App 构建 / 遥测及路由后 40 组扫描通过；默认 APK 与位流已同步，未上板。见[本轮报告](../pcm5102_pam8403/reports/rhythm_width5_20261028/README.md)。
+
+## 2026-10-28 · App v1.41-rhythm-notes / Code42，四类音符与完整长按尾条（当日默认位流，未烧录）
+
+音游移到曲谱页并给出十二键提示；`hub75e_rhythm_display.v` 的音符类型展开为 TAP / HOLD / DRAG / FLICK，长按带完整下落尾条，右侧红色得分与黄色命中反馈；`downloadable_song.v` / `rhythm_game.v` / `hc05_keymap.v` / `top.v` 增加 `event_type` / `spawn_type` / `spawn_body` 字段，曲谱字从 45 位扩到 47 位，显式类型下载前用 `SONG_CHORD,?` 查询能力，旧固件拒绝时 App 在 `SONG_BEGIN` 前停止。例谱 [rhythm_four_types.csv](../pcm5102_pam8403/android_app/examples/rhythm_four_types.csv)。完整 PnR（候选 `rhythm_notes42_capture`）Logic 22758 / CLS **11487** / Register 11581 / BSRAM 54 / DSP 25，剩 33 CLS（比旧 35 预留口径少 2）；50MHz 完整布通，setup / hold 违例 0/0，原始最差余量 +0.560 / +0.146 ns。命名位流 `PCM5102_UNIFIED_RHYTHM_NOTES_CODE42.fs`（`96F11065…`），APK `CBDEB87D…`（未入库）。17 组针对性 RTL、App 核心与签名构建、路由网表 40 组扫描通过；**未做实物验收**。玩法见[十二键音游](../pcm5102_pam8403/RHYTHM_GAME.md)，逐项数据见[本轮报告](../pcm5102_pam8403/reports/rhythm_notes_20261028/README.md)。
+
 [首页](../README.md) · [文档索引](README.md) · [完整验证记录](../pcm5102_pam8403/VERIFICATION.md)
 
 按当前工程文档和App版本整理。以下日期为上海时间；位流标识指已记录构建，重新构建以实际产物为准。下文历史安装包链接对应的旧 APK 已从 `dist/` 下架，可在 Gitee 提交记录中取得。
 
-`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口，内容为 **v1.38-scorebend / Code39**（2026-10-27 构建，SHA256 `4BF0C69A…`，与 `dist/FPGA-Music-ScoreBend-Code39.apk` 字节相同）。`dist/` 另保留文档引用过的 `FPGA-Music-Performance-Code35.apk`、`FPGA-Music-FX3-Code27.apk`、`FPGA-Music-Touch16-Code26.apk`、`FPGA-Music-Hue33-Code25.apk`、`FPGA-Music-LinkDiag-Code24.apk`、`FPGA-Music-Chromatic.apk` 与 `FPGA-Music-Pedal.apk`；Code28～Code34 与 Code36～Code38 这些外观构建只留在本机 `dist/`，未入库。
+`dist/FPGA-Music-Unified.apk` 是滚动的当前安装入口，内容为 **v1.46-cleanui / Code47**（2026-10-28 构建，SHA256 `24A2E68A…`，与不可变快照 `dist/FPGA-Music-CleanUI-Code47.apk` 逐字节相同）。`dist/` 另保留文档引用过的 `FPGA-Music-Score256-Code46.apk`（`4A4BEB47…`）、`FPGA-Music-Rhythm-Code41.apk`（`32B3D7C5…`）、`FPGA-Music-Control12-Code40.apk`（`4F5D1253…`）、`FPGA-Music-ScoreBend-Code39.apk`、`FPGA-Music-Performance-Code35.apk`、`FPGA-Music-FX3-Code27.apk`、`FPGA-Music-Touch16-Code26.apk`、`FPGA-Music-Hue33-Code25.apk`、`FPGA-Music-LinkDiag-Code24.apk`、`FPGA-Music-Chromatic.apk` 与 `FPGA-Music-Pedal.apk`；Code28～Code34 与 Code36～Code38 这些外观构建、以及 Code42～Code45 的四类音符 / 五像素 / 粉色阶梯 / 曲库构建只留在本机 `dist/`，未入库。
 
-## 2026-10-27 · App v1.38-scorebend / Code39，曲谱逐事件弯音（当前默认位流，未烧录）
+## 2026-10-27 · App v1.40-rhythm / Code41，十二键音游（当日默认位流，2026-10-28 起被 Code42～Code44 显示轮次与字库修复构建取代）
+
+新增 `src/rhythm_game.v` 并登记进 `PCM5102_UNIFIED.gprj`，LED 曲谱页在十二路工程下切换为音游页：屏幕左到右固定对应 K1～K12，每列跟随该键当前映射的 MIDI 音高，改键位即改谱面提示。判定分单点、和弦、重复音与长按四类，Perfect 1000 分、Good 500 分、长按完成另加 500 分，四档判定窗口 ±80 / 120 / 160 / 200 ms（Perfect 为窗口的一半），128 条事件满分 192000；得分、当前连击、最高连击与 Miss 全部在 FPGA 内用板上时钟计算，手机用 `VIZ?` 读取或连续刷新，`VIS,0,<配置>` 写入难度、配色、薄音符宽度、长按玩法与击打闪光开关。K13～K16 继续发 C5/D5/E5/F5 并在底部保留十六键反馈，但不参加十二列计分。显示侧把 `hub75e_rhythm_display.v` 的游戏像素改为三比特平面（音符头、类型低位、类型高位）与一条环形滚动，长按体只置类型低位，音符固定 1 像素高。App 主页新增「十二键音游」卡片，`RhythmState` 解析计分回复。
+
+完整 PnR（标签 `rhythm_game_release41`，Gowin V1.9.11.03 Education，sharing=1 / retiming=1 / place2 / route0 / maxfan23，50MHz，存储配置保留 native 32/36 位块、`Convert_SDP32_36_to_SDP16_18=false`）：Logic **22542**、CLS **11426**、Register 11525、BSRAM **54**、DSP 25；未布通 0、setup / hold 违例端点 0/0，原始 WNS **+0.246 / +0.149 ns**。相对 Code40 净回收 **56 CLS**、释放 2 块 BSRAM，CLS 剩余从 38 升到 94，扣掉 35 安全垫后功能预算 59。本轮未记录 UserCode。
+
+升级要点：音游设置与得分读取需要配套十二路码流，旧位流下 App 卡片会提示不可用；判定使用 FPGA 时钟，蓝牙回读有延迟但不影响判定；自动试听 `AUDITION` 不计分，播放期间不能改音游设置，需先 STOP。本版不含划键、下落速度设置与延迟校准，长按没有下落尾条。验证为数字与软件范围：十一组最终 RTL 检查、App 全部核心回归、APK 编译 / 签名 / 版本核对通过，最终路由网表另做 40 组外部扫描行检查（64 列、133 主时钟行周期、已知 RGB 与消隐 / LAT 顺序），属启动与扫描检查而非全游戏门级仿真；传感器暂存逐周期对照 150000 拍、按键上行对照 100000 拍；一组早期 9600-baud 完整门级 UART 查询测试因期望夹具写错而中止，测试源已修正但不计为门级 PASS。**未烧录 FPGA、未安装 App、未做真实 HC-05 链路、实板听音与显示验收。** 位流 SHA256 `F7B89654…`，APK SHA256 `32B3D7C5…`；回退位流 `2B25F84F…`（Code40），回退 APK `4F5D1253…`（Code40，已入库）。逐项证据、复现命令与回退路径见[音游交付报告](../pcm5102_pam8403/reports/rhythm_game_20261027/README.md)，玩法与边界见[十二键音游](../pcm5102_pam8403/RHYTHM_GAME.md)。
+
+**发布后的工作区状态**：上述五份源码（`downloadable_song.v`、`rhythm_game.v`、`hub75e_rhythm_display.v`、`hc05_keymap.v`、`top.v`）在 2026-10-28 凌晨继续改为 TAP / HOLD / DRAG / FLICK 四类型与长按尾条，曲谱字扩到 47 位；该改动未综合、未布线、App 未发送类型列，仓库 HEAD 因此不等于任何已验收构建，详见[验证记录](../pcm5102_pam8403/VERIFICATION.md)顶部。**更正记录**：该改造已于同日随 Code42 完整综合布线并交付，App 也改为发送类型列；本段的「未综合」只描述 Code41 发布当刻的工作区状态。
+
+## 2026-10-27 · App v1.39-control12 / Code40，K1～K12 十二路映射与独立弯音
+
+触摸、曲谱自动演奏、曲谱弯音与 LED 屏幕指引从原来的七路扩到十二路：`top.v` / `top_unified.v` 取 `CONTROL_KEYS=12`，K1～K12 可映射 MIDI 60～72 并各自设置弯音，K13～K16 保留 C5/D5/E5/F5，十六路发声引擎不变。`hc05_keymap.v` 的 `MAP?` 改为返回十二项、`MAP,<1..12>,<60..72>` 与 `BEND,<1..12>,<ratio>` 扩至十二路，`MAP_RESET` / `BEND_RESET` 与旧七路命令保持；十二键回复改用独立的 `src/hc05_reply12.hex`。App「触摸 → 音高」提供十二路映射与十二个弯音滑杆，`SongCodec` / `SongLibrary` 同时接受七键与十二键映射（按当前键位数自动匹配音高），十二路 TAKE 初始快照从 33 个字扩到 43 个字，新版仍可读旧七路记录，但十二路新记录需配套新版固件回放。
+
+完整 PnR（place2 / route0 / maxfan23，50MHz）：Logic **22732**、CLS **11482**、Register 11225、BSRAM **56（满）**、DSP 25；未布通 0、setup / hold 违例端点 0/0，原始 WNS **+0.478 / +0.188 ns**。相对 Code39 净增 **+43 CLS**，CLS 剩余从 81 降到 **38**，扣除 35 安全垫后只剩 3，BSRAM 用满；本轮未记录 UserCode。十二路 TAKE 与显示列数改造在当日交付时 BSRAM 已无余量，这也是紧接着的音游轮次以回收 CLS / BSRAM 为首要目标的原因。
+
+验证为数字与软件范围：十二键逐键 13 个合法音高、两位键号、全部 `BEND` 地址与旧七路协议通过；十二路扫描验证 1024 步滑音、独立声部、压力叠加与回正；曲谱验证 128×1 ms 密集十二键 / 休止 / 弯音、128×60000 ms 上限、原子双 bank、STOP / 重启与失败保留旧谱；整机核对 84 个精确音高与 24 条 UART 交互；43 / 33 字段 TAKE 兼容与原子恢复、528 位三效果快照回归、Android 核心回归与十二键导入 / 匹配 / 拒绝 / 弯音 CSV 检查通过。**未烧录 FPGA、未安装 App。** 位流 SHA256 `2B25F84F…`，APK SHA256 `4F5D1253…`。逐项记录见[十二路交付报告](../pcm5102_pam8403/reports/control12_20261027/README.md)，用法与兼容边界见[十二路映射与弯音](../pcm5102_pam8403/CONTROL12.md)。
+
+## 2026-10-27 · App v1.38-scorebend / Code39，曲谱逐事件弯音（当日默认位流，次日被音游构建取代）
 
 每条音符或和弦事件可以带一个弯音目标，按设备当前 `PITCH` 滑音速率靠近，和弦各音共用同一目标。曲谱 CSV 新增第三列 `bend_target_cents`（-1200..1200 整数音分；**空白**沿用手动目标，**0** 显式回正，休止行留空）；下行命令在 `SONG_CHORD,index,mask,duration` 后追加 Q2.14 比率（0 沿用手动、16384 回正、允许 8192..32768），能力查询 `SONG_BEGIN,?` 返回 `SONGBEND,1`。旧两列 CSV、旧三参数下载命令与 MIDI 既有行为保留；MIDI 非中心弯音、同一和弦内各音不同目标明确拒绝。STOP、休止、曲谱结束或移除目标后按当前滑音速率返回各自手动目标，手动目标值本身保留；板上 TAKE 仍为 528 位格式，保存实际生效音高，回放不需要曲谱文件。
 
