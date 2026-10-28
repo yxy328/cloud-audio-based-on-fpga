@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.*;
 
-/** Offline, seven-key editions of public-domain melodies. No audio or network dependency. */
+/** Offline melody library shared by audition, guidance and rhythm play. */
 public final class SongLibrary {
     private static final Pattern NOTE=Pattern.compile("(r|[A-G](?:#|b)?[0-8])([whqe])(\\.)?");
     public enum Tier {
@@ -22,11 +22,15 @@ public final class SongLibrary {
         private final SongCodec.Song score;
         private Entry(String id, String title, String englishTitle, Tier tier, String time,
                       int bpm, String edition, String notation) {
+            this(id,title,englishTitle,tier,time,bpm,edition,
+                "https://www.printablegarden.com/sheet-music/"+id+"/",
+                decode(title+"（"+tier.title+" · 七键版）",time,bpm,notation));
+        }
+        private Entry(String id, String title, String englishTitle, Tier tier, String time,
+                      int bpm, String edition, String sourceUrl, SongCodec.Song score) {
             this.id=id; this.title=title; this.englishTitle=englishTitle; this.tier=tier;
-            this.time=time; this.bpm=bpm; this.edition=edition;
-            sourceUrl="https://www.printablegarden.com/sheet-music/"+id+"/";
-            score=decode(title+"（"+tier.title+" · 七键版）",time,bpm,notation);
-            if(Integer.bitCount(score.requiredMask())>7)throw new IllegalArgumentException("曲库曲目超过七种音高："+id);
+            this.time=time; this.bpm=bpm; this.edition=edition; this.sourceUrl=sourceUrl; this.score=score;
+            if(Integer.bitCount(score.requiredMask())>12)throw new IllegalArgumentException("曲库曲目超过十二种音高："+id);
         }
         public SongCodec.Song song() { return score; }
         public byte[] csv() {
@@ -45,7 +49,7 @@ public final class SongLibrary {
                                int bpm, String edition, String notation) {
         return new Entry(id,title,english,tier,time,bpm,edition,notation);
     }
-    private static final List<Entry> ALL=Collections.unmodifiableList(Arrays.asList(
+    private static final List<Entry> LEGACY=Arrays.asList(
         entry("hot-cross-buns","十字面包","Hot Cross Buns",Tier.BRONZE,"4/4",100,
             "G 大调单旋律；使用 G4、A4、B4。",
             "B4q A4q G4h | B4q A4q G4h | G4e G4e G4e G4e A4e A4e A4e A4e | B4q A4q G4h"),
@@ -73,7 +77,30 @@ public final class SongLibrary {
         entry("row-row-row-your-boat","划小船","Row, Row, Row Your Boat",Tier.GOLD,"6/8",56,
             "C 大调单旋律；6/8 拍以附点四分音符为一拍。需要高音 C5，下载按钮会匹配七键。",
             "C4q. C4q. | C4q D4e E4q. | E4q D4e E4q F4e | G4h. | C5e C5e C5e G4e G4e G4e | E4e E4e E4e C4e C4e C4e | G4q F4e E4q D4e | C4h.")
-    ));
+    );
+    private static final List<Entry> ALL=buildLibrary();
+
+    private static List<Entry> buildLibrary() {
+        List<Entry> entries=new ArrayList<>(LEGACY);
+        TraditionalSongs.appendTo(entries);
+        Set<String> ids=new HashSet<>();
+        for(Entry e:entries)if(!ids.add(e.id))throw new IllegalArgumentException("重复曲目："+e.id);
+        return Collections.unmodifiableList(entries);
+    }
+
+    /** Generated, prevalidated MIDI-offset:duration pairs; no decoder or extra RAM on the FPGA. */
+    static Entry traditional(String id, String title, Tier tier, String time, int bpm,
+                             String edition, String sourceUrl, String data) {
+        List<SongCodec.Event> events=new ArrayList<>();
+        for(String pair:data.split(" ")) {
+            String[] fields=pair.split(":");
+            int pitch=Integer.parseInt(fields[0]);
+            if(pitch < -1 || pitch > 12)throw new IllegalArgumentException("曲库音高越界："+id);
+            events.add(new SongCodec.Event(pitch<0?0:1<<pitch,Integer.parseInt(fields[1])));
+        }
+        return new Entry(id,title,title,tier,time,bpm,edition,sourceUrl,
+            new SongCodec.Song(title+"（"+tier.title+" · 传统旋律）",events));
+    }
 
     public static List<Entry> all() { return ALL; }
     public static List<Entry> in(Tier tier) {
@@ -83,11 +110,11 @@ public final class SongLibrary {
 
     /** Keep existing required keys; replace only unused pitches or duplicate slots. */
     public static int[] matchingMapping(SongCodec.Song song, int[] current) {
-        if(current==null||current.length!=7)throw new IllegalArgumentException("请先读取七键映射");
+        if(current==null||(current.length!=7&&current.length!=12))throw new IllegalArgumentException("请先读取键位映射");
         int required=song.requiredMask();
-        if(Integer.bitCount(required)>7)throw new IllegalArgumentException("曲谱超过七种音高，不能自动匹配");
+        if(Integer.bitCount(required)>current.length)throw new IllegalArgumentException("曲谱需要的音高种类超过当前可映射键数，不能自动匹配");
         int[] out=current.clone();int covered=0;List<Integer> spare=new ArrayList<>();
-        for(int i=0;i<7;i++) {
+        for(int i=0;i<current.length;i++) {
             if(out[i]<60||out[i]>72)throw new IllegalArgumentException("键位超出 MIDI 60..72");
             int bit=1<<(out[i]-60);
             if((required&bit)!=0&&(covered&bit)==0)covered|=bit;else spare.add(i);

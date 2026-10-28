@@ -6,7 +6,7 @@ import java.util.*;
 
 /** Pure Java score decoder. No Android dependency, no recorded audio. */
 public final class SongCodec {
-    public static final int MAX_EVENTS = 128;
+    public static final int MAX_EVENTS = 256;
     public static final class Event {
         public final int mask, durationMs;
         public Event(int mask, int durationMs) {
@@ -19,7 +19,7 @@ public final class SongCodec {
         public final String name;
         public final List<Event> events;
         public Song(String name, List<Event> events) {
-            if (events.isEmpty() || events.size() > MAX_EVENTS) throw new IllegalArgumentException("曲谱必须有 1..128 条记录，当前 " + events.size());
+            if (events.isEmpty() || events.size() > MAX_EVENTS) throw new IllegalArgumentException("曲谱必须有 1.."+MAX_EVENTS+" 条记录，当前 " + events.size());
             this.name = name; this.events = Collections.unmodifiableList(new ArrayList<>(events));
         }
         public int requiredMask() { int m=0; for(Event e:events)m|=e.mask; return m; }
@@ -30,7 +30,7 @@ public final class SongCodec {
             out.add("SONG_END"); return out;
         }
         public void checkMapping(int[] mapping) {
-            if(mapping==null || mapping.length!=7)throw new IllegalArgumentException("请先连接设备并读取 7 个键位");
+            if(mapping==null || (mapping.length!=7&&mapping.length!=12))throw new IllegalArgumentException("请先连接设备并读取完整键位");
             int available=0;for(int n:mapping){checkNote(n);available|=1<<(n-60);}
             int missing=requiredMask() & ~available;
             if(missing!=0)throw new IllegalArgumentException("当前键位缺少："+notes(missing)+"。先在键位配置中修改，再下载。不会丢弃音符。");
@@ -60,8 +60,8 @@ public final class SongCodec {
     }
     private static void append(List<Event> out,int mask,long duration) {
         if(duration<1)throw new IllegalArgumentException("音符/休止不能短于 1ms");
-        if(duration>60000L*MAX_EVENTS)throw new IllegalArgumentException("时长过长，超过 128 条容量");
-        while(duration>0){if(out.size()==MAX_EVENTS)throw new IllegalArgumentException("转换后超过 128 条记录；请导出较短的曲谱片段");int d=(int)Math.min(60000,duration);out.add(new Event(mask,d));duration-=d;}
+        if(duration>60000L*MAX_EVENTS)throw new IllegalArgumentException("时长过长，超过 "+MAX_EVENTS+" 条容量");
+        while(duration>0){if(out.size()==MAX_EVENTS)throw new IllegalArgumentException("转换后超过 "+MAX_EVENTS+" 条记录；请导出较短的曲谱片段");int d=(int)Math.min(60000,duration);out.add(new Event(mask,d));duration-=d;}
     }
     private static Song checkedSong(String name,List<Event> out) throws IOException {try{return new Song(name,out);}catch(IllegalArgumentException e){throw new IOException(e.getMessage());}}
     private static final class MEvent {
@@ -120,7 +120,7 @@ public final class SongCodec {
         return csv(name,data);
     }
     public static int[] parseMapping(String line) {
-        String[] p=line.split(",",-1);if(p.length!=8||!p[0].equals("MAP"))throw new IllegalArgumentException("键位响应格式错误");
-        int[] m=new int[7];for(int i=0;i<7;i++){m[i]=Integer.parseInt(p[i+1]);checkNote(m[i]);}return m;
+        String[] p=line.split(",",-1);if((p.length!=8&&p.length!=13)||!p[0].equals("MAP"))throw new IllegalArgumentException("键位响应格式错误");
+        int[] m=new int[p.length-1];for(int i=0;i<m.length;i++){m[i]=Integer.parseInt(p[i+1]);checkNote(m[i]);}return m;
     }
 }

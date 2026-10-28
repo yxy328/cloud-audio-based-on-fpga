@@ -1,0 +1,186 @@
+{
+  "logs": {
+    "legacy_regression.log": [
+      "PASS [HC05 protocol]: 57 replies; all commands/keys/13 notes, exact DDS steps/pressure octave, busy guards, query bursts, CR/LF/CRLF, invalid/partial/long/binary lines, framing recovery and reset",
+      "PASS UART bend: 19 replies, endpoints, exact voice address, strict fields/bounds/atomic rejection, busy playing allowed, reset, ADSR coexistence",
+      "PASS FX protocol: 52 replies, all8 masks, atomic bounds, legacy0/1/2 and EFFECT2, configured/applied state",
+      "PASS D target words: both event targets, active bank preserved on failed END, current-range PLAY validation, 128x60000ms full-width data (139 commands)",
+      "PASS score priority/glide/manual restore: 4501 arithmetic checks, seven keys, null/unity, pressure, runtime clamp, fractional slew and original frame deadline",
+      "PASS per-voice bend: exact unity/bounds, 1024 monotonic steps, independent seven keys, FSR stacking, invalid guards, smooth reset, audio-frame timing",
+      "PASS touch TDM: 16 chromatic/pedal phase increments x32 frames (zero error), 4096-sample spectrum G4..F5, independent ADSR/profile snapshots/releases, smooth shared pitch, deadline",
+      "PASS per-voice bend: exact unity/bounds, 1024 monotonic steps, independent seven keys, FSR stacking, invalid guards, smooth reset, audio-frame timing"
+    ],
+    "compact_validation_tests.log": [
+      "PASS tb_downloadable_song: atomic banks, chords/rests, shared RAM, timing, lookahead, backpressure, STOP/restart, 128 dense notes",
+      "PASS D target words: both event targets, active bank preserved on failed END, current-range PLAY validation, 128x60000ms full-width data (139 commands)",
+      "PASS [HC05 protocol]: 57 replies; all commands/keys/13 notes, exact DDS steps/pressure octave, busy guards, query bursts, CR/LF/CRLF, invalid/partial/long/binary lines, framing recovery and reset",
+      "PASS UART bend: 19 replies, endpoints, exact voice address, strict fields/bounds/atomic rejection, busy playing allowed, reset, ADSR coexistence",
+      "PASS per-voice bend: exact unity/bounds, 1024 monotonic steps, independent twelve keys and merged MIDI ROM, FSR stacking, invalid guards, smooth reset, audio-frame timing",
+      "PASS control12 TAKE: 43-field atomic capture/replay, changed K12 pitch, gate32, legacy33 recovery, extended recovery, malformed partial snapshot rejection; capacity 1024 unchanged"
+    ],
+    "control12_units.log": [
+      "PASS per-voice bend: exact unity/bounds, 1024 monotonic steps, independent twelve keys and merged MIDI ROM, FSR stacking, invalid guards, smooth reset, audio-frame timing",
+      "PASS full528 FX atomic snapshot: 34 checks; complete capture and no mixed words at any audio frame",
+      "PASS tb_take_atomic: 5 checks; complete capture and no mixed words at any audio frame"
+    ],
+    "take_legacy.log": [
+      "PASS tb_performance_take: 25 checks, mock storage only"
+    ],
+    "control12_protocol.log": [
+      "PASS control12 protocol: all12 keys x13 pitches, two-digit keys, all12 BEND addresses, compact MAP query/reset, strict bounds; 168 checks, 175 replies"
+    ],
+    "control12_top_final.log": [
+      "PASS control12 UART, twelve exact pitches, 16 voices, independent bend, score scope, STOP/manual restoration: 84 pitch checks, 22 replies, 7338 panel rows"
+    ],
+    "control12_top_decode_final.log": [
+      "PASS control12 UART, twelve exact pitches, 16 voices, independent bend, score scope, STOP/manual restoration: 84 pitch checks, 22 replies, 7338 panel rows"
+    ],
+    "control12_dense.log": [
+      "PASS control12 dense score: 128 x1ms across all12 keys, rests, per-event bend targets, 119 lookahead emissions, no drops"
+    ],
+    "score_decode_tests_fixed.log": [
+      "PASS tb_downloadable_song: atomic banks, chords/rests, shared RAM, timing, lookahead, backpressure, STOP/restart, 128 dense notes",
+      "PASS D target words: both event targets, active bank preserved on failed END, current-range PLAY validation, 128x60000ms full-width data (139 commands)",
+      "PASS song bound: 128 x 60000ms, 23-bit horizon, note-off boundaries, stalled visual drain without wrap",
+      "PASS control12 protocol: all12 keys x13 pitches, two-digit keys, all12 BEND addresses, compact MAP query/reset, strict bounds; 168 checks, 175 replies"
+    ],
+    "control12_take_top_final.log": [
+      "PASS control12 TAKE top: UART recording/STOP/RAM replay, actual K8/K12 bent DDS steps after live bends changed, complete extension wiring, external I2S/deadline/headroom; no Flash write"
+    ],
+    "map_reply_tests.log": [
+      "PASS [HC05 protocol]: 57 replies; all commands/keys/13 notes, exact DDS steps/pressure octave, busy guards, query bursts, CR/LF/CRLF, invalid/partial/long/binary lines, framing recovery and reset",
+      "PASS control12 protocol: all12 keys x13 pitches, two-digit keys, all12 BEND addresses, compact MAP query/reset, strict bounds; 168 checks, 175 replies"
+    ],
+    "trusted_tests.log": [
+      "PASS control12 protocol: all12 keys x13 pitches, two-digit keys, all12 BEND addresses, compact MAP query/reset, strict bounds; 168 checks, 175 replies",
+      "PASS per-voice bend: exact unity/bounds, 1024 monotonic steps, independent twelve keys and merged MIDI ROM, FSR stacking, invalid guards, smooth reset, audio-frame timing"
+    ],
+    "shared_reply_top_tests.log": [
+      "PASS control12 UART, twelve exact pitches, 16 voices, independent bend, score scope, STOP/manual restoration: 84 pitch checks, 24 replies, 7715 panel rows",
+      "PASS control12 TAKE top: UART recording/STOP/RAM replay, actual K8/K12 bent DDS steps after live bends changed, complete extension wiring, external I2S/deadline/headroom; no Flash write"
+    ],
+    "shared_reply_take_top_production.log": [
+      "PASS control12 TAKE top: UART recording/STOP/RAM replay, actual K8/K12 bent DDS steps after live bends changed, complete extension wiring, K16 high key with production EVENT_KEYS_ENABLE=0, external I2S/deadline/headroom; no Flash write"
+    ],
+    "code39_differential.log": [
+      "PASS HC05 decoder differential: 512 UART transactions, exact replies/control values/pulses, mutated commands and random lines"
+    ],
+    "fixed16_download.log": [
+      "PASS fixed16 HC05 downloads: UART atomicity/retry/map validation, sample commands rejected, chords/rests, failed END retains active bank, live key MAP lock, obsolete GPIO logger rejected"
+    ],
+    "app_core.log": [
+      "PASS LedHue: 366 checks, 33 anchors/HSV, silence, saturation and independent App scales",
+      "PASS PerformanceParams: 8690 checks; unit conversions, quantized round trips, firmware bounds, query parsing, Chinese errors",
+      "PASS FX configuration/applied state, independent block updates and RTL replies: 5483 checks",
+      "PASS local FX scenes, CRC/atomic persistence, configuration vs overrides, rejection/readback/timeout: 170 checks",
+      "PASS LedProtocol: 180 checks",
+      "PASS TakeStatusTest: 17 checks",
+      "PASS RecordingSupport: 17 checks; event-only queries and rejection recovery",
+      "PASS PhoneTake: 10054 checks; local note timing/hold/velocity, standard MIDI, 25 independent saves/reopen/rename/delete, CRC, failure preservation, 10000-note bound and long silence",
+      "PASS SongLibrary: 4128 assertions",
+      "PASS ControlState: 33 checks",
+      "PASS TakeWorkflow: 285 checks",
+      "PASS SppAudio: 15 checks; removed PCM commands never reach Bluetooth",
+      "PASS ChromaticKeys: 77 checks; scan/pitch geometry and all sixteen MIDI notes",
+      "PASS device controls: 4695 assertions",
+      "PASS VoiceBend: 7243 assertions; all cents, protocol, pitch error, coalescing/fairness/offline/last edit/batch isolation",
+      "PASS AdsrProfile: 5032 assertions",
+      "PASS SongCodec: 31 assertions",
+      "PASS bend target CSV, all2401 cents, explicit zero/null, chord rejection, old commands, 128x60000ms and export roundtrip: 4827 checks",
+      "PASS SppLink: 267 assertions",
+      "PASS AudioRecording: 1203 checks"
+    ],
+    "app_core_final.log": [
+      "PASS LedHue: 366 checks, 33 anchors/HSV, silence, saturation and independent App scales",
+      "PASS PerformanceParams: 8690 checks; unit conversions, quantized round trips, firmware bounds, query parsing, Chinese errors",
+      "PASS FX configuration/applied state, independent block updates and RTL replies: 5483 checks",
+      "PASS local FX scenes, CRC/atomic persistence, configuration vs overrides, rejection/readback/timeout: 170 checks",
+      "PASS LedProtocol: 180 checks",
+      "PASS TakeStatusTest: 17 checks",
+      "PASS RecordingSupport: 17 checks; event-only queries and rejection recovery",
+      "PASS PhoneTake: 10054 checks; local note timing/hold/velocity, standard MIDI, 25 independent saves/reopen/rename/delete, CRC, failure preservation, 10000-note bound and long silence",
+      "PASS SongLibrary: 4128 assertions",
+      "PASS ControlState: 33 checks",
+      "PASS TakeWorkflow: 285 checks",
+      "PASS SppAudio: 15 checks; removed PCM commands never reach Bluetooth",
+      "PASS ChromaticKeys: 77 checks; scan/pitch geometry and all sixteen MIDI notes",
+      "PASS device controls: 4695 assertions",
+      "PASS VoiceBend: 7243 assertions; all cents, protocol, pitch error, coalescing/fairness/offline/last edit/batch isolation",
+      "PASS AdsrProfile: 5032 assertions",
+      "PASS SongCodec: 31 assertions",
+      "PASS bend target CSV, all2401 cents, explicit zero/null, chord rejection, old commands, 128x60000ms and export roundtrip: 4827 checks",
+      "PASS SppLink: 267 assertions",
+      "PASS AudioRecording: 1203 checks",
+      "PASS Control12: twelve-note chord, high-note remap, thirteen-note rejection, score bend CSV"
+    ],
+    "app_control12.log": [
+      "PASS Control12: twelve-note chord, high-note remap, thirteen-note rejection, score bend CSV"
+    ],
+    "step_ram_regression.log": [
+      "PASS control12 step RAM: 192 bit-exact frames, live scanner/replay half-word races, 16 DDS phases/ADSR/age/poly/tails/legacy fallback, PCM; worst busy 1011/1024 clocks",
+      "PASS control12 step RAM: 192 bit-exact frames, live scanner/replay half-word races, 16 DDS phases/ADSR/age/poly/tails/legacy fallback, PCM; worst busy 819/1024 clocks",
+      "PASS control12 TAKE: 43-field atomic capture/replay, changed K12 pitch, gate32, legacy33 recovery, extended recovery, malformed partial snapshot rejection; capacity 1024 unchanged",
+      "PASS tb_performance_take: 25 checks, mock storage only",
+      "PASS tb_take_atomic: 5 checks; complete capture and no mixed words at any audio frame",
+      "PASS full528 FX atomic snapshot: 34 checks; complete capture and no mixed words at any audio frame",
+      "PASS per-voice bend: exact unity/bounds, 1024 monotonic steps, independent twelve keys and merged MIDI ROM, FSR stacking, invalid guards, smooth reset, audio-frame timing",
+      "PASS control12 dense score: 128 x1ms across all12 keys, rests, per-event bend targets, 119 lookahead emissions, no drops",
+      "PASS control12 protocol: all12 keys x13 pitches, two-digit keys, all12 BEND addresses, compact MAP query/reset, strict bounds; 168 checks, 175 replies",
+      "PASS HC05 decoder differential: 512 UART transactions, exact replies/control values/pulses, mutated commands and random lines",
+      "PASS fixed16 HC05 downloads: UART atomicity/retry/map validation, sample commands rejected, chords/rests, failed END retains active bank, live key MAP lock, obsolete GPIO logger rejected"
+    ],
+    "packed_steps_equivalence.log": [
+      "PASS control12 step RAM: 192 bit-exact frames, live scanner/replay half-word races, 16 DDS phases/ADSR/age/poly/tails/legacy fallback, PCM; worst busy 791/1024 clocks",
+      "PASS control12 step RAM: 192 bit-exact frames, live scanner/replay half-word races, 16 DDS phases/ADSR/age/poly/tails/legacy fallback, PCM; worst busy 663/1024 clocks"
+    ],
+    "packed_steps_top.log": [
+      "PASS control12 UART, twelve exact pitches, 16 voices, independent bend, score scope, STOP/manual restoration: 84 pitch checks, 24 replies, 7715 panel rows",
+      "PASS control12 TAKE top: UART recording/STOP/RAM replay, actual K8/K12 bent DDS steps after live bends changed, complete extension wiring, K16 high key with production EVENT_KEYS_ENABLE=0, external I2S/deadline/headroom; no Flash write",
+      "PASS control12 TAKE: 43-field atomic capture/replay, changed K12 pitch, gate32, legacy33 recovery, extended recovery, malformed partial snapshot rejection; capacity 1024 unchanged",
+      "PASS tb_performance_take: 25 checks, mock storage only",
+      "PASS tb_take_atomic: 5 checks; complete capture and no mixed words at any audio frame",
+      "PASS full528 FX atomic snapshot: 34 checks; complete capture and no mixed words at any audio frame"
+    ],
+    "packed_steps_legacy.log": [
+      "PASS touch TDM: 16 chromatic/pedal phase increments x32 frames (zero error), 4096-sample spectrum G4..F5, independent ADSR/profile snapshots/releases, smooth shared pitch, deadline",
+      "PASS default 1200ms pedal: exactly 58594 samples, four linked segments, continuous phase, silence, no overrun/clipping"
+    ],
+    "touch_width_equivalence.log": [
+      "PASS exact touch arithmetic: 192 bit-exact frames, live/replay updates, 16 DDS phases/ADSR/age/poly/tails/legacy fallback, PCM; worst busy 1011/1024 clocks",
+      "PASS exact touch arithmetic: 192 bit-exact frames, live/replay updates, 16 DDS phases/ADSR/age/poly/tails/legacy fallback, PCM; worst busy 819/1024 clocks",
+      "PASS exact touch arithmetic: 192 bit-exact frames, live/replay updates, 16 DDS phases/ADSR/age/poly/tails/legacy fallback, PCM; worst busy 1011/1024 clocks",
+      "PASS exact touch arithmetic: 192 bit-exact frames, live/replay updates, 16 DDS phases/ADSR/age/poly/tails/legacy fallback, PCM; worst busy 1011/1024 clocks"
+    ],
+    "width_final_top.log": [
+      "PASS control12 UART, twelve exact pitches, 16 voices, independent bend, score scope, STOP/manual restoration: 84 pitch checks, 24 replies, 7715 panel rows",
+      "PASS control12 TAKE top: UART recording/STOP/RAM replay, actual K8/K12 bent DDS steps after live bends changed, complete extension wiring, K16 high key with production EVENT_KEYS_ENABLE=0, external I2S/deadline/headroom; no Flash write"
+    ],
+    "width_final_units.log": [
+      "PASS per-voice bend: exact unity/bounds, 1024 monotonic steps, independent twelve keys and merged MIDI ROM, FSR stacking, invalid guards, smooth reset, audio-frame timing",
+      "PASS control12 dense score: 128 x1ms across all12 keys, rests, per-event bend targets, 119 lookahead emissions, no drops",
+      "PASS control12 protocol: all12 keys x13 pitches, two-digit keys, all12 BEND addresses, compact MAP query/reset, strict bounds; 168 checks, 175 replies",
+      "PASS control12 TAKE: 43-field atomic capture/replay, changed K12 pitch, gate32, legacy33 recovery, extended recovery, malformed partial snapshot rejection; capacity 1024 unchanged",
+      "PASS score priority/glide/manual restore: 4501 arithmetic checks, seven keys, null/unity, pressure, runtime clamp, fractional slew and original frame deadline",
+      "PASS D target words: both event targets, active bank preserved on failed END, current-range PLAY validation, 128x60000ms full-width data (139 commands)",
+      "PASS per-voice bend: exact unity/bounds, 1024 monotonic steps, independent seven keys, FSR stacking, invalid guards, smooth reset, audio-frame timing",
+      "PASS HC05 decoder differential: 512 UART transactions, exact replies/control values/pulses, mutated commands and random lines",
+      "PASS fixed16 HC05 downloads: UART atomicity/retry/map validation, sample commands rejected, chords/rests, failed END retains active bank, live key MAP lock, obsolete GPIO logger rejected"
+    ],
+    "width_final_compat.log": [
+      "PASS key_live_stream: 9 lines, framing and queueing verified",
+      "PASS live packet exact equivalence: 100000 cycles, 1124 lines, 38978 stalled bytes, full FIFO/wrap, all key numbers, reset/enable/drop interactions",
+      "PASS tb_performance_take: 25 checks, mock storage only",
+      "PASS tb_take_atomic: 5 checks; complete capture and no mixed words at any audio frame",
+      "PASS full528 FX atomic snapshot: 34 checks; complete capture and no mixed words at any audio frame",
+      "PASS tb_hc05_control_races: real UART map lock during hardware validation, stale completion rejection, ordinary immediate/delayed ACKs",
+      "PASS shared arithmetic exact equivalence: joint_frames=1668 sensor_frames=1671 touch_frames=1671 sensor_max=951 touch_max=842 mul_stalls=13756 rom_stalls=40569 max_wait=1/6 tuning_hold_hits=39808 timbres=ff",
+      "PASS shared arithmetic arbitration: sensor priority, look_aux2 retention, signed and 51-bit products, rom phase mux, wait 2/6, 17 rom comparisons"
+    ]
+  },
+  "candidate_apk": {
+    "path": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\control12_20261027\\app_candidate\\dist\\FPGA-Music-Control12-Candidate-Code40.apk",
+    "sha256": "4F5D1253B597F03780C11000913BEB037E4031CF98AE7D98F393EC812E71379C"
+  },
+  "board_programmed": false,
+  "app_installed": false
+}

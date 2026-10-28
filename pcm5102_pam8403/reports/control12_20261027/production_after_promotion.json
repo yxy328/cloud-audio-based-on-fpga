@@ -1,0 +1,22 @@
+{
+  "checked_inputs": 138,
+  "changed": [
+    "pcm5102_pam8403/src/downloadable_song.v",
+    "pcm5102_pam8403/src/fsr_pitch_scaler.v",
+    "pcm5102_pam8403/src/hc05_command.hex",
+    "pcm5102_pam8403/src/hc05_keymap.v",
+    "pcm5102_pam8403/src/hc05_reply.hex",
+    "pcm5102_pam8403/src/hub75e_rhythm_display.v",
+    "pcm5102_pam8403/src/key_live_stream.v",
+    "pcm5102_pam8403/src/midi_note_lut.v",
+    "pcm5102_pam8403/src/performance_take.v",
+    "pcm5102_pam8403/src/top.v",
+    "pcm5102_pam8403/src/top_unified.v",
+    "pcm5102_pam8403/src/touch_tdm_synth.v",
+    "pcm5102_pam8403/tools/generate_hc05_decoder.py",
+    "pcm5102_pam8403/tools/generate_hc05_replies.py",
+    "pcm5102_pam8403/tools/run_sim.ps1"
+  ],
+  "default_apk_sha256": "4F5D1253B597F03780C11000913BEB037E4031CF98AE7D98F393EC812E71379C",
+  "default_bitstream_sha256": "2B25F84FCACB428BBD26127BC4C4A1527CC3039E64DEFFBEA03D9B353E307BE2"
+}

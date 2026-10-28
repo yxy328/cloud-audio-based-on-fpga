@@ -2,7 +2,7 @@
 // Case-sensitive ASCII lines, CR/LF/CRLF, <=64 characters excluding EOL.
 // Command replies and performance records share UART at complete-line boundaries.
 module hc05_keymap #(
-    parameter integer CLK_HZ=50_000_000,
+    parameter integer CLK_HZ=50_000_000, CONTROL_KEYS=7,
     parameter integer BAUD=9600,
     parameter [15:0] DEFAULT_A=98,DEFAULT_D=3906,DEFAULT_S=39321,DEFAULT_R=488,
     parameter integer ENABLE_DEMO_SCORE=0,
@@ -18,7 +18,7 @@ module hc05_keymap #(
     input wire clk, resetn, rx,
     output wire tx,
     input wire keys_ready, song_busy, notes_busy, recording,
-    output reg [55:0] note_map,
+    output wire [CONTROL_KEYS*8-1:0] note_map,
     input wire [6:0] touch_keys,
     input wire [15:0] scan_keys,
     input wire pressure_mode,
@@ -28,9 +28,14 @@ module hc05_keymap #(
     output wire downloaded_valid, downloaded_playing, downloaded_gate,
     output reg downloaded_audition,
     output wire [31:0] downloaded_increment,
-    output wire [6:0] guide_keys,
+    output wire [CONTROL_KEYS-1:0] guide_keys,
     output wire guide_ms_tick, guide_reset, note_spawn,
-    output wire [6:0] spawn_keys,
+    output wire game_spawn_long,game_event_start,game_event_end,
+    output wire [1:0] game_spawn_type,game_event_type,
+    output wire game_spawn_body,
+    output wire [15:0] game_event_duration,
+    output reg [7:0] game_settings,
+    output wire [CONTROL_KEYS-1:0] spawn_keys,
     output wire [15:0] spawn_delay_ms,
     input wire note_ready,
     output reg builtin_play, builtin_stop,
@@ -41,7 +46,7 @@ module hc05_keymap #(
     output wire [63:0] touch_adsr,
     output wire [129:0] sensor_adsr,
     output reg bend_write,bend_reset,
-    output reg [2:0] bend_index,
+    output reg [$clog2(CONTROL_KEYS)-1:0] bend_index,
     output reg [15:0] bend_ratio,
     output reg [15:0] bend_min,bend_max,bend_slew,tuning_ratio,
     output wire [15:0] score_ratio,
@@ -100,7 +105,19 @@ module hc05_keymap #(
     assign effect_wet=fx_mask[1] ? fx_mix[7:4] : fx_mask[0] ? fx_mix[3:0] :
         fx_mask[2] ? fx_mix[11:8] : fx_mix[3:0];
 
-    localparam [55:0] DEFAULT_MAP={8'd66,8'd65,8'd64,8'd63,8'd62,8'd61,8'd60};
+    localparam [CONTROL_KEYS*8-1:0] DEFAULT_MAP=CONTROL_KEYS==12 ? {8'd71,8'd70,8'd69,8'd68,8'd67,8'd66,8'd65,8'd64,8'd63,8'd62,8'd61,8'd60} : {8'd66,8'd65,8'd64,8'd63,8'd62,8'd61,8'd60};
+    // Legal pitches 60..72 have unique low nibbles (C..F,0..8).
+    // Store only these four bits; reconstruct the fixed high nibble.
+    reg [CONTROL_KEYS*4-1:0] map_nibbles;
+    function [CONTROL_KEYS*4-1:0] pack_map;
+        input [CONTROL_KEYS*8-1:0] mapping;integer n;
+        begin for(n=0;n<CONTROL_KEYS;n=n+1)pack_map[n*4+:4]=mapping[n*8+:4];end
+    endfunction
+    genvar map_key;
+    generate for(map_key=0;map_key<CONTROL_KEYS;map_key=map_key+1)begin: map_slots
+        wire [3:0] low=map_nibbles[map_key*4+:4];
+        assign note_map[map_key*8+:8]={low>=12 ? 4'd3 : 4'd4,low};
+    end endgenerate
     localparam COLLECT=0, EXECUTE=1, RESPOND=2, DECIMAL=3, SONG_WAIT=4, DECIMAL_READ=5, ADSR_WAIT=6, DECODE_START=7, DECODE_WAIT=8;
     // BEGIN GENERATED HC05 COMMAND IDS
     localparam [5:0] CMD_UNKNOWN=0;
@@ -178,10 +195,11 @@ module hc05_keymap #(
     reg [5:0] reply_remaining;
     wire visual_reply=reply_format==18;
     reg reply_char_ready;
-    (* syn_romstyle="block_rom" *) reg [7:0] reply_rom [0:1023];
+    (* syn_romstyle="block_rom" *) reg [7:0] reply_rom [0:2047];
     reg [7:0] reply_template;
-    initial $readmemh("src/hc05_reply.hex",reply_rom);
-    always @(posedge clk)reply_template<=reply_rom[{reply_format,reply_remaining[4:0]}];
+    initial if(CONTROL_KEYS==12)$readmemh("src/hc05_reply12.hex",reply_rom);
+        else $readmemh("src/hc05_reply.hex",reply_rom);
+    always @(posedge clk)reply_template<=reply_rom[{reply_format,reply_remaining}];
     wire [7:0] received;
     wire [7:0] reply_byte;
     wire received_valid, rx_fault, tx_ready;
@@ -254,7 +272,7 @@ module hc05_keymap #(
         .clk(clk),.resetn(resetn),.enable(klive_enable),.scan_keys(scan_keys),
         .tx_data(live_data),.tx_valid(live_valid),.tx_last(live_last),.tx_ready(live_ready)
     );
-    downloadable_song #(.CLK_HZ(CLK_HZ),.ENABLE_LOOKAHEAD(ENABLE_LOOKAHEAD),
+    downloadable_song #(.CONTROL_KEYS(CONTROL_KEYS),.TRUSTED_MAP(CONTROL_KEYS==12),.CLK_HZ(CLK_HZ),.ENABLE_LOOKAHEAD(ENABLE_LOOKAHEAD),
         .LOOKAHEAD_MS(LOOKAHEAD_MS)) u_download (
         .clk(clk),.resetn(resetn),.request(song_request),.operation(song_operation),
         .arg0(song_arg0),.arg1(song_arg1),.arg2(song_arg2),.arg3(song_arg3),.score_min(bend_min),.score_max(bend_max),.score_ratio(score_ratio),.edit_allowed(edit_allowed),
@@ -262,6 +280,8 @@ module hc05_keymap #(
         .done(song_done),.error(song_error),.valid(downloaded_valid),.playing(downloaded_playing),
         .gate(downloaded_gate),.current_note(download_note),.guide_keys(guide_keys),
         .ms_tick(guide_ms_tick),.guide_reset(guide_reset),.note_spawn(note_spawn),
+        .spawn_long(game_spawn_long),.event_start(game_event_start),.event_end(game_event_end),.event_duration(game_event_duration),
+        .spawn_type(game_spawn_type),.spawn_body(game_spawn_body),.event_type(game_event_type),
         .spawn_keys(spawn_keys),.spawn_delay_ms(spawn_delay_ms),.note_ready(note_ready),
         .current_mask(),.busy(download_busy)
     );
@@ -291,7 +311,27 @@ module hc05_keymap #(
     endfunction
     // A single ROM streams punctuation and static text. Only binary values
     // are snapshotted, and every dynamic digit shares one hex encoder.
-    assign reply_byte=reply_template==8'hff ? hex_char(reply[111:108]) : reply_template;
+    reg [$clog2(CONTROL_KEYS)-1:0] map_reply_key;
+    reg map_reply_ones;
+    wire [3:0] map_reply_low=map_nibbles[map_reply_key*4+:4];
+    wire map_reply_sixty=map_reply_low<6 || map_reply_low>=12;
+    wire [3:0] map_reply_digit=map_reply_ones ?
+        (map_reply_sixty ? map_reply_low-4'd12 : map_reply_low-4'd6) :
+        (map_reply_sixty ? 4'd6 : 4'd7);
+    wire advance_payload=state==RESPOND && reply_char_ready && !select_log &&
+        !select_stream && !select_live && tx_ready && reply_template==8'hff;
+    assign reply_byte=reply_template==8'hff ?
+        hex_char(reply_format==19 ? map_reply_digit : reply[111:108]) : reply_template;
+    // MAP cannot change while this serialized response owns the command FSM.
+    // No parallel BCD bank or MAP arm in the wide reply snapshot mux is needed.
+    always @(posedge clk)begin
+        if(!resetn)begin map_reply_key<=0;map_reply_ones<=0;end
+        else if(state==EXECUTE && decoded_command==CMD_MAP_QUERY)begin map_reply_key<=0;map_reply_ones<=0;end
+        else if(advance_payload && reply_format==19)begin
+            map_reply_ones<=!map_reply_ones;
+            if(map_reply_ones)map_reply_key<=map_reply_key+1'b1;
+        end
+    end
     function [7:0] tens;
         input [7:0] note;
         begin tens=(note<70) ? "6" : "7"; end
@@ -361,11 +401,11 @@ module hc05_keymap #(
                                     {3'd0,audio_rec_valid},audio_rec_status,audio_rec_error,audio_rec_generation,
                                     3'd0,audio_rec_stored_samples,48'd0};
                     else reply<={{3'd0,audio_rec_busy},{3'd0,audio_rec_ready},{3'd0,audio_rec_overflow},100'd0};
-                CMD_VIS_QUERY: reply<={{2'd0,visual_requested},{2'd0,visual_snapshot[103:102]},
+                CMD_VIS_QUERY: if(visual_snapshot[111:108]==2)reply<={{2'd0,visual_requested},4'd0,{2'd0,reference_ratio},{2'd0,reference_phase},8'd0,1'b0,visual_snapshot[31],2'd0,84'd0};
+                    else reply<={{2'd0,visual_requested},{2'd0,visual_snapshot[103:102]},
                                 {2'd0,reference_ratio},{2'd0,reference_phase},{2'd0,visual_snapshot[101:100]},
                                 {2'd0,visual_snapshot[99:98]},visual_snapshot[107:104],84'd0};
                 CMD_VIZ_QUERY: reply<=visual_snapshot;
-                CMD_MAP_QUERY: reply<={(note_map[7:0]<70 ? 4'd6 : 4'd7),(note_map[7:0]<70 ? note_map[3:0]-4'd12 : note_map[3:0]-4'd6),(note_map[15:8]<70 ? 4'd6 : 4'd7),(note_map[15:8]<70 ? note_map[11:8]-4'd12 : note_map[11:8]-4'd6),(note_map[23:16]<70 ? 4'd6 : 4'd7),(note_map[23:16]<70 ? note_map[19:16]-4'd12 : note_map[19:16]-4'd6),(note_map[31:24]<70 ? 4'd6 : 4'd7),(note_map[31:24]<70 ? note_map[27:24]-4'd12 : note_map[27:24]-4'd6),(note_map[39:32]<70 ? 4'd6 : 4'd7),(note_map[39:32]<70 ? note_map[35:32]-4'd12 : note_map[35:32]-4'd6),(note_map[47:40]<70 ? 4'd6 : 4'd7),(note_map[47:40]<70 ? note_map[43:40]-4'd12 : note_map[43:40]-4'd6),(note_map[55:48]<70 ? 4'd6 : 4'd7),(note_map[55:48]<70 ? note_map[51:48]-4'd12 : note_map[51:48]-4'd6),56'd0};
                 CMD_MAP_SET: reply<={line[27:24],line[11:8],line[3:0],100'd0};
                 default: begin end
             endcase
@@ -373,7 +413,7 @@ module hc05_keymap #(
     end
     always @(posedge clk) begin
         if(!resetn) begin
-            note_map<=DEFAULT_MAP; state<=COLLECT; line_error<=NO_ERROR;
+            map_nibbles<=pack_map(DEFAULT_MAP); state<=COLLECT; line_error<=NO_ERROR;
             line<=0; line_length<=0; reply_remaining<=0;reply_format<=0;reply_char_ready<=0;log_owned<=0;
             live_owned<=0; klive_enable<=0;
             song_request<=0; rec_start<=0; rec_stop<=0;
@@ -387,7 +427,7 @@ module hc05_keymap #(
             serial_active_high<=0;touch_hold<=0;poly_limit<=16;panic<=0;fx_mask<=0;fx_settings<=8'h52;fx_mix<=12'h444;
             master_volume<=16;analog_mode<=0;analog_min<=0;analog_max<=1023;pressure_write<=0;pressure_value<=0;control_parse<=0;
             xy_write<=0;xy_ratio<=2;xy_phase<=0;
-            visual_write<=0;remote_mode<=0;
+            visual_write<=0;remote_mode<=0;game_settings<=8'he4;
             bend_parse<=0;bend_write<=0;bend_reset<=0;bend_index<=0;bend_ratio<=16384;
             performance_parse<=0;bend_min<=8192;bend_max<=32768;bend_slew<=4096;tuning_ratio<=16384;
             vibrato_inc<=527766;vibrato_depth<=256;vibrato_delay<=0;vibrato_update<=0;
@@ -551,7 +591,8 @@ module hc05_keymap #(
                             control_parse<=11;parse_numbers(9,1);
                         end
                         else if(decoded_command==CMD_VIS_SET) begin
-                            if(line[7:0]>="0" && line[7:0]<="3") begin
+                            if(line_length!=5)begin control_parse<=14;parse_numbers(4,2);end
+                            else if(line[7:0]>="0" && line[7:0]<="3") begin
                                 remote_mode<=line[1:0];visual_write<=1;result(0);
                             end else result(2);
                         end else if(decoded_command==CMD_VIS_QUERY) begin
@@ -594,17 +635,19 @@ module hc05_keymap #(
                             else begin gesture_bank<=line[0]; result(0); end
                         end
                         else if(decoded_command==CMD_MAP_QUERY) begin
-                            respond(5'd19,6'd26);
+                            respond(5'd19,CONTROL_KEYS==12 ? 6'd41 : 6'd26);
                         end else if(decoded_command==CMD_MAP_RESET) begin
                             if(!edit_allowed) result(1);
-                            else begin note_map<=DEFAULT_MAP; respond(5'd20,6'd14); end
-                        end else if(decoded_command==CMD_MAP_SET && line[23:16]==",") begin
+                            else begin map_nibbles<=pack_map(DEFAULT_MAP); respond(5'd20,6'd14); end
+                        end else if(decoded_command==CMD_MAP_SET && CONTROL_KEYS==12) begin
+                            control_parse<=13;parse_numbers(4,2);
+                        end else if(decoded_command==CMD_MAP_SET && line_length==8 && line[23:16]==",") begin
                             if(line[31:24]<"1" || line[31:24]>"7") respond(5'd21,6'd9);
                             else if(line[15:8]<"0" || line[15:8]>"9" || line[7:0]<"0" || line[7:0]>"9") result(7);
                             else if(requested_note<60 || requested_note>72) respond(5'd22,6'd10);
                             else if(!edit_allowed) result(1);
                             else begin
-                                note_map[(line[26:24]-3'd1)*8 +: 8]<=requested_note;
+                                map_nibbles[(line[26:24]-3'd1)*4 +: 4]<=requested_note[3:0];
                                 respond(5'd23,6'd13);
                             end
                         end else if(decoded_command==CMD_SONG_BEGIN) begin
@@ -614,7 +657,10 @@ module hc05_keymap #(
                         end else if(decoded_command==CMD_SONG_NOTE) begin
                             song_operation<=2; parse_numbers(10,3);
                         end else if(decoded_command==CMD_SONG_CHORD) begin
-                            song_operation<=6; parse_numbers(11,3);
+                            // Read-only typed-chart capability query. Older
+                            // firmware rejects '?' before any staging write.
+                            if(line_length==12 && line[7:0]=="?")result(0);
+                            else begin song_operation<=6; parse_numbers(11,3);end
                         end else if(decoded_command==CMD_SONG_END) begin
                             song_request<=1; song_operation<=3; state<=SONG_WAIT;
                         end else if(decoded_command==CMD_PLAY) begin
@@ -713,12 +759,19 @@ module hc05_keymap #(
                                     12:if(accumulator!=1 && accumulator!=2 && accumulator!=4 && accumulator!=8 && accumulator!=16)result(2);
                                        else if(rec_busy || recording || take_recording)result(1);
                                        else begin poly_limit<=accumulator[4:0];result(0);end
+                                    13:if(value0<1 || value0>CONTROL_KEYS)respond(5'd21,6'd9);
+                                       else if(accumulator<60 || accumulator>72)respond(5'd22,6'd10);
+                                       else if(!edit_allowed)result(1);
+                                       else begin map_nibbles[(value0[3:0]-4'd1)*4 +:4]<=accumulator[3:0];result(0);end
+                                    14:if(value0!=0 || accumulator>255)result(2);
+                                       else if(downloaded_playing)result(1);
+                                       else begin game_settings<=accumulator[7:0];remote_mode<=0;visual_write<=1;result(0);end
                                     default:result(7);
                                 endcase
                             end else if(bend_parse) begin
-                                if(value0<1 || value0>7 || accumulator<bend_min || accumulator>bend_max) result(2);
+                                if(value0<1 || value0>CONTROL_KEYS || accumulator<bend_min || accumulator>bend_max) result(2);
                                 else begin
-                                    bend_index<=value0[2:0]-1'b1;bend_ratio<=accumulator;bend_write<=1;result(0);
+                                    bend_index<=value0[$clog2(CONTROL_KEYS)-1:0]-1'b1;bend_ratio<=accumulator;bend_write<=1;result(0);
                                 end
                             end else if(adsr_parse) begin
                                 if(value0>1000 || value1>1000 || value2>100 || accumulator>1000) result(2);

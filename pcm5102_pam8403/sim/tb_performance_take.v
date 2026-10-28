@@ -1,5 +1,6 @@
 `timescale 1ns/1ps
 module tb_performance_take;
+    wire legacy_playback;
     reg clk=0;always #10 clk=~clk;
     reg resetn=0;reg [2:0] command=0;
     reg [5:0] frame_div=0;

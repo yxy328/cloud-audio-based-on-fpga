@@ -5,6 +5,11 @@ $snapshot=Join-Path $projectDir "sim/build/unified/$Label"
 if(Test-Path -LiteralPath $snapshot){throw "Snapshot already exists: $snapshot"}
 $target=Join-Path $snapshot 'pcm5102_pam8403'
 New-Item -ItemType Directory -Path "$target/tools","$target/impl","$snapshot/pmod_hub75e" -Force | Out-Null
+$rhythmProcess=Join-Path $projectDir 'impl/PCM5102_UNIFIED_process_config.json'
+if(Test-Path -LiteralPath $rhythmProcess){
+    New-Item -ItemType Directory -Path "$snapshot/build_inputs" -Force | Out-Null
+    Copy-Item -LiteralPath $rhythmProcess -Destination "$snapshot/build_inputs/PCM5102_UNIFIED_process_config.json"
+}
 Copy-Item -LiteralPath "$projectDir/src" -Destination $target -Recurse
 Copy-Item -LiteralPath "$projectDir/../pmod_hub75e/src" -Destination "$snapshot/pmod_hub75e" -Recurse
 Copy-Item -LiteralPath "$projectDir/PCM5102_UNIFIED.gprj" -Destination $target
@@ -59,5 +64,14 @@ foreach($module in $DefaultEncodingModules){
 Get-ChildItem -LiteralPath $snapshot -File -Recurse | ForEach-Object {
     [pscustomobject]@{Path=$_.FullName.Substring($snapshot.Length+1);SHA256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 } | ConvertTo-Json | Set-Content -LiteralPath "$snapshot/sources.json" -Encoding utf8
+$buildStartedUtc=[DateTime]::UtcNow
 & 'E:/130_FPGA_Verilog/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe' "$target/tools/build_unified.tcl" 2>&1 | Tee-Object -FilePath "$snapshot/build.log"
 if($LASTEXITCODE -ne 0){throw "Unified build failed: $snapshot/build.log"}
+if(!$SynthesisOnly){
+    $routeText=[IO.File]::ReadAllText("$snapshot/build.log")
+    if(!$routeText.Contains('Placement and routing completed') -or !$routeText.Contains('Bitstream generation completed') -or $routeText -match '(?m)^ERROR\b'){throw 'Build log does not confirm a completed, error-free bitstream'}
+    if(!(Test-Path -LiteralPath "$target/impl/pnr/PCM5102_UNIFIED.fs")){throw 'Build did not produce a bitstream'}
+    if((Get-Item -LiteralPath "$target/impl/pnr/PCM5102_UNIFIED.fs").LastWriteTimeUtc -lt $buildStartedUtc.AddSeconds(-1)){throw 'Build left a stale bitstream'}
+    & python "$PSScriptRoot/check_rhythm_font_netlist.py" --netlist "$target/impl/pnr/PCM5102_UNIFIED.vo" --font "$target/src/rhythm_font.hex"
+    if($LASTEXITCODE -ne 0){throw 'Routed score font is missing or corrupt'}
+}

@@ -14,6 +14,12 @@ $tcl=$tcl.Replace('run syn','run pnr').Replace('Synthesis complete: [file join $
 $tcl=$tcl.Replace('run pnr',"set_option -place_option $PlaceOption -route_option $RouteOption -route_maxfan $MaxFan`n    run pnr")
 $script=Join-Path "$target/tools" 'resume_pnr.tcl'
 [System.IO.File]::WriteAllText($script,$tcl,[System.Text.UTF8Encoding]::new($false))
+$routeStartedUtc=[DateTime]::UtcNow
 & 'E:/130_FPGA_Verilog/Gowin/Gowin_V1.9.11.03_Education_x64/IDE/bin/gw_sh.exe' $script 2>&1 | Tee-Object -FilePath "$snapshot/pnr.log"
 if($LASTEXITCODE -ne 0){throw "Unified PNR failed: $snapshot/pnr.log"}
 if(!(Test-Path -LiteralPath "$target/impl/pnr/PCM5102_UNIFIED.fs")){throw 'PNR did not produce a bitstream'}
+$routeText=[IO.File]::ReadAllText("$snapshot/pnr.log")
+if(!$routeText.Contains('Placement and routing completed') -or !$routeText.Contains('Bitstream generation completed') -or $routeText -match '(?m)^ERROR\b'){throw 'PNR log does not confirm a completed, error-free bitstream'}
+if((Get-Item -LiteralPath "$target/impl/pnr/PCM5102_UNIFIED.fs").LastWriteTimeUtc -lt $routeStartedUtc.AddSeconds(-1)){throw 'PNR left a stale bitstream from an earlier run'}
+& python "$PSScriptRoot/check_rhythm_font_netlist.py" --netlist "$target/impl/pnr/PCM5102_UNIFIED.vo" --font "$target/src/rhythm_font.hex"
+if($LASTEXITCODE -ne 0){throw 'Routed score font is missing or corrupt'}

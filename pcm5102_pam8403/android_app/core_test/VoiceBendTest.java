@@ -12,7 +12,7 @@ public final class VoiceBendTest {
             yes(VoiceBend.command(7,c).equals("BEND,7,"+r));
         }
         for(int c:new int[]{-1201,1201}){try{VoiceBend.ratio(c);throw new AssertionError();}catch(IllegalArgumentException expected){checks++;}}
-        for(int key:new int[]{0,8}){try{VoiceBend.command(key,0);throw new AssertionError();}catch(IllegalArgumentException expected){checks++;}}
+        for(int key:new int[]{0,13}){try{VoiceBend.command(key,0);throw new AssertionError();}catch(IllegalArgumentException expected){checks++;}}
         VoiceBend q=new VoiceBend();yes(q.take()==-1);
         // Offline edits are drafts, never sent automatically on reconnection.
         q.edit(3,100,false);yes(!q.hasPending());yes(q.value(3)==100);
@@ -29,6 +29,9 @@ public final class VoiceBendTest {
         snapshot=q.snapshot();q.clearPending();q.edit(2,-300,true);
         yes(snapshot[2]==200);yes(q.take()==2);yes(q.value(2)==-300);yes(!q.hasPending());
         yes(VoiceBend.label(-50).contains("-0.50"));
+        for(int i=0;i<12;i++)q.edit(i,100+i,true);
+        boolean[] seen=new boolean[12];for(int i=0;i<12;i++){int key=q.take();yes(key>=0&&key<12&&!seen[key]);seen[key]=true;}
+        yes(q.take()==-1);yes(VoiceBend.command(12,1200).equals("BEND,12,32768"));
         System.out.println("PASS VoiceBend: "+checks+" assertions; all cents, protocol, pitch error, coalescing/fairness/offline/last edit/batch isolation");
     }
 }

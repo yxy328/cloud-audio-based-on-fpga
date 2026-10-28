@@ -19,7 +19,7 @@ module tb_song_time_bound;
         .playing(playing),.gate(gate),.guide_keys(keys),.note_ready(ready),
         .note_spawn(spawn),.spawn_delay_ms(delay_ms));
     integer i,waited,spawn_count=0;
-    reg [22:0] stopped_time;
+    reg [23:0] stopped_time;
     always @(posedge clk)if(resetn && spawn)begin
         spawn_count=spawn_count+1;
         if(delay_ms!==0)$fatal(1,"late display event should have zero delay");
@@ -36,14 +36,14 @@ module tb_song_time_bound;
     endtask
     initial begin
         repeat(3)@(negedge clk);resetn=1;
-        if(dut.TIME_BITS!=23)$fatal(1,"production timeline must use 23 bits");
-        command(1,128,0,0);
-        for(i=0;i<128;i=i+1)command(2,i,60,60000);
+        if(dut.TIME_BITS!=24)$fatal(1,"production timeline must use 24 bits");
+        command(1,256,0,0);
+        for(i=0;i<256;i=i+1)command(2,i,60,60000);
         command(3,0,0,0);command(4,0,0,0);
         wait(dut.state==5);
-        for(i=0;i<128;i=i+1)begin
+        for(i=0;i<256;i=i+1)begin
             wait(dut.cur_index==i && dut.cur_have);
-            if(i<127)wait(dut.next_have);
+            if(i<255)wait(dut.next_have);
             @(negedge clk);
             if(dut.cur_end_ms !== 1500+(i+1)*60000)$fatal(1,"end time wrapped at event %0d",i);
             // Last audible millisecond, then the exact end boundary.
@@ -56,14 +56,14 @@ module tb_song_time_bound;
         if(!playing || !dut.current_finished || keys!=0 || gate!=0)
             $fatal(1,"blocked display must drain after final audio note");
         stopped_time=dut.elapsed_ms;
-        if(stopped_time!==23'd7681500)$fatal(1,"maximum score duration incorrect");
+        if(stopped_time!==24'd15361500)$fatal(1,"maximum score duration incorrect");
         // Backpressure cannot turn a finished score into a wrapping timer.
         repeat(2000)@(negedge clk);
         if(dut.elapsed_ms!==stopped_time || spawn_count!=0)$fatal(1,"finished timeline advanced under backpressure");
         ready=1;waited=0;
-        while(playing && waited<2000)begin @(negedge clk);waited=waited+1;end
-        if(playing || spawn_count!=128)$fatal(1,"blocked lookahead failed to drain all 128 notes");
-        $display("PASS song bound: 128 x 60000ms, 23-bit horizon, note-off boundaries, stalled visual drain without wrap");
+        while(playing && waited<6000)begin @(negedge clk);waited=waited+1;end
+        if(playing || spawn_count!=256)$fatal(1,"blocked lookahead failed to drain all 256 notes");
+        $display("PASS song bound: 256 x 60000ms, 24-bit horizon, note-off boundaries, stalled visual drain without wrap");
         $finish;
     end
     initial begin #1000000;$fatal(1,"long-score timeout");end

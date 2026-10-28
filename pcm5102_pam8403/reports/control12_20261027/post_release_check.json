@@ -1,0 +1,33 @@
+{
+  "checks": "PASS",
+  "source_and_app_files_match_tested_candidates": true,
+  "default_artifacts_match_named_release": true,
+  "rollback_matches_Code39": true,
+  "changed_frozen_inputs": [
+    "src\\downloadable_song.v",
+    "src\\fsr_pitch_scaler.v",
+    "src\\hc05_command.hex",
+    "src\\hc05_keymap.v",
+    "src\\hc05_reply.hex",
+    "src\\hub75e_rhythm_display.v",
+    "src\\key_live_stream.v",
+    "src\\midi_note_lut.v",
+    "src\\performance_take.v",
+    "src\\top.v",
+    "src\\top_unified.v",
+    "src\\touch_tdm_synth.v",
+    "tools\\generate_hc05_decoder.py",
+    "tools\\generate_hc05_replies.py",
+    "tools\\run_sim.ps1"
+  ],
+  "rtl_check_groups": 23,
+  "CLS_net_increase": 43,
+  "CLS_remaining": 38,
+  "CLS_safety_reserve": 35,
+  "CLS_usable": 3,
+  "APK_sha256": "4F5D1253B597F03780C11000913BEB037E4031CF98AE7D98F393EC812E71379C",
+  "bitstream_sha256": "2B25F84FCACB428BBD26127BC4C4A1527CC3039E64DEFFBEA03D9B353E307BE2",
+  "app_core_in_installed_source_location": "PASS",
+  "board_programmed": false,
+  "app_installed": false
+}

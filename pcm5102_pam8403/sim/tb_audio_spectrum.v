@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+`include "sim/reference/audio_spectrum_score256_reference.v"
 module tb_audio_spectrum;
     reg clk=0;always #10 clk=~clk;
     reg resetn=0,ce=0;
@@ -12,6 +13,20 @@ module tb_audio_spectrum;
     real value;
     audio_spectrum dut (.clk(clk),.resetn(resetn),.sample_ce(ce),.sample(sample),
         .levels(levels),.valid(valid),.done(done),.peak_bin(peak),.peak_magnitude(magnitude));
+    wire [79:0] reference_levels;
+    wire reference_valid,reference_done;
+    wire [7:0] reference_peak;
+    wire [16:0] reference_magnitude;
+    audio_spectrum_score256_reference reference_dut(.clk(clk),.resetn(resetn),.sample_ce(ce),.sample(sample),
+        .levels(reference_levels),.valid(reference_valid),.done(reference_done),
+        .peak_bin(reference_peak),.peak_magnitude(reference_magnitude));
+    always @(negedge clk)if(resetn)begin
+        if({levels,valid,done,peak,magnitude}!=={reference_levels,reference_valid,reference_done,reference_peak,reference_magnitude} ||
+           dut.working_levels!==reference_dut.working_levels)
+            $fatal(1,"spectrum timing optimization changed a cycle or numerical output");
+        if(dut.state==36 && dut.previous_height!==reference_dut.working_levels[reference_dut.band*5+:5])
+            $fatal(1,"registered previous height differs at accumulation");
+    end
     always @(negedge clk) begin
         ce=0;
         if(!resetn) begin ticks=0;n=0;sample=0;end
@@ -49,7 +64,7 @@ module tb_audio_spectrum;
             @(posedge clk);#1;
         end
         $fclose(output_file);
-        $display("PASS audio spectrum: silence, single/two tones, CIC alias rejection, full complex FFT dump");$finish;
+        $display("PASS audio spectrum: silence, single/two tones, CIC alias rejection, full complex FFT dump, cycle-exact reference including every accumulation band");$finish;
     end
     initial begin #50000000;$fatal(1,"FFT timeout state=%0d index=%0d",dut.state,dut.capture_index);end
 endmodule

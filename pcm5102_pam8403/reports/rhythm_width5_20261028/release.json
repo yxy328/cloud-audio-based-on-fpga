@@ -1,0 +1,207 @@
+{
+  "date": "2026-10-28",
+  "label": "rhythm_width5_43a",
+  "app_version_code": 43,
+  "app_version_name": "1.42-rhythm-5px",
+  "device": "GW5A-LV25MG121NC1/I0",
+  "tool": "Gowin V1.9.11.03 Education",
+  "target_mhz": 50,
+  "place": 2,
+  "route": 0,
+  "maxfan": 23,
+  "native_wide_bsram": true,
+  "resources": {
+    "Logic": {
+      "used": 22785,
+      "total": 23040
+    },
+    "CLS": {
+      "used": 11485,
+      "total": 11520
+    },
+    "Register": {
+      "used": 11590,
+      "total": 23280
+    },
+    "BSRAM": {
+      "used": 54,
+      "total": 56
+    },
+    "DSP": {
+      "used": 25,
+      "total": 28
+    }
+  },
+  "remaining_cls": 35,
+  "setup_slack_ns": 0.275,
+  "hold_slack_ns": 0.163,
+  "violations": [
+    [
+      "clk",
+      "Setup",
+      "0.000",
+      "0"
+    ],
+    [
+      "clk",
+      "Hold",
+      "0.000",
+      "0"
+    ],
+    [
+      "fsr_adc_clk",
+      "Setup",
+      "0.000",
+      "0"
+    ],
+    [
+      "fsr_adc_clk",
+      "Hold",
+      "0.000",
+      "0"
+    ]
+  ],
+  "unrouted": 0,
+  "outputs": {
+    "apk": {
+      "name": "FPGA-Music-Rhythm-5px-Code43.apk",
+      "sha256": "0A62F2B96FF5B10E698EA0A0F9A609FE1BA33BF4DC77DEA73BACE314EC85B421"
+    },
+    "bitstream": {
+      "name": "PCM5102_UNIFIED_RHYTHM_5PX_CODE43.fs",
+      "sha256": "488583796F1003F7DB4D492F2A043DA10087114E093C8B1F552DC952DF864E3E"
+    }
+  },
+  "all_live_fpga_inputs_match_frozen": true,
+  "app_inputs": {
+    "android_app/app/src/main/AndroidManifest.xml": "9188B1339F6EAC41C2D9D3A41D6C5DE4BFBD8DDE7B5F00C62D1EF3A8C5E4D899",
+    "android_app/app/src/main/assets/backdrop.png": "88FBE15DC4F3832ED637A7EAE73D0FE1FB8E6CD37D8EA5F6093B163D9950BE11",
+    "android_app/app/src/main/assets/hero.png": "FD7C06858F7BE176827BA05E97870AEDDDB9FA84205571B35083A69E1C641AC0",
+    "android_app/app/src/main/assets/hero_art.png": "D468909BD3112D22F08138ABC152FDD28CF5C6DFC5FDEEE2FDAB647D13AC6D9D",
+    "android_app/app/src/main/assets/mascot_0.png": "E32A9BD69BF78957B86B4EFF3D8C3F5C01092AB5E0E5168F4A9A0268F1B2084F",
+    "android_app/app/src/main/assets/mascot_1.png": "6E5833043F76C5CD048921C6274BC14618DD586FFBBBADF2264F7C53B90A051B",
+    "android_app/app/src/main/assets/mascot_2.png": "7265CCF5326411EF71CAF3010DB1494EF34F0680C00130A926498F1302D217E5",
+    "android_app/app/src/main/assets/mascot_3.png": "22BECFD2B2DDB7B4F6EE1CE8E59429C2D43F2B7DCB132F4CF4024C3C1BB6002A",
+    "android_app/app/src/main/assets/mascot_4.png": "CDED3E88AEC99ACD3EC44C1B02667188DDB60C15507DD5BBA939194646E939B2",
+    "android_app/app/src/main/assets/mascot_5.png": "69DA0CA83CDD45723F3CA8E735737F37519444363DE3ED143DC3E38446C0811F",
+    "android_app/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml": "4A76D848A55CA3991A268A59915E4F908977F979785FA560C364F02AF0CB387D",
+    "android_app/app/src/main/res/mipmap-hdpi/ic_launcher.png": "479E89C793C77FF4F9FCFBD04D205414BEB1C68CCE74B6DF2E4D5B7FDF9C1AA2",
+    "android_app/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png": "33A7B85EF0FE31A96676CB59079D549ADDD39D03E3698E7DF1F7C988CEBF65D2",
+    "android_app/app/src/main/res/mipmap-mdpi/ic_launcher.png": "F92360B067E0E772E65A8E5F482C4FCA4FA3F985378FA880FDABF1AF1C38D81C",
+    "android_app/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png": "F0C413620A4EA38CFFD09F477B12118099A9D0E19DF31C73D24D8584B99C8B02",
+    "android_app/app/src/main/res/mipmap-xhdpi/ic_launcher.png": "2594E4620C76DD81C423D3883E96C98506785CA641900AF0A05FA13428AA5022",
+    "android_app/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png": "A6143927F160D12D0C1C2ED9D02B8E69152234F3133EA8C911CF5A84694A4101",
+    "android_app/app/src/main/res/mipmap-xxhdpi/ic_launcher.png": "E84DD5F6773DE318CDE0EF26706E2B8B9653B7D5672479526C466A68C67D1630",
+    "android_app/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png": "69B6C486D34BA004B76C37108F2E6602A7AB67B945D72C7D17FDC909E41DFBFE",
+    "android_app/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png": "43FCDAF1DEC18CA590EDDAEB9D5E0D9FF2DED86286CA0EF30F63E04D1594DE83",
+    "android_app/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png": "1F142F6719A4F425ADDA2E122317883279965CDDCF0AD62B607E86E6509822D7",
+    "android_app/app/src/main/res/values/colors.xml": "16419ABF11A5F6C213699FCB35A5E3E44FB3B73C0FEDE239FBF03A3E2FAFCDE7",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/BuildConfig.java": "EAC07953A7E4CCC3808841D2DB8C579C314753BA04DE66ECA161FACC8A7C61FA",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/CdcAcmSerialDriver.java": "F47737123212DD506D46AAD33A9531FB2D395BBA3F19160BCAF90F0C676465B5",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/Ch34xSerialDriver.java": "4C8E53043D5CEDBEFB7997AA865A3629989F6C207DC63AE05702868FBC47D0D6",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/ChromeCcdSerialDriver.java": "D74F66BD67087BC24B28FD950F6E8E048DDBDCCF269A490A21D92C436187AB52",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/CommonUsbSerialPort.java": "6F2EEE9C7988CFD1FB3D5C59B6E1A5FC8BFFC53871A7B894401771488CEAB53E",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/Cp21xxSerialDriver.java": "A092B92E118F4A8110AE7DB0563D9B09DF32A9C37D1A0AC5F0BC676B3ECF99FE",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/FtdiSerialDriver.java": "5D56017AFE9D91499BEA9392F940721D024CD66891DE80D6BBAC72BBBA75B741",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/GsmModemSerialDriver.java": "3FFB6F1D77DC37644D17E9C2DCC72C625DDBE3BF500851ACC4DAA35CE836D734",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/ProbeTable.java": "5DB744B235E4C2A93D57D41828720F8B78940FB4D5A1A397C18DF9D7A8A20D07",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/ProlificSerialDriver.java": "B577E1C84B1A4671C9BCB9B998F2D8AE66A7D3CD5529F293E42F7DEF776377D7",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/SerialTimeoutException.java": "0934207AAE9DC4AEE7F20D91B44C9387FC364995A746CB33F9E2F52F57DD3F9C",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/UsbId.java": "9AEDCD07CAE0BB1EA521A653E19731E2763913EEE7661BB6AB0B445F2AB22360",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialDriver.java": "EE606636A29CD4C682B4325EEC27DFFBBA66F07EDA93B8C3FD9716520DBAC8F1",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialPort.java": "9D7FBCB8599D15B03BD2A3B67749AFDA385EF0497274C65EDB6BDD32A33C542A",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/driver/UsbSerialProber.java": "F8CB4C38F6CBB80C16498EE0D15933559165E2D4179997BCD7C9F34769DB18AD",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/util/HexDump.java": "06E0C6E28C2B6D850FF451A54660F64BF83AEAE93B688C80F1CF6FBA41B81C2E",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/util/MonotonicClock.java": "73E29449754CFF976E0AB1C3EC4F890F11F6630CEE1E3E164DF5E3092CEA2E12",
+    "android_app/app/src/main/java/com/hoho/android/usbserial/util/UsbUtils.java": "B366665E94D7E4F5DA6C0492E31FD63C67DCFB77AB25698DFE1BEA4105D3E26F",
+    "android_app/app/src/main/java/cn/fpga/score/AdsrEnvelopeView.java": "F1876133E3A79295D471CC9DB3614514CE82105EF9F9B496A706F126FFCECA40",
+    "android_app/app/src/main/java/cn/fpga/score/AdsrProfile.java": "08F7D1C68C724ECF2AF73767BB9BAAE29B2C9C762DCEC985FB17002D12856961",
+    "android_app/app/src/main/java/cn/fpga/score/AppearanceController.java": "12E4B36E2655BE37DBEBE3E65B684D51C1FC107F446B747BC8AAF62BE48E72EE",
+    "android_app/app/src/main/java/cn/fpga/score/ArtAssets.java": "66CB6A2DF18047C02FEBC5B8D2A4759AD576F216F578C02FE7163062E604477D",
+    "android_app/app/src/main/java/cn/fpga/score/AudioRecording.java": "6F8C7BA9EE9F5AE20B846F22FF6F9D276C47E8B27D482B9520C491104BB516C6",
+    "android_app/app/src/main/java/cn/fpga/score/BeatBarsView.java": "5EC5603CF2A01AFF33896921C2A44F37FFEBDF623419B7E3B2F5A868EBEA6AC9",
+    "android_app/app/src/main/java/cn/fpga/score/ChromaticKeys.java": "9D9A5F7318774623802100524C75CF88B2EDD492FDD1C34DF0CA26E5E3FDE4E6",
+    "android_app/app/src/main/java/cn/fpga/score/ControlState.java": "5BEA2349E8C707B97B0C814F69022CEEF89DEBA8129530568D4903F6E7A48DAB",
+    "android_app/app/src/main/java/cn/fpga/score/DeviceControls.java": "0B72C0E015186A8F98ED28E5A4AA5392ADBA0BCD7B10616416C7FE0D4126A2E9",
+    "android_app/app/src/main/java/cn/fpga/score/FxScene.java": "5EA55626B8A8DA0015A229585ECD8FDEA9E4512078E9F0C86393EE95AC2FC623",
+    "android_app/app/src/main/java/cn/fpga/score/FxSceneStore.java": "BCFE41EEA57E9B3582EE0867103CCF85BE56AEB983F8974542D97E454E8A507C",
+    "android_app/app/src/main/java/cn/fpga/score/FxState.java": "CC95CD3BC32876EFBF1338A5AE21E591241EDEB50DD148FD2A25EDBB2DD3854D",
+    "android_app/app/src/main/java/cn/fpga/score/LedFrame.java": "71E0FECDAEEF6B63CC78D4F12FF5176B87E443CCBCCBCABABF184D77E0EF3DB6",
+    "android_app/app/src/main/java/cn/fpga/score/LedHue.java": "F9712F02D03E6F107B932176E440EC764FB43484590DF8435C39A33156C5EF17",
+    "android_app/app/src/main/java/cn/fpga/score/LedState.java": "CF09C14E83D8B5BF4E97B3C374DFAF013C0BC7A147FA79394C6D0DE0675D40C5",
+    "android_app/app/src/main/java/cn/fpga/score/MainActivity.java": "915BFFF9356999BC3103BBB0686D4B0943917BA8548527FB66BD2BF40800738B",
+    "android_app/app/src/main/java/cn/fpga/score/PerformanceParams.java": "4715FB6CE6DBBA06A3C3BF76D826DAB7A9D963C2B93A4FD695180147566BE8BB",
+    "android_app/app/src/main/java/cn/fpga/score/PhonePiano.java": "12B17633D5E3EEDC79A27A4BC4F2D81C583BFC92678F5284206B51F4FF0A6A9E",
+    "android_app/app/src/main/java/cn/fpga/score/PhoneTake.java": "C90383ED2FBA177DDDF06591CF573BB5FABFFC58CC8DC0611456EF38DDCCE4A2",
+    "android_app/app/src/main/java/cn/fpga/score/PhoneTakeStore.java": "09288DCA551C5686A344C1B3087EC09BFAE2CB775D7B82E0329D16EB84EC4036",
+    "android_app/app/src/main/java/cn/fpga/score/PianoKeyboardView.java": "5384FF89278F4D888780ABD707952FF9026B0B31456353875D272AEDD5CD62A1",
+    "android_app/app/src/main/java/cn/fpga/score/RecordingSupport.java": "C968E41191BBE145CD06D0E0B5BCEA925C54141445739315A79288A49DE1DE37",
+    "android_app/app/src/main/java/cn/fpga/score/RhythmState.java": "6E56A5BA4590192C3AD8A22ADEFE6893C20B0D7CAC6C9AADF76DCFFBDEC147BA",
+    "android_app/app/src/main/java/cn/fpga/score/ScoreBends.java": "4C21011428D936F6B6CAA91884FA870ECA20A4B90649D533BF9A94FEDA0D3365",
+    "android_app/app/src/main/java/cn/fpga/score/SegmentButton.java": "AE49FFB24425684974CD05FFB0AB1D3DE82B1AD0BDD7212D0B4438200052E589",
+    "android_app/app/src/main/java/cn/fpga/score/SongCodec.java": "8F1511F6D757AEFA7EAC8A42AF6937F239324213745FB9C6AEC0268BD5C6E8F7",
+    "android_app/app/src/main/java/cn/fpga/score/SongLibrary.java": "A715F82B681A8D600C78A4DBCCF615F2D813585F274A4C3A3E1FA8632A136DA0",
+    "android_app/app/src/main/java/cn/fpga/score/SpectrumPreviewView.java": "08068A62F6703F55C4AC0D9CCBE4D872E138D4E94CF67B322F610AF622E445B7",
+    "android_app/app/src/main/java/cn/fpga/score/SppLink.java": "A03F6FE99DB12FA6F54FBA83F4D0ACE0F1D0D875FAFBE507EF29F3223A8EF2E3",
+    "android_app/app/src/main/java/cn/fpga/score/StageBackdropView.java": "6761BED16150DBC646193F75BAE9F8359563104EA054259ED72ACC21C5B2ACB7",
+    "android_app/app/src/main/java/cn/fpga/score/TakeStatus.java": "B9B13D4E03DC08D2ED9A6D9DC22AD5FA2FAD01644CEACEBEBD9872F08543DF34",
+    "android_app/app/src/main/java/cn/fpga/score/TakeWorkflow.java": "B80A3007BAA4923F8D603AEABAABD75962C60975CBB0F8172EE427F668051D0B",
+    "android_app/app/src/main/java/cn/fpga/score/Theme.java": "514F7A6FFC2839E08B04A2BD8DF57E34966B10AC2A3E2D6ED2D5469C9C894D40",
+    "android_app/app/src/main/java/cn/fpga/score/UsbAudioLink.java": "A05EC3A42B21282F2DE3B76F6D964E2053F8CBA898DFE2196EF71D7C87805DEF",
+    "android_app/app/src/main/java/cn/fpga/score/VoiceBend.java": "6A49D8A609529D016FB881F77ADFB2D45BE1EBB3D4F783546C8564558A67AA4F",
+    "android_app/app/src/main/assets/third_party/usbserial-LICENSE.txt": "6F467D3D79C5D31734881FB83E082E84512BDE05D3F7893E0E8373FD0D2B5D2C"
+  },
+  "rtl_tests": [
+    {
+      "test": "tb_rhythm_panel",
+      "log": "tests/tb_rhythm_panel_quick.log",
+      "sha256": "1948DF0EA7ECADAA9216979F6A99D0B1ED41D184F6E3EADAB179049F77561C8B",
+      "test_source_sha256": "87B2C6178F80699A23EF6E8AD21168BAD06A70A5F5B2FDEF786BCD235C4FEADA"
+    },
+    {
+      "test": "tb_rhythm_tails",
+      "log": "tests/tb_rhythm_tails_quick.log",
+      "sha256": "84FFDC01E767C2A7E5CF82B1F9A856D7B5AFC9D6A69BFEB47D77D8B06DA7B8AB",
+      "test_source_sha256": "B299467584D004F7C71253D218CC7FE57EAAEB6FF183EB4A768DCA684D87778D"
+    },
+    {
+      "test": "tb_rhythm_raster",
+      "log": "tests/tb_rhythm_raster_quick.log",
+      "sha256": "68805BFB8DFED3AFAFE82E5026E56B41EBC70504B332702940D217DA1129FA5B",
+      "test_source_sha256": "83ED38BFDC143CB27BA664815D30F990B920D2149909B1F46F3AED874764CA6F"
+    },
+    {
+      "test": "tb_hub75e_rhythm_display",
+      "log": "tests/tb_hub75e_rhythm_display_quick.log",
+      "sha256": "DF613826F5CBCE68539024669752F28EBCD72F2129162531A040E2343687188A",
+      "test_source_sha256": "D81A70D420900A7CAC25DBCC8E19B27A95EC3C6005ED06A80C0115A7D6D35E5A"
+    }
+  ],
+  "rollback_inputs": {
+    "rollback_Code42/RHYTHM_GAME.md": "C0020BBE32528E23E277F6B254034CBD3D171F23527D65062575ED9569C9D55A",
+    "rollback_Code42/sim/tb_rhythm_panel.v": "2049B0B0E44D42BEC1F45C170DE13FD5F07BE03B3237A083E341BD1638A168F1",
+    "rollback_Code42/sim/tb_rhythm_tails.v": "999C4CB03200220B889442457A9CE04E8F53B073174ADE2C5497AB61B3CF43E2",
+    "rollback_Code42/src/hub75e_rhythm_display.v": "448A593F94E8EFCB6406AFBF52F238FFE215887916BA7D75E150764BE9AC0C98",
+    "rollback_Code42/impl/pnr/PCM5102_UNIFIED.fs": "96F110658DA0F2206D5450C1D0DD7DD3EB662279909C9BDA0E75B4D0D6D9E816",
+    "rollback_Code42/android_app/app/build.gradle": "92ECF5500A088922A3C5FC45ECE17F87E43680BC865EAEF5C3352F65DA1D3691",
+    "rollback_Code42/android_app/dist/FPGA-Music-Unified.apk": "CBDEB87D7F54F9BD190940C3DE90DA27E1F0850F780D280A7C34666C2F131FDB",
+    "rollback_Code42/android_app/app/src/main/AndroidManifest.xml": "7BCB98F1F3C7566F07ADED95FB011B1362646E474A65FC08234B63FEF49868AF",
+    "rollback_Code42/android_app/app/src/main/java/cn/fpga/score/MainActivity.java": "1FD78E7E31E010978E500BFA38E29AD6B7AF47E1E9DFAF798998158256198C39"
+  },
+  "layout": {
+    "lanes": 12,
+    "tap_width_px": 5,
+    "tap_height_px": 1,
+    "key_width_px": 5,
+    "lane_pitch_px": 5,
+    "lane_first_x": 0,
+    "lane_last_x": 59,
+    "score": "six horizontal red digits at upper right",
+    "combo": "three yellow digits at upper left",
+    "old_width_bit_changes_width": false
+  },
+  "unchanged_rtl_from_code42": "all except hub75e_rhythm_display.v",
+  "installed_on_phone": false,
+  "programmed_fpga": false,
+  "routed_scan": "PASS:40 external row pairs, 64 columns, 133 clocks, known RGB/blank/LAT; startup scan, not full gameplay gate simulation"
+}

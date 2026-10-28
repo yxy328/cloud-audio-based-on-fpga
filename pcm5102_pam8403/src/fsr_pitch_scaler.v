@@ -6,8 +6,8 @@
 // One scan per audio frame avoids switching the shared DSPs while idle.
 // Launch AFTER sample_ce so the newly slewed ratio is used for the next frame.
 module fsr_pitch_scaler #(
-    parameter integer PER_VOICE_BEND=0,
-    parameter [223:0] NOTE_INCREMENTS = {
+    parameter integer PER_VOICE_BEND=0, CONTROL_KEYS=7, MAP_ROM=0, TRUSTED_BEND_WRITE=0,
+    parameter [CONTROL_KEYS*32-1:0] NOTE_INCREMENTS = {
         32'd43442435, 32'd38702809, 32'd34480283, 32'd30718440,
         32'd28994347, 32'd25831026, 32'd23012828
     }
@@ -16,25 +16,26 @@ module fsr_pitch_scaler #(
     input wire resetn,
     input wire sample_ce,
     input wire [15:0] pitch_ratio,
-    input wire [223:0] note_increments,
+    input wire [CONTROL_KEYS*32-1:0] note_increments,
+    input wire [CONTROL_KEYS*8-1:0] note_map,
     input wire bend_write,bend_reset,
-    input wire [2:0] bend_index,
+    input wire [$clog2(CONTROL_KEYS)-1:0] bend_index,
     input wire [15:0] bend_ratio,
     input wire [15:0] bend_min,bend_max,bend_slew,
     input wire [15:0] score_ratio,
-    input wire [6:0] score_keys,
-    output wire [255:0] phase_increments
+    input wire [CONTROL_KEYS-1:0] score_keys,
+    output wire [(CONTROL_KEYS+1)*32-1:0] phase_increments
 );
     generate if(PER_VOICE_BEND) begin: individual
-        voice_pitch_scaler #(.NOTE_INCREMENTS(NOTE_INCREMENTS)) u_bend (
+        voice_pitch_scaler #(.CONTROL_KEYS(CONTROL_KEYS),.MAP_ROM(MAP_ROM),.TRUSTED_BEND_WRITE(TRUSTED_BEND_WRITE),.NOTE_INCREMENTS(NOTE_INCREMENTS)) u_bend (
             .clk(clk),.resetn(resetn),.sample_ce(sample_ce),.pitch_ratio(pitch_ratio),
-            .note_increments(note_increments),.bend_write(bend_write),.bend_reset(bend_reset),
+            .note_increments(note_increments),.note_map(note_map),.bend_write(bend_write),.bend_reset(bend_reset),
             .bend_index(bend_index),.bend_ratio(bend_ratio),
             .score_ratio(score_ratio),.score_keys(score_keys),.bend_min(bend_min),.bend_max(bend_max),.bend_slew(bend_slew),.phase_increments(phase_increments));
     end else begin: legacy
-    reg [255:0] increments;
+    reg [(CONTROL_KEYS+1)*32-1:0] increments;
     assign phase_increments=increments;
-    reg [2:0] select_index, selected_index, product_index;
+    reg [$clog2(CONTROL_KEYS)-1:0] select_index, selected_index, product_index;
     reg [31:0] selected_base, product_base;
     reg [15:0] selected_ratio;
     reg [31:0] product_low, product_high;
@@ -50,7 +51,7 @@ module fsr_pitch_scaler #(
             increments<={32'd0,NOTE_INCREMENTS};
         end else begin
             if (scan_active) begin
-                if (select_index==6) scan_active<=0;
+                if (select_index==CONTROL_KEYS-1) scan_active<=0;
                 else select_index<=select_index+1'b1;
                 selected_index<=select_index;
                 selected_base<=note_increments[select_index*32 +: 32];
@@ -79,28 +80,54 @@ endmodule
 // A distributed target bank plus one current-value RAM save one BSRAM.
 // The shared multiplier and original 43-clock scan schedule are retained.
 module voice_pitch_scaler #(
-    parameter [223:0] NOTE_INCREMENTS={32'd43442435,32'd38702809,32'd34480283,
+    parameter integer CONTROL_KEYS=7, MAP_ROM=0, TRUSTED_BEND_WRITE=0,
+    parameter [CONTROL_KEYS*32-1:0] NOTE_INCREMENTS={32'd43442435,32'd38702809,32'd34480283,
         32'd30718440,32'd28994347,32'd25831026,32'd23012828}
 )(
     input wire clk,resetn,sample_ce,
     input wire [15:0] pitch_ratio,
-    input wire [223:0] note_increments,
+    input wire [CONTROL_KEYS*32-1:0] note_increments,
+    input wire [CONTROL_KEYS*8-1:0] note_map,
     input wire bend_write,bend_reset,
-    input wire [2:0] bend_index,
+    input wire [$clog2(CONTROL_KEYS)-1:0] bend_index,
     input wire [15:0] bend_ratio,
     input wire [15:0] bend_min,bend_max,bend_slew,
     input wire [15:0] score_ratio,
-    input wire [6:0] score_keys,
-    output reg [255:0] phase_increments
+    input wire [CONTROL_KEYS-1:0] score_keys,
+    output reg [(CONTROL_KEYS+1)*32-1:0] phase_increments
 );
     localparam INIT=0,IDLE=1,READ=2,LOAD=3,FSR_WAIT=4,FSR_DONE=5,BEND_WAIT=6,BEND_DONE=7;
     // Tiny target bank uses LUT RAM, with synchronous capture of old data
     // on a same-edge UART write, matching the original target pipeline.
-    (* syn_ramstyle="distributed_ram" *) reg [15:0] targets[0:7];
-    (* syn_ramstyle="block_ram" *) reg [15:0] currents[0:7];
+    (* syn_ramstyle="block_ram" *) reg [15:0] targets[0:15];
+    (* syn_ramstyle="block_ram" *) reg [15:0] currents[0:15];
     reg [15:0] target_q,current_q;
-    reg [3:0] clear_left;
-    reg [2:0] index,state;
+    reg [4:0] clear_left;
+    reg [$clog2(CONTROL_KEYS)-1:0] index;
+    reg [2:0] state;
+    wire [25:0] scan_base;
+    generate if(MAP_ROM)begin: pitch_rom
+        (* syn_romstyle="block_rom" *) reg [25:0] memory[0:255];
+        reg [25:0] q;integer n;
+        initial begin
+            for(n=0;n<256;n=n+1)memory[n]=0;
+            memory[60]=26'd23012828;
+            memory[61]=26'd24381242;
+            memory[62]=26'd25831026;
+            memory[63]=26'd27367019;
+            memory[64]=26'd28994347;
+            memory[65]=26'd30718440;
+            memory[66]=26'd32545054;
+            memory[67]=26'd34480283;
+            memory[68]=26'd36530588;
+            memory[69]=26'd38702809;
+            memory[70]=26'd41004198;
+            memory[71]=26'd43442435;
+            memory[72]=26'd46025656;
+        end
+        always @(posedge clk)q<=memory[note_map[index*8+:8]];
+        assign scan_base=q;
+    end else assign scan_base=note_increments[index*32+:26];endgenerate
     reg [15:0] frame_ratio,selected_bend,mul_ratio;
     reg [25:0] mul_base;
     reg [41:0] product;
@@ -112,13 +139,13 @@ module voice_pitch_scaler #(
         ((current_q-target_q>frame_step) ? current_q-frame_step : target_q);
     wire [15:0] next_current=slewed<bend_min ? bend_min : slewed>bend_max ? bend_max : slewed;
     always @(posedge clk) begin
-        target_q<=(score_ratio!=0 && index<7 && score_keys[index]) ? score_ratio : targets[index];
+        target_q<=(score_ratio!=0 && index<CONTROL_KEYS && score_keys[index]) ? score_ratio : targets[index];
         // The read result is used in LOAD, after a READ cycle. Hold it on
         // writes to infer supported normal mode, avoiding read-before-write.
         if(!(resetn && (state==INIT || state==LOAD))) current_q<=currents[index];
         if(resetn) begin
-            if(clear_left!=0) targets[clear_left[2:0]-3'd1]<=16'd16384;
-            else if(bend_write && bend_index<7 && bend_ratio>=bend_min && bend_ratio<=bend_max)
+            if(clear_left!=0) targets[clear_left[3:0]-4'd1]<=16'd16384;
+            else if(bend_write && (TRUSTED_BEND_WRITE || (bend_index<CONTROL_KEYS && bend_ratio>=bend_min && bend_ratio<=bend_max)))
                 targets[bend_index]<=bend_ratio;
             if(state==INIT) currents[index]<=16'd16384;
             else if(state==LOAD) currents[index]<=next_current;
@@ -127,15 +154,15 @@ module voice_pitch_scaler #(
     end
     always @(posedge clk) begin
         if(!resetn) begin
-            clear_left<=8; index<=0;state<=INIT;
+            clear_left<=CONTROL_KEYS; index<=0;state<=INIT;
             slew_fraction<=0;frame_step<=16;
             frame_ratio<=65535;selected_bend<=16384;mul_ratio<=16384;mul_base<=0;
             phase_increments<={32'd0,NOTE_INCREMENTS};
         end else begin
-            if(bend_reset) clear_left<=8;
+            if(bend_reset) clear_left<=CONTROL_KEYS;
             else if(clear_left!=0)clear_left<=clear_left-1'b1;
             case(state)
-                INIT:if(index==7)begin index<=0;state<=IDLE;end else index<=index+1'b1;
+                INIT:if(index==CONTROL_KEYS-1)begin index<=0;state<=IDLE;end else index<=index+1'b1;
                 IDLE:if(sample_ce)begin
                     index<=0;state<=READ;
                     slew_fraction<=fraction_sum[7:0];
@@ -147,7 +174,7 @@ module voice_pitch_scaler #(
                 end
                 LOAD:begin
                     selected_bend<=next_current;
-                    mul_base<=note_increments[index*32 +: 26];mul_ratio<=frame_ratio;
+                    mul_base<=scan_base;mul_ratio<=frame_ratio;
                     state<=FSR_WAIT;
                 end
                 FSR_WAIT:state<=FSR_DONE;
@@ -158,7 +185,7 @@ module voice_pitch_scaler #(
                 BEND_WAIT:state<=BEND_DONE;
                 BEND_DONE:begin
                     phase_increments[index*32 +: 32]<={5'd0,product[40:14]};
-                    if(index==6)state<=IDLE;
+                    if(index==CONTROL_KEYS-1)state<=IDLE;
                     else begin index<=index+1'b1;state<=READ;end
                 end
             endcase

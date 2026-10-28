@@ -59,7 +59,7 @@ module sensor_poly_audio #(
     wire gesture_event=sensor_ready && gesture_valid && dir_evaluated && gesture_inc!=0;
     // Four staging entries plus 64 engine FIFO entries.
     // A simultaneous IR/gesture pair shares one atomic ADSR/timbre snapshot.
-    (* syn_ramstyle="distributed_ram" *) reg [132:0] configs[0:3];
+    (* syn_ramstyle="block_ram" *) reg [132:0] configs[0:3];
     reg [1:0] config_wr;
     reg [1:0] config_tags[0:3];
     reg [31:0] pitches[0:3];
@@ -83,7 +83,7 @@ module sensor_poly_audio #(
             if ((ir_note_valid && !take_ir) || (gesture_event && !take_gesture) ||
                 (test32 && test_pending && !send_test)) queue_overrun<=1;
             if(pushes!=0)begin
-                configs[config_wr]<={adsr_config,control_timbre};config_wr<=config_wr+1'b1;
+                config_wr<=config_wr+1'b1;
             end
             if(take_ir)begin pitches[wr]<=ir_inc;config_tags[wr]<=config_wr;end
             if(take_gesture)begin pitches[second_wr]<=gesture_inc;config_tags[second_wr]<=config_wr;end
@@ -92,7 +92,24 @@ module sensor_poly_audio #(
             queued<=queued+pushes-pop;
         end
     end
-    wire [164:0] next_event={configs[config_tags[rd]],pitches[rd]};
+    // Prefetch the following head, including tags written by either producer
+    // on this edge. Explicit same-address forwarding preserves the original
+    // queue's zero extra pop latency for simultaneous IR/gesture events.
+    wire [1:0] prefetch_rd=pop ? rd+2'd1 : rd;
+    wire [1:0] prefetch_tag=(take_ir && wr==prefetch_rd) ||
+        (take_gesture && second_wr==prefetch_rd) ? config_wr : config_tags[prefetch_rd];
+    wire config_collision=pushes!=0 && prefetch_tag==config_wr;
+    reg [132:0] config_q,config_written;
+    reg config_forward;
+    always @(posedge clk)begin
+        if(resetn && pushes!=0)begin
+            configs[config_wr]<={adsr_config,control_timbre};
+            config_written<={adsr_config,control_timbre};
+        end
+        if(!config_collision)config_q<=configs[prefetch_tag];
+        config_forward<=config_collision;
+    end
+    wire [164:0] next_event={config_forward ? config_written : config_q,pitches[rd]};
     tdm_synth #(.VOICES(32),.EXTENDED_TIMBRES(1),.RUNTIME_ADSR(1),.VOLUME_SHIFT(VOLUME_SHIFT),.SHARED_ARITH(SHARED_ARITH),
         .PRESET_FRAMES(1),.NOTE_FRAMES(NOTE_FRAMES),.PIANO_FRAMES(PIANO_FRAMES),
         .FLUTE_FRAMES(FLUTE_FRAMES),.UKULELE_FRAMES(UKULELE_FRAMES),.DRUM_FRAMES(DRUM_FRAMES)) u_synth (

@@ -58,7 +58,7 @@ module uart_8n1 #(
         end
     end
 
-    reg [7:0] fifo [0:127];
+    (* syn_ramstyle="block_ram" *) reg [7:0] fifo [0:127];
     reg [6:0] wr_ptr, rd_ptr;
     reg [7:0] queued;
     reg discard_line;
@@ -76,7 +76,7 @@ module uart_8n1 #(
     always @(posedge clk) begin
         if (!resetn) begin
             wr_ptr<=0; rd_ptr<=0; queued<=0; discard_line<=0; rx_fault<=0;
-            prefetched_byte<=0; prefetched_valid<=0;
+            prefetched_valid<=0;
         end else begin
             rx_fault<=0;
             if (received_error || overrun) begin
@@ -85,12 +85,11 @@ module uart_8n1 #(
                 prefetched_valid<=0;
             end else begin
                 if (push) begin
-                    fifo[wr_ptr]<=received_byte; wr_ptr<=wr_ptr+1'b1;
+                    wr_ptr<=wr_ptr+1'b1;
                     if (eol) discard_line<=0;
                 end
                 if (pop) prefetched_valid<=0;
                 if (fetch) begin
-                    prefetched_byte<=fifo[rd_ptr];
                     prefetched_valid<=1;
                     rd_ptr<=rd_ptr+1'b1;
                 end
@@ -103,6 +102,12 @@ module uart_8n1 #(
         end
     end
 
+    always @(posedge clk)begin
+        if(resetn && !received_error && !overrun)begin
+            if(push)fifo[wr_ptr]<=received_byte;
+            if(fetch)prefetched_byte<=fifo[rd_ptr];
+        end
+    end
     reg [9:0] tx_shift;
     reg [3:0] tx_bits;
     reg [COUNT_W-1:0] tx_count;

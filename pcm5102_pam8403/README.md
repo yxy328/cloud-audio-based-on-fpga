@@ -1,3 +1,19 @@
+**2026-10-28 当前 App 为 Code47 / 1.46-cleanui（FPGA 不改）：** [安装包](android_app/dist/FPGA-Music-Unified.apk)只做手机界面整理：编号统一从01、去掉重复彩条与头像，曲谱页选曲自动载入并只保留一个下载入口，文件操作与音游设置默认折叠；120首曲库与256条单曲全部保留。音游协议、键位与配套位流与 Code46 相同，本轮不综合、不烧录，未在手机安装。用法见[十二键音游](RHYTHM_GAME.md)与[App 说明](android_app/README.md)。以下为此前记录。
+
+**2026-10-28 当前FPGA为计分字库修复版：** 修复标量字库在综合中变成恒0的问题，右上六位得分与左上连击恢复。Logic 22902、CLS 11504、Register 11516、BSRAM 55、DSP 25；剩16 CLS。50MHz完整布通，setup/hold违例均0，最差余量 +0.598/+0.178 ns。App Code46无需更新；未烧录。见[交付与验证](reports/score_visible_20261028/README.md)。以下为历史记录。
+
+**2026-10-28 当前 App / FPGA：Code46，单曲256条。** 单曲由128条扩到256条；120首曲库中19首保留原谱反复，最长252条、约104秒。整机BSRAM仍54/56、DSP仍25，音游支持256连击及384000分。超过128条须配套更新FPGA位流；未安装手机或烧录。曲谱页新增“载入长曲 · 104秒”。见[安装与位流](reports/score256_20261028/README.md)。以下为此前版本记录。
+
+**2026-10-28 当前 App 为 Code45 / 1.44-library120。** [安装包](android_app/dist/FPGA-Music-Unified.apk)内置120首曲谱（保留原9首，新增58首单遍版和53首标注节选），三个等级各40首。音游与自动演奏共用已下载曲谱，全部曲库只保存在手机，FPGA资源增量为0，无需为曲库重新烧录。详见[曲库用法](android_app/SONG_LIBRARY.md)与[本轮验证](reports/song_library120_20261028/README.md)。Code44的粉色FLICK阶梯、五像素键与四类玩法保留；原显示构建见[交付/预览](reports/rhythm_flick_shape_20261028/README.md)。以下为历史记录。
+
+**2026-10-28 当前入口：Code43 / 1.42-rhythm-5px。** 已按图固定 **TAP 5像素宽，下方十二键每键5像素宽**；每列5像素，右上横排红色得分，移除1/2像素选项。四类音符及完整HOLD尾条保留。50MHz零setup/hold违例，剩35 CLS；默认APK/位流已同步，未安装或烧录。见[用法](RHYTHM_GAME.md)与[验证/预览](reports/rhythm_width5_20261028/README.md)。以下为Code42及更早记录。
+
+**2026-10-28 当前四类音符版：App 1.41-rhythm-notes / Code42。** “十二键音游”已移到曲谱页，提示界面只显示前十二键；蓝 TAP/HOLD 与完整滚动尾条、黄 DRAG、粉 FLICK（跨键或既有 APDS 手势）、右侧红色得分、黄色命中反馈已接入。Logic 22758、CLS 11487（剩33）、BSRAM 54、DSP 25；50MHz setup/hold违例0/0。默认 APK/位流已同步，未安装或烧录。见[操作与格式](RHYTHM_GAME.md)、[交付与实际余量](reports/rhythm_notes_20261028/README.md)。该版宽度设置已由Code43固定5像素取代。以下为此前版本记录。
+
+**2026-10-27 音游增强已接入默认入口：App 1.40-rhythm / Code41。** 单点、和弦、长按、重复音判定，得分/连击/Miss，薄音符、三主题和击打闪光。剩余94 CLS（保留35后可用59）、54/56 BSRAM，50MHz setup/hold零违例。见 [音游用法](RHYTHM_GAME.md) 与 [交付/回退](reports/rhythm_game_20261027/README.md)。未安装或烧录。下列旧版本记录按其原范围阅读。
+
+> 2026-10-27 当前入口：Code41（音游增强，沿用十二路映射），K1～K12 已支持映射、独立弯音、曲谱及十二列指引；K13～K16 保留高音键。使用与配套版本见 [十二路说明](CONTROL12.md)。下文较早版本记录按其原范围阅读。
+
 # Tang Primer 25K：触摸 / 压力 / 红外 / 手势 / 吉他 / 蓝牙 / 64×64 LED
 
 **2026-10-27 曲谱弯音已接入：[完整交付与回退](reports/score_bend_integration_20261026/README.md)。** App Code39；Logic 22453、CLS 11439、BSRAM 55、DSP 26.5。剩余 81 CLS，保留35后可用 46。50MHz 完整布通，setup/hold 违例0/0，原始 WNS +0.265/+0.149ns。默认入口已更新，未安装或烧录。以下旧版本记录保留。

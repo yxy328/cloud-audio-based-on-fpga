@@ -1,0 +1,9 @@
+{
+  "same_tune_ids": true,
+  "longer_musical_content": 19,
+  "repeats_expanded": 19,
+  "above_128_events": 13,
+  "max_events": 252,
+  "longest_ms": 103571,
+  "old_longest_ms": 68571
+}

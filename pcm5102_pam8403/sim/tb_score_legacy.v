@@ -106,7 +106,7 @@ module tb_score_legacy;
         repeat(3) @(negedge clk); resetn=1;
         command(4,0,0,0,3);
         command(1,0,0,0,2);
-        command(1,129,0,0,2);
+        command(1,257,0,0,2);
         command(2,0,60,1,3);
         command(1,1,0,0,0);
         command(2,1,60,1,2);

@@ -13,7 +13,7 @@
 <File path="src/fsr_dynamics.v" type="file.verilog" enable="1"/><File path="src/fsr_mode_select.v" type="file.verilog" enable="1"/>
 <File path="src/fsr_pitch_scaler.v" type="file.verilog" enable="1"/><File path="src/uart_8n1.v" type="file.verilog" enable="1"/>
 <File path="src/hc05_command_decode.v" type="file.verilog" enable="1"/><File path="src/hc05_keymap.v" type="file.verilog" enable="1"/><File path="src/key_live_stream.v" type="file.verilog" enable="1"/>
-<File path="src/downloadable_song.v" type="file.verilog" enable="1"/><File path="src/hub75e_rhythm_display.v" type="file.verilog" enable="1"/>
+<File path="src/rhythm_game.v" type="file.verilog" enable="1"/><File path="src/downloadable_song.v" type="file.verilog" enable="1"/><File path="src/hub75e_rhythm_display.v" type="file.verilog" enable="1"/>
 <File path="src/hub75e_status.v" type="file.verilog" enable="1"/><File path="src/audio_visualizer.v" type="file.verilog" enable="1"/>
 <File path="src/audio_scope.v" type="file.verilog" enable="1"/>
 <File path="src/lissajous_reference.v" type="file.verilog" enable="1"/><File path="src/audio_spectrum.v" type="file.verilog" enable="1"/>

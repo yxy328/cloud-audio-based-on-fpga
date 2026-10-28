@@ -1,5 +1,7 @@
 # 2026-10-26 三效果协议补充
 
+> 2026-10-27 当前入口 Code41（沿用 Code40 十二路协议）：`MAP?` 返回十二项、`MAP,<1..12>,<60..72>` 与 `BEND,<1..12>,<ratio>` 扩至十二路，`MAP_RESET` / `BEND_RESET` 保持；音游设置由 `VIS,0,<配置>` 写入，得分与状态用 `VIZ?` 读取（回复为 `V,` 前缀，音游帧以 `V,2` 开头）。App 侧对 `MAP?` 只返回七键的设备会拒绝十二路写入，逐项见[十二路映射与弯音](CONTROL12.md)与[十二键音游](RHYTHM_GAME.md)。下文按其原范围阅读。
+
 **2026-10-27：曲谱事件弯音已接入，App Code39。** [CSV、协议、试听与录放说明](SCORE_BEND.md)。旧三参数曲谱命令保留；能力查询 `SONG_BEGIN,?` 返回 `SONGBEND,1`。
 
 新增 `EFFECT,3,m,s,w` 与 `EFFECT,?` → `EFFECT3,m,ss,www,a,tt,vvv`，定义见 [FX3.md](FX3.md)。原 EFFECT 0/1/2 和 EFFECT2 保留；回复 kind30 现已使用、kind31 保留，命令 ID 不变。新回复含配置和实际状态，滑杆覆盖/TAKE 回放时二者可以不同。下文旧版“kind30 空闲”与单效果说明为历史记录。

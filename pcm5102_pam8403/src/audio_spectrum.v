@@ -132,6 +132,10 @@ module audio_spectrum (
         end
     endfunction
     wire [3:0] band=band_for(mag_index);
+    // Read the selected band's previous height during the existing scaling
+    // cycle. Accumulation compares two registered heights; its write enable
+    // no longer includes the 80-bit bank read mux. No FFT cycle is added.
+    reg [4:0] previous_height;
     always @(posedge clk) begin
         if(!resetn) begin
             state<=CAPTURE;capture_index<=0;half_size<=1;stride<=128;base<=0;offset<=0;twiddle_index<=0;mag_index<=1;
@@ -211,9 +215,9 @@ module audio_spectrum (
                 end
                 // Separate RAM -> abs/sum, height compression and per-band
                 // max/enable decoding to keep each path within 50MHz.
-                MAG_SCALE:begin bar_height<=height_for(bin_magnitude);state<=MAG_ACCUMULATE;end
+                MAG_SCALE:begin previous_height<=working_levels[band*5 +: 5];bar_height<=height_for(bin_magnitude);state<=MAG_ACCUMULATE;end
                 MAG_ACCUMULATE:begin
-                    if(bar_height>working_levels[band*5 +: 5]) working_levels[band*5 +: 5]<=bar_height;
+                    if(bar_height>previous_height) working_levels[band*5 +: 5]<=bar_height;
                     if(bin_magnitude>working_peak) begin working_peak<=bin_magnitude;working_peak_bin<=mag_index;end
                     if(mag_index==127) state<=PUBLISH;
                     else begin mag_index<=mag_index+1'b1;state<=MAG_READ;end

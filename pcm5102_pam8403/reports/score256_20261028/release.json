@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-28",
+  "label": "score256_46e",
+  "app_version_code": 46,
+  "app_version_name": "1.45-score256",
+  "max_events": 256,
+  "target_mhz": 50,
+  "resources": {
+    "Logic": {
+      "used": 22770,
+      "total": 23040
+    },
+    "CLS": {
+      "used": 11485,
+      "total": 11520
+    },
+    "Register": {
+      "used": 11512,
+      "total": 23280
+    },
+    "BSRAM": {
+      "used": 54,
+      "total": 56
+    },
+    "DSP": {
+      "used": 25,
+      "total": 28
+    }
+  },
+  "remaining_cls": 35,
+  "setup_slack_ns": 1.1,
+  "hold_slack_ns": 0.156,
+  "setup_violations": 0,
+  "hold_violations": 0,
+  "score_bsram": 2,
+  "source_files_match_frozen": 86,
+  "apk_sha256": "4A4BEB473618D53FFA54E1432130EBF18346A41E317D33B2AAE3EAD2945EBD82",
+  "bitstream_sha256": "0320567B38BD47D443D85677D553DABD39D45FB9740A0B9899FF11D625FC31B0",
+  "library": {
+    "same_tune_ids": true,
+    "longer_musical_content": 19,
+    "repeats_expanded": 19,
+    "above_128_events": 13,
+    "max_events": 252,
+    "longest_ms": 103571,
+    "old_longest_ms": 68571
+  },
+  "rtl_tests": "PASS",
+  "app_core": "PASS",
+  "routed_scan": "PASS",
+  "phone_installed": false,
+  "fpga_programmed": false
+}

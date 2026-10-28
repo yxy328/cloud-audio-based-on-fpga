@@ -1,3 +1,27 @@
+**2026-10-28 App Code47 / 1.46-cleanui（当前安装包）：** 只改手机界面，编号统一从01、去重复彩条与头像、曲谱页选曲自动载入并只保留一个下载入口、文件操作与音游设置默认折叠；120首曲库与256条单曲全部保留。`build.gradle` 与 `AndroidManifest.xml` 均为 versionCode 47 / versionName 1.46-cleanui，滚动入口 `android_app/dist/FPGA-Music-Unified.apk` 与不可变快照 `dist/FPGA-Music-CleanUI-Code47.apk` 逐字节相同，SHA256 `24A2E68A…`。FPGA 侧 `src/`、约束与位流未改，沿用下方 2026-10-28 字库修复构建（`0B924964…`），本轮不综合、不烧录。已记录通过项为 Java/D8/aapt2 构建、APK 签名与既有 App 核心回归（含 `SongLibraryTest`、`Control12Test`、`RhythmStateTest`、`RhythmTypesTest`）；**本轮没有独立的 `reports/` 目录，未在手机安装、未核对实机布局、未做 HC-05 实链验收**，界面行为结论仅以 [App 说明](android_app/README.md) 的记录为限。以下为历史轮次。
+
+**2026-10-28 实屏计分字库修复：** Logic 22902、CLS 11504、Register 11516、BSRAM 55、DSP 25；剩16 CLS。50MHz完整布通，setup/hold违例均0，最差余量 +0.598/+0.178 ns。最小硬件字库512地址、实际TAP后1000→2000的显示模块路由后RGB/PWM测试、RTL显示回归及整机启动扫描均通过。未做实物验收。见[报告](reports/score_visible_20261028/README.md)。以下为历史轮次。
+
+**2026-10-28 Code46 单曲256条：** Logic 22770 / CLS 11485 / Register 11512 / BSRAM 54 / DSP 25，剩35 CLS；50MHz setup/hold违例0/0，余量 +1.100/+0.156ns。曲谱本身仍2块BSRAM，256条UART/原子性/四类判定与音频回归、App核心、频谱逐拍等价和路由网表扫描通过。未安装或烧录，详见[本轮报告](reports/score256_20261028/README.md)。
+
+**2026-10-28 App Code45 / 1.44-library120：** 曲库120首，三个等级各40；保留原9首，新增58首单遍版和53首标注节选。曲库80015项断言及全部App核心回归通过，选定ABC重生成Java/目录SHA256一致，APK编译/签名/版本核对通过。FPGA的86个src文件逐项哈希未变，Logic/CLS/Register/BSRAM/DSP增量均0，本轮不综合、不烧录；未安装手机或做HC-05实测。入口为默认Unified.apk。见[本轮报告](reports/song_library120_20261028/README.md)。
+
+**2026-10-28 Code44 粉色阶梯修正：** Logic 22848 / CLS 11497 / Register 11624 / BSRAM 54 / DSP 25，剩23 CLS。50MHz完整布通，主时钟与ADC时钟setup/hold违例均0，最差余量 +0.053/+0.153 ns。BSRAM54/56。外部扫描轮廓/跨区/滚动/清屏、尾条及旧扫描、App构建与遥测、路由后40组扫描均通过；未安装或烧录。见[本轮报告](reports/rhythm_flick_shape_20261028/README.md)。以下为历史轮次。
+
+**2026-10-28 Code43 五像素宽度修正：** 最终候选 rhythm_width5_43a，Logic 22785 / CLS 11485 / Register 11590 / BSRAM 54 / DSP 25，剩35 CLS。50MHz完整布通，主/ADC时钟setup、hold违例均0，原始最差余量 +0.275/+0.163 ns。外部RGB逐像素核对TAP及十二键各5像素、宽度位兼容、尾条/旧扫描、App构建/遥测及路由后40组扫描通过。默认APK/位流已同步，未上板。见[本轮报告](reports/rhythm_width5_20261028/README.md)。以下为历史轮次。
+
+**2026-10-28 Code42 四类音符与完整尾条：** 最终候选 rhythm_notes42_capture，Logic 22758 / CLS 11487 / Register 11581 / BSRAM 54 / DSP 25；剩33 CLS，比旧35预留口径少2。50MHz完整布通，主/ADC时钟setup、hold违例均0，原始最差余量 +0.560/+0.146 ns。17组针对性RTL、App核心/签名构建、最终路由网表40组扫描通过，未做实物验收。完整数据、输入/产物哈希及验证边界见[本轮报告](reports/rhythm_notes_20261028/README.md)。以下为历史轮次。
+
+# 2026-10-27 十二路控制（Code40）与十二键音游（Code41）
+
+**Code41 十二键音游已接入默认工程：[交付、审计与回退](reports/rhythm_game_20261027/README.md)。** App 1.40-rhythm / versionCode 41，APK SHA256 `32B3D7C5…`，与滚动入口 `android_app/dist/FPGA-Music-Unified.apk` 逐字节相同；位流交付副本 `PCM5102_UNIFIED_RHYTHM_CODE41.fs` SHA256 `F7B89654…`。构建标签 `rhythm_game_release41`，GW5A-LV25MG121NC1/I0、Gowin V1.9.11.03 Education、50MHz、sharing=1 / retiming=1 / place2 / route0 / maxfan23，存储配置保留 native 32/36 位块（`Convert_SDP32_36_to_SDP16_18=false`）。Logic 22542、CLS 11426、Register 11525、BSRAM 54、DSP 25；未布通 0、setup / hold 违例端点 0/0，原始 WNS +0.246 / +0.149 ns。相对 Code40 净回收 56 CLS，CLS 剩余 94、扣 35 安全垫后功能预算 59。本轮未记录 UserCode，未烧录、未安装。
+
+验证范围止于数字与软件：十一组最终 RTL 检查、App 全部核心回归、新 APK 编译 / 签名 / 版本核对通过，界面素材与 Code40 逐项相同；最终路由网表另验证 40 组外部扫描行（64 列、133 主时钟行周期、已知 RGB 与消隐 / LAT 顺序），属启动与扫描检查，不是全游戏门级仿真。传感器暂存与未改 RTL 参考逐周期对照 150000 拍（1778 个原子事件、1710 次同址转发、1029 个满队列周期），按键上行对照 100000 拍（1124 条消息、38978 次背压）。曾启动的早期 9600-baud 完整门级 UART 查询测试因期望夹具误写为 33 字节而中止，测试源已修正，但不计为完整门级 PASS。实物触摸延迟、LED 观感、手机界面与蓝牙、DAC 听音仍待实机验收。
+
+**Code40 十二路控制：[交付与回退](reports/control12_20261027/README.md)。** App 1.39-control12 / versionCode 40，命名 APK SHA256 `4F5D1253…`（本轮已入库，作为 Code41 的回退包）；位流 `PCM5102_UNIFIED_CONTROL12_20261027.fs` SHA256 `2B25F84F…`。Logic 22732、CLS 11482、Register 11225、BSRAM 56（满）、DSP 25；50MHz 未布通 0、setup / hold 违例 0/0，原始 WNS +0.478 / +0.188 ns。相对 Code39 净增 43 CLS，CLS 剩余从 81 降到 38、扣 35 后仅 3，这正是随后音游轮次先做 CLS 回收的原因。`tools/test_control12.ps1` 一次跑完 23 组 RTL 与 App 核心检查。未烧录、未安装。
+
+**Code41 之后的工作区改动（未发布、未综合）：** `src/downloadable_song.v`、`src/rhythm_game.v`、`src/hub75e_rhythm_display.v`、`src/hc05_keymap.v`、`src/top.v` 五份源码在 2026-10-28 01:22～01:23 继续改为四类型音符（TAP / HOLD / DRAG / FLICK）与长按尾条显示，曲谱字从 45 位扩到 47 位并新增 `event_type` / `spawn_type` / `spawn_body` 端口。与 [reports/rhythm_game_20261027/release.json](reports/rhythm_game_20261027/release.json) 的 `source_hashes` 逐项比对，记录的 87 份源码中 82 份仍与 Code41 冻结指纹一致，只有这五份不同；因此仓库 HEAD 不等于任何一次已验收构建。该改动未重新综合、未布线，App 侧也不发送类型列。本机默认输出 `impl/pnr/PCM5102_UNIFIED.fs`（2026-10-27 19:08 重建，SHA256 `FC0A5073…`）既与 Code41 交付副本字节不同，也早于上述源码改动，不能作为已验收产物使用。
+
 # 2026-10-26 CLS 优先纠正与第三步
 
 **2026-10-27 曲谱弯音已接入：[完整交付与回退](reports/score_bend_integration_20261026/README.md)。** App Code39；Logic 22453、CLS 11439、BSRAM 55、DSP 26.5。剩余 81 CLS，保留35后可用 46。50MHz 完整布通，setup/hold 违例0/0，原始 WNS +0.265/+0.149ns。默认入口已更新，未安装或烧录。以下旧版本记录保留。

@@ -33,7 +33,8 @@ public final class MainActivity extends Activity {
     private TextView status,scoreInfo,mapInfo,logs;
     private ProgressBar progress;
     private Spinner libraryTier,libraryTracks;
-    private TextView libraryInfo;
+    private TextView libraryInfo,scoreDownloadHint;
+    private Button scoreDownload,libraryReload;
     private List<SongLibrary.Entry> libraryEntries=Collections.emptyList();
     private SongLibrary.Entry exportingScore;
     private Spinner devices,gestureTone,gestureVibrato,gestureBank;
@@ -73,7 +74,8 @@ public final class MainActivity extends Activity {
     private DeviceControls confirmedControls;
     private Spinner xyRatio,xyPhase;
     private TextView xyInfo;
-    private TextView ledStatus,ledPreviewInfo;
+    private TextView ledStatus,ledPreviewInfo,rhythmStatus;
+    private Spinner rhythmDifficulty,rhythmLong,rhythmFx;
     private SpectrumPreviewView ledPreview;
     private volatile boolean ledPreviewRunning;
     private boolean ledPollPending;
@@ -83,6 +85,7 @@ public final class MainActivity extends Activity {
     private final Runnable ledStale=()->{
         if(ledPreviewRunning && SystemClock.uptimeMillis()-ledLastFrameAt>=1500){
             ledPreview.setFrame(null);ledPreviewInfo.setText("数据已过期，等待设备；其他命令执行期间预览暂停。");
+            if(rhythmStatus!=null)rhythmStatus.setText("计分回读已过期，等待设备；板上判定继续运行。");
         }
     };
     private Spinner adsrTarget;
@@ -92,15 +95,15 @@ public final class MainActivity extends Activity {
     private AdsrEnvelopeView adsrCurve;
     private boolean loadingAdsr;
     private final VoiceBend voiceBend=new VoiceBend();
-    private final SeekBar[] bendBars=new SeekBar[7];
-    private final TextView[] bendLabels=new TextView[7];
-    private final Integer[] bendConfirmed=new Integer[7];
+    private final SeekBar[] bendBars=new SeekBar[12];
+    private final TextView[] bendLabels=new TextView[12];
+    private final Integer[] bendConfirmed=new Integer[12];
     private boolean bendScheduled;
     private AppearanceController appearance;
     private static final int INK=Theme.INK,MUTED=Theme.MUTED,ACCENT=Theme.PINK_INK;
     private final List<BluetoothDevice> paired=new ArrayList<>();
     private final List<Button> lockedButtons=new ArrayList<>();
-    private SongCodec.Song song=SongCodec.twinkle();
+    private SongCodec.Song song;
     private ScoreBends scoreFile;
     private byte[] scoreExportCsv;
     private volatile boolean busy,cancelled,recording,recordDraining;
@@ -128,6 +131,7 @@ public final class MainActivity extends Activity {
     private final Button[] navButtons=new Button[6],sourceButtons=new Button[3],pageButtons=new Button[4],xyButtons=new Button[6],takeButtons=new Button[4];
     private final List<DraftBinding> draftBindings=new ArrayList<>();
     private final List<View> deviceInputs=new ArrayList<>();
+    private final Set<LinearLayout> cardPanels=new HashSet<>();
     private LinearLayout drawer,adsrPanel,sensorTonePanel,sensorExpressionPanel;
     private FrameLayout drawerOverlay;
     private View connectionDot;
@@ -161,10 +165,7 @@ public final class MainActivity extends Activity {
     }
     private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density+0.5f);}
     private GradientDrawable rounded(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
-    /** 圆形角色小徽章：居中裁圆 + 粉描边玻璃底；分区吉祥物用 assets/mascot_N.png。 */
-    private ImageView mascotChip(String asset){ImageView v=new ImageView(this);android.graphics.Bitmap art=ArtAssets.load(this,asset);if(art!=null)v.setImageBitmap(art);v.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);GradientDrawable ring=new GradientDrawable();ring.setShape(GradientDrawable.OVAL);ring.setColor(Theme.GLASS);ring.setStroke(dp(1),Theme.LINE);v.setBackground(ring);v.setClipToOutline(true);v.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);return v;}
-    /** 沿父链回溯卡片属于哪个分区；找不到返回 -1。 */
-    private int sectionOf(View v){View cur=v;while(cur!=null){for(int s=0;s<sections.length;s++){if(sections[s]==cur)return s;}cur=(View)cur.getParent();}return -1;}
+    private static String number(int value){return String.format(Locale.ROOT,"%02d",value);}
     /** 卡片与按钮共用的抬升阴影：让层次从「平面」变成「纸片叠起来」。 */
     private void lift(View view,int dp){view.setElevation(dp(dp));}
     private TextView text(LinearLayout box,String value,int sp,int color){TextView t=new TextView(this);t.setText(value);t.setTextSize(sp);t.setTextColor(color);t.setPadding(0,dp(4),0,dp(6));t.setLineSpacing(dp(3),1);if(sp>=18)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);box.addView(t);return t;}
@@ -191,18 +192,24 @@ public final class MainActivity extends Activity {
         b.setElevation(0);b.setStateListAnimator(null);
         boolean horizontal=box.getOrientation()==LinearLayout.HORIZONTAL;LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(horizontal?0:-1,-2,horizontal?1:0);lp.setMargins(horizontal?dp(3):0,dp(5),horizontal?dp(3):0,dp(5));box.addView(b,lp);b.setOnClickListener(v->action.run());if(lock)lockedButtons.add(b);return b;
     }
-    private LinearLayout card(LinearLayout parent,String number,String title,String hint){
+    private LinearLayout card(LinearLayout parent,String title,String hint){
+        boolean nested=cardPanels.contains(parent);int index=1;
+        for(int n=0;n<parent.getChildCount();n++)if(cardPanels.contains(parent.getChildAt(n)))index++;
         LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);card.setPadding(dp(18),dp(17),dp(18),dp(17));
         GradientDrawable bg=Theme.card(Theme.R_CARD);bg.setStroke(dp(1),Theme.LINE);card.setBackground(bg);lift(card,2);
-        LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(Theme.GAP);parent.addView(card,lp);
-        // 顶部一道 3dp 粉紫渐变细线，给每张卡片一个「舞台上沿」的暗示。
-        View edge=new View(this);edge.setBackground(Theme.gradient(new int[]{Theme.PINK,Theme.VIOLET,Theme.CYAN},2));
-        LinearLayout.LayoutParams edgeLp=new LinearLayout.LayoutParams(-1,dp(3));edgeLp.bottomMargin=dp(13);edge.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);card.addView(edge,edgeLp);
+        LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(Theme.GAP);parent.addView(card,lp);cardPanels.add(card);
         LinearLayout heading=row(card);heading.setGravity(Gravity.CENTER_VERTICAL);
-        TextView badge=new TextView(this);badge.setText(number);badge.setGravity(Gravity.CENTER);badge.setTextSize(13);badge.setTextColor(Color.WHITE);badge.setTypeface(Typeface.DEFAULT,Typeface.BOLD);badge.setBackground(Theme.gradient(Theme.BUTTON,Theme.R_CHIP));heading.addView(badge,new LinearLayout.LayoutParams(dp(34),dp(34)));
-        TextView label=new TextView(this);label.setText(title);label.setTextSize(19);label.setTextColor(INK);label.setTypeface(Typeface.DEFAULT,Typeface.BOLD);label.setLetterSpacing(0.01f);LinearLayout.LayoutParams labelLp=new LinearLayout.LayoutParams(0,-2,1);labelLp.leftMargin=dp(11);heading.addView(label,labelLp);
-        int sec=sectionOf(parent);if(sec>=0)heading.addView(mascotChip("mascot_"+sec),new LinearLayout.LayoutParams(dp(34),dp(34)));
+        if(!nested){
+            TextView badge=new TextView(this);badge.setText(number(index));badge.setGravity(Gravity.CENTER);badge.setTextSize(13);badge.setTextColor(ACCENT);badge.setTypeface(Typeface.DEFAULT,Typeface.BOLD);badge.setBackground(rounded(Theme.SURFACE_ALT,Theme.R_CHIP));heading.addView(badge,new LinearLayout.LayoutParams(dp(34),dp(34)));
+        }
+        TextView label=new TextView(this);label.setText(title);label.setTextSize(18);label.setTextColor(INK);label.setTypeface(Typeface.DEFAULT,Typeface.BOLD);LinearLayout.LayoutParams labelLp=new LinearLayout.LayoutParams(0,-2,1);labelLp.leftMargin=nested?0:dp(10);heading.addView(label,labelLp);
         if(hint!=null)text(card,hint,13,MUTED);return card;
+    }
+    private LinearLayout foldout(LinearLayout parent,String title){
+        LinearLayout details=new LinearLayout(this);details.setOrientation(LinearLayout.VERTICAL);details.setVisibility(View.GONE);
+        Button toggle=button(parent,"展开 · "+title,()->{},false);
+        toggle.setOnClickListener(v->{boolean expanded=details.getVisibility()!=View.VISIBLE;details.setVisibility(expanded?View.VISIBLE:View.GONE);toggle.setText((expanded?"收起 · ":"展开 · ")+title);toggle.setContentDescription(title+(expanded?"，已展开":"，已收起"));});
+        toggle.setContentDescription(title+"，已收起");parent.addView(details,new LinearLayout.LayoutParams(-1,-2));return details;
     }
     private void addSpinner(LinearLayout box,Spinner spinner){spinner.setMinimumHeight(dp(54));spinner.setBackgroundTintList(ColorStateList.valueOf(ACCENT));box.addView(spinner,new LinearLayout.LayoutParams(-1,-2));}
     /** 进度条：粉紫渐变填充 + 淡粉轨道，和主按钮同一套霓虹色。 */
@@ -271,41 +278,47 @@ public final class MainActivity extends Activity {
         try{android.content.pm.PackageInfo installed=getPackageManager().getPackageInfo(getPackageName(),0);text(statusBox,"当前安装：v"+installed.versionName+" / Code"+installed.getLongVersionCode(),12,MUTED);}
         catch(PackageManager.NameNotFoundException e){throw new IllegalStateException(e);}
         status=text(statusBox,"",14,ACCENT);status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-        LinearLayout box=card(content,"01","蓝牙连接","先在系统蓝牙设置中配对 HC-05，再选择设备。");devices=new Spinner(this);devices.setContentDescription("已配对蓝牙设备");addSpinner(box,devices);
+        LinearLayout box=card(content,"蓝牙连接","先在系统蓝牙设置中配对 HC-05，再选择设备。");devices=new Spinner(this);devices.setContentDescription("已配对蓝牙设备");addSpinner(box,devices);
         LinearLayout connectionRow=row(box);button(connectionRow,"刷新设备",()->ensurePermission(this::refreshDevices),true);button(connectionRow,"连接设备",()->ensurePermission(this::connectSelected),true,1);
         button(box,"断开 / 取消下载",this::disconnect,false,2);
         text(box,"当前手机与FPGA仅通过HC-05通信，无需USB串口模块或OTG。",12,MUTED);
         buildPerformance();
         buildControls(content);
-        box=card(sections[3],"02","曲谱与播放","从分级曲库选曲，或从文件夹导入；下载后可自动演奏或跟随屏幕练习。");
+        box=card(sections[3],"选曲与播放","选择曲目并下载，随后试听或跟谱演奏。");
         buildSongLibrary(box);
-        button(box,"载入小星星示例",()->{song=SongCodec.twinkle();showSong();},true);
-        button(box,"从文件夹导入 CSV / MIDI",this::pickScore,true);
         scoreInfo=text(box,"",14,INK);scoreInfo.setPadding(dp(13),dp(12),dp(13),dp(12));scoreInfo.setBackground(rounded(Theme.SURFACE_ALT,12));scoreInfo.setLineSpacing(dp(4),1);
-        button(box,"查看全部音符与休止",this::preview,true);
-        button(box,"导出当前曲谱 CSV",this::exportCurrentScore,true);
-        text(box,"带弯音的 CSV 使用 bend_target_cents：每事件一个和弦共用目标，按当前滑音速率靠近；空白沿用手动目标，0 回正。即时静态偏移、和弦各音不同目标和 MIDI 弯音导入暂不支持。",12,MUTED);
+        scoreDownload=button(box,"匹配键位并下载",this::download,true,1);
+        scoreDownloadHint=text(box,"",12,MUTED);
         progress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);progress.setMax(100);progress.setProgressDrawable(progressDrawable());progress.setContentDescription("曲谱下载进度");LinearLayout.LayoutParams progressLp=new LinearLayout.LayoutParams(-1,dp(8));progressLp.setMargins(0,dp(10),0,dp(10));box.addView(progress,progressLp);
-        button(box,"校验键位并下载 / 重新下载",this::download,true,1);
-        text(box,"逐条确认后发送下一条。超时或取消后请重连并从头下载；提交成功前保留板上旧谱。",12,MUTED);
-        button(box,"自动演奏 · 已下载曲谱",this::audition,true,1);
-        text(box,"下载提交成功后点自动演奏，开发板喇叭会从头播放，无需按触摸键；预备 1.5 秒后发声，结束自动停止。使用当前触摸 ADSR 和音高/压力设置，需配套新版 FPGA 位流。",12,MUTED);
-        LinearLayout playRow=row(box);button(playRow,"PLAY · 开始指引",()->sendSimple("PLAY","已开始无声指引，预备 1.5 秒后进入首条音符，请按触摸键演奏"),true,1);button(playRow,"STOP · 停止",()->sendSimple("STOP","指引 / 自动演奏已停止，按住的触摸键仍可发声"),true);
+        LinearLayout playRow=row(box);button(playRow,"自动演奏",this::audition,true);button(playRow,"跟谱演奏",()->sendSimple("PLAY","已开始无声指引，预备 1.5 秒后进入首条音符，请按触摸键演奏"),true);
+        button(box,"停止播放",()->sendSimple("STOP","指引 / 自动演奏已停止，按住的触摸键仍可发声"),true,2);
+        text(box,"播放使用开发板已下载曲谱；自动演奏不计分，跟谱演奏参与音游计分。",12,MUTED);
+        LinearLayout files=foldout(box,"文件与曲目详情");
+        button(files,"导入 CSV / MIDI",this::pickScore,true);
+        LinearLayout fileRow=row(files);button(fileRow,"预览全部音符",this::preview,true);button(fileRow,"导出当前 CSV",this::exportCurrentScore,true);
+        button(files,"所选曲目详情 / 原谱",this::showLibraryDetails,true);
+        LinearLayout help=foldout(box,"下载与格式说明");
+        text(help,"单曲最多256条音符、和弦或休止事件；超过128条需先烧录Code46配套FPGA位流。下载后音游和自动演奏共用该曲谱。",12,MUTED);
+        text(help,"曲库下载仅补齐所需音高，已覆盖的键位保持原位置。恢复钢琴半音阶演奏前，可到“演奏 → 触摸 → 音高”恢复默认映射。导入文件只校验现有键位。",12,MUTED);
+        text(help,"逐条确认后发送下一条。超时或取消后请重连并从头下载；提交成功前保留板上旧谱。曲谱保存在开发板 RAM，掉电后需重新下载。",12,MUTED);
+        text(help,"自动演奏在预备1.5秒后发声，结束自动停止；使用当前触摸 ADSR 和音高/压力设置。",12,MUTED);
+        text(help,"带弯音的 CSV 使用 bend_target_cents：每事件一个和弦共用目标，按当前滑音速率靠近；空白沿用手动目标，0 回正。即时静态偏移、和弦各音不同目标和 MIDI 弯音导入暂不支持。",12,MUTED);
+        buildRhythmControls(sections[3]);
         buildLedControls(sections[4]);
-        box=card(sourceGroups[0][1],"MAP","七键音高映射","按第 1～7 键填写 MIDI 音高，范围 60～72。");
+        box=card(sourceGroups[0][1],"十二键音高映射","按第 1～12 键填写 MIDI 音高，范围 60～72。");
         mapInfo=text(box,"尚未读取键位",14,MUTED);
         button(box,"读取设备键位 MAP?",()->task(()->readMapping(),"键位已读取"),true);
-        mappingInput=new EditText(this);mappingInput.setSingleLine(true);mappingInput.setText("60,61,62,63,64,65,66");mappingInput.setTextColor(INK);mappingInput.setTextSize(15);mappingInput.setMinHeight(dp(54));mappingInput.setPadding(dp(12),dp(12),dp(12),dp(12));mappingInput.setBackground(rounded(Theme.SURFACE_ALT,Theme.R_CHIP));mappingInput.setContentDescription("第1到第7键的 MIDI 音高，用英文逗号分隔");
-        mappingTarget=choices(box,"选择要修改的扫描键号（当前仅 K1～K7 可映射）",new String[]{"K1 · 白1","K2 · 黑1","K3 · 白2","K4 · 黑2","K5 · 白3","K6 · 白4","K7 · 黑3"});
+        mappingInput=new EditText(this);mappingInput.setSingleLine(true);mappingInput.setText("60,61,62,63,64,65,66,67,68,69,70,71");mappingInput.setTextColor(INK);mappingInput.setTextSize(15);mappingInput.setMinHeight(dp(54));mappingInput.setPadding(dp(12),dp(12),dp(12),dp(12));mappingInput.setBackground(rounded(Theme.SURFACE_ALT,Theme.R_CHIP));mappingInput.setContentDescription("第1到第12键的 MIDI 音高，用英文逗号分隔");
+        mappingTarget=choices(box,"选择要修改的扫描键号（当前仅 K1～K12 可映射）",new String[]{"K1 · 白1","K2 · 黑1","K3 · 白2","K4 · 黑2","K5 · 白3","K6 · 白4","K7 · 黑3","K8 · 白5","K9 · 黑4","K10 · 白6","K11 · 黑5","K12 · 白7"});
         mappingKeyboard=new PianoKeyboardView(this,72,(key,down)->{if(down)editMappedNote(ChromaticKeys.note(key));});box.addView(mappingKeyboard,new LinearLayout.LayoutParams(-1,dp(180)));
-        text(box,"先选键号，再点琴键填写目标 MIDI 音高；粉框显示该键草稿。K8～K16 仍固定音高；后三个踏板条高音超出 MAP 的60～72范围，不能选。",12,MUTED);
-        text(box,"高级入口 · 七键 MIDI 文本",13,MUTED);box.addView(mappingInput,new LinearLayout.LayoutParams(-1,-2));
-        button(box,"应用七键映射",this::applyMapping,true,1);
-        button(box,"恢复默认映射",()->{if(recording||recordDraining){alert("先停止并等待日志结束，再修改键位");return;}task(()->{link.command("MAP_RESET","OK");readMapping();},"默认映射已恢复");},true);
-        sensorTonePanel=card(sourceGroups[1][2],"TONE","共享音色","作用于：红外 + 手势。调整后两个音源同时改变。");
+        text(box,"先选键号，再点琴键填写目标 MIDI 音高；粉框显示该键草稿。K13～K16 仍固定高音；后三个踏板条高音超出 MAP 的60～72范围，不能选。",12,MUTED);
+        text(box,"高级入口 · 十二键 MIDI 文本",13,MUTED);box.addView(mappingInput,new LinearLayout.LayoutParams(-1,-2));
+        button(box,"应用十二键映射",this::applyMapping,true,1);
+        button(box,"恢复默认映射",()->{if(recording||recordDraining){alert("先停止并等待日志结束，再修改键位");return;}task(()->{requireTwelveControl();link.command("MAP_RESET","OK");readMapping();},"默认映射已恢复");},true);
+        sensorTonePanel=card(sourceGroups[1][2],"共享音色","作用于：红外 + 手势。调整后两个音源同时改变。");
         gestureTone=choices(sensorTonePanel,"红外 / 手势音色",new String[]{"正弦","钢琴","长笛","尤克里里","鼓","电钢琴","钟声","弦乐"});
         button(sensorTonePanel,"应用音源音色",()->{int value=gestureTone.getSelectedItemPosition();sendSimple("TONE,"+value,"红外 / 手势音色已确认："+gestureTone.getSelectedItem());},true);
-        sensorExpressionPanel=card(sourceGroups[1][4],"VIB","共享颤音","作用于：红外 + 手势（共用一套参数）。下方颤音改变音高；起振延迟从整体使能或应用参数时计时，不是逐音符延迟。");
+        sensorExpressionPanel=card(sourceGroups[1][4],"共享颤音","作用于：红外 + 手势（共用一套参数）。下方颤音改变音高；起振延迟从整体使能或应用参数时计时，不是逐音符延迟。");
         gestureVibrato=choices(sensorExpressionPanel,"红外 / 手势颤音",new String[]{"关闭","开启"});
         button(sensorExpressionPanel,"应用音源颤音",()->{int value=gestureVibrato.getSelectedItemPosition();sendSimple("VIBRATO,"+value,"红外 / 手势颤音已确认："+gestureVibrato.getSelectedItem());},true);
         gestureBank=choices(sourceGroups[2][0],"手势音符组",new String[]{"低音组 C4～F4","高音组 G4～C5"});
@@ -317,21 +330,21 @@ public final class MainActivity extends Activity {
         buildAdsrControls(sourceGroups[0][3]);
         buildBendControls(sourceGroups[0][1]);
         buildPerformanceControls();
-        box=card(sections[5],"EVT","板上事件 · RAM / Flash · 板上回放","统一版由下面按钮控制事件录制，16 个实体键保留演奏。独立事件版还可用 K13～K16 控制。");
+        box=card(sections[5],"板上事件 · RAM / Flash · 板上回放","统一版由下面按钮控制事件录制，16 个实体键保留演奏。独立事件版还可用 K13～K16 控制。");
         takeInfo=text(box,"连接新版 FPGA 固件后读取录制状态。",13,MUTED);
         text(box,"录的是按键和表情事件，不是音频；保存在板上，当前不提供文件导出。停止后可直接回放或保存，无需先回放才能保存。",12,MUTED);
         takeReason=text(box,"",13,Theme.DANGER);
         takeConfigure=button(box,"切到可录配置 · 关闭踏板 / 复音 16",this::configureTake,true);
-        takeButtons[0]=segment(box,"1 · 开始录制",()->takeAction("TAKE_REC"),true);
+        takeButtons[0]=segment(box,"01 · 开始录制",()->takeAction("TAKE_REC"),true);
         LinearLayout takeRow=row(box);
-        takeButtons[1]=segment(takeRow,"2 · 停止",()->takeAction("TAKE_STOP"),true);
-        takeButtons[2]=segment(takeRow,"3 · 回放",()->takeAction("TAKE_PLAY"),true);
-        takeButtons[3]=segment(box,"4 · 保存到板上 Flash",()->takeAction("TAKE_SAVE"),true);
+        takeButtons[1]=segment(takeRow,"02 · 停止",()->takeAction("TAKE_STOP"),true);
+        takeButtons[2]=segment(takeRow,"03 · 回放",()->takeAction("TAKE_PLAY"),true);
+        takeButtons[3]=segment(box,"04 · 保存到板上 Flash",()->takeAction("TAKE_SAVE"),true);
         button(box,"删除已录制内容",()->takeAction("TAKE_DEL"),true,2);
         button(box,"读取录制状态",()->takeAction(null),true);
         text(box,"等待显示 Flash 保存并读回校验成功后才能断电。容量为 1024 条事件；连续音量或音高变化会较快用满。覆盖与删除均需再次确认。",12,MUTED);
         buildPhoneRecording(sections[5]);
-        box=card(sections[5],"LOG","演奏事件日志 · 手机内存 · 导出 TXT","REC_START / REC_STOP 记录设备事件文本；不是音频，也不等同于板上 TAKE 录制。统一固件可能未启用此通路，设备拒绝会显示原因。");
+        box=card(sections[5],"演奏事件日志 · 手机内存 · 导出 TXT","REC_START / REC_STOP 记录设备事件文本；不是音频，也不等同于板上 TAKE 录制。统一固件可能未启用此通路，设备拒绝会显示原因。");
         logReason=text(box,"",12,Theme.DANGER);
         logStart=button(box,"REC_START · 开始事件日志",this::startRecording,true,1);
         logStop=button(box,"REC_STOP · 停止事件日志",this::stopRecording,true);
@@ -350,14 +363,14 @@ public final class MainActivity extends Activity {
         parent.addView(group,new LinearLayout.LayoutParams(-1,-2));return group;
     }
     private void buildQuickPerformance(){
-        quickPanel=card(sections[1],"LIVE","常用演奏","先连接并读取设备。配置是板上保存的参数，实际值可能被滑杆或 TAKE 回放接管；控件选择只是待发送草稿。");
+        quickPanel=card(sections[1],"常用演奏","先连接并读取设备。配置是板上保存的参数，实际值可能被滑杆或 TAKE 回放接管；控件选择只是待发送草稿。");
         button(quickPanel,"连接 / 检查设备",()->showSection(0),false);
         quickState=text(quickPanel,"设备状态尚未读取",13,INK);
         quickPanic=button(quickPanel,"紧急止音 · 释放声音与尾音",()->applyControl("PANIC","声音与尾音已释放；按住的键请松开重按"),true,2);
         button(quickPanel,"板上 TAKE · 录制 / 回放",()->showSection(5),false);
         button(quickPanel,"手机音符 / MIDI · 录制与导出",()->{showSection(5);main.post(()->contentScroll.smoothScrollTo(0,phoneInfo.getTop()+((View)phoneInfo.getParent()).getTop()));},false);
         text(quickPanel,"板上 TAKE 保存演奏状态并由 FPGA 回放；手机保存音符事件，可命名、回放和导出 MIDI。两者都不是麦克风音频录音。",12,MUTED);
-        LinearLayout box=card(sections[1],"FX","三效果场景","保存在这部手机，只包含合唱、延迟、混响配置；不保存总音量、音色、ADSR 或滑杆位置。初始组合尚待实机听音。");
+        LinearLayout box=card(sections[1],"三效果场景","保存在这部手机，只包含合唱、延迟、混响配置；不保存总音量、音色、ADSR 或滑杆位置。初始组合尚待实机听音。");
         sceneChoice=choices(box,"选择场景（选择本身不会发送）",new String[]{"正在读取本地场景"});
         sceneChoice.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> p,View view,int position,long id){if(uiReady)refreshQuickPerformance();}
@@ -428,7 +441,7 @@ public final class MainActivity extends Activity {
             final int index=source;sourceButtons[source]=segment(buttons,names[source],()->showSource(index),false);
             LinearLayout page=new LinearLayout(this);page.setOrientation(LinearLayout.VERTICAL);sourcePages[source]=page;performanceDetails.addView(page);
             for(int group=0;group<7;group++){
-                LinearLayout box=card(page,""+(group+1),GROUP_NAMES[group],null);sourceGroups[source][group]=box;
+                LinearLayout box=card(page,GROUP_NAMES[group],null);sourceGroups[source][group]=box;
                 text(box,source==0?"作用于：触摸键盘":"作用于：红外 + 手势（共用一套参数）",12,MUTED);
             }
         }
@@ -460,7 +473,7 @@ public final class MainActivity extends Activity {
     }
     private void showSection(int section){
         currentSection=section;for(int n=0;n<6;n++)sections[n].setVisibility(n==section?View.VISIBLE:View.GONE);
-        sectionTitle.setText((section+1)+" · "+SECTION_NAMES[section]);contentScroll.scrollTo(0,0);refreshControlUi();
+        sectionTitle.setText(number(section+1)+" · "+SECTION_NAMES[section]);contentScroll.scrollTo(0,0);refreshControlUi();
         main.removeCallbacks(displayPoll);if(section==4||section==2||section==1)scheduleDisplayPoll();
     }
     private void buildDrawer(FrameLayout root){
@@ -470,7 +483,7 @@ public final class MainActivity extends Activity {
         FrameLayout.LayoutParams drawerLp=new FrameLayout.LayoutParams(dp(280),-1,Gravity.START);drawerOverlay.addView(drawer,drawerLp);
         text(drawer,"当前生效设置",18,INK);settingsSummary=text(drawer,"",12,MUTED);
         ScrollView navScroll=new ScrollView(this);drawer.addView(navScroll,new LinearLayout.LayoutParams(-1,0,1));LinearLayout nav=new LinearLayout(this);nav.setOrientation(LinearLayout.VERTICAL);navScroll.addView(nav);
-        for(int n=0;n<6;n++){final int section=n;navButtons[n]=segment(nav,(n+1)+" · "+SECTION_NAMES[n],()->{showSection(section);closeDrawer();},false);}
+        for(int n=0;n<6;n++){final int section=n;navButtons[n]=segment(nav,number(n+1)+" · "+SECTION_NAMES[n],()->{showSection(section);closeDrawer();},false);}
         button(drawer,"关闭导航",this::closeDrawer,false);
         drawerOverlay.setOnApplyWindowInsetsListener((view,insets)->{
             if(Build.VERSION.SDK_INT>=30){android.graphics.Insets safe=insets.getInsets(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());drawerLp.topMargin=safe.top;drawerLp.bottomMargin=safe.bottom;drawerLp.leftMargin=safe.left;drawerLp.rightMargin=safe.right;}
@@ -527,7 +540,7 @@ public final class MainActivity extends Activity {
         bindDraft("volume",1,"应用总音量",()->""+volumeBar.getProgress(),volumeBar);
         bindDraft("analog",2,"应用模拟输入用途",()->choice(analogChoice),analogChoice);
         bindDraft("cal",2,"应用滑杆端点标定",()->clean(calibrationInput),calibrationInput);
-        bindDraft("mapping",1,"应用七键映射",()->clean(mappingInput),mappingInput,mappingTarget,mappingKeyboard);
+        bindDraft("mapping",1,"应用十二键映射",()->clean(mappingInput),mappingInput,mappingTarget,mappingKeyboard);
         bindDraft("tone",1,"应用音源音色",()->choice(gestureTone),gestureTone);
         bindDraft("vibrato",1,"应用音源颤音",()->choice(gestureVibrato),gestureVibrato);
         bindDraft("bank",1,"应用手势音符组",()->choice(gestureBank),gestureBank);
@@ -536,7 +549,7 @@ public final class MainActivity extends Activity {
         adsrApply=findButton("应用 ADSR 到下一次发音");adsrBadge=text(adsrPanel,"",10,Theme.PINK_INK);adsrBadge.setGravity(Gravity.END);
         deviceInputs.addAll(Arrays.asList(adsrBars));deviceInputs.add(adsrCurve);deviceInputs.addAll(Arrays.asList(bendBars));
         for(int target=0;target<2;target++)controlState.edit("adsr"+target,1,adsrValue(target));
-        for(int key=0;key<7;key++)controlState.edit("bend"+key,1,""+voiceBend.value(key));
+        for(int key=0;key<12;key++)controlState.edit("bend"+key,1,""+voiceBend.value(key));
     }
     private void refreshControlUi(){
         if(!uiReady)return;
@@ -557,7 +570,7 @@ public final class MainActivity extends Activity {
         }
         controlState.confirm("perf_tuning",connected&&confirmedPitch!=null?""+confirmedPitch[3]:null);
         for(int target=0;target<2;target++){String key="adsr"+target;controlState.edit(key,1,adsrValue(target));controlState.confirm(key,connected?acknowledged.get(key):null);}
-        for(int key=0;key<7;key++){controlState.edit("bend"+key,1,""+voiceBend.value(key));controlState.confirm("bend"+key,connected&&bendConfirmed[key]!=null?""+bendConfirmed[key]:null);}
+        for(int key=0;key<12;key++){controlState.edit("bend"+key,1,""+voiceBend.value(key));controlState.confirm("bend"+key,connected&&bendConfirmed[key]!=null?""+bendConfirmed[key]:null);}
         for(DraftBinding binding:draftBindings){boolean dirty=controlState.dirty(binding.key);binding.badge.setText(dirty?"•待发送"+(controlState.confirmed(binding.key)==null?" · 设备值未知":" · 设备："+controlState.confirmed(binding.key)):"✓ 已确认");binding.badge.setTextColor(dirty?Theme.PINK_INK:Theme.MUTED);((SegmentButton)binding.apply).selection(dirty?ControlState.Selection.DRAFT:ControlState.Selection.OFF);binding.apply.setEnabled(controlState.enabled()&&(!binding.key.startsWith("fx")||confirmedFx!=null));}
         String adsr="adsr"+(currentSource==0?0:1);boolean adsrDirty=controlState.dirty(adsr);adsrBadge.setText(adsrDirty?"•待发送 · 包络草稿":"✓ 包络已确认");((SegmentButton)adsrApply).selection(adsrDirty?ControlState.Selection.DRAFT:ControlState.Selection.OFF);
         adsrApply.setEnabled(controlState.enabled());
@@ -565,7 +578,7 @@ public final class MainActivity extends Activity {
         for(int n=0;n<6;n++){((SegmentButton)xyButtons[n]).selection(controlState.selection("xy",XY_RATIOS[n]+","+XY_PHASES[n]));xyButtons[n].setEnabled(controlState.enabled());}
         for(int n=0;n<6;n++){boolean pending=controlState.pending(n);((SegmentButton)navButtons[n]).pending(pending);((SegmentButton)navButtons[n]).selection(n==currentSection?ControlState.Selection.CONFIRMED:ControlState.Selection.OFF);navButtons[n].setContentDescription(SECTION_NAMES[n]+(n==currentSection?"，当前分区":"")+(pending?"，有待发送草稿":""));if(Build.VERSION.SDK_INT>=30)navButtons[n].setStateDescription(n==currentSection?"当前分区":"未选中");}
         connectionDot.setBackground(rounded(connected?Theme.CONNECTED:Theme.DISABLED_FG,8));connectionDot.setContentDescription(connected?"HC-05 已连接":"HC-05 未连接");headerPending.setVisibility(controlState.pending(currentSection)?View.VISIBLE:View.INVISIBLE);
-        settingsSummary.setText(!connected?"未连接，以下均为待发送草稿":(c==null?"演奏状态尚未读取":c.keyboardSummary()+(confirmedFx==null?"\n三效果状态未知":"\n"+confirmedFx.summary()))+"\n七键："+(mapping==null?"未知":join(mapping))+"\n弯音："+bendSummary()+"\n显示："+(controlState.confirmed("page")==null?"未知":LedState.page(Integer.parseInt(controlState.confirmed("page")),false))+"\nXY："+(controlState.confirmed("xy")==null?"未知":controlState.confirmed("xy")));
+        settingsSummary.setText(!connected?"未连接，以下均为待发送草稿":(c==null?"演奏状态尚未读取":c.keyboardSummary()+(confirmedFx==null?"\n三效果状态未知":"\n"+confirmedFx.summary()))+"\n十二键："+(mapping==null?"未知":join(mapping))+"\n弯音："+bendSummary()+"\n显示："+(controlState.confirmed("page")==null?"未知":LedState.page(Integer.parseInt(controlState.confirmed("page")),false))+"\nXY："+(controlState.confirmed("xy")==null?"未知":controlState.confirmed("xy")));
         updateTakeWorkflow();
         refreshQuickPerformance();
         refreshMappingKeyboard();
@@ -585,7 +598,7 @@ public final class MainActivity extends Activity {
         TakeWorkflow flow=new TakeWorkflow(confirmedControls,confirmedTake);takeReason.setText(!link.connected()?"请先连接 HC-05":flow.reason);
         boolean configure=confirmedControls!=null&&confirmedControls.extended&&(confirmedControls.hold==2||confirmedControls.poly!=16);
         takeConfigure.setVisibility(configure?View.VISIBLE:View.GONE);takeConfigure.setEnabled(controlState.enabled()&&confirmedTake!=null&&!confirmedTake.busy()&&confirmedTake.confirmation()==0);
-        TakeWorkflow.Step[] steps={flow.record,flow.stop,flow.play,flow.save};boolean[] enabled={flow.canRecord,flow.canStop,flow.canPlay,flow.canSave};String[] labels={"1 · 开始录制","2 · 停止","3 · 回放","4 · 保存到板上 Flash"};
+        TakeWorkflow.Step[] steps={flow.record,flow.stop,flow.play,flow.save};boolean[] enabled={flow.canRecord,flow.canStop,flow.canPlay,flow.canSave};String[] labels={"01 · 开始录制","02 · 停止","03 · 回放","04 · 保存到板上 Flash"};
         for(int n=0;n<4;n++){takeButtons[n].setText((steps[n]==TakeWorkflow.Step.DONE?"✓ ":"")+labels[n]);((SegmentButton)takeButtons[n]).selection(steps[n]==TakeWorkflow.Step.READY?ControlState.Selection.CONFIRMED:ControlState.Selection.OFF);takeButtons[n].setEnabled(controlState.enabled()&&enabled[n]);takeButtons[n].setContentDescription(labels[n]+(steps[n]==TakeWorkflow.Step.DONE?"，已完成":steps[n]==TakeWorkflow.Step.READY?"，可执行":"，尚不可执行"));}
         findButton("删除已录制内容").setEnabled(controlState.enabled()&&flow.canDelete);
     }
@@ -614,10 +627,43 @@ public final class MainActivity extends Activity {
         }else{task(this::readLedState,"显示状态已刷新");scheduleDisplayPoll();}
     }
     @Override protected void onResume(){super.onResume();resumed=true;if(uiReady)scheduleDisplayPoll();}
+    private void buildRhythmControls(LinearLayout content){
+        LinearLayout box=card(content,"十二键音游","下载成功后，点击上方“跟谱演奏”开始计分。");
+        rhythmStatus=text(box,"尚未读取音游状态",14,ACCENT);
+        button(box,"读取得分 / 本次结果",()->task(this::readRhythmState,"音游状态已读取"),true);
+        LinearLayout liveScore=row(box);
+        button(liveScore,"开始刷新分数",this::startLedPreview,true);
+        button(liveScore,"停止刷新",()->stopLedPreview("自动刷新已停止，可手动读取最新结果。"),false);
+        LinearLayout settings=foldout(box,"音游设置与练习谱");
+        rhythmDifficulty=choices(settings,"判定窗口",new String[]{"严格 · ±80 ms","标准 · ±120 ms","宽松 · ±160 ms","练习 · ±200 ms"});rhythmDifficulty.setSelection(1);
+        rhythmLong=choices(settings,"长音玩法",new String[]{"仅点按","长音持续保持"});rhythmLong.setSelection(1);
+        rhythmFx=choices(settings,"击打闪光",new String[]{"关闭","开启"});rhythmFx.setSelection(1);
+        button(settings,"应用音游设置",()->{
+            final int config=RhythmState.settings(rhythmDifficulty.getSelectedItemPosition(),0,rhythmLong.getSelectedItemPosition()==1,rhythmFx.getSelectedItemPosition()==1,false);
+            task(()->{link.command("VIS,0,"+config,"OK");RhythmState state=RhythmState.parse(link.command("VIZ?","V"));
+                if(state.settings!=config)throw new IOException("设置回读不一致，请重新读取");
+                main.post(()->{if(!cancelled&&link.connected())rhythmStatus.setText("设备设置已确认\n"+state.description());});},"音游设置已应用并回读确认；开始曲谱后计分");
+        },true);
+        button(settings,"载入四类音符练习谱",()->{try{
+            scoreFile=ScoreBends.parse("四类音符练习",("pitches,duration_ms,note_type\n60,400,TAP\n62,1200,HOLD\nREST,300,\n64,150,DRAG\n65,150,DRAG\n67,150,DRAG\n69,150,DRAG\n71,600,FLICK\nREST,400,\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            song=scoreFile.song;showSong();setStatus("已载入四类音符练习谱，请校验键位并下载后 PLAY");
+        }catch(IOException e){alert(e.getMessage());}},true);
+        text(settings,"选择框为设置草稿，点击应用并回读后生效；播放中不能更改。音符配色固定为蓝 / 黄 / 粉。",12,MUTED);
+        LinearLayout help=foldout(box,"玩法说明");
+        text(help,"屏幕从左到右对应 K1～K12，跟随自定义音高映射。计分使用 FPGA 时钟，判定窗口在相邻事件边界截断。",12,MUTED);
+        text(help,"TAP · 蓝色薄键：到判定线时点击。HOLD · 蓝色长条：到线时按住，尾条消失即可松手。DRAG · 黄色：到线时接住，已按住也能命中。FLICK · 粉色阶梯：按住对应键并滑向另一触摸键，或向任意方向挥手。成功命中变黄。",12,MUTED);
+        text(help,"Perfect 1000、Good 500，HOLD 完成额外 500；漏击或提前松手清连击。右上红字为得分，左上黄字为连击。TAP 为5×1像素，FLICK 为5×2阶梯形，下方十二键均宽5像素。",12,MUTED);
+        text(help,"和弦所有列均需到位。同一音高若映射到多个键，会同时提示这些列并按和弦处理；单键对应请设置不同音高。",12,MUTED);
+        text(help,"CSV 可加 note_type 列选择 TAP / HOLD / DRAG / FLICK；普通曲谱仍自动将 ≥500 ms 的音符视为 HOLD。手势使用已有 APDS-9960，需先完成传感器初始化；触摸跨键滑动同样可判 FLICK。",12,MUTED);
+    }
+    private void readRhythmState()throws Exception{
+        RhythmState state=RhythmState.parse(link.command("VIZ?","V"));
+        main.post(()->{if(!cancelled&&link.connected())rhythmStatus.setText("设备最近回读：\n"+state.description());});
+    }
     private void buildLedControls(LinearLayout content){
-        LinearLayout preview=card(content,"LIVE","手机实时预览","青蓝紫红随演奏幅度变化。");
+        LinearLayout preview=card(content,"手机实时预览","青蓝紫红随演奏幅度变化。");
         buildLedPreview(preview);
-        LinearLayout box=card(content,"LED","显示控制与实时预览","需配套新版 FPGA 位流。手机可直接切页，板上 S2 仍可使用。");
+        LinearLayout box=card(content,"显示控制与实时预览","需配套新版 FPGA 位流。手机可直接切页，板上 S2 仍可使用。");
         LinearLayout pageGroup=segmentGroup(box);String[] pageNames={"总览 / 曲谱","波形","XY 轨迹","频谱"};
         for(int n=0;n<4;n+=2){LinearLayout pages=row(pageGroup);for(int k=n;k<n+2;k++){final int mode=k;pageButtons[k]=segment(pages,pageNames[k],()->selectLedPage(mode),true);}}
         button(box,"读取设备显示状态",()->task(this::readLedState,"已读取 FPGA 实际显示状态"),true);
@@ -675,6 +721,7 @@ public final class MainActivity extends Activity {
         main.removeCallbacks(ledPoll);main.removeCallbacks(ledStale);
         if(ledPreview!=null)ledPreview.setFrame(null);
         if(ledPreviewInfo!=null)ledPreviewInfo.setText(reason);
+        if(rhythmStatus!=null)rhythmStatus.setText(reason+"\n此前回读仅供参考。");
     }
     private void scheduleLedPreview(long delay){
         main.removeCallbacks(ledPoll);if(ledPreviewRunning)main.postDelayed(ledPoll,delay);
@@ -688,7 +735,17 @@ public final class MainActivity extends Activity {
         worker.execute(()->{
             try{
                 if(!ledPreviewRunning)return;
-                LedFrame frame=LedFrame.parse(link.command("VIZ?","V"));
+                String line=link.command("VIZ?","V");
+                if(RhythmState.isGame(line)){
+                    RhythmState game=RhythmState.parse(line);
+                    main.post(()->{
+                        if(generation!=ledGeneration || !ledPreviewRunning || !link.connected())return;
+                        ledLastFrameAt=SystemClock.uptimeMillis();ledPreview.setFrame(null);
+                        ledPreviewInfo.setText(game.description());rhythmStatus.setText("FPGA 实时计分：\n"+game.description());
+                        main.removeCallbacks(ledStale);main.postDelayed(ledStale,1500);
+                    });return;
+                }
+                LedFrame frame=LedFrame.parse(line);
                 main.post(()->{
                     if(generation!=ledGeneration || !ledPreviewRunning || !link.connected())return;
                     ledLastFrameAt=SystemClock.uptimeMillis();ledPreview.setFrame(frame);
@@ -724,12 +781,15 @@ public final class MainActivity extends Activity {
         },"LED 轨迹参数已确认；请在板上 XY 页查看");
     }
     private void buildSongLibrary(LinearLayout box){
-        text(box,"分级曲库 · 9 首离线曲目",18,INK);
-        libraryTier=choices(box,"选择等级",new String[]{"青铜 · 入门（3 首）","白银 · 进阶（3 首）","黄金 · 挑战（3 首）"});
+        text(box,SongLibrary.all().size()+" 首离线曲目 · 选曲后自动载入",12,MUTED);
+        String[] tiers=new String[SongLibrary.Tier.values().length];
+        for(SongLibrary.Tier tier:SongLibrary.Tier.values())tiers[tier.ordinal()]=tier.title+" · "+SongLibrary.in(tier).size()+" 首";
+        libraryTier=choices(box,"选择等级",tiers);
         libraryTier.setSelection(SongLibrary.Tier.SILVER.ordinal());
         libraryTracks=new Spinner(this);libraryTracks.setContentDescription("选择分级曲库曲目");addSpinner(box,libraryTracks);
         libraryInfo=text(box,"",13,MUTED);
-        refreshLibrary(SongLibrary.Tier.SILVER.ordinal());libraryTracks.setSelection(2);
+        libraryReload=button(box,"切回所选曲库曲目",this::showLibraryEntry,true);libraryReload.setVisibility(View.GONE);
+        refreshLibrary(SongLibrary.Tier.SILVER.ordinal());libraryTracks.setSelection(2);showLibraryEntry();
         libraryTracks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> parent,View view,int position,long id){showLibraryEntry();}
             public void onNothingSelected(AdapterView<?> parent){}
@@ -740,30 +800,10 @@ public final class MainActivity extends Activity {
             }
             public void onNothingSelected(AdapterView<?> parent){}
         });
-        button(box,"匹配七键并下载所选曲目",()->{
-            if(busy)return;
-            if(recording||recordDraining){alert("先停止录制并等待 REC_END，再下载曲谱");return;}
-            if(!link.connected()){alert("请先连接 HC-05；也可先载入曲目查看音符");return;}
-            SongLibrary.Entry entry=selectedLibraryEntry();if(entry==null)return;
-            song=entry.song();showSong();downloadScore(true);
-        },true,1);
-        text(box,"仅补齐本曲缺少的键位，已覆盖的音高保持原位置；修改后会读回核对，再逐条下载。保存于开发板 RAM，掉电后需重下。",12,MUTED);
-        text(box,"匹配曲库可能修改前七个扫描键的音高；恢复钢琴半音阶演奏前，请到“演奏 → 触摸 → 音高”恢复默认映射。",12,MUTED);
-        button(box,"载入所选曲目 · 查看后再下载",()->{
-            SongLibrary.Entry entry=selectedLibraryEntry();if(entry==null)return;
-            song=entry.song();showSong();setStatus("已载入《"+entry.title+"》；尚未下载到开发板");
-        },true);
-        button(box,"保存所选曲目到文件夹 · CSV",this::exportLibraryScore,true);
-        button(box,"查看所选曲目的原谱网页",()->{
-            SongLibrary.Entry entry=selectedLibraryEntry();if(entry==null)return;
-            try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(entry.sourceUrl)));}
-            catch(ActivityNotFoundException e){alert("未找到浏览器；曲库选曲和下载仍可离线使用");}
-        },true);
-        text(box,"曲目参考 PrintableGarden 的传统／公版旋律，按本设备七键音域改编；等级为本 APP 的练习分级。原有文件夹导入入口见下方。",12,MUTED);
     }
     private void refreshLibrary(int tier){
         libraryEntries=SongLibrary.in(SongLibrary.Tier.values()[tier]);
-        List<String> titles=new ArrayList<>();for(SongLibrary.Entry e:libraryEntries)titles.add(e.title);
+        List<String> titles=new ArrayList<>();for(int n=0;n<libraryEntries.size();n++)titles.add(number(n+1)+" · "+libraryEntries.get(n).title);
         libraryTracks.setAdapter(options(titles));showLibraryEntry();
     }
     private SongLibrary.Entry selectedLibraryEntry(){
@@ -771,8 +811,17 @@ public final class MainActivity extends Activity {
     }
     private void showLibraryEntry(){
         SongLibrary.Entry entry=selectedLibraryEntry();if(entry==null)return;
-        libraryInfo.setText(entry.englishTitle+"\n"+entry.tier.title+" · "+entry.tier.description+"\n"+entry.time+" 拍 · "+entry.bpm+" BPM · "+
-            String.format(Locale.ROOT,"%.2f",entry.song().durationMs()/1000.0)+" 秒\n需要音高："+SongCodec.notes(entry.song().requiredMask())+"\n"+entry.edition);
+        libraryInfo.setText(entry.time+" 拍 · "+entry.bpm+" BPM · "+String.format(Locale.ROOT,"%.1f",entry.song().durationMs()/1000.0)+" 秒");
+        scoreFile=null;song=entry.song();if(scoreInfo!=null)showSong();
+    }
+    private boolean isLibrarySong(){for(SongLibrary.Entry entry:SongLibrary.all())if(entry.song()==song)return true;return false;}
+    private void showLibraryDetails(){
+        SongLibrary.Entry entry=selectedLibraryEntry();if(entry==null)return;
+        new AlertDialog.Builder(this).setTitle(entry.title).setMessage(entry.englishTitle+"\n"+entry.tier.title+" · "+entry.tier.description+"\n"+entry.edition+"\n需要音高："+SongCodec.notes(entry.song().requiredMask()))
+            .setPositiveButton("查看原谱",(dialog,which)->{
+                try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(entry.sourceUrl)));}
+                catch(ActivityNotFoundException e){alert("未找到浏览器；曲库选曲和下载仍可离线使用");}
+            }).setNeutralButton("保存含来源 CSV",(dialog,which)->exportLibraryScore()).setNegativeButton("关闭",null).show();
     }
     private void exportLibraryScore(){
         exportingScore=selectedLibraryEntry();if(exportingScore==null)return;
@@ -780,9 +829,9 @@ public final class MainActivity extends Activity {
         intent.putExtra(Intent.EXTRA_TITLE,exportingScore.id+".csv");startActivityForResult(intent,EXPORT_SCORE);
     }
     private void buildBendControls(LinearLayout content){
-        LinearLayout box=card(content,"06","七声部弯音","弯音是目标音高偏移。按住和弦时分别调节第 1～7 键；已回读设备时，拖动会限制在设备当前弯音范围内。FSR 全局音高比率继续叠加。");
-        text(box,"作用于：前七触摸声部。范围与过渡速率在下方弯音 / 滑音卡片调整；缩小范围后，原草稿须重新拖动或回正再发送。",12,MUTED);
-        for(int i=0;i<7;i++){
+        LinearLayout box=card(content,"十二声部弯音","弯音是目标音高偏移。按住和弦时分别调节第 1～12 键；已回读设备时，拖动会限制在设备当前弯音范围内。FSR 全局音高比率继续叠加。");
+        text(box,"作用于：前十二触摸声部。范围与过渡速率在下方弯音 / 滑音卡片调整；缩小范围后，原草稿须重新拖动或回正再发送。",12,MUTED);
+        for(int i=0;i<12;i++){
             final int index=i;bendLabels[i]=text(box,"",13,MUTED);
             SeekBar bar=new SeekBar(this);bendBars[i]=bar;bar.setMax(2400);bar.setProgress(1200);
             bar.setContentDescription("第 "+(i+1)+" 个触摸声部独立音高，上下1200音分");
@@ -804,14 +853,14 @@ public final class MainActivity extends Activity {
         button(box,"发送全部音高",()->{
             final int[] values=voiceBend.snapshot();voiceBend.clearPending();
             for(int cents:values)if(!bendWithinDevice(cents))return;
-            task(()->{try{for(int i=0;i<7;i++){link.command(VoiceBend.command(i+1,values[i]),"OK");final int key=i;main.post(()->confirmBend(key,values[key]));}}
-                catch(Exception e){main.post(this::forgetBendConnection);throw e;}},"七个声部目标音高均已确认");
+            task(()->{try{for(int i=0;i<12;i++){requireTwelveControl();link.command(VoiceBend.command(i+1,values[i]),"OK");final int key=i;main.post(()->confirmBend(key,values[key]));}}
+                catch(Exception e){main.post(this::forgetBendConnection);throw e;}},"十二个声部目标音高均已确认");
         },true,1);
         button(box,"全部回正 · 0 半音",()->{
             voiceBend.clearPending();
-            for(int i=0;i<7;i++){voiceBend.edit(i,0,false);bendBars[i].setProgress(1200);updateBendLabel(i);}
-            task(()->{try{link.command("BEND_RESET","OK");main.post(()->{for(int i=0;i<7;i++)confirmBend(i,0);});}
-                catch(Exception e){main.post(this::forgetBendConnection);throw e;}},"七声部弯音已回正；FSR 全局音高比率继续有效");
+            for(int i=0;i<12;i++){voiceBend.edit(i,0,false);bendBars[i].setProgress(1200);updateBendLabel(i);}
+            task(()->{try{requireTwelveControl();link.command("BEND_RESET","OK");main.post(()->{for(int i=0;i<12;i++)confirmBend(i,0);});}
+                catch(Exception e){main.post(this::forgetBendConnection);throw e;}},"十二声部弯音已回正；FSR 全局音高比率继续有效");
         },true);
     }
     private void takeAction(String command){
@@ -825,7 +874,7 @@ public final class MainActivity extends Activity {
         },"录制状态已读取");
     }
     private void buildPhoneRecording(LinearLayout content){
-        LinearLayout box=card(content,"PHONE","手机音符录制 · 本地保存 · 导出 MIDI","页面琴键在手机本地发声。保存的是音符事件，不是 WAV 音频；无需连接蓝牙，可在“我的录音”回放、改名、删除和导出。");
+        LinearLayout box=card(content,"手机音符录制 · 本地保存 · 导出 MIDI","页面琴键在手机本地发声。保存的是音符事件，不是 WAV 音频；无需连接蓝牙，可在“我的录音”回放、改名、删除和导出。");
         phoneInfo=text(box,"开始手机录制 → 弹奏下方琴键 → 停止 → 回放 → 命名保存。录制前先松开琴键。",13,MUTED);
         text(box,"7白键 + 5黑键为 C4～B4；右侧4个独立踏板条暂作 C5 / D5 / E5 / F5。键号与板上串行扫描顺序一致。",12,MUTED);
         phoneKeyboard=new PianoKeyboardView(this,127,this::phoneKey);
@@ -911,13 +960,13 @@ public final class MainActivity extends Activity {
     private void updateBendLabel(int i){
         if(bendLabels[i]==null)return;
         Integer confirmed=bendConfirmed[i];
-        bendLabels[i].setText("声部 "+(i+1)+" / OUT"+(i+1)+" · "+VoiceBend.label(voiceBend.value(i))+"\n"+
+        bendLabels[i].setText("声部 "+(i+1)+" / K"+(i+1)+" · "+VoiceBend.label(voiceBend.value(i))+"\n"+
             (confirmed==null?"设备目标未确认 · •待发送": "已确认目标："+VoiceBend.label(confirmed)+(confirmed!=voiceBend.value(i)?" · •待发送":"")));
         refreshControlUi();
     }
     private void confirmBend(int key,int cents){if(cancelled||!link.connected())return;bendConfirmed[key]=cents;updateBendLabel(key);}
     private void forgetBendConnection(){
-        voiceBend.clearPending();for(int i=0;i<7;i++){bendConfirmed[i]=null;updateBendLabel(i);}
+        voiceBend.clearPending();for(int i=0;i<12;i++){bendConfirmed[i]=null;updateBendLabel(i);}
     }
     private void scheduleBend(){if(!bendScheduled){bendScheduled=true;main.postDelayed(this::flushBend,100);}}
     private void flushBend(){
@@ -927,7 +976,7 @@ public final class MainActivity extends Activity {
         final int key=voiceBend.take();if(key<0)return;
         final int cents=voiceBend.value(key);
         if(!bendWithinDevice(cents)){voiceBend.clearPending();return;}
-        task(()->{try{link.command(VoiceBend.command(key+1,cents),"OK");main.post(()->confirmBend(key,cents));}
+        task(()->{try{requireTwelveControl();link.command(VoiceBend.command(key+1,cents),"OK");main.post(()->confirmBend(key,cents));}
             catch(Exception e){main.post(this::forgetBendConnection);throw e;}},"声部 "+(key+1)+" 目标音高已确认："+VoiceBend.label(cents));
         if(voiceBend.hasPending())scheduleBend();
     }
@@ -937,7 +986,7 @@ public final class MainActivity extends Activity {
         setStatus("弯音草稿超出设备已确认范围，请重新拖动该声部或全部回正");return false;
     }
     private void buildAdsrControls(LinearLayout content){
-        LinearLayout box=card(content,"05","ADSR 包络编辑","滑块或拖动曲线控制点编辑；曲线表示待发送参数，点击应用后新发音生效。");
+        LinearLayout box=card(content,"ADSR 包络编辑","滑块或拖动曲线控制点编辑；曲线表示待发送参数，点击应用后新发音生效。");
         adsrPanel=box;adsrTarget=new Spinner(this);adsrTarget.setAdapter(options(Arrays.asList("触摸键盘","红外 / 手势")));
         text(box,"作用于当前演奏页签；红外 + 手势共用一套参数。",12,MUTED);
         adsrCurve=new AdsrEnvelopeView(this);box.addView(adsrCurve,new LinearLayout.LayoutParams(-1,dp(210)));
@@ -1010,7 +1059,7 @@ public final class MainActivity extends Activity {
     private int tuningDraft(){return PerformanceParams.tuningRatio(tuningBar.getProgress()-12,new int[]{415,432,440,442,466}[standardPitch.getSelectedItemPosition()]);}
     private String vibratoDraft(){return PerformanceParams.vibratoValues(performanceBars[2].getProgress()/10.0,performanceBars[3].getProgress(),performanceBars[4].getProgress());}
     private void buildPerformanceControls(){
-        LinearLayout pitch=card(sourceGroups[0][1],"PITCH","弯音范围与滑音","作用于：前七个扫描键。滑音时间标定为原音到所选正向弯音上限；距离较短或下行时，实际时间会更短。修改范围前松键并停止曲谱。");
+        LinearLayout pitch=card(sourceGroups[0][1],"弯音范围与滑音","作用于：前十二个扫描键。滑音时间标定为原音到所选正向弯音上限；距离较短或下行时，实际时间会更短。修改范围前松键并停止曲谱。");
         performanceState=text(pitch,"演奏参数尚未读取；下方均为草稿。需要配套参数版位流。",13,MUTED);
         button(pitch,"读取设备演奏参数",()->task(this::readPerformance,"已读取弯音、滑音与颤音参数"),true);
         performanceTempoLabel=text(pitch,"",13,INK);performanceTempo=new SeekBar(this);performanceTempo.setMin(20);performanceTempo.setMax(300);performanceTempo.setProgress(125);pitch.addView(performanceTempo);
@@ -1019,7 +1068,7 @@ public final class MainActivity extends Activity {
             public void onStartTrackingTouch(SeekBar bar){}public void onStopTrackingTouch(SeekBar bar){}
         });
         button(pitch,"参考速度恢复 125 BPM",()->performanceTempo.setProgress(125),false);
-        LinearLayout tuning=card(sections[2],"TUNE","移调与 A4 标准音","作用于红外与手势（共用一套参数）。为保留四档回声，触摸键移调未保留，触摸键与吉他保持原音高。本版仍与电位器音高用途 ANALOG=2 互斥。");
+        LinearLayout tuning=card(sections[2],"移调与 A4 标准音","作用于红外与手势（共用一套参数）。为保留四档回声，触摸键移调未保留，触摸键与吉他保持原音高。本版仍与电位器音高用途 ANALOG=2 互斥。");
         tuningLabel=text(tuning,"移调 0 半音（0 音分）",13,INK);tuningBar=new SeekBar(this);tuningBar.setMax(24);tuningBar.setProgress(12);tuning.addView(tuningBar);
         tuningBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
             public void onProgressChanged(SeekBar b,int value,boolean user){tuningLabel.setText(String.format(Locale.ROOT,"移调 %+d 半音（%+d 音分）",value-12,(value-12)*100));refreshControlUi();}
@@ -1122,7 +1171,7 @@ public final class MainActivity extends Activity {
         String[] titles={"CHORUS · 合唱","DELAY · 延迟","REVERB · 混响"};
         String[] hints={"固定约 0.745 Hz 调制，分数延迟平滑插值。","四档延迟，长档只降低湿声采样率。切时间会清除本块旧尾音。","短到长四档尾音。切预设会清除本块旧尾音，其他效果保留。"};
         for(int b=0;b<3;b++){
-            final int block=b;LinearLayout box=card(sections[2],""+(b+1),titles[b],hints[b]);
+            final int block=b;LinearLayout box=card(sections[2],titles[b],hints[b]);
             fxEnable[b]=choices(box,"效果开关",new String[]{"旁路","开启"});
             if(b==1){
                 buildEchoControls(box);fxPreset[b]=echoChoice;
@@ -1169,16 +1218,16 @@ public final class MainActivity extends Activity {
         }catch(Exception e){main.post(()->{confirmedFx=null;refreshControlUi();});throw e;}},FX_NAMES[b]+"配置已确认；以当前实际状态为准");
     }
     private void buildControls(LinearLayout content){
-        LinearLayout box=card(content,"K","键盘与演奏控制","固定使用 16 键串行输入。调整串行极性前松开全部键，停止曲谱并关闭延音。");
+        LinearLayout box=card(content,"键盘与演奏控制","固定使用 16 键串行输入。调整串行极性前松开全部键，停止曲谱并关闭延音。");
         controlsInfo=text(box,"尚未读取设备状态",14,ACCENT);
         text(box,"64×64 LED：空闲显示键态、延音、音色、音量、滑杆/ADC、音效和红外状态；播放曲谱时显示下落指引。长按板上 S2 可切换波形、XY、频谱。",12,MUTED);
         box=sourceGroups[0][0];
         text(box,"TTP229 · 固定 16 键串行，K1～K16 全部演奏 / 和弦。上电等待约 0.6 秒校准，再松开并重按触摸键。",14,ACCENT);
-        text(box,"16 键：7白+5黑一个八度（K1～K12 = C4～B4）+ 4 踏板条（K13～K16 暂作 C5/D5/E5/F5）。前七个扫描键 K1～K7 可自定义，默认 C4/C#4/D4/D#4/E4/F4/F#4。16 键须拆掉 OUT1～OUT8 直连线，只接 SCL/SDO，并配置模块的16键及多键焊盘；App 不会改变芯片焊盘。",12,MUTED);
+        text(box,"16 键：7白+5黑一个八度（K1～K12 = C4～B4）+ 4 踏板条（K13～K16 暂作 C5/D5/E5/F5）。前十二个扫描键 K1～K12 可自定义，默认 C4～B4。16 键须拆掉 OUT1～OUT8 直连线，只接 SCL/SDO，并配置模块的16键及多键焊盘；App 不会改变芯片焊盘。",12,MUTED);
         serialPolarity=choices(box,"16 键串行极性（匹配模块 TP1 / SAHL）",new String[]{"低有效：参考工程 TP1 开路","高有效：TP1 已装跳帽"});
         button(box,"应用串行极性",()->{if(recording||recordDraining){alert("请先结束事件录制");return;}applyControl("SERIAL,"+serialPolarity.getSelectedItemPosition(),"串行极性已确认；进入串行时重新等待校准");},true);
         box=sourceGroups[0][4];
-        text(box,"触摸颤音仍使用 ANALOG,3 电位器档，保留原单向下摆。前七扫描键的弯音范围和滑音时间可在“音高与弯音”分组调整；红外 / 手势颤音参数在对应页签。",12,MUTED);
+        text(box,"触摸颤音仍使用 ANALOG,3 电位器档，保留原单向下摆。前十二扫描键的弯音范围和滑音时间可在“音高与弯音”分组调整；红外 / 手势颤音参数在对应页签。",12,MUTED);
         pressureChoice=choices(box,"FSR 压力用途（独立于滑杆，始终生效；16 键时由手机切换）",new String[]{"控制触摸音量","控制触摸音高"});
         button(box,"应用压力用途",()->applyControl("PRESSURE,"+pressureChoice.getSelectedItemPosition(),"压力用途已确认"),true);
         box=sourceGroups[0][5];
@@ -1190,11 +1239,11 @@ public final class MainActivity extends Activity {
         polyChoice=choices(box,"复音上限（物理按键优先）",new String[]{"1","2","4","8","16"});polyChoice.setSelection(4);
         button(box,"应用复音上限",()->applyControl("POLY,"+new int[]{1,2,4,8,16}[polyChoice.getSelectedItemPosition()],"复音上限已确认"),true);
         text(box,"超过上限时优先释掉最旧的松键尾音；按住的键始终保留。钢琴踏板与限复音暂不支持演出事件录制 / 回放。",12,MUTED);
-        box=card(quickPanel,"VOL","总音量","调节全部声音。移动是草稿，点击应用后才发送；设备总音量是滑杆音量的上限。");
+        box=card(quickPanel,"总音量","调节全部声音。移动是草稿，点击应用后才发送；设备总音量是滑杆音量的上限。");
         volumeLabel=text(box,"总音量 · 16 / 16",13,INK);volumeBar=new SeekBar(this);volumeBar.setMax(16);volumeBar.setProgress(16);box.addView(volumeBar);
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int n,boolean user){volumeLabel.setText("总音量 · "+n+" / 16");refreshControlUi();}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});
         button(box,"应用总音量",()->applyControl("VOLUME,"+volumeBar.getProgress(),"总音量已确认；0 为静音"),true);
-        box=card(sections[2],"ADC","滑杆输入与标定","作用于：全局混音。压力（片内 ADC）与滑杆（ADS1115）是两路独立输入，这里只选滑杆；压力用途在「表情」页单独选择，两者同时生效。");
+        box=card(sections[2],"滑杆输入与标定","作用于：全局混音。压力（片内 ADC）与滑杆（ADS1115）是两路独立输入，这里只选滑杆；压力用途在「表情」页单独选择，两者同时生效。");
         analogChoice=choices(box,"滑杆用途（ANALOG，独立于压力）",new String[]{"0 · 关闭滑杆（压力仍有效）","1 · 滑动变阻器：总音量","2 · 滑动变阻器：触摸音高 0.5～1 倍","3 · 滑动变阻器：触摸颤音深度","4 · 滑动变阻器：音效湿度"});
         button(box,"应用模拟输入用途",()->{
             if(recording||recordDraining){alert("请先结束事件录制");return;}
@@ -1211,11 +1260,11 @@ public final class MainActivity extends Activity {
             catch(NumberFormatException e){alert("输入两个十进制 ADC 端点，0～1023 且最大值至少比最小值大 32");return;}
             applyControl("CAL,"+lo+","+hi,"滑杆标定已确认；不修改原 FSR 标定");
         },true);
-        box=card(sections[0],"STATE","设备状态与安全静音","作用于：全局混音。");
+        box=card(sections[0],"设备状态与安全静音","作用于：全局混音。");
         adcInfo=text(box,"ADC 尚未读取（模式 0 读压力，1～4 读滑杆）",13,MUTED);
         button(box,"读取实际模式 / ADC",()->task(()->{readControls();String raw=link.command("ADC?","ADC");String[] fields=raw.split(",",-1);if(fields.length!=3||!fields[1].matches("[0-3][0-9A-F]{2}")||!fields[2].matches("[01]"))throw new IOException("ADC 回报无效");int code=Integer.parseInt(fields[1],16);main.post(()->adcInfo.setText("ADC："+code+" / 1023（0x"+fields[1]+"） · "+(fields[2].equals("0")?"正常":"超时")));},"设备状态与 ADC 已读取"),true);
         button(box,"PANIC · 释放全部声音与延音",()->applyControl("PANIC","声音已释放，曲谱停止，延音关闭；按住的键需松开重按"),true,2);
-        text(box,"曲谱下载、屏幕七列指引与逐声部弯音仍针对前七个扫描键；K8～K16 使用固定音高。默认七键只覆盖 C4～F#4，曲库可匹配改键后下载。演奏录制可使用手机 MIDI 或板上 TAKE。",12,MUTED);
+        text(box,"曲谱下载、屏幕十二列指引与逐声部弯音仍针对前十二个扫描键；K13～K16 使用固定高音。默认十二键覆盖 C4～B4，需要 C5 的曲库可匹配改键后下载。演奏录制可使用手机 MIDI 或板上 TAKE。",12,MUTED);
     }
     private void applyControl(String command,String done){task(()->{link.command(command,"OK");readControls();},done);}
     private void readControls()throws Exception{
@@ -1246,6 +1295,8 @@ public final class MainActivity extends Activity {
     }
     private ScoreBends currentScore(){return scoreFile!=null&&scoreFile.song==song?scoreFile:ScoreBends.plain(song);}
     private void checkScoreSupport(ScoreBends selected)throws Exception{
+        if(selected.hasTypes())try{link.command("SONG_CHORD,?","OK");}
+        catch(SppLink.CommandRejectedException e){throw new IOException("该固件不支持四类音符，曲谱尚未发送，请使用 Code44 配套码流",e);}
         if(!selected.hasBends())return;
         try{ScoreBends.checkCapability(link.command("SONG_BEGIN,?","SONGBEND"));}
         catch(SppLink.CommandRejectedException e){if(e.response.equals("ERR,CMD"))throw new IOException("该固件不支持曲谱弯音目标，曲谱尚未发送，请使用配套码流");throw e;}
@@ -1255,16 +1306,23 @@ public final class MainActivity extends Activity {
         scoreExportCsv=currentScore().csv();Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType("text/csv");
         intent.putExtra(Intent.EXTRA_TITLE,"fpga-score-"+System.currentTimeMillis()+".csv");startActivityForResult(intent,EXPORT_BEND);
     }
-    private void showSong(){scoreInfo.setText(song.name+"\n"+song.events.size()+" 条 · "+String.format(Locale.ROOT,"%.2f",song.durationMs()/1000.0)+" 秒\n需要音高："+SongCodec.notes(song.requiredMask())+(currentScore().hasBends()?"\n含弯音目标：按当前滑音速率滑入；设备会核对弯音范围":""));progress.setProgress(0);}
-    private void preview(){ScoreBends metadata=currentScore();StringBuilder s=new StringBuilder();long at=0;for(int i=0;i<song.events.size();i++){SongCodec.Event e=song.events.get(i);s.append(i).append("  ").append(at).append("ms  ").append(SongCodec.notes(e.mask)).append("  ").append(e.durationMs).append("ms");if(metadata.hasBends())s.append(" · ").append(metadata.describe(i));s.append("\n");at+=e.durationMs;}new AlertDialog.Builder(this).setTitle(song.name).setMessage(s.toString()).setPositiveButton("关闭",null).show();}
+    private void showSong(){
+        scoreInfo.setText("当前曲谱 · "+song.name+"\n"+song.events.size()+" 条 · "+String.format(Locale.ROOT,"%.2f",song.durationMs()/1000.0)+" 秒"+(currentScore().hasTypes()?" · 含四类音符":"")+(currentScore().hasBends()?" · 含弯音":""));
+        boolean library=isLibrarySong();scoreDownload.setText(library?"匹配键位并下载":"校验键位并下载");
+        libraryReload.setVisibility(library?View.GONE:View.VISIBLE);
+        scoreDownloadHint.setText(library?"下载会补齐所需的十二键映射；开发板掉电后需重下。":"导入 / 练习谱仅校验现有键位；缺少音高时请先修改映射。");
+        progress.setProgress(0);
+    }
+    private void preview(){ScoreBends metadata=currentScore();StringBuilder s=new StringBuilder("需要音高：").append(SongCodec.notes(song.requiredMask())).append("\n\n");long at=0;for(int i=0;i<song.events.size();i++){SongCodec.Event e=song.events.get(i);s.append(number(i+1)).append("  ").append(at).append("ms  ").append(SongCodec.notes(e.mask)).append("  ").append(e.durationMs).append("ms");if(metadata.hasBends()||metadata.hasTypes())s.append(" · ").append(metadata.describe(i));s.append("\n");at+=e.durationMs;}new AlertDialog.Builder(this).setTitle(song.name).setMessage(s.toString()).setPositiveButton("关闭",null).show();}
     private void pickScore(){Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.addCategory(Intent.CATEGORY_OPENABLE);i.setType("*/*");startActivityForResult(i,PICK_SCORE);}
-    private void readMapping()throws Exception {int[] m=SongCodec.parseMapping(link.command("MAP?","MAP"));mapping=m;main.post(()->{if(cancelled||!link.connected())return;mapInfo.setText("设备第 1..7 键："+join(m));refreshControlUi();});}
+    private void requireTwelveControl()throws Exception{if(mapping==null||mapping.length!=12)readMapping();}
+    private void readMapping()throws Exception {int[] m=SongCodec.parseMapping(link.command("MAP?","MAP"));if(m.length!=12)throw new IOException("请使用配套十二声部 FPGA 码流；当前设备仅返回七键映射");mapping=m;main.post(()->{if(cancelled||!link.connected())return;mapInfo.setText("设备第 1..12 键："+join(m));refreshControlUi();});}
     private static String join(int[] m){StringBuilder s=new StringBuilder();for(int v:m){if(s.length()>0)s.append(',');s.append(v);}return s.toString();}
-    private void download(){downloadScore(false);}
+    private void download(){if(!link.connected()){alert("请先连接 HC-05");return;}downloadScore(isLibrarySong());}
     private void downloadScore(boolean matchKeys){if(recording||recordDraining){alert("先停止录制并等待 REC_END，再下载曲谱");return;}final ScoreBends selectedFile=currentScore();final SongCodec.Song selected=selectedFile.song;
         task(()->{checkScoreSupport(selectedFile);readMapping();
             if(matchKeys){int[] target=SongLibrary.matchingMapping(selected,mapping);boolean changed=false;
-                for(int key=0;key<7;key++)if(target[key]!=mapping[key]){if(cancelled)throw new IOException("下载已取消");link.command("MAP,"+(key+1)+","+target[key],"OK");changed=true;}
+                for(int key=0;key<12;key++)if(target[key]!=mapping[key]){if(cancelled)throw new IOException("下载已取消");link.command("MAP,"+(key+1)+","+target[key],"OK");changed=true;}
                 if(changed)readMapping();
             }
             selected.checkMapping(mapping);List<String> commands=selectedFile.commands();for(int i=0;i<commands.size();i++){if(cancelled)throw new IOException("下载已取消");String command=commands.get(i);link.command(command,"OK");final int p=(i+1)*100/commands.size();final int n=i+1;main.post(()->{progress.setProgress(p);setStatus("下载 "+n+" / "+commands.size()+"，已确认 "+command);});}},"《"+selected.name+"》已校验并提交。可自动演奏或 PLAY 开始指引；掉电后需重新下载。");}
@@ -1287,8 +1345,8 @@ public final class MainActivity extends Activity {
             throw e;
         }},"自动演奏已开始：预备 1.5 秒后由开发板合成发声；结束自动停止，也可点 STOP 提前停止。");
     }
-    private void applyMapping(){if(recording||recordDraining){alert("录制期间键位锁定，请先停止并等待 REC_END");return;}String[] p=mappingInput.getText().toString().trim().split(",",-1);if(p.length!=7){alert("请输入 7 个 MIDI 音高，用英文逗号分隔");return;}int[] m=new int[7];try{for(int i=0;i<7;i++){m[i]=Integer.parseInt(p[i].trim());if(m[i]<60||m[i]>72)throw new NumberFormatException();}}catch(NumberFormatException e){alert("七个音高均须为 60..72");return;}
-        task(()->{for(int i=0;i<7;i++)link.command("MAP,"+(i+1)+","+m[i],"OK");readMapping();},"键位已应用。若曲谱需要其他音高，下载前会提示。");}
+    private void applyMapping(){if(recording||recordDraining){alert("录制期间键位锁定，请先停止并等待 REC_END");return;}String[] p=mappingInput.getText().toString().trim().split(",",-1);if(p.length!=12){alert("请输入 12 个 MIDI 音高，用英文逗号分隔");return;}int[] m=new int[12];try{for(int i=0;i<12;i++){m[i]=Integer.parseInt(p[i].trim());if(m[i]<60||m[i]>72)throw new NumberFormatException();}}catch(NumberFormatException e){alert("十二个音高均须为 60..72");return;}
+        task(()->{requireTwelveControl();for(int i=0;i<12;i++)link.command("MAP,"+(i+1)+","+m[i],"OK");readMapping();},"键位已应用。若曲谱需要其他音高，下载前会提示。");}
     private void startRecording(){String reason=TakeWorkflow.logBlockReason(confirmedControls);if(!reason.isEmpty()){logReason.setText(reason);return;}if(recording||recordDraining){alert("正在录制或等待日志排空");return;}recordingText.setLength(0);recordingOverflow=false;recordingCompleted=false;
         // Mark before the command: the FPGA may send MAP/EVT immediately after OK.
         recording=true;task(()->{try{link.command("REC_START","OK");}catch(Exception e){recording=false;recordingOverflow=true;if(e instanceof SppLink.CommandRejectedException&&((SppLink.CommandRejectedException)e).response.equals("ERR,MISSING"))throw new IOException("当前固件未启用事件日志（ERR,MISSING）；请使用板上事件录制或手机音符录制",e);throw e;}},"正在记录演奏事件；保持 App 前台");}

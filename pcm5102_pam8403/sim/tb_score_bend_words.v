@@ -32,7 +32,7 @@ initial begin
  command(3,0,0,0,0,0);
  if(dut.active_count!==128)$fatal(1,"128-event geometry reduced");
  for(n=0;n<128;n=n+1)begin
-     if(dut.score[{dut.active_bank,n[6:0]}][15:0]!==60000 || dut.score[{dut.active_bank,n[6:0]}][44:29]!==(n[0]?16'd32768:16'd8192))$fatal(1,"Truncated event %d",n);
+     if(dut.score[{dut.active_bank,n[7:0]}][15:0]!==60000 || dut.score[{dut.active_bank,n[7:0]}][44:29]!==(n[0]?16'd32768:16'd8192))$fatal(1,"Truncated event %d",n);
  end
  $display("PASS D target words: both event targets, active bank preserved on failed END, current-range PLAY validation, 128x60000ms full-width data (%0d commands)",checks);$finish;
 end

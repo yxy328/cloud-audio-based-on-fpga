@@ -20,13 +20,15 @@ FORMATS = [
 ]
 
 
-def generate():
+def generate(keys=7):
     assert len(FORMATS) <= 32
-    rom = [0] * 1024
-    for kind, template in enumerate(FORMATS):
-        assert len(template) <= 32
+    templates = FORMATS.copy()
+    templates[19] = 'MAP,' + ','.join(['##'] * keys) + '\r\n'
+    rom = [0] * 2048
+    for kind, template in enumerate(templates):
+        assert len(template) <= 64
         for offset, character in enumerate(template):
-            rom[kind * 32 + ((len(template) - offset) & 31)] = 255 if character == '#' else ord(character)
+            rom[kind * 64 + ((len(template) - offset) & 63)] = 255 if character == '#' else ord(character)
     return ''.join(f'{value:02x}\n' for value in rom)
 
 
@@ -38,6 +40,8 @@ if __name__ == '__main__':
     expected = generate()
     if args.check:
         assert path.read_text(encoding='ascii') == expected, 'Stale HC-05 reply ROM'
+        assert (path.parent / 'hc05_reply12.hex').read_text(encoding='ascii') == generate(12), 'Stale twelve-key reply ROM'
         print('HC-05 reply templates match generated ROM')
     else:
         path.write_text(expected, encoding='ascii')
+        (path.parent / 'hc05_reply12.hex').write_text(generate(12), encoding='ascii')

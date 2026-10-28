@@ -1,0 +1,25 @@
+{
+  "baseline_inputs": [
+    {
+      "path": "hc05_keymap.v",
+      "sha256": "5F3E36077430CEF3D6A28F372E3F65EA0179CF73750715E99D5C9154F449DC43"
+    },
+    {
+      "path": "hc05_command_decode.v",
+      "sha256": "5CEAD8FF34201612ADEF7A98E18B8BA71F3E47A82FA15484214971C76AF5CD0B"
+    },
+    {
+      "path": "downloadable_song.v",
+      "sha256": "DAE4496564538D6121A8AED95D2F0D659104B7201AADCFB8F82DFDA827DE1771"
+    },
+    {
+      "path": "hc05_reply.hex",
+      "sha256": "E69657474D176996AEA07DD93885BD1DE41662FDB52310D909692BF11ED7382F"
+    },
+    {
+      "path": "hc05_command.hex",
+      "sha256": "B0C1326CF9EC2824367753B313F7DA7B8CBE6A29E80DFF91FDE27BDB0D6C7E61"
+    }
+  ],
+  "transformation": "Private module names and private ROM paths only; production inputs still match freeze.json."
+}

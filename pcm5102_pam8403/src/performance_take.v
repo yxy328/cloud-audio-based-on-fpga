@@ -6,7 +6,7 @@
 // FE commits the gates and emits one-shot events after their controls have
 // arrived. FF ends the take and clears all synth/effect tails.
 module performance_take #(
-    parameter integer CLK_HZ=50000000, WORDS=33, DEPTH=1024
+    parameter integer CLK_HZ=50000000, WORDS=33, DEPTH=1024, GATE_WORD=WORDS-1, LEGACY_WORDS=WORDS
 )(
     input wire clk,resetn,frame_ce,
     input wire [2:0] command,
@@ -14,6 +14,7 @@ module performance_take #(
     input wire [15:0] live_pulses,
     output wire [WORDS*16-1:0] play_state,
     output wire play_valid,
+    output reg legacy_playback,
     output reg [15:0] play_pulses,
     output reg recording,playing,kill,
     output reg available,saved,full,
@@ -69,11 +70,11 @@ module performance_take #(
     assign field_event=event_due && held[23:16]<WORDS;
     wire apply_event;
     assign apply_event=event_due && held[23:16]==8'hfe &&
-        (primed || initial_next==WORDS);
+        (primed || (initial_next==WORDS || initial_next==LEGACY_WORDS));
     genvar word_number;
     generate for(word_number=0;word_number<WORDS;word_number=word_number+1)begin: replay_words
         reg [15:0] value;
-        if(word_number==WORDS-1)begin: gate_word
+        if(word_number==GATE_WORD)begin: gate_word
             always @(posedge clk)begin
                 if(!resetn || !playing)value<=0;
                 else if(apply_event)value<=held[15] ? 16'd0 : pending_gates;
@@ -140,15 +141,16 @@ module performance_take #(
             if(held[23:16]<WORDS)begin
                 if((!primed && held[23:16]!=initial_next) || initial_next>=WORDS)fail(3);
                 else begin
-                    if(held[23:16]==WORDS-1)pending_gates<=held[15:0];
+                    if(held[23:16]==GATE_WORD)pending_gates<=held[15:0];
                     initial_next<=initial_next+1'b1;group_active<=1;
                     state<=P_FETCH;
                 end
             end else if(held[23:16]==8'hfe)begin
-                if(!primed && (held[47:24]!=0 || initial_next!=WORDS))fail(3);
+                if(!primed && (held[47:24]!=0 || (initial_next!=WORDS && initial_next!=LEGACY_WORDS)))fail(3);
                 else begin
                     play_pulses<=held[15:0];
                     if(held[15])kill<=1;
+                    if(!primed)legacy_playback<=initial_next==LEGACY_WORDS && WORDS!=LEGACY_WORDS;
                     primed<=1;group_active<=0;initial_next<=0;state<=P_FETCH;
                 end
             end else if(held[23:16]==8'hff && held[15:0]==0 && primed && !group_active && cursor==count-1)begin
@@ -165,7 +167,7 @@ module performance_take #(
             confirm<=0;elapsed_ms<=0;duration_ms<=0;count<=0;field<=0;snapshot_time<=0;
             stop_time<=0;last_play_time<=0;pending_pulses<=0;snapshot_pulses<=0;
             force_snapshot<=0;changed<=0;stopping<=0;final_scan<=0;deleting<=0;
-            primed<=0;has_music<=0;group_active<=0;initial_next<=0;cursor<=0;nv_save<=0;nv_delete<=0;
+            legacy_playback<=0;primed<=0;has_music<=0;group_active<=0;initial_next<=0;cursor<=0;nv_save<=0;nv_delete<=0;
         end else begin
             // Fields are visited in order. Shifting the frozen group avoids
             // a 33-way, 16-bit selector while keeping each group atomic.
@@ -176,7 +178,7 @@ module performance_take #(
                 else ms_div<=ms_div+1'b1;
             end
             if(recording && !final_scan)pending_pulses<=pending_pulses | live_pulses;
-            if(recording && ((|live_state[(WORDS-1)*16 +: 16]) || (|live_pulses[14:0])))has_music<=1;
+            if(recording && ((|live_state[GATE_WORD*16 +: 16]) || (|live_pulses[14:0])))has_music<=1;
             if(cap_we)count<=count+1'b1;
             case(state)
                 BOOT:if(nv_boot_done)begin

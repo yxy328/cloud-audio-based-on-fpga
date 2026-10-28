@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-28",
+  "label": "score_visible47_r",
+  "firmware_revision": "score-visible-fix",
+  "app_compatible": "Code46, unchanged",
+  "device": "GW5A-LV25MG121NC1/I0",
+  "target_mhz": 50,
+  "place": 2,
+  "route": 0,
+  "maxfan": 23,
+  "retiming": 1,
+  "native_wide_bsram": true,
+  "resources": {
+    "Logic": {
+      "used": 22902,
+      "total": 23040
+    },
+    "CLS": {
+      "used": 11504,
+      "total": 11520
+    },
+    "Register": {
+      "used": 11516,
+      "total": 23280
+    },
+    "BSRAM": {
+      "used": 55,
+      "total": 56
+    },
+    "DSP": {
+      "used": 25,
+      "total": 28
+    }
+  },
+  "remaining_cls": 16,
+  "setup_slack_ns": 0.598,
+  "hold_slack_ns": 0.178,
+  "violations": [
+    [
+      "clk",
+      "Setup",
+      "0.000",
+      "0"
+    ],
+    [
+      "clk",
+      "Hold",
+      "0.000",
+      "0"
+    ],
+    [
+      "fsr_adc_clk",
+      "Setup",
+      "0.000",
+      "0"
+    ],
+    [
+      "fsr_adc_clk",
+      "Hold",
+      "0.000",
+      "0"
+    ]
+  ],
+  "bitstream": {
+    "name": "PCM5102_UNIFIED_SCORE_VISIBLE_FIX.fs",
+    "sha256": "0B9249648BF5363449469235E94DA1F6F5D41007A8648A81EF0F5B99903BBA69"
+  },
+  "changed_frozen_inputs_from_code46": [
+    "pcm5102_pam8403\\src\\hub75e_rhythm_display.v",
+    "pcm5102_pam8403\\src\\top.v"
+  ],
+  "previous_default_bitstream_sha256": "618F23B7F03BC08DED6C08D02EA852A8E70EA04BE3ECDF837FAFF1A8B8552C5D",
+  "code46_named_release_sha256": "0320567B38BD47D443D85677D553DABD39D45FB9740A0B9899FF11D625FC31B0",
+  "production_font": "PASS all512 addresses,106 lit pixels,retained one-bit pROM",
+  "routed_display": "PASS real TAP 001000/001 then002000/002,all512 top pixels RGB5 over32 PWM phases,133 clocks/row; isolated display+judge,not full audio top",
+  "routed_startup_scan": "PASS40 external row pairs,64 columns,known RGB,blank/latch order,133 clocks/row",
+  "rtl_tests": [
+    {
+      "name": "tb_rhythm_panel",
+      "source_sha256": "EC8B9C894C51B321AFAEE4C367005A01B80AA1C48431FF96B61FCAB03C0C53E1",
+      "log_sha256": "69EDFF9E3F9C86A94A50B44ADB42B47F19C4DA28E53927AAD1123ABABBBF80EF"
+    },
+    {
+      "name": "tb_rhythm_tails",
+      "source_sha256": "7EF628A561BA2AF0DD3EFFAE93404FE06D07BECBE4EF3889351087A0FAEEA654",
+      "log_sha256": "84FFDC01E767C2A7E5CF82B1F9A856D7B5AFC9D6A69BFEB47D77D8B06DA7B8AB"
+    },
+    {
+      "name": "tb_hub75e_rhythm_display",
+      "source_sha256": "D81A70D420900A7CAC25DBCC8E19B27A95EC3C6005ED06A80C0115A7D6D35E5A",
+      "log_sha256": "DF613826F5CBCE68539024669752F28EBCD72F2129162531A040E2343687188A"
+    },
+    {
+      "name": "tb_boot_reset",
+      "source_sha256": "2CD8843422E15C6BE6C7B864953B4CAF022E25BA9C818A36DE875A42AB719EEF",
+      "log_sha256": "34EE8B136639BAFAB3CD691CE1146E7B61BC35BC9493DDCA42E31E1113F8B0B5"
+    }
+  ],
+  "routed_startup_provenance": {
+    "label": "score_visible47_r",
+    "netlist_sha256": "BEF9988EC5ED169489E15DCFBEFF233D8836BDEAFC4DEFCE6AADE7D3ADFB1934",
+    "testbench_sha256": "4F0E491FC179124E6ED15202C8893EC9763CB2B3FC3CBA1F6ADA344CF8E04746",
+    "compiled_vvp_sha256": "95E756E301F1506ADC99929EBBC62F0A53B809EDBF99AD73660B389439514ED8",
+    "log_sha256": "54E2664A055F1D9A55F6E98A50D852F5CCEBA33DAE924A7EEE9552168EEC58D0",
+    "completed": true
+  },
+  "build_tools": {
+    "tools/check_unified_build.ps1": "2C13F78DD5B2454779F0B09B2B0401D2C61BC63ABAE2C51294BC7CF46CAD8983",
+    "tools/resume_unified_pnr.ps1": "82AC09C60A7CFBCA4AB16D69DBD386517F85E7CF68D6E4BC8B4ABED2A71541E6",
+    "tools/check_rhythm_font_netlist.py": "1DEDE8896F85558E0E9F75F6E7E3AA83AAF9FF2B51BA8E488F808C55AD754049"
+  },
+  "programmed_fpga": false,
+  "physical_panel_verified": false,
+  "apk_changed": false
+}

@@ -1,0 +1,16 @@
+{
+  "default_artifacts_match_named": true,
+  "all_published_files_match": true,
+  "all_rollback_files_match": true,
+  "all_fpga_sources_match_tested_snapshot": true,
+  "board_programmed": false,
+  "app_installed": false,
+  "installed_source_check.log": {
+    "sha256": "725AAFBD7D8B5B02A9EDD690189011F158302E2A068608014B839E95814BF309",
+    "pass_count": 3
+  },
+  "installed_app_core.log": {
+    "sha256": "BAFA86DB7A698495CF80C57C28D2F447675402D4108A091CDA9E59C27CF91E31",
+    "pass_count": 30
+  }
+}

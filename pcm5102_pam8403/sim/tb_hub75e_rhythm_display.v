@@ -154,7 +154,7 @@ module tb_hub75e_rhythm_display;
         if(!ready || overflow) $fatal(1,"bitmap did not accept a note");
         // Row 2 starts as cyan, lower row 60 shows a correct held key.
         inspect_pixel(6,2,3'b011);
-        inspect_pixel(6,60,3'b111);
+        inspect_pixel(6,60,3'b110);
         // Count one complete 32-phase PWM cycle through the actual pins.
         wait(dut.pwm_phase == 31 && panel_row == 31 && st == 1);
         @(negedge st); count_pwm=1;
@@ -163,8 +163,8 @@ module tb_hub75e_rhythm_display;
         #1; count_pwm=0;
         if(red_count!=0 || green_count!=24 || blue_count!=31)
             $fatal(1,"native RGB5 PWM count %0d/%0d/%0d",red_count,green_count,blue_count);
-        if(touch_r!=31 || touch_g!=31 || touch_b!=31)
-            $fatal(1,"white key PWM count %0d/%0d/%0d",touch_r,touch_g,touch_b);
+        if(touch_r!=31 || touch_g!=25 || touch_b!=0)
+            $fatal(1,"yellow hit key PWM count %0d/%0d/%0d",touch_r,touch_g,touch_b);
         elapse(750);
         inspect_pixel(6,28,3'b011);
         inspect_pixel(6,2,3'b111); // Background only after head moves away.
@@ -257,7 +257,7 @@ module tb_hub75e_rhythm_display;
         // Scan every row/PWM plane with different combinations of lanes,
         // including nonzero clipped heads at rows 55..63.
         wait(dut.state==1);@(negedge clk); playing=1;
-        dut.head_valid=64'hffffffffffffffff;
+        dut.legacy_valid.valid_rows=64'hffffffffffffffff;
         for(k=0;k<64;k=k+1)begin
             dut.head_memory[k]=(k*37+11)&127;
             dut.panel_memories[0].memory[k]=(k*37+11)&127;

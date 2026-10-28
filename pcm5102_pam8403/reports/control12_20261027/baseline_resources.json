@@ -1,0 +1,22 @@
+{
+  "Logic": {
+    "used": 22453.0,
+    "capacity": 23040.0
+  },
+  "CLS": {
+    "used": 11439.0,
+    "capacity": 11520.0
+  },
+  "Register": {
+    "used": 10783.0,
+    "capacity": 23280.0
+  },
+  "BSRAM": {
+    "used": 55.0,
+    "capacity": 56.0
+  },
+  "DSP": {
+    "used": 26.5,
+    "capacity": 28.0
+  }
+}

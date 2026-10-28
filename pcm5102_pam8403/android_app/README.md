@@ -1,3 +1,19 @@
+**2026-10-28 当前安装包：1.46-cleanui / Code47。** [简洁界面 APK](dist/FPGA-Music-CleanUI-Code47.apk)与[默认 Unified.apk](dist/FPGA-Music-Unified.apk)相同。导航、同级卡片、录制步骤、曲目及音符预览统一从01编号；内层卡片去掉重复编号，移除卡片顶部彩条与重复头像。曲谱页移除独立“小星星示例”和长曲快捷按钮，选曲自动载入，只保留一个下载入口；文件操作、详细说明及音游设置默认折叠。原120首曲库全部保留，默认白银《伦敦桥》；长曲仍可从列表选择。曲库下载匹配十二键，导入文件和练习谱只校验现有键位。沿用Code46配套FPGA位流。Java/D8/aapt2构建、APK签名和既有核心回归通过；未安装手机或验证实机布局、蓝牙。详见[曲库使用](SONG_LIBRARY.md)。以下为历史版本记录。
+
+**Code46：1.45-score256。** 单曲由128条扩到256条；120首曲库中19首保留原谱反复，最长252条、约104秒。整机BSRAM仍54/56、DSP仍25，音游支持256连击及384000分。超过128条须配套更新FPGA位流；未安装手机或烧录。[Code46安装包](dist/FPGA-Music-Score256-Code46.apk)保留供回退；旧版曲谱页可直接“载入长曲 · 104秒”。见[配套位流与验证](../reports/score256_20261028/README.md)。
+
+**2026-10-28 当前安装包：1.44-library120 / Code45。** `dist/FPGA-Music-Library120-Code45.apk`（本机 dist/，未入库）与[默认 Unified.apk](dist/FPGA-Music-Unified.apk)当时内容相同。离线曲库120首（保留原9首，新增58首单遍版和53首明确标注节选），三个等级各40首；保留原九首和四类音符练习谱。音游与自动演奏共用已下载曲谱，曲库增量只在手机，FPGA资源增量为0。无需为曲库换烧位流。见[曲库用法](SONG_LIBRARY.md)及[本轮验证](../reports/song_library120_20261028/README.md)。未安装手机。以下为此前版本记录。
+
+**Code44：** `dist/FPGA-Music-Rhythm-Flick-Code44.apk`（本机 dist/，未入库），原显示功能与验证见[用法](../RHYTHM_GAME.md)及[交付/预览](../reports/rhythm_flick_shape_20261028/README.md)。
+
+**2026-10-28 当前安装包：1.42-rhythm-5px / Code43。** `dist/FPGA-Music-Rhythm-5px-Code43.apk`（本机 dist/，未入库）当时与默认 Unified.apk 一致。音符及下方十二键固定5像素宽，原1/2像素选项移除；红色得分横排于右上方。需配套Code43位流。见[用法](../RHYTHM_GAME.md)、[资源与预览](../reports/rhythm_width5_20261028/README.md)。未安装实机；以下为此前版本记录。
+
+**2026-10-28 当前安装包：1.41-rhythm-notes / Code42。** `dist/FPGA-Music-Rhythm-Notes-Code42.apk`（本机 dist/，未入库）当时与默认 Unified.apk 字节一致；音游卡片已移到“曲谱”，可载入四类音符练习谱，下载/导出带 note_type 的 CSV。蓝 TAP/HOLD、黄 DRAG、粉 FLICK、完整尾条、右侧红色得分与黄色命中需使用配套 Code42 位流。见[用法](../RHYTHM_GAME.md)、[验收与资源](../reports/rhythm_notes_20261028/README.md)。未安装手机；以下保留此前版本记录。
+
+**2026-10-27 当前安装包：1.40-rhythm / Code41。** 滚动入口 [FPGA-Music-Unified.apk](dist/FPGA-Music-Unified.apk)（SHA256 `32B3D7C5…`）即本轮构建，与入库的不可变快照 [FPGA-Music-Rhythm-Code41.apk](dist/FPGA-Music-Rhythm-Code41.apk) 逐字节相同；回退包 [FPGA-Music-Control12-Code40.apk](dist/FPGA-Music-Control12-Code40.apk)（`4F5D1253…`）已入库。主页“十二键音游”可设难度/配色/薄音符/长按/特效，读分与自动刷新；配套码流、原理及回退见 [音游说明](../RHYTHM_GAME.md)。未安装到手机。以下旧版本记录保留。
+
+> 2026-10-27 当前入口：Code41（音游增强，沿用十二路映射），K1～K12 已支持映射、独立弯音、曲谱及十二列指引；K13～K16 保留高音键。使用与配套版本见 [十二路说明](../CONTROL12.md)。下文较早版本记录按其原范围阅读。
+
 # 2026-10-26 演奏体验版：1.34-performance / Code35
 
 **2026-10-27：曲谱事件弯音已接入，App Code39。** [CSV、协议、试听与录放说明](../SCORE_BEND.md)。旧三参数曲谱命令保留；能力查询 `SONG_BEGIN,?` 返回 `SONGBEND,1`。

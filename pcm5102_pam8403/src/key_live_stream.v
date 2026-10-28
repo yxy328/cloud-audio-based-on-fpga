@@ -14,11 +14,10 @@ module key_live_stream(
     reg [1:0] state;
     reg enable_q;
     reg [15:0] last_keys, captured, pending;
-    reg [4:0] fifo [0:31];
+    (* syn_ramstyle="block_ram" *) reg [4:0] fifo [0:31];
     reg [4:0] fifo_q;
     reg [4:0] wr_ptr, rd_ptr;
     reg [5:0] count;
-    reg [63:0] message;
     reg [3:0] send_index;
     wire enable_rise=enable && !enable_q;
     wire capture=enable && !enable_rise && pending==0 && scan_keys!=last_keys;
@@ -35,10 +34,16 @@ module key_live_stream(
     wire fetch=enable && state==IDLE && count!=0;
     assign tx_valid=state==SEND;
     assign tx_last=state==SEND && send_index==4'd7;
+    // Data is read only after count is nonzero. Invalidating the pointers
+    // replaces the unnecessary data reset and permits a physical block RAM.
+    always @(posedge clk)begin
+        if(pushing)fifo[wr_ptr]<={captured[low_idx],low_idx};
+        if(fetch)fifo_q<=fifo[rd_ptr];
+    end
     always @(posedge clk) begin
         if(!resetn) begin
             state<=IDLE; enable_q<=0; last_keys<=0; captured<=0; pending<=0;
-            fifo_q<=0; wr_ptr<=0; rd_ptr<=0; count<=0; message<=0; send_index<=0; tx_data<=0;
+            wr_ptr<=0; rd_ptr<=0; count<=0; send_index<=0; tx_data<=0;
         end else begin
             enable_q<=enable;
             if(!enable) begin
@@ -50,8 +55,7 @@ module key_live_stream(
             end else if(pushing || dropping) begin
                 pending<=pending & (pending-1'b1);
             end
-            if(pushing) fifo[wr_ptr]<={captured[low_idx],low_idx};
-            if(fetch) fifo_q<=fifo[rd_ptr];
+
             case({pushing,fetch})
                 2'b10: count<=count+1'b1;
                 2'b01: count<=count-1'b1;
@@ -64,14 +68,22 @@ module key_live_stream(
                     send_index<=0; state<=LOAD;
                 end
                 LOAD: begin
-                    message<={8'd44,tens_byte,ones_byte,8'd44,
-                        fifo_q[4] ? 8'd49 : 8'd48,8'd13,8'd10};
                     tx_data<=8'd75;
                     state<=SEND;
                 end
                 SEND: if(tx_ready) begin
-                    tx_data<=message[55:48];
-                    message<={message[55:0],8'd0};
+                    // fifo_q is held until the next fetch, so only the
+                    // event needs storage. Generate static punctuation at
+                    // its byte position instead of shifting a wide packet.
+                    case(send_index)
+                        0,3:tx_data<=8'd44;
+                        1:tx_data<=tens_byte;
+                        2:tx_data<=ones_byte;
+                        4:tx_data<=fifo_q[4] ? 8'd49 : 8'd48;
+                        5:tx_data<=8'd13;
+                        6:tx_data<=8'd10;
+                        default:tx_data<=0;
+                    endcase
                     send_index<=send_index+1'b1;
                     if(send_index==4'd7) state<=IDLE;
                 end

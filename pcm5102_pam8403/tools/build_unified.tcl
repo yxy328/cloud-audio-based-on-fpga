@@ -7,7 +7,10 @@ if {[catch {
         file mkdir [file join $project_dir impl]
         file copy -force $frozen_config [file join $project_dir impl PCM5102_UNIFIED_process_config.json]
     }
+    # This design uses native 32/36-bit BSRAM ports. Splitting them silently
+    # expands the 54 physical blocks beyond the GW5A-25K's 56-block limit.
     open_project [file join $project_dir PCM5102_UNIFIED.gprj]
+    set_option -convert_sdp32_36_to_sdp16_18 0
     set_option -top_module top_unified -use_cpu_as_gpio 1 -use_sspi_as_gpio 1 -use_mspi_as_gpio 1 -use_jtag_as_gpio 0 -output_base_name PCM5102_UNIFIED -gen_verilog_sim_netlist 1 -show_init_in_vo 1
     set_option -resource_sharing 1 -retiming 1 -global_freq 50 -enable_dsrm 1
     # 2026-10-25: the slider now owns its own I2C pins (K10/L10) instead of

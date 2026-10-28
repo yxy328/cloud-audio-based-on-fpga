@@ -44,7 +44,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Recording support tests failed' }
     & java -cp build\core cn.fpga.score.PhoneTakeTest
     if ($LASTEXITCODE -ne 0) { throw 'Event MIDI tests failed' }
-    & javac --release 8 -encoding UTF-8 -cp build\core -d build\core app\src\main\java\cn\fpga\score\SongLibrary.java core_test\SongLibraryTest.java
+    & javac --release 8 -encoding UTF-8 -cp build\core -d build\core app\src\main\java\cn\fpga\score\VoiceBend.java app\src\main\java\cn\fpga\score\ScoreBends.java app\src\main\java\cn\fpga\score\SongLibrary.java app\src\main\java\cn\fpga\score\TraditionalSongs.java core_test\SongLibraryTest.java
     if ($LASTEXITCODE -ne 0) { throw 'Song library compilation failed' }
     & java -cp build\core cn.fpga.score.SongLibraryTest
     if ($LASTEXITCODE -ne 0) { throw 'Song library tests failed' }
@@ -72,6 +72,10 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Score bend compilation failed' }
     & java -cp build\core cn.fpga.score.ScoreBendsTest
     if ($LASTEXITCODE -ne 0) { throw 'Score bend tests failed' }
+    & javac --release 8 -Xlint:-options -encoding UTF-8 -cp build/core -d build/core core_test/RhythmTypesTest.java
+    if($LASTEXITCODE -ne 0){throw 'Typed rhythm compilation failed'}
+    & java -cp build/core cn.fpga.score.RhythmTypesTest
+    if($LASTEXITCODE -ne 0){throw 'Typed rhythm tests failed'}
 
     & java -cp build\core cn.fpga.score.SppLinkTest
     if ($LASTEXITCODE -ne 0) { throw 'SPP transport tests failed' }
@@ -85,4 +89,14 @@ try {
         & java -cp build\core cn.fpga.score.AudioRecordingTest ../sim/build/audio_record_top.bin ../sim/build/audio_record_top_expected.txt
         if ($LASTEXITCODE -ne 0) { throw 'Top live audio recording integration failed' }
     }
+    & javac --release 8 -Xlint:-options -encoding UTF-8 -cp build/core -d build/core core_test/Control12Test.java
+    if ($LASTEXITCODE -ne 0) { throw 'Twelve-control core compilation failed' }
+    & java -cp build/core cn.fpga.score.Control12Test
+    if ($LASTEXITCODE -ne 0) { throw 'Twelve-control core regression failed' }
+    & javac --release 8 -encoding UTF-8 -d build/core app/src/main/java/cn/fpga/score/RhythmState.java core_test/RhythmStateTest.java
+    if($LASTEXITCODE -ne 0){throw 'Rhythm state compilation failed'}
+    $rhythmFixtures=@()
+    if(Test-Path -LiteralPath ../sim/build/rhythm_snapshot.txt){$rhythmFixtures+= '../sim/build/rhythm_snapshot.txt';if(Test-Path -LiteralPath ../sim/build/rhythm_top_reply.txt){$rhythmFixtures+= '../sim/build/rhythm_top_reply.txt'}}
+    & java -cp build/core cn.fpga.score.RhythmStateTest @rhythmFixtures
+    if($LASTEXITCODE -ne 0){throw 'Rhythm state tests failed'}
 } finally { Pop-Location }

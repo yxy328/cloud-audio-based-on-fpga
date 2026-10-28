@@ -31,7 +31,11 @@ public final class SongCodecTest {
         fails(()->SongCodec.midi("cut.mid",Arrays.copyOf(midi(0,480,music),25)),"截断");
         fails(()->SongCodec.midi("held.mid",midi(0,480,bytes(0,144,60,1,0,255,47,0))),"未关闭");
         fails(()->SongCodec.midi("sustain.mid",midi(0,480,bytes(0,176,64,127,0,255,47,0))),"延音踏板");
-        StringBuilder tooMany=new StringBuilder();for(int i=0;i<129;i++)tooMany.append("60,500\n");fails(()->SongCodec.csv("long",tooMany.toString().getBytes(StandardCharsets.UTF_8)),"128");
+        StringBuilder full=new StringBuilder();for(int i=0;i<256;i++)full.append(i%2==0?"60,500\n":"REST,250\n");
+        SongCodec.Song longest=SongCodec.csv("256 events",full.toString().getBytes(StandardCharsets.UTF_8));
+        eq(longest.events.size(),256);eq(longest.durationMs(),96000);
+        if(!longest.commands().get(256).equals("SONG_CHORD,255,0,250"))throw new AssertionError("last event lost");checks++;
+        fails(()->SongCodec.csv("too many",(full+"60,500\n").getBytes(StandardCharsets.UTF_8)),"256");
         // Tempo changes inside a held note alter its duration without splitting it.
         byte[] tempoHeld=bytes(0,144,60,1,0x81,0x70,255,81,3,15,66,64,0x81,0x70,128,60,0,0,255,47,0);
         SongCodec.Song h=SongCodec.midi("tempo.mid",midi(0,480,tempoHeld));eq(h.events.size(),1);eq(h.events.get(0).durationMs,750);

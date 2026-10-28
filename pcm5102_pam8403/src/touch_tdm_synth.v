@@ -3,7 +3,7 @@
 // one 256x16 context RAM. Worst-case 16 simultaneous segment divisions
 // complete within the 1024-clock stereo frame. First seven retain remap/bend.
 module touch_tdm_synth #(
-    parameter integer VOLUME_SHIFT=4, EXTENDED_CONTROL=0,
+    parameter integer VOLUME_SHIFT=4, EXTENDED_CONTROL=0, CONTROL_KEYS=7,
     parameter integer SHARED_ARITH=0, FAST_READ=0,
     parameter integer PEDAL_TAIL_MS=1200, DAMPER_MS=10
 )(
@@ -12,7 +12,8 @@ module touch_tdm_synth #(
     input wire [15:0] physical_gates,
     input wire [1:0] pedal_mode,
     input wire [4:0] poly_limit,
-    input wire [223:0] low_steps,
+    input wire [CONTROL_KEYS*32-1:0] low_steps,
+    input wire legacy_high_keys,
     input wire [63:0] adsr_config,
     input wire [15:0] pitch_ratio,
     output reg signed [15:0] sample,
@@ -72,7 +73,8 @@ module touch_tdm_synth #(
         input [1:0] part;
         begin tail_duration=TAIL_QUARTER+(part<TAIL_REMAINDER);end
     endfunction
-    reg [223:0] frame_steps;
+    reg [CONTROL_KEYS*32-1:0] frame_steps;
+    reg frame_legacy;
     reg [63:0] config_snapshot;
     reg [15:0] ratio_snapshot;
     reg [31:0] phase;
@@ -82,9 +84,12 @@ module touch_tdm_synth #(
     reg [15:0] quotient;
     reg [16:0] div_remainder;
     reg [4:0] divide_left;
-    reg signed [32:0] mul_a;
-    reg signed [17:0] mul_b;
-    reg signed [50:0] local_product;
+    // Fixed high-note steps are below 2^26; sine and mixer sums are
+    // signed and also fit 27 bits. Narrowing operands is exact and lets
+    // synthesis use one 27x18 DSP instead of the wider multiplier mode.
+    reg signed [26:0] mul_a;
+    reg signed [16:0] mul_b;
+    reg signed [43:0] local_product;
     wire signed [50:0] product=SHARED_ARITH ? shared_product : local_product;
     reg [31:0] lookup_phase;
     wire signed [15:0] local_sine;
@@ -95,7 +100,10 @@ module touch_tdm_synth #(
     assign shared_mul_request=SHARED_ARITH && resetn &&
         (state==PITCH_WAIT || state==GAIN_WAIT || (state==PUBLISH && publish_part==1));
     assign shared_sine_request=SHARED_ARITH && resetn && state==WAVE_WAIT;
-    reg signed [23:0] sum;
+    // Sixteen signed 16-bit samples need at most 20 bits before
+    // VOLUME_SHIFT attenuation; high keys receive one extra shift.
+    localparam SUM_BITS=VOLUME_SHIFT<0 ? 24 : VOLUME_SHIFT>14 ? 6 : 20-VOLUME_SHIFT;
+    reg signed [SUM_BITS-1:0] sum;
     reg [15:0] context_write;
     always @*begin
         case(field)
@@ -168,7 +176,7 @@ module touch_tdm_synth #(
                     if(init_address==255)begin index<=0;state<=IDLE;end else init_address<=init_address+1'b1;
                 end
                 IDLE:if(sample_ce)begin
-                    frame_gates<=gates;frame_steps<=low_steps;config_snapshot<=adsr_config;ratio_snapshot<=pitch_ratio;
+                    frame_gates<=gates;frame_steps<=low_steps;frame_legacy<=legacy_high_keys;config_snapshot<=adsr_config;ratio_snapshot<=pitch_ratio;
                     frame_physical<=EXTENDED_CONTROL ? physical_gates : gates;
                     frame_pedal<=requested_pedal;frame_poly<=requested_poly;
                     count_work<=0;pending_work<=0;physical_work<=0;oldest_valid<=0;publish_part<=0;
@@ -240,7 +248,7 @@ module touch_tdm_synth #(
                         oldest_valid<=1;oldest<=index;oldest_age<=next_age;
                     end
                     lookup_phase<=phase;
-                    phase<=phase+((index<7) ? frame_steps[index*32+:32] :
+                    phase<=phase+((index<7 || (CONTROL_KEYS>7 && !frame_legacy && index<CONTROL_KEYS)) ? frame_steps[index*32+:32] :
                         (ratio_snapshot==65535) ? note_step(index-4'd7) : product[47:16]);
                     state<=WAVE_WAIT;
                 end

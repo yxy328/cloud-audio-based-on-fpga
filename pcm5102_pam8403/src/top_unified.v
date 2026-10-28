@@ -17,7 +17,7 @@ module top_unified #(
     input wire flash_miso
 );
     // The PCM store is disabled to reserve routing and logic for live voices.
-    top #(.ENABLE_FLASH_AUDIO(0),.ENABLE_EVENT_TAKE(1),.EVENT_KEYS_ENABLE(0),.ENABLE_USB_AUDIO_RECORD(0),
+    top #(.CONTROL_KEYS(12),.ENABLE_FLASH_AUDIO(0),.ENABLE_EVENT_TAKE(1),.EVENT_KEYS_ENABLE(0),.ENABLE_USB_AUDIO_RECORD(0),
         .PEDAL_TAIL_MS(PEDAL_TAIL_MS),.DAMPER_MS(DAMPER_MS),.HC05_BAUD(9600)) u_main(
         .clk(clk),.key_s1(key_s1),.key_s2(key_s2),.touch_out(touch_out),.ir_beam(ir_beam),
         .touch_sdo(touch_sdo),.hc05_rx(hc05_rx),.hc05_tx(hc05_tx),.audio_rec_cts_n(audio_rec_cts_n),.audio_rec_tx(audio_rec_tx),

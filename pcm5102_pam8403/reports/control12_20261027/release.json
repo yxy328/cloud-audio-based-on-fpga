@@ -1,0 +1,395 @@
+{
+  "label": "control12_width_final",
+  "build": {
+    "label": "control12_width_final",
+    "status": "validated",
+    "strategy": {
+      "place_option": 2,
+      "route_option": 0,
+      "route_maxfan": 23
+    },
+    "metrics": {
+      "Logic": {
+        "used": 22732.0,
+        "capacity": 23040.0
+      },
+      "CLS": {
+        "used": 11482.0,
+        "capacity": 11520.0
+      },
+      "Register": {
+        "used": 11225.0,
+        "capacity": 23280.0
+      },
+      "BSRAM": {
+        "used": 56.0,
+        "capacity": 56.0
+      },
+      "DSP": {
+        "used": 25.0,
+        "capacity": 28.0
+      }
+    },
+    "delta_vs_baseline": {
+      "Logic": 279.0,
+      "CLS": 43.0,
+      "Register": 442.0,
+      "BSRAM": 1.0,
+      "DSP": -1.5
+    },
+    "unrouted_nets": 0,
+    "bitstream_present": true,
+    "bitstream_sha256": "2B25F84FCACB428BBD26127BC4C4A1527CC3039E64DEFFBEA03D9B353E307BE2",
+    "timing": {
+      "setup_violated_endpoints": 0,
+      "setup_worst_path": {
+        "slack_ns": 0.478,
+        "from": "u_main/u_keymap/u_download/elapsed_ms_2_s4/Q",
+        "to": "u_main/u_keymap/u_download/cur_word_36_s1/CE"
+      },
+      "setup_reported_violating_paths": [],
+      "hold_violated_endpoints": 0,
+      "hold_worst_path": {
+        "slack_ns": 0.188,
+        "from": "u_main/take_enabled.u_take/capture_word_2_s0/Q",
+        "to": "u_main/take_enabled.u_take/history_history_0_0_s/DI[2]"
+      },
+      "hold_reported_violating_paths": [],
+      "setup_raw_worst_path": {
+        "slack_ns": 0.478,
+        "from_cell": "u_main/u_keymap/u_download/elapsed_ms_2_s4",
+        "to_cell": "u_main/u_keymap/u_download/cur_word_36_s1"
+      },
+      "setup_raw_violating_paths": [],
+      "hold_raw_worst_path": {
+        "slack_ns": 0.188,
+        "from_cell": "u_main/take_enabled.u_take/capture_word_2_s0",
+        "to_cell": "u_main/take_enabled.u_take/history_history_0_0_s"
+      },
+      "hold_raw_violating_paths": []
+    },
+    "changed_inputs_vs_baseline": [],
+    "changed_input_hashes": {},
+    "source_manifest": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\control12_20261027\\candidate\\pcm5102_pam8403\\sim\\build\\unified\\control12_width_final\\sources.json",
+    "source_manifest_sha256": "EC51763A69B06E7499211AE9C8EBCCAFE480DC169B17F10141E217749BEA6BA4",
+    "downloadable_song_sha256": "11672B71B14419E159B4D3CB60BD7AEC6ABA7D445FCCA3C24432C7E20E438743",
+    "snapshot_corrupt_inputs": [],
+    "errors": [],
+    "pnr_log": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\control12_20261027\\candidate\\pcm5102_pam8403\\sim\\build\\unified\\control12_width_final\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.log",
+    "resource_report": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\control12_20261027\\candidate\\pcm5102_pam8403\\sim\\build\\unified\\control12_width_final\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+    "timing_content": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\control12_20261027\\candidate\\pcm5102_pam8403\\sim\\build\\unified\\control12_width_final\\pcm5102_pam8403\\impl\\pnr\\PCM5102_UNIFIED_tr_content.html",
+    "source_directory": "E:\\130_FPGA_Verilog\\TP-25K\\pmod_hub75e_TTP229\\pcm5102_pam8403\\reports\\control12_20261027\\candidate\\pcm5102_pam8403\\sim\\build\\unified\\control12_width_final",
+    "synthesis_resource_failure": [],
+    "cls_remaining": 38.0,
+    "cls_safety_reserve": 35,
+    "default_hardware_admissible": true,
+    "synthesis_logic_report": null,
+    "current_candidate_inputs_match": true
+  },
+  "copied_files": [
+    {
+      "path": "src\\downloadable_song.v",
+      "sha256": "11672B71B14419E159B4D3CB60BD7AEC6ABA7D445FCCA3C24432C7E20E438743"
+    },
+    {
+      "path": "src\\fsr_pitch_scaler.v",
+      "sha256": "E6D82E03681031D9D4FF8DE23984D65B064446592BF022DED1C6C799BB4CA781"
+    },
+    {
+      "path": "src\\hc05_command.hex",
+      "sha256": "D9BC840F930C246D2E63CD44A5CA7E0847235ADEDB13088B8AE5DD826947ACA3"
+    },
+    {
+      "path": "src\\hc05_keymap.v",
+      "sha256": "574A8CFEFCF6D8E5FB21D6F8F916BAFB165C56DD167818E6E5E816E29508CC0F"
+    },
+    {
+      "path": "src\\hc05_reply.hex",
+      "sha256": "B6A486A5A385B87FFF750B77E51E5EEC69BA9FFC7D9B5FB4FAE1B9818DD5418B"
+    },
+    {
+      "path": "src\\hc05_reply12.hex",
+      "sha256": "1B9FD9C97B8AC2CBD23F0251042C3D619C77FEF23161E2741EBA96669AA34C9D"
+    },
+    {
+      "path": "src\\hub75e_rhythm_display.v",
+      "sha256": "B49874C9B434A27949D9C33617264D63F6E5825A3FF6F49CE686B48553E8AEEE"
+    },
+    {
+      "path": "src\\key_live_stream.v",
+      "sha256": "A07CDE5D7923513BD98C09E344332D401FF14F9D49C68CB4BE50DD57EF2A14D3"
+    },
+    {
+      "path": "src\\midi_note_lut.v",
+      "sha256": "A4878D6AFC633F492CE5DEB2592E10BCCC5B566BEEE729816A6C4EA99512CB4A"
+    },
+    {
+      "path": "src\\performance_take.v",
+      "sha256": "6D2F26C8F3AFEA1D0E48602014A2E9FD6626B2B8FF46CB1E3AE3DB64DE418A5F"
+    },
+    {
+      "path": "src\\top.v",
+      "sha256": "6DF3F3DDAADC10E151CFFAFB9FB682D4A83736F9247CD0291C7329F105A3A65B"
+    },
+    {
+      "path": "src\\top_unified.v",
+      "sha256": "EB4981407E82BFDCBBAD75C046604F2B50CAF14F3A7B10D5C157514786889EA4"
+    },
+    {
+      "path": "src\\touch_tdm_synth.v",
+      "sha256": "5FB333DBB1F94D5083FCEBD900A5BFE85C6A2629D841E1CDB1872475BDE988F8"
+    },
+    {
+      "path": "tools\\generate_hc05_decoder.py",
+      "sha256": "79C788A120FEC994FA25D8CC68F5F16117FD3363277EB3A807299D09D40AF696"
+    },
+    {
+      "path": "tools\\generate_hc05_replies.py",
+      "sha256": "908003158A47438F81BCFB2DB629C368ED6BFF20144C3A39840B05FBF72A246E"
+    },
+    {
+      "path": "tools\\run_sim.ps1",
+      "sha256": "FADF83F81EFF46AB6D03A38BB659103BFAC78DFD635A56D354BA7848B2264365"
+    },
+    {
+      "path": "tools\\test_control12.ps1",
+      "sha256": "07CBF0C27DC93018077700F2C36FA5EB9453C8C0D438ED496FEBF1B4BB3420AE"
+    },
+    {
+      "path": "sim\\tb_control12.v",
+      "sha256": "C2D272FF3A30FB16FBC37B149E8298FF28909252406C8706C9A55F62C670A34C"
+    },
+    {
+      "path": "sim\\tb_control12_dense.v",
+      "sha256": "7DC5CE97AAD49722BB3F606275E5C10F1FAA749CFC264E8CDC93B5EA3E1460FC"
+    },
+    {
+      "path": "sim\\tb_control12_live_equivalence.v",
+      "sha256": "C1E49DBB364FA527975083180ACF77D5E66AD3A817685339155798AC68BEC369"
+    },
+    {
+      "path": "sim\\tb_control12_pitch.v",
+      "sha256": "1C05C5DA3D79E20710F1044F6B99FCFE614A1727E84788EAB41DF57F72CBEA3E"
+    },
+    {
+      "path": "sim\\tb_control12_protocol.v",
+      "sha256": "B7CF2842EB63F4CE8C32225180331D29C8D1521ABDB570B085A18C249F16FDC3"
+    },
+    {
+      "path": "sim\\tb_control12_take.v",
+      "sha256": "95F50A032EE528BE38DD49831C88605D447D01394F61023B31F4883AFBBE175C"
+    },
+    {
+      "path": "sim\\tb_control12_take_top.v",
+      "sha256": "2A07AA6501DEE6E97A1970DD29E1890883896F87A80D3486F4C894CB8BD5E5D9"
+    },
+    {
+      "path": "sim\\tb_control12_touch_widths.v",
+      "sha256": "010EECDD5A9C3718F3E9C65AECCBB49674C9878926C20BCC526CB42555548856"
+    },
+    {
+      "path": "sim\\tb_control12_touch_widths_fast.v",
+      "sha256": "8079C85D330D9F25A50172FE9612FFF981EAE03E040C2D84280A90F5F14D7FD3"
+    },
+    {
+      "path": "sim\\tb_control12_touch_widths_loud.v",
+      "sha256": "48653D54DAF185B56880E62CB2892E9D589FF2C33476663B002F4A93CB1D86E6"
+    },
+    {
+      "path": "sim\\tb_control12_touch_widths_quiet.v",
+      "sha256": "F6CC6FE91DF7B206A7A2D6DE3E9FB2754586EB151687C2E37D648AC9F9434CDB"
+    },
+    {
+      "path": "sim\\tb_hc05_code39_equivalence.v",
+      "sha256": "EAE445363A7A229F3ADCB7F3893D502C8F06F25259186A3CEF4876F902F1B15B"
+    },
+    {
+      "path": "sim\\tb_hc05_download_fixed16.v",
+      "sha256": "23CD47B2BE3CC1B5A2080FE41D10259CBE43AD83DF2DF78BE8AEDD56F1520DB3"
+    },
+    {
+      "path": "sim\\reference\\downloadable_song_code39_reference.v",
+      "sha256": "BD7A12A2F4DD4F926086D7144BE944EE962FC4E9782BEFBED598288BFE0D0819"
+    },
+    {
+      "path": "sim\\reference\\hc05_command_code39.hex",
+      "sha256": "B0C1326CF9EC2824367753B313F7DA7B8CBE6A29E80DFF91FDE27BDB0D6C7E61"
+    },
+    {
+      "path": "sim\\reference\\hc05_command_code39_reference.v",
+      "sha256": "B7CFA5C4EDFC76DD8B70CC93666EC2DEB5BE88CC11AEB1CBCECCC62EF02DC5CF"
+    },
+    {
+      "path": "sim\\reference\\hc05_keymap_code39_reference.v",
+      "sha256": "3885B29118DE39F761926A0B0863BBAF24FDFD31233B5844AAF1AAD8159420E8"
+    },
+    {
+      "path": "sim\\reference\\hc05_reply_code39.hex",
+      "sha256": "E69657474D176996AEA07DD93885BD1DE41662FDB52310D909692BF11ED7382F"
+    },
+    {
+      "path": "sim\\tb_performance_take.v",
+      "sha256": "CDF3C031EC5A57E51F20794FFD8A42079AB3777D0FA2553D8564AA3A44C67F5C"
+    },
+    {
+      "path": "sim\\tb_take_atomic.v",
+      "sha256": "FBCFED4824D69401246C12926866E8EF842C9618EA2190F7A7FB4EDE81FDF747"
+    },
+    {
+      "path": "sim\\tb_fx_take_atomic_528.v",
+      "sha256": "DCE361019D17B66BF6A6CE1F33CCD638D1BAACEEAF196DDDE5329A5A2EE77C0E"
+    },
+    {
+      "path": "android_app\\app\\build.gradle",
+      "sha256": "06056CC5958C6490491A20F88A73258B0CEAA94A06E632C34695C3493C1DF957"
+    },
+    {
+      "path": "android_app\\app\\src\\main\\AndroidManifest.xml",
+      "sha256": "9D89CF76AB9979D1455FAD5BBD887F9BE8D573B318F6B2D6E98B23D2EA5DC150"
+    },
+    {
+      "path": "android_app\\app\\src\\main\\java\\cn\\fpga\\score\\MainActivity.java",
+      "sha256": "E55684A44FC9B28E995C68120B4E090DE9C0A28CA748F4428084DDECCB2556C0"
+    },
+    {
+      "path": "android_app\\app\\src\\main\\java\\cn\\fpga\\score\\SongCodec.java",
+      "sha256": "8F1511F6D757AEFA7EAC8A42AF6937F239324213745FB9C6AEC0268BD5C6E8F7"
+    },
+    {
+      "path": "android_app\\app\\src\\main\\java\\cn\\fpga\\score\\SongLibrary.java",
+      "sha256": "A715F82B681A8D600C78A4DBCCF615F2D813585F274A4C3A3E1FA8632A136DA0"
+    },
+    {
+      "path": "android_app\\app\\src\\main\\java\\cn\\fpga\\score\\VoiceBend.java",
+      "sha256": "6A49D8A609529D016FB881F77ADFB2D45BE1EBB3D4F783546C8564558A67AA4F"
+    },
+    {
+      "path": "android_app\\core_test\\Control12Test.java",
+      "sha256": "BCC21A667FF0612B439440CAA061B6D5C4B0F7BE4A8AE8D0E7912D1956058226"
+    },
+    {
+      "path": "android_app\\core_test\\VoiceBendTest.java",
+      "sha256": "EA0B5ABE8B41DAC51D3ECA08AE610F6227A33D8351F60915358364BFD017589E"
+    },
+    {
+      "path": "android_app\\test-core.ps1",
+      "sha256": "B1BB316D4F98655E314785E83073FECD328254F87E67B2D613465062303473F6"
+    },
+    {
+      "path": "impl\\gwsynthesis\\PCM5102_UNIFIED.log",
+      "sha256": "288DC86B828E2E6ADDB8A05BBAC1EFB16DF4BCB5D711D68C4783BF6FCF2E838C"
+    },
+    {
+      "path": "impl\\gwsynthesis\\PCM5102_UNIFIED.prj",
+      "sha256": "4598ACA248F8BC5A358614F43B8D91BB522E4C87634DA8B57A89B86385CCBF8C"
+    },
+    {
+      "path": "impl\\gwsynthesis\\PCM5102_UNIFIED.vg",
+      "sha256": "7A834BE334FE3B7AD327FD66A647E87FC78C1DEFF0BDF51F33790DB4CD62DFD2"
+    },
+    {
+      "path": "impl\\gwsynthesis\\PCM5102_UNIFIED_syn.rpt.html",
+      "sha256": "5A1DE782D5757283AF9A50EBA1B3A4711A9C470C46BA8E285E9175247EECD321"
+    },
+    {
+      "path": "impl\\gwsynthesis\\PCM5102_UNIFIED_syn_resource.html",
+      "sha256": "F2220AB2F0D65235D6815B203579A506FA9E2FBF5AFC39059465212072A6149B"
+    },
+    {
+      "path": "impl\\gwsynthesis\\PCM5102_UNIFIED_syn_rsc.xml",
+      "sha256": "6D3C3F92CC55C494F75F87F5E4BAA1B7CF7B8D2EC122CECEDFCB4548B1EE3B3C"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.bin",
+      "sha256": "A016B9732995E6AEEE0698D54A0EBF453159B7DB846D6E1A28066B998996D3A5"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.binx",
+      "sha256": "4B19572DC74AE0C8D55E766F52C5784D57FF20F0F571110029752478E9D7D7BB"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.db",
+      "sha256": "8AE1C308ADA4233193E12C3672A379690C351E9FD16D44683490609CE0839C17"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.fs",
+      "sha256": "2B25F84FCACB428BBD26127BC4C4A1527CC3039E64DEFFBEA03D9B353E307BE2"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.log",
+      "sha256": "892CDF362A3253DD8DC1EB46B7AE81D0FCA97D10445ADB2CAF0EB35BD199ADB0"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.p",
+      "sha256": "272871A90113D608F0FA91EAFCE636189C877504EC5B273C517C05ABE49D32F0"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.pin.html",
+      "sha256": "7CCF702E2C831DEB7C3DD1CD5E90DAE83F2C5ACE7F6E026ACF7F0E6BC7C143B3"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.power.html",
+      "sha256": "9A8E3723359EDA9354796BC53FFE37E277B72B6A7FDE0D258F88803272B9D5D7"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.pr",
+      "sha256": "8CCC948B60B06CBBC2E28B4FC8D95022BA2370A9D79E5DFEDFF6C974365974C9"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.rpt.html",
+      "sha256": "B7757FCD9504939C1075ACA7682F0E023DD9B9855D6EC9860966153985B09B77"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.rpt.txt",
+      "sha256": "DD781554B3B186CB06EBDFF9F8ACE37FF30C5C6C3F124F49F261214EA57A9E5A"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.timing_paths",
+      "sha256": "009A6D8AB5CE3819B3F6DA41A973F387CA375C10E97852BC5B875B79A9172766"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.tr.html",
+      "sha256": "A61E25FCFB53517B6BE804BF5F137E80E50683420426A2914AA031CD0FD796CA"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED.vo",
+      "sha256": "1EC03B7C1AC85555862AA59D644789ABBA050BC90B970EB75E3A36CEFC7B5403"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED_tr_cata.html",
+      "sha256": "CA60E69566280868C0C8BF5023DCC566A2A6794CA49EA9EFEFC67C68EFEDD497"
+    },
+    {
+      "path": "impl\\pnr\\PCM5102_UNIFIED_tr_content.html",
+      "sha256": "C90DD135C0E9342D57A60424F75E56CCE7DD11AF774330F960269FBB98565076"
+    },
+    {
+      "path": "impl\\pnr\\cmd.do",
+      "sha256": "87EA161DF2BD7956DBA9863637B288FCD12066B18CF73473F681CC9BCAEF09E0"
+    },
+    {
+      "path": "impl\\pnr\\device.cfg",
+      "sha256": "DAFD8E4E17F3323E0F7AA9D5F7EA7C5026803C7043B44E35F83E36B1FA5FA69A"
+    },
+    {
+      "path": "impl\\PCM5102_UNIFIED_process_config.json",
+      "sha256": "C2D5DE495C388541F4D35EFD1F62CEF96CF6DC6143079B20B6EFA418AEF1DC31"
+    },
+    {
+      "path": "android_app\\dist\\FPGA-Music-Control12-Code40.apk",
+      "sha256": "4F5D1253B597F03780C11000913BEB037E4031CF98AE7D98F393EC812E71379C"
+    },
+    {
+      "path": "android_app\\dist\\FPGA-Music-Unified.apk",
+      "sha256": "4F5D1253B597F03780C11000913BEB037E4031CF98AE7D98F393EC812E71379C"
+    },
+    {
+      "path": "reports\\control12_20261027\\PCM5102_UNIFIED_CONTROL12_20261027.fs",
+      "sha256": "2B25F84FCACB428BBD26127BC4C4A1527CC3039E64DEFFBEA03D9B353E307BE2"
+    }
+  ],
+  "default_apk_sha256": "4F5D1253B597F03780C11000913BEB037E4031CF98AE7D98F393EC812E71379C",
+  "default_bitstream_sha256": "2B25F84FCACB428BBD26127BC4C4A1527CC3039E64DEFFBEA03D9B353E307BE2",
+  "board_programmed": false,
+  "app_installed": false
+}

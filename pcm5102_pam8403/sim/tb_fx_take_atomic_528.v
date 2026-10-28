@@ -1,5 +1,6 @@
 `timescale 1ns/1ps
 module tb_fx_take_atomic_528;
+    wire legacy_playback;
     reg clk=0;always #10 clk=~clk;
     reg resetn=0;reg [2:0] command=0;
     reg [9:0] frame_div=0;

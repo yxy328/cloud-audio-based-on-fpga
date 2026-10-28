@@ -19,14 +19,14 @@ public final class ScoreBendsTest {
         s.checkRange(8192,32768);checks++;bad(()->s.checkRange(16384,32768));
         ScoreBends.checkCapability("SONGBEND,1");checks++;bad(()->ScoreBends.checkCapability("SONGBEND,0"));
         for(String line:new String[]{"60,500,1201","60,500,-1201","REST,500,0","60+64,500,100|200","60,500,1,2","60,0,100"})bad(()->parse(ScoreBends.HEADER+"\n"+line));
-        StringBuilder dense=new StringBuilder(ScoreBends.HEADER+"\n");for(int n=0;n<128;n++)dense.append("60,60000,").append(n%2==0?-1200:1200).append('\n');
-        ScoreBends full=parse(dense.toString());yes(full.song.events.size()==128&&full.song.durationMs()==7680000);yes(parse(new String(full.csv(),StandardCharsets.UTF_8)).commands().equals(full.commands()));
+        StringBuilder dense=new StringBuilder(ScoreBends.HEADER+"\n");for(int n=0;n<256;n++)dense.append("60,60000,").append(n%2==0?-1200:1200).append('\n');
+        ScoreBends full=parse(dense.toString());yes(full.song.events.size()==256&&full.song.durationMs()==15360000);yes(parse(new String(full.csv(),StandardCharsets.UTF_8)).commands().equals(full.commands()));
         bad(()->parse(dense+"60,1,0\n"));
         for(int cents=-1200;cents<=1200;cents++){
             ScoreBends one=parse(ScoreBends.HEADER+"\n60,1,"+cents);yes(one.commands().get(1).equals("SONG_CHORD,0,1,1,"+VoiceBend.ratio(cents)));
             yes(parse(new String(one.csv(),StandardCharsets.UTF_8)).target(0)==cents);
         }
         yes(ScoreBends.plain(SongCodec.twinkle()).commands().equals(SongCodec.twinkle().commands()));
-        System.out.println("PASS bend target CSV, all2401 cents, explicit zero/null, chord rejection, old commands, 128x60000ms and export roundtrip: "+checks+" checks");
+        System.out.println("PASS bend target CSV, all2401 cents, explicit zero/null, chord rejection, old commands, 256x60000ms and export roundtrip: "+checks+" checks");
     }
 }
