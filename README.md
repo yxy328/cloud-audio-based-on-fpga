@@ -92,8 +92,13 @@
 ## 获取代码
 
 ```powershell
-git clone https://gitee.com/yxy0818/cloud-audio-based-on-fpga.git
+git clone https://gitee.com/yxy0818/cloud-audio-based-on-fpga.git   # Gitee 主仓
+git clone https://github.com/yxy328/cloud-audio-based-on-fpga.git   # GitHub 镜像
 cd cloud-audio-based-on-fpga
 ```
 
 仓库保存源码、约束、工程配置、测试、文档、App 安装包，以及 `pcm5102_pam8403/deliveries/` 中已验证的交付包（位流、APK 与报告）。日常构建输出 `impl/`、仿真日志 `sim/build/`、SDK、工具安装包及重复压缩包不入库，`pcm5102_pam8403/reports/` 每轮审计只入库报告正文与指纹数据，其下的综合 / PnR 快照树和起始补丁留在本机，需按 [快速上手](docs/QUICK_START.md) 在本机生成；重新构建的指纹可能与交付包不同。
+
+## 许可
+
+本项目以 [MIT License](LICENSE) 发布，Copyright (c) 2026 yxy。在保留版权声明与许可声明的前提下，可自由使用、修改、分发或再许可；软件按「原样」提供，不附带任何担保。
