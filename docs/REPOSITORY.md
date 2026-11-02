@@ -2,7 +2,12 @@
 
 [首页](../README.md) · [文档索引](README.md)
 
-远程仓库：[cloud-audio-based-on-fpga](https://gitee.com/yxy0818/cloud-audio-based-on-fpga)，日常同步分支为 `main`。
+远程仓库：
+
+- Gitee（主仓，日常提交）：[cloud-audio-based-on-fpga](https://gitee.com/yxy0818/cloud-audio-based-on-fpga)
+- GitHub（同步镜像）：[cloud-audio-based-on-fpga](https://github.com/yxy328/cloud-audio-based-on-fpga)
+
+日常同步分支为 `main`，两边保持一致。
 
 ## 更新流程
 
@@ -24,7 +29,24 @@ git push origin main
 git status --short --branch
 ```
 
-`git add --all` 同时保存新增、修改和删除。推送被拒绝时先检查远程新增提交并合并，保留双方历史。其他设备需要独立配置 Git 提交姓名、邮箱和 Gitee 登录。
+`git add --all` 同时保存新增、修改和删除。推送被拒绝时先检查远程新增提交并合并，保留双方历史。其他设备需要独立配置 Git 提交姓名、邮箱和 Gitee / GitHub 登录。
+
+## 双平台同步
+
+GitHub 是 Gitee 的镜像，只在 Gitee 侧提交一次，然后把同一分支推到 GitHub，不要两边各自提交：
+
+```powershell
+git push origin main      # Gitee 主仓
+git push github main      # GitHub 镜像
+```
+
+本机若还没有 `github` 远程，先添加一次：
+
+```powershell
+git remote add github https://github.com/yxy328/cloud-audio-based-on-fpga.git
+```
+
+推送顺序以 Gitee 在前，确认 `git status --short --branch` 显示两边一致后再结束。忘记推 GitHub 时，镜像会落后但历史仍然完整，直接补推即可，不需要重建仓库。
 
 ## 保存范围与目录约定
 

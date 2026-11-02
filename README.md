@@ -1,3 +1,7 @@
+> **同步仓库**：本工程在 **Gitee** 与 **GitHub** 双平台同步更新，两边内容保持一致。Gitee 为主开发仓库，GitHub 跟随同步。
+> - Gitee（主仓，持续更新）：<https://gitee.com/yxy0818/cloud-audio-based-on-fpga>
+> - GitHub（同步镜像）：<https://github.com/yxy328/cloud-audio-based-on-fpga>
+
 **2026-10-28 当前 App 为 1.46-cleanui / Code47。** [安装包](pcm5102_pam8403/android_app/dist/FPGA-Music-Unified.apk)（SHA256 `24A2E68A…`，与不可变快照 `dist/FPGA-Music-CleanUI-Code47.apk` 逐字节相同）只做界面整理：导航、同级卡片、录制步骤、曲目与音符预览统一从01编号，内层卡片去掉重复编号、顶部彩条与重复头像；曲谱页移除独立小星星示例和长曲快捷按钮，选曲自动载入并只保留一个下载入口，文件操作、详细说明与音游设置默认折叠。120首曲库与256条单曲全部保留，FPGA 不改、沿用下方 2026-10-28 字库修复位流。Java/D8/aapt2 构建、APK 签名与既有核心回归通过；未安装手机、未验证实机布局与蓝牙。见[App 说明](pcm5102_pam8403/android_app/README.md)。以下为此前记录。
 
 **2026-10-28 计分字库硬件修复版：** 已复现并修复“仿真有分数、实屏无分数”的字库综合缺陷。Logic 22902、CLS 11504、Register 11516、BSRAM 55、DSP 25；剩16 CLS。50MHz完整布通，setup/hold违例均0，最差余量 +0.598/+0.178 ns。App Code46无需更新，保留256条曲谱。默认位流已同步，未上板验证。见[修复位流与验证](pcm5102_pam8403/reports/score_visible_20261028/README.md)。以下为此前记录。
@@ -33,7 +37,7 @@
 | LED 波形读数 | [FSR 量程、33 档色环与 PK 标定](pcm5102_pam8403/SCOPE_DISPLAY.md) · [色环实际 RTL 对照图](pcm5102_pam8403/design/led_scope_20261023/hue33/hue33_verified.png) · [外观候选设计稿](pcm5102_pam8403/design/led_scope_20261022/README.md) · [音频可视化总说明](pcm5102_pam8403/AUDIO_VISUAL.md) |
 | 压力与滑杆双通道接线 | [迁移说明](pcm5102_pam8403/REFERENCE_MIGRATION.md) · [FSR402 与片内 ADC](pcm5102_pam8403/FSR402.md) · [引脚与功能验收表](pcm5102_pam8403/PIN_FUNCTION_REQUIREMENTS.md) |
 | 当前构建、位流标识和验证范围 | [验证记录](pcm5102_pam8403/VERIFICATION.md) · [33 档色环交付包](pcm5102_pam8403/deliveries/LED_HUE33_20261023/README.md) · [App 色环交付包](pcm5102_pam8403/deliveries/APP_HUE33_20261023/README.md) · [效果器帧预算核验](pcm5102_pam8403/FX_PREFLIGHT_20261024.md) · [演奏参数与四档回声](pcm5102_pam8403/PERFORMANCE_PARAMS.md) · [B1 半音阶键位表](pcm5102_pam8403/CHROMATIC_KEYS.md) |
-| 更新代码到 Gitee | [仓库维护](docs/REPOSITORY.md) |
+| 更新代码到 Gitee / GitHub | [仓库维护](docs/REPOSITORY.md) |
 | 版本变化与升级要点 | [版本记录](docs/CHANGELOG.md) |
 
 ## 当前功能（2026-10-28）
